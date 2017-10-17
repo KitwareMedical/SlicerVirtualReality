@@ -71,6 +71,8 @@ void vtkMRMLVRViewNode::ReadXMLAttributes(const char** atts)
 	  attName = *(atts++);
 	  attValue = *(atts++);
 
+    (void)(attName);
+    (void)(attValue);
   }
   this->EndModify(disabledModify);
 }
@@ -84,6 +86,8 @@ void vtkMRMLVRViewNode::Copy(vtkMRMLNode *anode)
 
   this->Superclass::Copy(anode);
   vtkMRMLVRViewNode *node = (vtkMRMLVRViewNode *) anode;
+
+  (void)(node);
 
   this->EndModify(disabledModify);
 }
