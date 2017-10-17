@@ -23,11 +23,6 @@
 
 // VTK includes
 #include <vtkObjectFactory.h>
-//----------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------
-// Needed when we don't use the vtkStandardNewMacro.
-vtkInstantiatorNewMacro(vtkMRMLVRViewDisplayableManagerFactory);
 
 //----------------------------------------------------------------------------
 // vtkMRMLVRViewDisplayableManagerFactory methods

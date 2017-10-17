@@ -2,10 +2,15 @@ project(qSlicer${MODULE_NAME}ModuleWidgets)
 
 set(KIT ${PROJECT_NAME})
 
+#-----------------------------------------------------------------------------
+find_package(VTK COMPONENTS vtkRenderingOpenVR REQUIRED)
+
+#-----------------------------------------------------------------------------
 set(${KIT}_EXPORT_DIRECTIVE "Q_SLICER_QTMODULES_${MODULE_NAME_UPPER}_WIDGETS_EXPORT")
 
 set(${KIT}_INCLUDE_DIRECTORIES
   ${vtkSlicerVRModuleMRML_INCLUDE_DIRS}
+  ${VTK_INCLUDE_DIRS}
   )
 
 set(${KIT}_SRCS
@@ -27,6 +32,7 @@ set(${KIT}_RESOURCES
 
 set(${KIT}_TARGET_LIBRARIES
   vtkSlicer${MODULE_NAME}ModuleMRML
+  ${VTK_LIBRARIES}
   )
 
 #-----------------------------------------------------------------------------
