@@ -1,7 +1,9 @@
 SlicerOpenVR
 ============
 
-A Slicer extension for ITK's Python wrapping.
+A Slicer extension that enables user to interact with a Slicer scene using virtual reality.
+
+![](VR.png)
 
 License
 -------
