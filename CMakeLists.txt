@@ -8,7 +8,7 @@ set(EXTENSION_HOMEPAGE "http://slicer.org/slicerWiki/index.php/Documentation/Nig
 set(EXTENSION_CATEGORY "Examples")
 set(EXTENSION_CONTRIBUTORS "Jean-Baptiste Vimort (Kitware), Jean-Christophe Fillion-Robin (Kitware)")
 set(EXTENSION_DESCRIPTION "This extension allow to use a an HTC vive to display data in Virtual Reallity")
-set(EXTENSION_ICONURL "https://raw.githubusercontent.com/KitwareMedical/SlicerOpenVR/master/VR.pg")
+set(EXTENSION_ICONURL "https://raw.githubusercontent.com/KitwareMedical/SlicerOpenVR/master/VR.png")
 set(EXTENSION_SCREENSHOTURLS "http://www.example.com/Slicer/Extensions/VR/Screenshots/1.png")
 set(EXTENSION_DEPENDS "NA") # Specified as a space separated string, a list or 'NA' if any
 set(EXTENSION_BUILD_SUBDIRECTORY inner-build)
