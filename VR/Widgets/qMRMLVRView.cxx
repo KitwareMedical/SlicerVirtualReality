@@ -163,7 +163,7 @@ void qMRMLVRViewPrivate::initDisplayableManagers()
   this->Renderer->RemoveCuller(this->Renderer->GetCullers()->GetLastItem());
   this->Renderer->SetBackground(0.7, 0.7, 0.7);
 
-  // create 4 lights for even lighting
+  // create 2 lights
   {
     vtkNew<vtkLight> light;
     light->SetPosition(0.0, 1.0, 0.0);
@@ -175,20 +175,6 @@ void qMRMLVRViewPrivate::initDisplayableManagers()
     vtkNew<vtkLight> light;
     light->SetPosition(0.8, -0.2, 0.0);
     light->SetIntensity(0.8);
-    light->SetLightTypeToSceneLight();
-    this->Renderer->AddLight(light.GetPointer());
-  }
-  {
-    vtkNew<vtkLight> light;
-    light->SetPosition(-0.3, -0.2, 0.7);
-    light->SetIntensity(0.6);
-    light->SetLightTypeToSceneLight();
-    this->Renderer->AddLight(light.GetPointer());
-  }
-  {
-    vtkNew<vtkLight> light;
-    light->SetPosition(-0.3, -0.2, -0.7);
-    light->SetIntensity(0.4);
     light->SetLightTypeToSceneLight();
     this->Renderer->AddLight(light.GetPointer());
   }
