@@ -1,7 +1,7 @@
 
 #-----------------------------------------------------------------------------
-set(MODULE_NAME VR)
-set(MODULE_TITLE ${MODULE_NAME})
+set(MODULE_NAME VirtualReality)
+set(MODULE_TITLE "Virtual Reality")
 
 string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
 
@@ -24,29 +24,29 @@ set(MODULE_INCLUDE_DIRECTORIES
   )
 
 set(MODULE_SRCS
-  qSlicer${MODULE_NAME}Module.cxx
-  qSlicer${MODULE_NAME}Module.h
-  qSlicer${MODULE_NAME}ModuleWidget.cxx
-  qSlicer${MODULE_NAME}ModuleWidget.h
+  qSlicerVRModule.cxx
+  qSlicerVRModule.h
+  qSlicerVRModuleWidget.cxx
+  qSlicerVRModuleWidget.h
   )
 
 set(MODULE_MOC_SRCS
-  qSlicer${MODULE_NAME}Module.h
-  qSlicer${MODULE_NAME}ModuleWidget.h
+  qSlicerVRModule.h
+  qSlicerVRModuleWidget.h
   )
 
 set(MODULE_UI_SRCS
-  Resources/UI/qSlicer${MODULE_NAME}ModuleWidget.ui
+  Resources/UI/qSlicerVRModuleWidget.ui
   )
 
 set(MODULE_TARGET_LIBRARIES
-  vtkSlicer${MODULE_NAME}ModuleMRML
-  vtkSlicer${MODULE_NAME}ModuleLogic
-  qSlicer${MODULE_NAME}ModuleWidgets
+  vtkSlicerVirtualRealityModuleMRML
+  vtkSlicerVirtualRealityModuleLogic
+  qSlicerVirtualRealityModuleWidgets
   )
 
 set(MODULE_RESOURCES
-  Resources/qSlicer${MODULE_NAME}Module.qrc
+  Resources/qSlicerVRModule.qrc
   )
 
 #-----------------------------------------------------------------------------
@@ -60,7 +60,7 @@ slicerMacroBuildLoadableModule(
   UI_SRCS ${MODULE_UI_SRCS}
   TARGET_LIBRARIES ${MODULE_TARGET_LIBRARIES}
   RESOURCES ${MODULE_RESOURCES}
-  WITH_GENERIC_TESTS
+  # WITH_GENERIC_TESTS
   )
 
 #-----------------------------------------------------------------------------

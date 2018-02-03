@@ -27,7 +27,7 @@
 // VTK includes
 #include <vtkSingleton.h>
 
-#include "vtkSlicerVRModuleMRMLExport.h"
+#include "vtkSlicerVirtualRealityModuleMRMLExport.h"
 
 class vtkRenderer;
 
@@ -35,7 +35,7 @@ class vtkRenderer;
 ///
 /// A displayable manager class is responsible to represente a
 /// MRMLDisplayable node in a renderer.
-class VTK_SLICER_VR_MODULE_MRML_EXPORT vtkMRMLVRViewDisplayableManagerFactory
+class VTK_SLICER_VIRTUALREALITY_MODULE_MRML_EXPORT vtkMRMLVRViewDisplayableManagerFactory
   : public vtkMRMLDisplayableManagerFactory
 {
 public:
@@ -69,7 +69,7 @@ private:
 
 #ifndef __VTK_WRAP__
 //BTX
-VTK_SINGLETON_DECLARE_INITIALIZER(VTK_SLICER_VR_MODULE_MRML_EXPORT,
+VTK_SINGLETON_DECLARE_INITIALIZER(VTK_SLICER_VIRTUALREALITY_MODULE_MRML_EXPORT,
                                   vtkMRMLVRViewDisplayableManagerFactory);
 //ETX
 #endif // __VTK_WRAP__

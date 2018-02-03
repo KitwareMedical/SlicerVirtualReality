@@ -76,19 +76,18 @@ public slots:
 
   void updateWidgetFromMRML();
 
-
   void doOpenVR();
 
 protected:
   void initDisplayableManagers();
 
-  vtkMRMLDisplayableManagerGroup*    DisplayableManagerGroup;
-  vtkMRMLScene*                      MRMLScene;
-  vtkMRMLVRViewNode*                 MRMLVRViewNode;
-  bool                               RenderEnabled;
-  vtkSmartPointer<vtkOpenVRRenderer>       Renderer;
-  vtkSmartPointer<vtkOpenVRRenderWindow>   RenderWindow;
-  vtkSmartPointer<vtkOpenVRRenderWindowInteractor>   Interactor;
+  vtkMRMLDisplayableManagerGroup* DisplayableManagerGroup;
+  vtkMRMLScene* MRMLScene;
+  vtkMRMLVRViewNode* MRMLVRViewNode;
+  bool RenderEnabled;
+  vtkSmartPointer<vtkOpenVRRenderer> Renderer;
+  vtkSmartPointer<vtkOpenVRRenderWindow> RenderWindow;
+  vtkSmartPointer<vtkOpenVRRenderWindowInteractor> Interactor;
   vtkSmartPointer<vtkOpenVRCamera> Camera;
 
   QTimer VRLoopTimer;

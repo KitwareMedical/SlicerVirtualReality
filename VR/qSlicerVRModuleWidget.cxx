@@ -53,6 +53,7 @@ qSlicerVRModuleWidgetPrivate::qSlicerVRModuleWidgetPrivate()
 qSlicerVRModuleWidget::qSlicerVRModuleWidget(QWidget* _parent)
   : Superclass( _parent )
   , d_ptr( new qSlicerVRModuleWidgetPrivate )
+  , m_vrWidget(NULL)
 {
 }
 
@@ -68,20 +69,33 @@ void qSlicerVRModuleWidget::setup()
   d->setupUi(this);
   this->Superclass::setup();
 
-  connect(d->initializePushButton, SIGNAL(clicked()), this, SLOT(onInitializePushButtonClicked()));
-  connect(d->startVRPushButton, SIGNAL(clicked()), this, SLOT(onStartVRPushButtonClicked()));
-  connect(d->stopVRPushButton, SIGNAL(clicked()), this, SLOT(onStopVRPushButtonClicked()));
+  connect(d->initializePushButton, SIGNAL(clicked()), this, SLOT(initializeVR()));
+  connect(d->startVRPushButton, SIGNAL(clicked()), this, SLOT(startVR()));
+  connect(d->stopVRPushButton, SIGNAL(clicked()), this, SLOT(stopVR()));
 }
 
 //-----------------------------------------------------------------------------
-void qSlicerVRModuleWidget::onInitializePushButtonClicked()
+qMRMLVRView* qSlicerVRModuleWidget::vrWidget() const
 {
-  std::cout << "--Initialize--" << std::endl;
+  return this->m_vrWidget;
+}
 
+//-----------------------------------------------------------------------------
+void qSlicerVRModuleWidget::initializeVR()
+{
   Q_D(qSlicerVRModuleWidget);
+  qDebug() << Q_FUNC_INFO << ": Initialize OpenVR";
 
+  if (this->m_vrWidget && this->mrmlScene()->GetNumberOfNodesByClass("vtkMRMLVRViewNode") > 0)
+    {
+    qDebug() << Q_FUNC_INFO << ": OpenVR already initialized";
+    return;
+    }
+
+  // Register VR view node class
   this->mrmlScene()->RegisterNodeClass((vtkSmartPointer<vtkMRMLVRViewNode>::New()));
 
+  // Register displayable managers to VR view displayable manager factory
   foreach(const QString& name,
     QStringList()
       << "vtkMRMLAnnotationDisplayableManager"
@@ -95,24 +109,27 @@ void qSlicerVRModuleWidget::onInitializePushButtonClicked()
     vtkMRMLVRViewDisplayableManagerFactory::GetInstance()->RegisterDisplayableManager(name.toLatin1());
     }
 
-  this->vrWidget = new qMRMLVRView();
-  this->vrWidget->setObjectName(QString("VRWidget"));
-  this->vrWidget->setMRMLScene(this->mrmlScene());
+  // Create VR view node
   vtkNew<vtkMRMLVRViewNode> vrViewNode;
   this->mrmlScene()->AddNode(vrViewNode.GetPointer());
-  this->vrWidget->setMRMLVRViewNode(vrViewNode.GetPointer());
+
+  // Setup VR view widget
+  this->m_vrWidget = new qMRMLVRView();
+  this->m_vrWidget->setObjectName(QString("VRWidget"));
+  this->m_vrWidget->setMRMLScene(this->mrmlScene());
+  this->m_vrWidget->setMRMLVRViewNode(vrViewNode.GetPointer());
 }
 
 //-----------------------------------------------------------------------------
-void qSlicerVRModuleWidget::onStartVRPushButtonClicked()
+void qSlicerVRModuleWidget::startVR()
 {
-  std::cout<<"--Start--"<<std::endl;
-  this->vrWidget->startVR();
+  qDebug() << Q_FUNC_INFO << ": Start VR";
+  this->m_vrWidget->startVR();
 }
 
 //-----------------------------------------------------------------------------
-void qSlicerVRModuleWidget::onStopVRPushButtonClicked()
+void qSlicerVRModuleWidget::stopVR()
 {
-  std::cout<<"--Stop--"<<std::endl;
-  this->vrWidget->stopVR();
+  qDebug() << Q_FUNC_INFO << ": Stop VR";
+  this->m_vrWidget->stopVR();
 }

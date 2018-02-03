@@ -91,7 +91,7 @@ QIcon qSlicerVRModule::icon() const
 //-----------------------------------------------------------------------------
 QStringList qSlicerVRModule::categories() const
 {
-  return QStringList() << "Examples";
+  return QStringList() << "Virtual Reality";
 }
 
 //-----------------------------------------------------------------------------

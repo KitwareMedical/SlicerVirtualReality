@@ -32,11 +32,11 @@
 // STD includes
 #include <cstdlib>
 
-#include "vtkSlicerVRModuleLogicExport.h"
+#include "vtkSlicerVirtualRealityModuleLogicExport.h"
 
 
 /// \ingroup Slicer_QtModules_ExtensionTemplate
-class VTK_SLICER_VR_MODULE_LOGIC_EXPORT vtkSlicerVRLogic :
+class VTK_SLICER_VIRTUALREALITY_MODULE_LOGIC_EXPORT vtkSlicerVRLogic :
   public vtkSlicerModuleLogic
 {
 public:
