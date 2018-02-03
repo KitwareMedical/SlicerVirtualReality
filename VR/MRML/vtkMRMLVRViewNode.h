@@ -18,12 +18,12 @@
 // VTK includes
 #include "vtkMRMLViewNode.h"
 
-#include "vtkSlicerVRModuleMRMLExport.h"
+#include "vtkSlicerVirtualRealityModuleMRMLExport.h"
 
 /// \brief MRML node to represent a 3D view.
 ///
 /// View node contains view parameters.
-class VTK_SLICER_VR_MODULE_MRML_EXPORT vtkMRMLVRViewNode
+class VTK_SLICER_VIRTUALREALITY_MODULE_MRML_EXPORT vtkMRMLVRViewNode
   : public vtkMRMLViewNode
 {
 public:
@@ -52,6 +52,9 @@ public:
   ///
   /// Get node XML tag name (like Volume, Model)
   virtual const char* GetNodeTagName() VTK_OVERRIDE;
+
+  /// Update the references of the node to the scene.
+  virtual void SetSceneReferences();
 
   /// Return the color the view nodes have for the background by default.
   static double* defaultBackgroundColor();

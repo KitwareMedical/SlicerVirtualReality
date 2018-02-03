@@ -21,32 +21,33 @@
 // SlicerQt includes
 #include "qSlicerAbstractModuleWidget.h"
 
-#include "qSlicerVRModuleExport.h"
+#include "qSlicerVirtualRealityModuleExport.h"
 
 class qSlicerVRModuleWidgetPrivate;
 class vtkMRMLNode;
 class qMRMLVRView;
 
 /// \ingroup Slicer_QtModules_ExtensionTemplate
-class Q_SLICER_QTMODULES_VR_EXPORT qSlicerVRModuleWidget :
+class Q_SLICER_QTMODULES_VIRTUALREALITY_EXPORT qSlicerVRModuleWidget :
   public qSlicerAbstractModuleWidget
 {
   Q_OBJECT
 
 public:
-
   typedef qSlicerAbstractModuleWidget Superclass;
   qSlicerVRModuleWidget(QWidget *parent=0);
   virtual ~qSlicerVRModuleWidget();
+  
+  Q_INVOKABLE qMRMLVRView* vrWidget() const;
 
 public slots:
-  void onInitializePushButtonClicked();
-  void onStartVRPushButtonClicked();
-  void onStopVRPushButtonClicked();
+  void initializeVR();
+  void startVR();
+  void stopVR();
 
 protected:
   QScopedPointer<qSlicerVRModuleWidgetPrivate> d_ptr;
-  qMRMLVRView* vrWidget;
+  qMRMLVRView* m_vrWidget;
 
   virtual void setup();
 

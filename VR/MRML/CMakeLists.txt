@@ -8,10 +8,12 @@ set(${KIT}_INCLUDE_DIRECTORIES
   )
 
 set(${KIT}_SRCS
-  vtkMRML${MODULE_NAME}ViewDisplayableManagerFactory.cxx
-  vtkMRML${MODULE_NAME}ViewDisplayableManagerFactory.h
-  vtkMRML${MODULE_NAME}ViewNode.cxx
-  vtkMRML${MODULE_NAME}ViewNode.h
+  vtkMRMLVRViewDisplayableManagerFactory.cxx
+  vtkMRMLVRViewDisplayableManagerFactory.h
+  vtkMRMLVRViewNode.cxx
+  vtkMRMLVRViewNode.h
+  vtkMRMLVRLayoutNode.cxx
+  vtkMRMLVRLayoutNode.h
   )
 
 set(${KIT}_TARGET_LIBRARIES

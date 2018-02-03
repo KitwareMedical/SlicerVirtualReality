@@ -21,14 +21,13 @@
 // SlicerQt includes
 #include "qSlicerLoadableModule.h"
 
-#include "qSlicerVRModuleExport.h"
+#include "qSlicerVirtualRealityModuleExport.h"
 
 class qSlicerVRModulePrivate;
 
 /// \ingroup Slicer_QtModules_ExtensionTemplate
-class Q_SLICER_QTMODULES_VR_EXPORT
-qSlicerVRModule
-  : public qSlicerLoadableModule
+class Q_SLICER_QTMODULES_VIRTUALREALITY_EXPORT qSlicerVRModule :
+  public qSlicerLoadableModule
 {
   Q_OBJECT
 #ifdef Slicer_HAVE_QT5
