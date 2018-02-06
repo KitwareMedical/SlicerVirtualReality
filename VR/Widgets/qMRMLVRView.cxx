@@ -296,7 +296,7 @@ void qMRMLVRView::addDisplayableManager(const QString& displayableManagerName)
 void qMRMLVRView::startVR()
 {
   Q_D(qMRMLVRView);
-  qDebug() << "startVR";
+  qDebug() << Q_FUNC_INFO << "Start VR";
   d->VRLoopTimer.start(0);
 }
 
@@ -304,7 +304,7 @@ void qMRMLVRView::startVR()
 void qMRMLVRView::stopVR()
 {
   Q_D(qMRMLVRView);
-  qDebug() << "stopVR";
+  qDebug() << Q_FUNC_INFO << "Stop VR";
   d->VRLoopTimer.stop();
 }
 
@@ -329,7 +329,6 @@ void qMRMLVRView::setMRMLVRViewNode(vtkMRMLVRViewNode* newViewNode)
     return;
     }
 
-
   d->qvtkReconnect(
     d->MRMLVRViewNode, newViewNode,
     vtkCommand::ModifiedEvent, d, SLOT(updateWidgetFromMRML()));
@@ -338,6 +337,7 @@ void qMRMLVRView::setMRMLVRViewNode(vtkMRMLVRViewNode* newViewNode)
   d->DisplayableManagerGroup->SetMRMLDisplayableNode(newViewNode);
 
   d->updateWidgetFromMRML();
+
   // Enable/disable widget
   this->setEnabled(newViewNode != 0);
 }

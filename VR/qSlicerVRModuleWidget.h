@@ -34,7 +34,6 @@ class Q_SLICER_QTMODULES_VR_EXPORT qSlicerVRModuleWidget :
   Q_OBJECT
 
 public:
-
   typedef qSlicerAbstractModuleWidget Superclass;
   qSlicerVRModuleWidget(QWidget *parent=0);
   virtual ~qSlicerVRModuleWidget();
