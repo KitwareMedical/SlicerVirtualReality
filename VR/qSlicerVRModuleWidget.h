@@ -38,6 +38,8 @@ public:
   qSlicerVRModuleWidget(QWidget *parent=0);
   virtual ~qSlicerVRModuleWidget();
 
+  Q_INVOKABLE qMRMLVRView* vrWidget() const;
+
 public slots:
   void onInitializePushButtonClicked();
   void onStartVRPushButtonClicked();
@@ -45,7 +47,7 @@ public slots:
 
 protected:
   QScopedPointer<qSlicerVRModuleWidgetPrivate> d_ptr;
-  qMRMLVRView* vrWidget;
+  qMRMLVRView* VRWidget;
 
   virtual void setup();
 
