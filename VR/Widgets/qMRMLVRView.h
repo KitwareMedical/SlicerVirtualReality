@@ -43,7 +43,7 @@ class vtkOpenVRRenderWindowInteractor;
 class vtkOpenVRCamera;
 
 /// \brief 3D view for view nodes.
-/// For performance reasons, the view block refreshs when the scene is in
+/// For performance reasons, the view block refreshes when the scene is in
 /// batch process state.
 /// \sa qMRMLVRWidget, qMRMLVRViewControllerWidget, qMRMLSliceView
 class Q_SLICER_QTMODULES_VR_WIDGETS_EXPORT qMRMLVRView : public QWidget
@@ -85,9 +85,9 @@ public:
   Q_INVOKABLE vtkOpenVRRenderWindowInteractor* interactor()const;
 
 public slots:
-
   void startVR();
   void stopVR();
+
   /// Set the MRML \a scene that should be listened for events
   /// When the scene is in batch process state, the view blocks all refresh.
   /// \sa renderEnabled
@@ -98,7 +98,6 @@ public slots:
 
   /// Enable/Disable rendering
   void setRenderEnabled(bool value);
-
 
 protected:
   QScopedPointer<qMRMLVRViewPrivate> d_ptr;

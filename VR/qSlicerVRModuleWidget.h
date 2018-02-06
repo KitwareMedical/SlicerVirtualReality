@@ -34,19 +34,20 @@ class Q_SLICER_QTMODULES_VR_EXPORT qSlicerVRModuleWidget :
   Q_OBJECT
 
 public:
-
   typedef qSlicerAbstractModuleWidget Superclass;
   qSlicerVRModuleWidget(QWidget *parent=0);
   virtual ~qSlicerVRModuleWidget();
 
+  Q_INVOKABLE qMRMLVRView* vrWidget() const;
+
 public slots:
-  void onInitializePushButtonClicked();
-  void onStartVRPushButtonClicked();
-  void onStopVRPushButtonClicked();
+  void initializeVR();
+  void startVR();
+  void stopVR();
 
 protected:
   QScopedPointer<qSlicerVRModuleWidgetPrivate> d_ptr;
-  qMRMLVRView* vrWidget;
+  qMRMLVRView* VRWidget;
 
   virtual void setup();
 
