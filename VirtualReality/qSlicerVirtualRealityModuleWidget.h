@@ -37,7 +37,7 @@ public:
   qSlicerVirtualRealityModuleWidget(QWidget *parent=0);
   virtual ~qSlicerVirtualRealityModuleWidget();
 
-  Q_INVOKABLE qMRMLVirtualRealityView* vrWidget() const;
+  Q_INVOKABLE qMRMLVirtualRealityView* vrView() const;
 
 public slots:
   void initializeVirtualReality();

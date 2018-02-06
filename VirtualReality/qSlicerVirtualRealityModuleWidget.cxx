@@ -75,7 +75,7 @@ void qSlicerVirtualRealityModuleWidget::setup()
 }
 
 //-----------------------------------------------------------------------------
-qMRMLVirtualRealityView* qSlicerVirtualRealityModuleWidget::vrWidget() const
+qMRMLVirtualRealityView* qSlicerVirtualRealityModuleWidget::vrView() const
 {
   return this->VirtualRealityWidget;
 }
