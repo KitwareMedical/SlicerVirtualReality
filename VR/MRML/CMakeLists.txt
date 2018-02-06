@@ -12,6 +12,8 @@ set(${KIT}_SRCS
   vtkMRML${MODULE_NAME}ViewDisplayableManagerFactory.h
   vtkMRML${MODULE_NAME}ViewNode.cxx
   vtkMRML${MODULE_NAME}ViewNode.h
+  vtkMRML${MODULE_NAME}LayoutNode.cxx
+  vtkMRML${MODULE_NAME}LayoutNode.h
   )
 
 set(${KIT}_TARGET_LIBRARIES
