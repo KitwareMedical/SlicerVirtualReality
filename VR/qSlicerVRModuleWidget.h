@@ -41,9 +41,9 @@ public:
   Q_INVOKABLE qMRMLVRView* vrWidget() const;
 
 public slots:
-  void onInitializePushButtonClicked();
-  void onStartVRPushButtonClicked();
-  void onStopVRPushButtonClicked();
+  void initializeVR();
+  void startVR();
+  void stopVR();
 
 protected:
   QScopedPointer<qSlicerVRModuleWidgetPrivate> d_ptr;

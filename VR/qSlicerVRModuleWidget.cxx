@@ -69,9 +69,9 @@ void qSlicerVRModuleWidget::setup()
   d->setupUi(this);
   this->Superclass::setup();
 
-  connect(d->initializePushButton, SIGNAL(clicked()), this, SLOT(onInitializePushButtonClicked()));
-  connect(d->startVRPushButton, SIGNAL(clicked()), this, SLOT(onStartVRPushButtonClicked()));
-  connect(d->stopVRPushButton, SIGNAL(clicked()), this, SLOT(onStopVRPushButtonClicked()));
+  connect(d->initializePushButton, SIGNAL(clicked()), this, SLOT(initializeVR()));
+  connect(d->startVRPushButton, SIGNAL(clicked()), this, SLOT(startVR()));
+  connect(d->stopVRPushButton, SIGNAL(clicked()), this, SLOT(stopVR()));
 }
 
 //-----------------------------------------------------------------------------
@@ -81,7 +81,7 @@ qMRMLVRView* qSlicerVRModuleWidget::vrWidget() const
 }
 
 //-----------------------------------------------------------------------------
-void qSlicerVRModuleWidget::onInitializePushButtonClicked()
+void qSlicerVRModuleWidget::initializeVR()
 {
   Q_D(qSlicerVRModuleWidget);
   qDebug() << Q_FUNC_INFO << ": Initialize OpenVR";
@@ -115,14 +115,14 @@ void qSlicerVRModuleWidget::onInitializePushButtonClicked()
 }
 
 //-----------------------------------------------------------------------------
-void qSlicerVRModuleWidget::onStartVRPushButtonClicked()
+void qSlicerVRModuleWidget::startVR()
 {
   qDebug() << Q_FUNC_INFO << ": Start VR";
   this->VRWidget->startVR();
 }
 
 //-----------------------------------------------------------------------------
-void qSlicerVRModuleWidget::onStopVRPushButtonClicked()
+void qSlicerVRModuleWidget::stopVR()
 {
   qDebug() << Q_FUNC_INFO << ": Stop VR";
   this->VRWidget->stopVR();
