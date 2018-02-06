@@ -6,29 +6,29 @@
   or http://www.slicer.org/copyright/copyright.txt for details.
 
   Program:   3D Slicer
-  Module:    $RCSfile: vtkMRMLVRViewNode.h,v $
+  Module:    $RCSfile: vtkMRMLVirtualRealityViewNode.h,v $
   Date:      $Date: 2006/03/19 17:12:28 $
   Version:   $Revision: 1.6 $
 
 =========================================================================auto=*/
 
-#ifndef __vtkMRMLVRViewNode_h
-#define __vtkMRMLVRViewNode_h
+#ifndef __vtkMRMLVirtualRealityViewNode_h
+#define __vtkMRMLVirtualRealityViewNode_h
 
 // VTK includes
 #include "vtkMRMLViewNode.h"
 
-#include "vtkSlicerVRModuleMRMLExport.h"
+#include "vtkSlicerVirtualRealityModuleMRMLExport.h"
 
 /// \brief MRML node to represent a 3D view.
 ///
 /// View node contains view parameters.
-class VTK_SLICER_VR_MODULE_MRML_EXPORT vtkMRMLVRViewNode
+class VTK_SLICER_VIRTUALREALITY_MODULE_MRML_EXPORT vtkMRMLVirtualRealityViewNode
   : public vtkMRMLViewNode
 {
 public:
-  static vtkMRMLVRViewNode *New();
-  vtkTypeMacro(vtkMRMLVRViewNode,vtkMRMLViewNode);
+  static vtkMRMLVirtualRealityViewNode *New();
+  vtkTypeMacro(vtkMRMLVirtualRealityViewNode,vtkMRMLViewNode);
   void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   //--------------------------------------------------------------------------
@@ -62,10 +62,10 @@ public:
 
 
 protected:
-  vtkMRMLVRViewNode();
-  ~vtkMRMLVRViewNode();
-  vtkMRMLVRViewNode(const vtkMRMLVRViewNode&);
-  void operator=(const vtkMRMLVRViewNode&);
+  vtkMRMLVirtualRealityViewNode();
+  ~vtkMRMLVirtualRealityViewNode();
+  vtkMRMLVirtualRealityViewNode(const vtkMRMLVirtualRealityViewNode&);
+  void operator=(const vtkMRMLVirtualRealityViewNode&);
 };
 
 #endif

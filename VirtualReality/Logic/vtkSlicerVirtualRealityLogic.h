@@ -15,14 +15,14 @@
 
 ==============================================================================*/
 
-// .NAME vtkSlicerVRLogic - slicer logic class for volumes manipulation
+// .NAME vtkSlicerVirtualRealityLogic - slicer logic class for volumes manipulation
 // .SECTION Description
 // This class manages the logic associated with reading, saving,
 // and changing propertied of the volumes
 
 
-#ifndef __vtkSlicerVRLogic_h
-#define __vtkSlicerVRLogic_h
+#ifndef __vtkSlicerVirtualRealityLogic_h
+#define __vtkSlicerVirtualRealityLogic_h
 
 // Slicer includes
 #include "vtkSlicerModuleLogic.h"
@@ -32,22 +32,20 @@
 // STD includes
 #include <cstdlib>
 
-#include "vtkSlicerVRModuleLogicExport.h"
+#include "vtkSlicerVirtualRealityModuleLogicExport.h"
 
-
-/// \ingroup Slicer_QtModules_ExtensionTemplate
-class VTK_SLICER_VR_MODULE_LOGIC_EXPORT vtkSlicerVRLogic :
+class VTK_SLICER_VIRTUALREALITY_MODULE_LOGIC_EXPORT vtkSlicerVirtualRealityLogic :
   public vtkSlicerModuleLogic
 {
 public:
 
-  static vtkSlicerVRLogic *New();
-  vtkTypeMacro(vtkSlicerVRLogic, vtkSlicerModuleLogic);
+  static vtkSlicerVirtualRealityLogic *New();
+  vtkTypeMacro(vtkSlicerVirtualRealityLogic, vtkSlicerModuleLogic);
   void PrintSelf(ostream& os, vtkIndent indent);
 
 protected:
-  vtkSlicerVRLogic();
-  virtual ~vtkSlicerVRLogic();
+  vtkSlicerVirtualRealityLogic();
+  virtual ~vtkSlicerVirtualRealityLogic();
 
   virtual void SetMRMLSceneInternal(vtkMRMLScene* newScene);
   /// Register MRML Node classes to Scene. Gets called automatically when the MRMLScene is attached to this logic class.
@@ -57,8 +55,8 @@ protected:
   virtual void OnMRMLSceneNodeRemoved(vtkMRMLNode* node);
 private:
 
-  vtkSlicerVRLogic(const vtkSlicerVRLogic&); // Not implemented
-  void operator=(const vtkSlicerVRLogic&); // Not implemented
+  vtkSlicerVirtualRealityLogic(const vtkSlicerVirtualRealityLogic&); // Not implemented
+  void operator=(const vtkSlicerVirtualRealityLogic&); // Not implemented
 };
 
 #endif

@@ -1,6 +1,6 @@
 
 #-----------------------------------------------------------------------------
-set(MODULE_NAME VR)
+set(MODULE_NAME VirtualReality)
 set(MODULE_TITLE "Virtual Reality")
 
 string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)

@@ -6,7 +6,7 @@ See COPYRIGHT.txt
 or http://www.slicer.org/copyright/copyright.txt for details.
 
 Program:   3D Slicer
-Module:    $RCSfile: vtkMRMLVRViewNode.cxx,v $
+Module:    $RCSfile: vtkMRMLVirtualRealityViewNode.cxx,v $
 Date:      $Date: 2006/03/03 22:26:39 $
 Version:   $Revision: 1.3 $
 
@@ -14,7 +14,7 @@ Version:   $Revision: 1.3 $
 
 // MRML includes
 #include "vtkMRMLScene.h"
-#include "vtkMRMLVRViewNode.h"
+#include "vtkMRMLVirtualRealityViewNode.h"
 
 // VTK includes
 #include <vtkObjectFactory.h>
@@ -23,11 +23,11 @@ Version:   $Revision: 1.3 $
 #include <sstream>
 
 //----------------------------------------------------------------------------
-vtkMRMLNodeNewMacro(vtkMRMLVRViewNode);
+vtkMRMLNodeNewMacro(vtkMRMLVirtualRealityViewNode);
 
 
 //----------------------------------------------------------------------------
-vtkMRMLVRViewNode::vtkMRMLVRViewNode()
+vtkMRMLVirtualRealityViewNode::vtkMRMLVirtualRealityViewNode()
 {
   this->BackgroundColor[0] = this->defaultBackgroundColor()[0];
   this->BackgroundColor[1] = this->defaultBackgroundColor()[1];
@@ -38,18 +38,18 @@ vtkMRMLVRViewNode::vtkMRMLVRViewNode()
  }
 
 //----------------------------------------------------------------------------
-vtkMRMLVRViewNode::~vtkMRMLVRViewNode()
+vtkMRMLVirtualRealityViewNode::~vtkMRMLVirtualRealityViewNode()
 {
 }
 
 //----------------------------------------------------------------------------
-const char* vtkMRMLVRViewNode::GetNodeTagName()
+const char* vtkMRMLVirtualRealityViewNode::GetNodeTagName()
 {
-  return "VRView";
+  return "VirtualRealityView";
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLVRViewNode::WriteXML(ostream& of, int nIndent)
+void vtkMRMLVirtualRealityViewNode::WriteXML(ostream& of, int nIndent)
 {
 	// Write all attributes not equal to their defaults
 
@@ -58,7 +58,7 @@ void vtkMRMLVRViewNode::WriteXML(ostream& of, int nIndent)
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLVRViewNode::ReadXMLAttributes(const char** atts)
+void vtkMRMLVirtualRealityViewNode::ReadXMLAttributes(const char** atts)
 {
   int disabledModify = this->StartModify();
 
@@ -80,12 +80,12 @@ void vtkMRMLVRViewNode::ReadXMLAttributes(const char** atts)
 //----------------------------------------------------------------------------
 // Copy the node's attributes to this object.
 // Does NOT copy: ID, FilePrefix, Name, ID
-void vtkMRMLVRViewNode::Copy(vtkMRMLNode *anode)
+void vtkMRMLVirtualRealityViewNode::Copy(vtkMRMLNode *anode)
 {
   int disabledModify = this->StartModify();
 
   this->Superclass::Copy(anode);
-  vtkMRMLVRViewNode *node = (vtkMRMLVRViewNode *) anode;
+  vtkMRMLVirtualRealityViewNode *node = (vtkMRMLVirtualRealityViewNode *) anode;
 
   (void)(node);
 
@@ -93,13 +93,13 @@ void vtkMRMLVRViewNode::Copy(vtkMRMLNode *anode)
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLVRViewNode::PrintSelf(ostream& os, vtkIndent indent)
+void vtkMRMLVirtualRealityViewNode::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os,indent);
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLVRViewNode::SetSceneReferences()
+void vtkMRMLVirtualRealityViewNode::SetSceneReferences()
 {
   if (!this->Scene)
     {
@@ -111,7 +111,7 @@ void vtkMRMLVRViewNode::SetSceneReferences()
 }
 
 //------------------------------------------------------------------------------
-double* vtkMRMLVRViewNode::defaultBackgroundColor()
+double* vtkMRMLVirtualRealityViewNode::defaultBackgroundColor()
 {
   //static double backgroundColor[3] = {0.70196, 0.70196, 0.90588};
   static double backgroundColor[3] = {0.7568627450980392,
@@ -121,7 +121,7 @@ double* vtkMRMLVRViewNode::defaultBackgroundColor()
 }
 
 //------------------------------------------------------------------------------
-double* vtkMRMLVRViewNode::defaultBackgroundColor2()
+double* vtkMRMLVirtualRealityViewNode::defaultBackgroundColor2()
 {
   static double backgroundColor2[3] = {0.4549019607843137,
                                        0.4705882352941176,

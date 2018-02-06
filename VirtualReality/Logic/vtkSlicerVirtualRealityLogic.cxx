@@ -15,8 +15,8 @@
 
 ==============================================================================*/
 
-// VR Logic includes
-#include "vtkSlicerVRLogic.h"
+// VirtualReality Logic includes
+#include "vtkSlicerVirtualRealityLogic.h"
 
 // MRML includes
 #include <vtkMRMLScene.h>
@@ -30,26 +30,26 @@
 #include <cassert>
 
 //----------------------------------------------------------------------------
-vtkStandardNewMacro(vtkSlicerVRLogic);
+vtkStandardNewMacro(vtkSlicerVirtualRealityLogic);
 
 //----------------------------------------------------------------------------
-vtkSlicerVRLogic::vtkSlicerVRLogic()
+vtkSlicerVirtualRealityLogic::vtkSlicerVirtualRealityLogic()
 {
 }
 
 //----------------------------------------------------------------------------
-vtkSlicerVRLogic::~vtkSlicerVRLogic()
+vtkSlicerVirtualRealityLogic::~vtkSlicerVirtualRealityLogic()
 {
 }
 
 //----------------------------------------------------------------------------
-void vtkSlicerVRLogic::PrintSelf(ostream& os, vtkIndent indent)
+void vtkSlicerVirtualRealityLogic::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 }
 
 //---------------------------------------------------------------------------
-void vtkSlicerVRLogic::SetMRMLSceneInternal(vtkMRMLScene * newScene)
+void vtkSlicerVirtualRealityLogic::SetMRMLSceneInternal(vtkMRMLScene * newScene)
 {
   vtkNew<vtkIntArray> events;
   events->InsertNextValue(vtkMRMLScene::NodeAddedEvent);
@@ -59,25 +59,25 @@ void vtkSlicerVRLogic::SetMRMLSceneInternal(vtkMRMLScene * newScene)
 }
 
 //-----------------------------------------------------------------------------
-void vtkSlicerVRLogic::RegisterNodes()
+void vtkSlicerVirtualRealityLogic::RegisterNodes()
 {
   assert(this->GetMRMLScene() != 0);
 }
 
 //---------------------------------------------------------------------------
-void vtkSlicerVRLogic::UpdateFromMRMLScene()
+void vtkSlicerVirtualRealityLogic::UpdateFromMRMLScene()
 {
   assert(this->GetMRMLScene() != 0);
 }
 
 //---------------------------------------------------------------------------
-void vtkSlicerVRLogic
+void vtkSlicerVirtualRealityLogic
 ::OnMRMLSceneNodeAdded(vtkMRMLNode* vtkNotUsed(node))
 {
 }
 
 //---------------------------------------------------------------------------
-void vtkSlicerVRLogic
+void vtkSlicerVirtualRealityLogic
 ::OnMRMLSceneNodeRemoved(vtkMRMLNode* vtkNotUsed(node))
 {
 }

@@ -9,19 +9,19 @@ find_package(VTK COMPONENTS vtkRenderingOpenVR REQUIRED)
 set(${KIT}_EXPORT_DIRECTIVE "Q_SLICER_QTMODULES_${MODULE_NAME_UPPER}_WIDGETS_EXPORT")
 
 set(${KIT}_INCLUDE_DIRECTORIES
-  ${vtkSlicerVRModuleMRML_INCLUDE_DIRS}
+  ${vtkSlicerVirtualRealityModuleMRML_INCLUDE_DIRS}
   ${VTK_INCLUDE_DIRS}
   )
 
 set(${KIT}_SRCS
-  qMRMLVRView.cxx
-  qMRMLVRView_p.h
-  qMRMLVRView.h
+  qMRMLVirtualRealityView.cxx
+  qMRMLVirtualRealityView_p.h
+  qMRMLVirtualRealityView.h
   )
 
 set(${KIT}_MOC_SRCS
-  qMRMLVRView.h
-  qMRMLVRView_p.h
+  qMRMLVirtualRealityView.h
+  qMRMLVirtualRealityView_p.h
   )
 
 set(${KIT}_UI_SRCS

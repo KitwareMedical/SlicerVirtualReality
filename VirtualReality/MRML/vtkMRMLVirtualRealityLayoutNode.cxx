@@ -26,31 +26,31 @@
 #include <vtkObjectFactory.h>
 
 // MRML includes
-#include "vtkMRMLVRLayoutNode.h"
+#include "vtkMRMLVirtualRealityLayoutNode.h"
 
 //----------------------------------------------------------------------------
-vtkMRMLNodeNewMacro(vtkMRMLVRLayoutNode);
+vtkMRMLNodeNewMacro(vtkMRMLVirtualRealityLayoutNode);
 
 //----------------------------------------------------------------------------
-vtkMRMLVRLayoutNode::vtkMRMLVRLayoutNode()
+vtkMRMLVirtualRealityLayoutNode::vtkMRMLVirtualRealityLayoutNode()
 {
-  this->SetSingletonTag("vtkMRMLVRLayoutNode");
+  this->SetSingletonTag("vtkMRMLVirtualRealityLayoutNode");
 
   this->CurrentLayoutDescription = NULL;
 
   // Synchronize the view description with the layout
   //TODO:
-  //this->AddLayoutDescription(vtkMRMLVRLayoutNode::SlicerLayoutNone, "");
+  //this->AddLayoutDescription(vtkMRMLVirtualRealityLayoutNode::SlicerLayoutNone, "");
 }
 
 //----------------------------------------------------------------------------
-vtkMRMLVRLayoutNode::~vtkMRMLVRLayoutNode()
+vtkMRMLVirtualRealityLayoutNode::~vtkMRMLVirtualRealityLayoutNode()
 {
   this->SetCurrentLayoutDescription(0);
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLVRLayoutNode::WriteXML(ostream& of, int nIndent)
+void vtkMRMLVirtualRealityLayoutNode::WriteXML(ostream& of, int nIndent)
 {
   // Write all attributes, since the parsing of the string is dependent on the
   // order here.
@@ -61,7 +61,7 @@ void vtkMRMLVRLayoutNode::WriteXML(ostream& of, int nIndent)
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLVRLayoutNode::ReadXMLAttributes(const char** atts)
+void vtkMRMLVirtualRealityLayoutNode::ReadXMLAttributes(const char** atts)
 {
   int disabledModify = this->StartModify();
 
@@ -85,7 +85,7 @@ void vtkMRMLVRLayoutNode::ReadXMLAttributes(const char** atts)
 }
 
 //----------------------------------------------------------------------------
-bool vtkMRMLVRLayoutNode::AddLayoutDescription(int layout, const char* layoutDescription)
+bool vtkMRMLVirtualRealityLayoutNode::AddLayoutDescription(int layout, const char* layoutDescription)
 {
   if (this->IsLayoutDescription(layout))
     {
@@ -98,7 +98,7 @@ bool vtkMRMLVRLayoutNode::AddLayoutDescription(int layout, const char* layoutDes
 }
 
 //----------------------------------------------------------------------------
-bool vtkMRMLVRLayoutNode::SetLayoutDescription(int layout, const char* layoutDescription)
+bool vtkMRMLVirtualRealityLayoutNode::SetLayoutDescription(int layout, const char* layoutDescription)
 {
   if (!this->IsLayoutDescription(layout))
     {
@@ -118,14 +118,14 @@ bool vtkMRMLVRLayoutNode::SetLayoutDescription(int layout, const char* layoutDes
 }
 
 //----------------------------------------------------------------------------
-bool vtkMRMLVRLayoutNode::IsLayoutDescription(int layout)
+bool vtkMRMLVirtualRealityLayoutNode::IsLayoutDescription(int layout)
 {
   std::map<int, std::string>::const_iterator it = this->Layouts.find(layout);
   return it != this->Layouts.end();
 }
 
 //----------------------------------------------------------------------------
-std::string vtkMRMLVRLayoutNode::GetLayoutDescription(int layout)
+std::string vtkMRMLVirtualRealityLayoutNode::GetLayoutDescription(int layout)
 {
   std::map<int, std::string>::const_iterator it = this->Layouts.find(layout);
   if (it == this->Layouts.end())
@@ -137,9 +137,9 @@ std::string vtkMRMLVRLayoutNode::GetLayoutDescription(int layout)
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLVRLayoutNode::UpdateCurrentLayoutDescription()
+void vtkMRMLVirtualRealityLayoutNode::UpdateCurrentLayoutDescription()
 {
-  //if (this->GetViewArrangement() == vtkMRMLVRLayoutNode::SlicerLayoutCustomView)
+  //if (this->GetViewArrangement() == vtkMRMLVirtualRealityLayoutNode::SlicerLayoutCustomView)
   //  {
   //  return;
   //  }
@@ -153,7 +153,7 @@ void vtkMRMLVRLayoutNode::UpdateCurrentLayoutDescription()
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLVRLayoutNode::SetAndParseCurrentLayoutDescription(const char* vtkNotUsed(description))
+void vtkMRMLVirtualRealityLayoutNode::SetAndParseCurrentLayoutDescription(const char* vtkNotUsed(description))
 {
   //// Be careful that it matches the ViewArrangement value
   //if (this->LayoutRootElement)
@@ -174,12 +174,12 @@ void vtkMRMLVRLayoutNode::SetAndParseCurrentLayoutDescription(const char* vtkNot
 //----------------------------------------------------------------------------
 // Copy the node's attributes to this object.
 // Does NOT copy: ID, FilePrefix, LabelText, ID
-void vtkMRMLVRLayoutNode::Copy(vtkMRMLNode *anode)
+void vtkMRMLVirtualRealityLayoutNode::Copy(vtkMRMLNode *anode)
 {
   int disabledModify = this->StartModify();
 
   //vtkObject::Copy(anode);
-  vtkMRMLVRLayoutNode *node = (vtkMRMLVRLayoutNode*)anode;
+  vtkMRMLVirtualRealityLayoutNode *node = (vtkMRMLVirtualRealityLayoutNode*)anode;
   // Try to copy the registered layout descriptions. However, if the node
   // currently has layout descriptions (more than the default None description)
   // then we don't want to copy them (it would overwrite the descriptions)
@@ -192,7 +192,7 @@ void vtkMRMLVRLayoutNode::Copy(vtkMRMLNode *anode)
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLVRLayoutNode::PrintSelf(ostream& os, vtkIndent indent)
+void vtkMRMLVirtualRealityLayoutNode::PrintSelf(ostream& os, vtkIndent indent)
 {
   Superclass::PrintSelf(os,indent);
 }

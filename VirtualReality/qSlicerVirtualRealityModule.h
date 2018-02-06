@@ -15,19 +15,18 @@
 
 ==============================================================================*/
 
-#ifndef __qSlicerVRModule_h
-#define __qSlicerVRModule_h
+#ifndef __qSlicerVirtualRealityModule_h
+#define __qSlicerVirtualRealityModule_h
 
 // SlicerQt includes
 #include "qSlicerLoadableModule.h"
 
-#include "qSlicerVRModuleExport.h"
+#include "qSlicerVirtualRealityModuleExport.h"
 
-class qSlicerVRModulePrivate;
+class qSlicerVirtualRealityModulePrivate;
 
-/// \ingroup Slicer_QtModules_ExtensionTemplate
-class Q_SLICER_QTMODULES_VR_EXPORT
-qSlicerVRModule
+class Q_SLICER_QTMODULES_VIRTUALREALITY_EXPORT
+qSlicerVirtualRealityModule
   : public qSlicerLoadableModule
 {
   Q_OBJECT
@@ -39,8 +38,8 @@ qSlicerVRModule
 public:
 
   typedef qSlicerLoadableModule Superclass;
-  explicit qSlicerVRModule(QObject *parent=0);
-  virtual ~qSlicerVRModule();
+  explicit qSlicerVirtualRealityModule(QObject *parent=0);
+  virtual ~qSlicerVirtualRealityModule();
 
   qSlicerGetTitleMacro(QTMODULE_TITLE);
 
@@ -65,11 +64,11 @@ protected:
   virtual vtkMRMLAbstractLogic* createLogic();
 
 protected:
-  QScopedPointer<qSlicerVRModulePrivate> d_ptr;
+  QScopedPointer<qSlicerVirtualRealityModulePrivate> d_ptr;
 
 private:
-  Q_DECLARE_PRIVATE(qSlicerVRModule);
-  Q_DISABLE_COPY(qSlicerVRModule);
+  Q_DECLARE_PRIVATE(qSlicerVirtualRealityModule);
+  Q_DISABLE_COPY(qSlicerVirtualRealityModule);
 
 };
 

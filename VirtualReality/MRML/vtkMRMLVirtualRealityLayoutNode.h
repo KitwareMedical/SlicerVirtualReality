@@ -18,20 +18,20 @@
 
 ==============================================================================*/
 
-#ifndef __vtkMRMLVRLayoutNode_h
-#define __vtkMRMLVRLayoutNode_h
+#ifndef __vtkMRMLVirtualRealityLayoutNode_h
+#define __vtkMRMLVirtualRealityLayoutNode_h
 
 // MRML includes
 #include "vtkMRMLAbstractLayoutNode.h"
 
-#include "vtkSlicerVRModuleMRMLExport.h"
+#include "vtkSlicerVirtualRealityModuleMRMLExport.h"
 
 /// \brief Node that describes the virtual reality layout of the application.
-class VTK_SLICER_VR_MODULE_MRML_EXPORT vtkMRMLVRLayoutNode : public vtkMRMLAbstractLayoutNode
+class VTK_SLICER_VIRTUALREALITY_MODULE_MRML_EXPORT vtkMRMLVirtualRealityLayoutNode : public vtkMRMLAbstractLayoutNode
 {
 public:
-  static vtkMRMLVRLayoutNode *New();
-  vtkTypeMacro(vtkMRMLVRLayoutNode,vtkMRMLAbstractLayoutNode);
+  static vtkMRMLVirtualRealityLayoutNode *New();
+  vtkTypeMacro(vtkMRMLVirtualRealityLayoutNode,vtkMRMLAbstractLayoutNode);
   virtual vtkMRMLNode* CreateNodeInstance() VTK_OVERRIDE;
   void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
@@ -49,7 +49,7 @@ public:
   virtual void Copy(vtkMRMLNode *node) VTK_OVERRIDE;
 
   /// Get node XML tag name (like Volume, Model)
-  virtual const char* GetNodeTagName() VTK_OVERRIDE {return "VRLayout";}
+  virtual const char* GetNodeTagName() VTK_OVERRIDE {return "VirtualRealityLayout";}
 
   /// Adds a layout description with integer identifier
   /// "layout". Returns false without making any modifications if the
@@ -75,7 +75,7 @@ public:
   // correspond while a view is being switched.
   vtkGetStringMacro(CurrentLayoutDescription);
 
-  //TODO: Add features to handle heads-up display. It is unlikely that the VR layouts can use
+  //TODO: Add features to handle heads-up display. It is unlikely that the VirtualReality layouts can use
   // the same API as the Slicer layouts, because they are not a Qt layouts, just stationary
   // 2D panels in the 3D scene.
   // A new displayable manager will be needed to handle these HUD views
@@ -86,10 +86,10 @@ protected:
   vtkSetStringMacro(CurrentLayoutDescription);
 
 protected:
-  vtkMRMLVRLayoutNode();
-  ~vtkMRMLVRLayoutNode();
-  vtkMRMLVRLayoutNode(const vtkMRMLVRLayoutNode&);
-  void operator=(const vtkMRMLVRLayoutNode&);
+  vtkMRMLVirtualRealityLayoutNode();
+  ~vtkMRMLVirtualRealityLayoutNode();
+  vtkMRMLVirtualRealityLayoutNode(const vtkMRMLVirtualRealityLayoutNode&);
+  void operator=(const vtkMRMLVirtualRealityLayoutNode&);
 
   //TODO: Are layout descriptions needed like this? If so, sink this into abstract layout
   std::map<int, std::string> Layouts;

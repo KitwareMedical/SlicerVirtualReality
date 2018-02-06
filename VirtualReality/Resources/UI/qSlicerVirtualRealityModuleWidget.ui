@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>qSlicerVRModuleWidget</class>
- <widget class="qSlicerWidget" name="qSlicerVRModuleWidget">
+ <class>qSlicerVirtualRealityModuleWidget</class>
+ <widget class="qSlicerWidget" name="qSlicerVirtualRealityModuleWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -22,16 +22,16 @@
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="startVRPushButton">
+    <widget class="QPushButton" name="startVirtualRealityPushButton">
      <property name="text">
-      <string>StartVR</string>
+      <string>StartVirtualReality</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="stopVRPushButton">
+    <widget class="QPushButton" name="stopVirtualRealityPushButton">
      <property name="text">
-      <string>StopVR</string>
+      <string>StopVirtualReality</string>
      </property>
     </widget>
    </item>

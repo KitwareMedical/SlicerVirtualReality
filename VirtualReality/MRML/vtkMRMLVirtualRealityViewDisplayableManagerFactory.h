@@ -18,8 +18,8 @@
 
 ==============================================================================*/
 
-#ifndef __vtkMRMLVRViewDisplayableManagerFactory_h
-#define __vtkMRMLVRViewDisplayableManagerFactory_h
+#ifndef __vtkMRMLVirtualRealityViewDisplayableManagerFactory_h
+#define __vtkMRMLVirtualRealityViewDisplayableManagerFactory_h
 
 // MRMLDisplayableManager includes
 #include "vtkMRMLDisplayableManagerFactory.h"
@@ -27,7 +27,7 @@
 // VTK includes
 #include <vtkSingleton.h>
 
-#include "vtkSlicerVRModuleMRMLExport.h"
+#include "vtkSlicerVirtualRealityModuleMRMLExport.h"
 
 class vtkRenderer;
 
@@ -35,42 +35,42 @@ class vtkRenderer;
 ///
 /// A displayable manager class is responsible to represente a
 /// MRMLDisplayable node in a renderer.
-class VTK_SLICER_VR_MODULE_MRML_EXPORT vtkMRMLVRViewDisplayableManagerFactory
+class VTK_SLICER_VIRTUALREALITY_MODULE_MRML_EXPORT vtkMRMLVirtualRealityViewDisplayableManagerFactory
   : public vtkMRMLDisplayableManagerFactory
 {
 public:
 
-  vtkTypeMacro(vtkMRMLVRViewDisplayableManagerFactory,
+  vtkTypeMacro(vtkMRMLVirtualRealityViewDisplayableManagerFactory,
                        vtkMRMLDisplayableManagerFactory);
   void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   /// This is a singleton pattern New.  There will only be ONE
-  /// reference to a vtkMRMLVRViewDisplayableManagerFactory object per process. Clients that
+  /// reference to a vtkMRMLVirtualRealityViewDisplayableManagerFactory object per process. Clients that
   /// call this must call Delete on the object so that the reference counting will work.
   /// The single instance will be unreferenced when the program exits.
-  static vtkMRMLVRViewDisplayableManagerFactory *New();
+  static vtkMRMLVirtualRealityViewDisplayableManagerFactory *New();
 
   /// Return the singleton instance with no reference counting.
-  static vtkMRMLVRViewDisplayableManagerFactory* GetInstance();
+  static vtkMRMLVirtualRealityViewDisplayableManagerFactory* GetInstance();
 
 protected:
 
-  vtkMRMLVRViewDisplayableManagerFactory();
-  virtual ~vtkMRMLVRViewDisplayableManagerFactory();
+  vtkMRMLVirtualRealityViewDisplayableManagerFactory();
+  virtual ~vtkMRMLVirtualRealityViewDisplayableManagerFactory();
 
-  VTK_SINGLETON_DECLARE(vtkMRMLVRViewDisplayableManagerFactory);
+  VTK_SINGLETON_DECLARE(vtkMRMLVirtualRealityViewDisplayableManagerFactory);
 
 private:
 
-  vtkMRMLVRViewDisplayableManagerFactory(const vtkMRMLVRViewDisplayableManagerFactory&);
-  void operator=(const vtkMRMLVRViewDisplayableManagerFactory&);
+  vtkMRMLVirtualRealityViewDisplayableManagerFactory(const vtkMRMLVirtualRealityViewDisplayableManagerFactory&);
+  void operator=(const vtkMRMLVirtualRealityViewDisplayableManagerFactory&);
 
 };
 
 #ifndef __VTK_WRAP__
 //BTX
-VTK_SINGLETON_DECLARE_INITIALIZER(VTK_SLICER_VR_MODULE_MRML_EXPORT,
-                                  vtkMRMLVRViewDisplayableManagerFactory);
+VTK_SINGLETON_DECLARE_INITIALIZER(VTK_SLICER_VIRTUALREALITY_MODULE_MRML_EXPORT,
+                                  vtkMRMLVirtualRealityViewDisplayableManagerFactory);
 //ETX
 #endif // __VTK_WRAP__
 

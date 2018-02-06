@@ -18,64 +18,64 @@
 // Qt includes
 #include <QtPlugin>
 
-// VR Logic includes
-#include <vtkSlicerVRLogic.h>
+// VirtualReality Logic includes
+#include <vtkSlicerVirtualRealityLogic.h>
 
-// VR includes
-#include "qSlicerVRModule.h"
-#include "qSlicerVRModuleWidget.h"
+// VirtualReality includes
+#include "qSlicerVirtualRealityModule.h"
+#include "qSlicerVirtualRealityModuleWidget.h"
 
 //-----------------------------------------------------------------------------
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
 #include <QtPlugin>
-Q_EXPORT_PLUGIN2(qSlicerVRModule, qSlicerVRModule);
+Q_EXPORT_PLUGIN2(qSlicerVirtualRealityModule, qSlicerVirtualRealityModule);
 #endif
 
 //-----------------------------------------------------------------------------
 /// \ingroup Slicer_QtModules_ExtensionTemplate
-class qSlicerVRModulePrivate
+class qSlicerVirtualRealityModulePrivate
 {
 public:
-  qSlicerVRModulePrivate();
+  qSlicerVirtualRealityModulePrivate();
 };
 
 //-----------------------------------------------------------------------------
-// qSlicerVRModulePrivate methods
+// qSlicerVirtualRealityModulePrivate methods
 
 //-----------------------------------------------------------------------------
-qSlicerVRModulePrivate::qSlicerVRModulePrivate()
+qSlicerVirtualRealityModulePrivate::qSlicerVirtualRealityModulePrivate()
 {
 }
 
 //-----------------------------------------------------------------------------
-// qSlicerVRModule methods
+// qSlicerVirtualRealityModule methods
 
 //-----------------------------------------------------------------------------
-qSlicerVRModule::qSlicerVRModule(QObject* _parent)
+qSlicerVirtualRealityModule::qSlicerVirtualRealityModule(QObject* _parent)
   : Superclass(_parent)
-  , d_ptr(new qSlicerVRModulePrivate)
+  , d_ptr(new qSlicerVirtualRealityModulePrivate)
 {
 }
 
 //-----------------------------------------------------------------------------
-qSlicerVRModule::~qSlicerVRModule()
+qSlicerVirtualRealityModule::~qSlicerVirtualRealityModule()
 {
 }
 
 //-----------------------------------------------------------------------------
-QString qSlicerVRModule::helpText() const
+QString qSlicerVirtualRealityModule::helpText() const
 {
   return "This is a loadable module that can be bundled in an extension";
 }
 
 //-----------------------------------------------------------------------------
-QString qSlicerVRModule::acknowledgementText() const
+QString qSlicerVirtualRealityModule::acknowledgementText() const
 {
   return "This work was partially funded by NIH grant NXNNXXNNNNNN-NNXN";
 }
 
 //-----------------------------------------------------------------------------
-QStringList qSlicerVRModule::contributors() const
+QStringList qSlicerVirtualRealityModule::contributors() const
 {
   QStringList moduleContributors;
   moduleContributors << QString("John Doe (AnyWare Corp.)");
@@ -83,37 +83,37 @@ QStringList qSlicerVRModule::contributors() const
 }
 
 //-----------------------------------------------------------------------------
-QIcon qSlicerVRModule::icon() const
+QIcon qSlicerVirtualRealityModule::icon() const
 {
-  return QIcon(":/Icons/VR.png");
+  return QIcon(":/Icons/VirtualReality.png");
 }
 
 //-----------------------------------------------------------------------------
-QStringList qSlicerVRModule::categories() const
+QStringList qSlicerVirtualRealityModule::categories() const
 {
   return QStringList() << "Virtual Reality";
 }
 
 //-----------------------------------------------------------------------------
-QStringList qSlicerVRModule::dependencies() const
+QStringList qSlicerVirtualRealityModule::dependencies() const
 {
   return QStringList();
 }
 
 //-----------------------------------------------------------------------------
-void qSlicerVRModule::setup()
+void qSlicerVirtualRealityModule::setup()
 {
   this->Superclass::setup();
 }
 
 //-----------------------------------------------------------------------------
-qSlicerAbstractModuleRepresentation* qSlicerVRModule::createWidgetRepresentation()
+qSlicerAbstractModuleRepresentation* qSlicerVirtualRealityModule::createWidgetRepresentation()
 {
-  return new qSlicerVRModuleWidget;
+  return new qSlicerVirtualRealityModuleWidget;
 }
 
 //-----------------------------------------------------------------------------
-vtkMRMLAbstractLogic* qSlicerVRModule::createLogic()
+vtkMRMLAbstractLogic* qSlicerVirtualRealityModule::createLogic()
 {
-  return vtkSlicerVRLogic::New();
+  return vtkSlicerVirtualRealityLogic::New();
 }

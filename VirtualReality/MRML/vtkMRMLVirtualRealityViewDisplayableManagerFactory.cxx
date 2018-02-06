@@ -19,36 +19,36 @@
 ==============================================================================*/
 
 // MRMLDisplayableManager includes
-#include "vtkMRMLVRViewDisplayableManagerFactory.h"
+#include "vtkMRMLVirtualRealityViewDisplayableManagerFactory.h"
 
 // VTK includes
 #include <vtkObjectFactory.h>
 
 //----------------------------------------------------------------------------
-// vtkMRMLVRViewDisplayableManagerFactory methods
+// vtkMRMLVirtualRealityViewDisplayableManagerFactory methods
 
 //----------------------------------------------------------------------------
 // Up the reference count so it behaves like New
-vtkMRMLVRViewDisplayableManagerFactory* vtkMRMLVRViewDisplayableManagerFactory::New()
+vtkMRMLVirtualRealityViewDisplayableManagerFactory* vtkMRMLVirtualRealityViewDisplayableManagerFactory::New()
 {
-  vtkMRMLVRViewDisplayableManagerFactory* instance = Self::GetInstance();
+  vtkMRMLVirtualRealityViewDisplayableManagerFactory* instance = Self::GetInstance();
   instance->Register(0);
   return instance;
 }
 
 //----------------------------------------------------------------------------
-vtkMRMLVRViewDisplayableManagerFactory* vtkMRMLVRViewDisplayableManagerFactory::GetInstance()
+vtkMRMLVirtualRealityViewDisplayableManagerFactory* vtkMRMLVirtualRealityViewDisplayableManagerFactory::GetInstance()
 {
   if(!Self::Instance)
     {
     // Try the factory first
-    Self::Instance = (vtkMRMLVRViewDisplayableManagerFactory*)
-                     vtkObjectFactory::CreateInstance("vtkMRMLVRViewDisplayableManagerFactory");
+    Self::Instance = (vtkMRMLVirtualRealityViewDisplayableManagerFactory*)
+                     vtkObjectFactory::CreateInstance("vtkMRMLVirtualRealityViewDisplayableManagerFactory");
 
     // if the factory did not provide one, then create it here
     if(!Self::Instance)
       {
-      Self::Instance = new vtkMRMLVRViewDisplayableManagerFactory;
+      Self::Instance = new vtkMRMLVirtualRealityViewDisplayableManagerFactory;
 #ifdef VTK_HAS_INITIALIZE_OBJECT_BASE
       Self::Instance->InitializeObjectBase();
 #endif
@@ -59,20 +59,20 @@ vtkMRMLVRViewDisplayableManagerFactory* vtkMRMLVRViewDisplayableManagerFactory::
 }
 
 //----------------------------------------------------------------------------
-vtkMRMLVRViewDisplayableManagerFactory::
-    vtkMRMLVRViewDisplayableManagerFactory():Superclass()
+vtkMRMLVirtualRealityViewDisplayableManagerFactory::
+    vtkMRMLVirtualRealityViewDisplayableManagerFactory():Superclass()
 {
 }
 
 //----------------------------------------------------------------------------
-vtkMRMLVRViewDisplayableManagerFactory::~vtkMRMLVRViewDisplayableManagerFactory()
+vtkMRMLVirtualRealityViewDisplayableManagerFactory::~vtkMRMLVirtualRealityViewDisplayableManagerFactory()
 {
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLVRViewDisplayableManagerFactory::PrintSelf(ostream& os, vtkIndent indent)
+void vtkMRMLVirtualRealityViewDisplayableManagerFactory::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 }
 
-VTK_SINGLETON_CXX(vtkMRMLVRViewDisplayableManagerFactory);
+VTK_SINGLETON_CXX(vtkMRMLVirtualRealityViewDisplayableManagerFactory);
