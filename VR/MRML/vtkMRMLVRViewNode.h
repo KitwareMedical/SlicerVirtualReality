@@ -53,6 +53,9 @@ public:
   /// Get node XML tag name (like Volume, Model)
   virtual const char* GetNodeTagName() VTK_OVERRIDE;
 
+  /// Update the references of the node to the scene.
+  virtual void SetSceneReferences();
+
   /// Return the color the view nodes have for the background by default.
   static double* defaultBackgroundColor();
   static double* defaultBackgroundColor2();

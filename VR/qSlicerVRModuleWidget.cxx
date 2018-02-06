@@ -86,6 +86,12 @@ void qSlicerVRModuleWidget::initializeVR()
   Q_D(qSlicerVRModuleWidget);
   qDebug() << Q_FUNC_INFO << ": Initialize OpenVR";
 
+  if (this->VRWidget && this->mrmlScene()->GetNumberOfNodesByClass("vtkMRMLVRViewNode") > 0)
+    {
+    qDebug() << Q_FUNC_INFO << ": OpenVR already initialized";
+    return;
+    }
+
   // Register VR view node class
   this->mrmlScene()->RegisterNodeClass((vtkSmartPointer<vtkMRMLVRViewNode>::New()));
 

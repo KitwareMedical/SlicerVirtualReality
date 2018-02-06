@@ -96,7 +96,18 @@ void vtkMRMLVRViewNode::Copy(vtkMRMLNode *anode)
 void vtkMRMLVRViewNode::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os,indent);
+}
 
+//----------------------------------------------------------------------------
+void vtkMRMLVRViewNode::SetSceneReferences()
+{
+  if (!this->Scene)
+    {
+    vtkErrorMacro(<< "SetSceneReferences: Scene is expected to be non NULL.");
+    return;
+    }
+
+  this->SetAndObserveParentLayoutNode(this);
 }
 
 //------------------------------------------------------------------------------
