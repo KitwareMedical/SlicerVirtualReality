@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(SlicerOpenVR)
+project(SlicerVirtualReality)
 
 #-----------------------------------------------------------------------------
 # Extension meta-information
-set(EXTENSION_HOMEPAGE "http://slicer.org/slicerWiki/index.php/Documentation/Nightly/Extensions/VR")
-set(EXTENSION_CATEGORY "Examples")
+set(EXTENSION_HOMEPAGE "http://slicer.org/slicerWiki/index.php/Documentation/Nightly/Extensions/VirtualReality")
+set(EXTENSION_CATEGORY "Virtual Reality")
 set(EXTENSION_CONTRIBUTORS "Jean-Baptiste Vimort (Kitware), Jean-Christophe Fillion-Robin (Kitware)")
 set(EXTENSION_DESCRIPTION "This extension allow to use a an HTC vive to display data in Virtual Reallity")
-set(EXTENSION_ICONURL "https://raw.githubusercontent.com/KitwareMedical/SlicerOpenVR/master/VR.png")
+set(EXTENSION_ICONURL "https://raw.githubusercontent.com/KitwareMedical/SlicerVirtualReality/master/VirtualReality.png")
 set(EXTENSION_SCREENSHOTURLS "http://www.example.com/Slicer/Extensions/VR/Screenshots/1.png")
 set(EXTENSION_DEPENDS "NA") # Specified as a space separated string, a list or 'NA' if any
 set(EXTENSION_BUILD_SUBDIRECTORY inner-build)
@@ -35,7 +35,7 @@ endif()
 
 #-----------------------------------------------------------------------------
 # Extension modules
-add_subdirectory(VR)
+add_subdirectory(VirtualReality)
 ## NEXT_MODULE
 
 #-----------------------------------------------------------------------------

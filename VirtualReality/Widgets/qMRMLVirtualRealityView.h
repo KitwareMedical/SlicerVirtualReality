@@ -18,8 +18,8 @@
 
 ==============================================================================*/
 
-#ifndef __qMRMLVRView_h
-#define __qMRMLVRView_h
+#ifndef __qMRMLVirtualRealityView_h
+#define __qMRMLVirtualRealityView_h
 
 // CTK includes
 #include <ctkPimpl.h>
@@ -28,11 +28,11 @@
 // Qt includes
 #include <QWidget>
 
-#include "qSlicerVRModuleWidgetsExport.h"
+#include "qSlicerVirtualRealityModuleWidgetsExport.h"
 
-class qMRMLVRViewPrivate;
+class qMRMLVirtualRealityViewPrivate;
 class vtkMRMLScene;
-class vtkMRMLVRViewNode;
+class vtkMRMLVirtualRealityViewNode;
 class vtkCollection;
 class vtkGenericOpenGLRenderWindow;
 class vtkRenderWindowInteractor;
@@ -46,7 +46,7 @@ class vtkOpenVRCamera;
 /// For performance reasons, the view block refreshes when the scene is in
 /// batch process state.
 /// \sa qMRMLVRWidget, qMRMLVRViewControllerWidget, qMRMLSliceView
-class Q_SLICER_QTMODULES_VR_WIDGETS_EXPORT qMRMLVRView : public QWidget
+class Q_SLICER_QTMODULES_VIRTUALREALITY_WIDGETS_EXPORT qMRMLVirtualRealityView : public QWidget
 {
   Q_OBJECT
 public:
@@ -54,15 +54,15 @@ public:
   typedef QWidget Superclass;
 
   /// Constructors
-  explicit qMRMLVRView(QWidget* parent = 0);
-  virtual ~qMRMLVRView();
+  explicit qMRMLVirtualRealityView(QWidget* parent = 0);
+  virtual ~qMRMLVirtualRealityView();
 
   /// Add a displayable manager to the view,
   /// the displayable manager is proper to the 3D view and is not shared
   /// with other views.
   /// If you want to register a displayable manager with all the 3D
   /// views (existing or future), you need to do it via
-  /// vtkMRMLVRViewDisplayableManagerFactory::RegisterDisplayableManager()
+  /// vtkMRMLVirtualRealityViewDisplayableManagerFactory::RegisterDisplayableManager()
   /// By default: vtkMRMLCameraDisplayableManager,
   /// vtkMRMLViewDisplayableManager and vtkMRMLModelDisplayableManager are
   /// already registered.
@@ -70,7 +70,7 @@ public:
   Q_INVOKABLE void getDisplayableManagers(vtkCollection *displayableManagers);
 
   /// Get the 3D View node observed by view.
-  Q_INVOKABLE vtkMRMLVRViewNode* mrmlVRViewNode()const;
+  Q_INVOKABLE vtkMRMLVirtualRealityViewNode* mrmlVirtualRealityViewNode()const;
 
   /// Return if rendering is enabled
   bool renderEnabled() const;
@@ -85,8 +85,8 @@ public:
   Q_INVOKABLE vtkOpenVRRenderWindowInteractor* interactor()const;
 
 public slots:
-  void startVR();
-  void stopVR();
+  void startVirtualReality();
+  void stopVirtualReality();
 
   /// Set the MRML \a scene that should be listened for events
   /// When the scene is in batch process state, the view blocks all refresh.
@@ -94,17 +94,17 @@ public slots:
   void setMRMLScene(vtkMRMLScene* newScene);
 
   /// Set the current \a viewNode to observe
-  void setMRMLVRViewNode(vtkMRMLVRViewNode* newViewNode);
+  void setMRMLVirtualRealityViewNode(vtkMRMLVirtualRealityViewNode* newViewNode);
 
   /// Enable/Disable rendering
   void setRenderEnabled(bool value);
 
 protected:
-  QScopedPointer<qMRMLVRViewPrivate> d_ptr;
+  QScopedPointer<qMRMLVirtualRealityViewPrivate> d_ptr;
 
 private:
-  Q_DECLARE_PRIVATE(qMRMLVRView);
-  Q_DISABLE_COPY(qMRMLVRView);
+  Q_DECLARE_PRIVATE(qMRMLVirtualRealityView);
+  Q_DISABLE_COPY(qMRMLVirtualRealityView);
 };
 
 #endif

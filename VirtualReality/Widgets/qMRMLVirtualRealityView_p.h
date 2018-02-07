@@ -18,8 +18,8 @@
 
 ==============================================================================*/
 
-#ifndef __qMRMLVRView_p_h
-#define __qMRMLVRView_p_h
+#ifndef __qMRMLVirtualRealityView_p_h
+#define __qMRMLVirtualRealityView_p_h
 
 //
 //  W A R N I N G
@@ -40,34 +40,34 @@
 #include <ctkVTKObject.h>
 
 // qMRML includes
-#include "qMRMLVRView.h"
+#include "qMRMLVirtualRealityView.h"
 
 // Qt includes
 #include <QTimer>
 
 class QLabel;
 class vtkMRMLDisplayableManagerGroup;
-class vtkMRMLVRViewNode;
+class vtkMRMLVirtualRealityViewNode;
 class vtkMRMLCameraNode;
 class vtkObject;
 
 //-----------------------------------------------------------------------------
-class qMRMLVRViewPrivate: public QObject
+class qMRMLVirtualRealityViewPrivate: public QObject
 {
   Q_OBJECT
   QVTK_OBJECT
-  Q_DECLARE_PUBLIC(qMRMLVRView);
+  Q_DECLARE_PUBLIC(qMRMLVirtualRealityView);
 protected:
-  qMRMLVRView* const q_ptr;
+  qMRMLVirtualRealityView* const q_ptr;
 public:
-  qMRMLVRViewPrivate(qMRMLVRView& object);
-  ~qMRMLVRViewPrivate();
+  qMRMLVirtualRealityViewPrivate(qMRMLVirtualRealityView& object);
+  ~qMRMLVirtualRealityViewPrivate();
 
   virtual void init();
 
   void setMRMLScene(vtkMRMLScene* scene);
-  void startVR();
-  void stopVR();
+  void startVirtualReality();
+  void stopVirtualReality();
 
 public slots:
   /// Handle MRML scene event
@@ -76,21 +76,21 @@ public slots:
 
   void updateWidgetFromMRML();
 
-  void doOpenVR();
+  void doOpenVirtualReality();
 
 protected:
   void initDisplayableManagers();
 
   vtkMRMLDisplayableManagerGroup* DisplayableManagerGroup;
   vtkMRMLScene* MRMLScene;
-  vtkMRMLVRViewNode* MRMLVRViewNode;
+  vtkMRMLVirtualRealityViewNode* MRMLVirtualRealityViewNode;
   bool RenderEnabled;
   vtkSmartPointer<vtkOpenVRRenderer> Renderer;
   vtkSmartPointer<vtkOpenVRRenderWindow> RenderWindow;
   vtkSmartPointer<vtkOpenVRRenderWindowInteractor> Interactor;
   vtkSmartPointer<vtkOpenVRCamera> Camera;
 
-  QTimer VRLoopTimer;
+  QTimer VirtualRealityLoopTimer;
 };
 
 #endif

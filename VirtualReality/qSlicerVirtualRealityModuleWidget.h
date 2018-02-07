@@ -15,45 +15,43 @@
 
 ==============================================================================*/
 
-#ifndef __qSlicerVRModuleWidget_h
-#define __qSlicerVRModuleWidget_h
+#ifndef __qSlicerVirtualRealityModuleWidget_h
+#define __qSlicerVirtualRealityModuleWidget_h
 
 // SlicerQt includes
 #include "qSlicerAbstractModuleWidget.h"
 
-#include "qSlicerVRModuleExport.h"
+#include "qSlicerVirtualRealityModuleExport.h"
 
-class qSlicerVRModuleWidgetPrivate;
+class qSlicerVirtualRealityModuleWidgetPrivate;
 class vtkMRMLNode;
-class qMRMLVRView;
+class qMRMLVirtualRealityView;
 
-/// \ingroup Slicer_QtModules_ExtensionTemplate
-class Q_SLICER_QTMODULES_VR_EXPORT qSlicerVRModuleWidget :
+class Q_SLICER_QTMODULES_VIRTUALREALITY_EXPORT qSlicerVirtualRealityModuleWidget :
   public qSlicerAbstractModuleWidget
 {
   Q_OBJECT
 
 public:
   typedef qSlicerAbstractModuleWidget Superclass;
-  qSlicerVRModuleWidget(QWidget *parent=0);
-  virtual ~qSlicerVRModuleWidget();
+  qSlicerVirtualRealityModuleWidget(QWidget *parent=0);
+  virtual ~qSlicerVirtualRealityModuleWidget();
 
-  Q_INVOKABLE qMRMLVRView* vrWidget() const;
+  Q_INVOKABLE qMRMLVirtualRealityView* vrView() const;
 
 public slots:
-  void initializeVR();
-  void startVR();
-  void stopVR();
+  void initializeVirtualReality();
+  void startVirtualReality();
+  void stopVirtualReality();
 
 protected:
-  QScopedPointer<qSlicerVRModuleWidgetPrivate> d_ptr;
-  qMRMLVRView* VRWidget;
+  QScopedPointer<qSlicerVirtualRealityModuleWidgetPrivate> d_ptr;
 
   virtual void setup();
 
 private:
-  Q_DECLARE_PRIVATE(qSlicerVRModuleWidget);
-  Q_DISABLE_COPY(qSlicerVRModuleWidget);
+  Q_DECLARE_PRIVATE(qSlicerVirtualRealityModuleWidget);
+  Q_DISABLE_COPY(qSlicerVirtualRealityModuleWidget);
 };
 
 #endif
