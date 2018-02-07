@@ -1,16 +1,14 @@
-SlicerOpenVR
-============
+SlicerVirtualReality
+====================
 
 A Slicer extension that enables user to interact with a Slicer scene using virtual reality.
 
-![](VR.png)
+![](SlicerVirtualReality.png)
 
 Building steps
 --------------
 
 **This Slicer extension is in active development. The API may change from version to version without notice.**
-
-It currently requires patches not yet integrated in upstream Slicer. See https://github.com/Slicer/Slicer/compare/master...jbvimort:VR
 
 Waiting it is available in the Slicer Extension Manager, follow these instructions:
 
@@ -23,6 +21,50 @@ Waiting it is available in the Slicer Extension Manager, follow these instructio
    ```
 
 Note that specifying the top-level build directory of the extension ensures that Slicer find all types of modules.
+
+
+Useful Python Snippets
+----------------------
+
+```python
+
+import logging
+
+import slicer
+
+def isVRInitialized():
+    """Determine if VR has been initialized
+    """
+    vrModuleWidget = slicer.modules.virtualreality.widgetRepresentation()
+    if (vrModuleWidget is None
+        or vrModuleWidget.vrView() is None
+        or vrModuleWidget.vrView().mrmlVirtualRealityViewNode() is None):
+        return False
+    return True
+
+def vrCamera():
+    # Get VR module widget
+    if not isVRInitialized():
+        return None
+    # Get VR camera
+    vrModuleWidget = slicer.modules.virtualreality.widgetRepresentation()
+    rendererCollection = vrModuleWidget.vrView().renderWindow().GetRenderers()
+    if rendererCollection.GetNumberOfItems() < 1:
+        logging.error('Unable to access VR renderers')
+        return None
+    return rendererCollection.GetItemAsObject(0).GetActiveCamera()
+
+
+assert isVRInitialized() is False
+assert vrCamera() is None
+
+slicer.modules.virtualreality.widgetRepresentation().initializeVirtualReality()
+
+assert isVRInitialized() is True
+assert vrCamera() is not None
+
+
+```
 
 License
 -------
