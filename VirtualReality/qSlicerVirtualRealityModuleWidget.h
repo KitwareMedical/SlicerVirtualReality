@@ -46,7 +46,6 @@ public slots:
 
 protected:
   QScopedPointer<qSlicerVirtualRealityModuleWidgetPrivate> d_ptr;
-  qMRMLVirtualRealityView* VirtualRealityWidget;
 
   virtual void setup();
 

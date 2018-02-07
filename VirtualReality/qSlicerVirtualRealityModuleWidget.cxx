@@ -36,6 +36,7 @@ class qSlicerVirtualRealityModuleWidgetPrivate: public Ui_qSlicerVirtualRealityM
 {
 public:
   qSlicerVirtualRealityModuleWidgetPrivate();
+  qMRMLVirtualRealityView* VirtualRealityView;
 };
 
 //-----------------------------------------------------------------------------
@@ -43,6 +44,7 @@ public:
 
 //-----------------------------------------------------------------------------
 qSlicerVirtualRealityModuleWidgetPrivate::qSlicerVirtualRealityModuleWidgetPrivate()
+ : VirtualRealityView(NULL)
 {
 }
 
@@ -53,7 +55,6 @@ qSlicerVirtualRealityModuleWidgetPrivate::qSlicerVirtualRealityModuleWidgetPriva
 qSlicerVirtualRealityModuleWidget::qSlicerVirtualRealityModuleWidget(QWidget* _parent)
   : Superclass( _parent )
   , d_ptr( new qSlicerVirtualRealityModuleWidgetPrivate )
-  , VirtualRealityWidget(NULL)
 {
 }
 
@@ -77,7 +78,8 @@ void qSlicerVirtualRealityModuleWidget::setup()
 //-----------------------------------------------------------------------------
 qMRMLVirtualRealityView* qSlicerVirtualRealityModuleWidget::vrView() const
 {
-  return this->VirtualRealityWidget;
+  Q_D(const qSlicerVirtualRealityModuleWidget);
+  return d->VirtualRealityView;
 }
 
 //-----------------------------------------------------------------------------
@@ -86,7 +88,7 @@ void qSlicerVirtualRealityModuleWidget::initializeVirtualReality()
   Q_D(qSlicerVirtualRealityModuleWidget);
   qDebug() << Q_FUNC_INFO << ": Initialize OpenVirtualReality";
 
-  if (this->VirtualRealityWidget && this->mrmlScene()->GetNumberOfNodesByClass("vtkMRMLVirtualRealityViewNode") > 0)
+  if (d->VirtualRealityView && this->mrmlScene()->GetNumberOfNodesByClass("vtkMRMLVirtualRealityViewNode") > 0)
     {
     qDebug() << Q_FUNC_INFO << ": OpenVirtualReality already initialized";
     return;
@@ -114,22 +116,24 @@ void qSlicerVirtualRealityModuleWidget::initializeVirtualReality()
   this->mrmlScene()->AddNode(vrViewNode.GetPointer());
 
   // Setup VirtualReality view widget
-  this->VirtualRealityWidget = new qMRMLVirtualRealityView();
-  this->VirtualRealityWidget->setObjectName(QString("VirtualRealityWidget"));
-  this->VirtualRealityWidget->setMRMLScene(this->mrmlScene());
-  this->VirtualRealityWidget->setMRMLVirtualRealityViewNode(vrViewNode.GetPointer());
+  d->VirtualRealityView = new qMRMLVirtualRealityView();
+  d->VirtualRealityView->setObjectName(QString("VirtualRealityWidget"));
+  d->VirtualRealityView->setMRMLScene(this->mrmlScene());
+  d->VirtualRealityView->setMRMLVirtualRealityViewNode(vrViewNode.GetPointer());
 }
 
 //-----------------------------------------------------------------------------
 void qSlicerVirtualRealityModuleWidget::startVirtualReality()
 {
+  Q_D(qSlicerVirtualRealityModuleWidget);
   qDebug() << Q_FUNC_INFO << ": Start VirtualReality";
-  this->VirtualRealityWidget->startVirtualReality();
+  d->VirtualRealityView->startVirtualReality();
 }
 
 //-----------------------------------------------------------------------------
 void qSlicerVirtualRealityModuleWidget::stopVirtualReality()
 {
+  Q_D(qSlicerVirtualRealityModuleWidget);
   qDebug() << Q_FUNC_INFO << ": Stop VirtualReality";
-  this->VirtualRealityWidget->stopVirtualReality();
+  d->VirtualRealityView->stopVirtualReality();
 }
