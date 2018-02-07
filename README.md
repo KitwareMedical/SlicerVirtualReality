@@ -17,7 +17,7 @@ Waiting it is available in the Slicer Extension Manager, follow these instructio
 - To start Slicer from a build tree and ensure the extension is properly loaded, considering using the ``--launcher-additional-settings`` option:
 
    ```
-   ./Slicer.exe  --launcher-additional-settings C:\path\to\SlicerOpenVR-build\inner-build\AdditionalLauncherSettings.ini --additional-module-paths C:\path\to\SlicerOpenVR-build\inner-build\
+   ./Slicer.exe  --launcher-additional-settings C:\path\to\SlicerVirtualReality-build\inner-build\AdditionalLauncherSettings.ini --additional-module-paths C:\path\to\SlicerVirtualReality-build\inner-build\
    ```
 
 Note that specifying the top-level build directory of the extension ensures that Slicer find all types of modules.
