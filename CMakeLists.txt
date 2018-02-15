@@ -47,10 +47,20 @@ include(${Slicer_EXTENSION_GENERATE_CONFIG})
 
 #-----------------------------------------------------------------------------
 # Install OpenVR
-install(FILES ${OPENVR_LIBRARY}
-  DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
-  COMPONENT RuntimeLibraries
-  )
+set(_platform)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  # ${OPENVR_LIBRARY} contains import library which does not have to be installed.
+  # Instead, the dll must be added to the package.
+  install(FILES ${OpenVR_LIBRARY_PATHS_LAUNCHER_BUILD}/openvr_api.dll
+    DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
+    COMPONENT RuntimeLibraries
+    )
+else()
+  install(FILES ${OPENVR_LIBRARY}
+    DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
+    COMPONENT RuntimeLibraries
+    )
+endif()
 
 #-----------------------------------------------------------------------------
 set(CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${CMAKE_BINARY_DIR};${EXTENSION_NAME};ALL;/")
