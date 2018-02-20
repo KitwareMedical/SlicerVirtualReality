@@ -208,6 +208,8 @@ void qMRMLVirtualRealityViewPrivate::initDisplayableManagers()
   this->Renderer->SetBackground2(0.7, 0.7, 0.7);
   this->Renderer->SetBackground(0, 0, 1);
 
+  this->Renderer->SetTwoSidedLighting(0);
+
   this->RenderWindow->Initialize();
   if (!this->RenderWindow->GetHMD())
     {
