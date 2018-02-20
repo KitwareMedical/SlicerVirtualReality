@@ -102,7 +102,7 @@ void qSlicerVirtualRealityModuleWidget::initializeVirtualReality()
   this->mrmlScene()->AddNode(vrViewNode.GetPointer());
 
   // Setup VirtualReality view widget
-  d->VirtualRealityView = new qMRMLVirtualRealityView();
+  d->VirtualRealityView = new qMRMLVirtualRealityView(this);
   d->VirtualRealityView->setObjectName(QString("VirtualRealityWidget"));
   d->VirtualRealityView->setMRMLScene(this->mrmlScene());
   d->VirtualRealityView->setMRMLVirtualRealityViewNode(vrViewNode.GetPointer());
