@@ -97,20 +97,6 @@ void qSlicerVirtualRealityModuleWidget::initializeVirtualReality()
   // Register VirtualReality view node class
   this->mrmlScene()->RegisterNodeClass((vtkSmartPointer<vtkMRMLVirtualRealityViewNode>::New()));
 
-  // Register displayable managers to VirtualReality view displayable manager factory
-  foreach(const QString& name,
-    QStringList()
-      << "vtkMRMLAnnotationDisplayableManager"
-      << "vtkMRMLMarkupsFiducialDisplayableManager3D"
-      << "vtkMRMLSegmentationsDisplayableManager3D"
-      << "vtkMRMLTransformsDisplayableManager3D"
-      << "vtkMRMLLinearTransformsDisplayableManager3D"
-      << "vtkMRMLVolumeRenderingDisplayableManager"
-  )
-    {
-    vtkMRMLVirtualRealityViewDisplayableManagerFactory::GetInstance()->RegisterDisplayableManager(name.toLatin1());
-    }
-
   // Create VirtualReality view node
   vtkNew<vtkMRMLVirtualRealityViewNode> vrViewNode;
   this->mrmlScene()->AddNode(vrViewNode.GetPointer());

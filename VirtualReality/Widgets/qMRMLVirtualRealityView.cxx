@@ -144,7 +144,13 @@ void qMRMLVirtualRealityViewPrivate::initDisplayableManagers()
                       << "vtkMRMLCrosshairDisplayableManager3D"
                       << "vtkMRMLOrientationMarkerDisplayableManager"
                       << "vtkMRMLRulerDisplayableManager"
-	  ;
+                      << "vtkMRMLAnnotationDisplayableManager"
+                      << "vtkMRMLMarkupsFiducialDisplayableManager3D"
+                      << "vtkMRMLSegmentationsDisplayableManager3D"
+                      << "vtkMRMLTransformsDisplayableManager3D"
+                      << "vtkMRMLLinearTransformsDisplayableManager3D"
+                      << "vtkMRMLVolumeRenderingDisplayableManager"
+                      ;
   foreach(const QString& displayableManager, displayableManagers)
     {
     if(!factory->IsDisplayableManagerRegistered(displayableManager.toLatin1()))
