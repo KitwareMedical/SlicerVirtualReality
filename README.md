@@ -22,6 +22,16 @@ Waiting it is available in the Slicer Extension Manager, follow these instructio
 
 Note that specifying the top-level build directory of the extension ensures that Slicer find all types of modules.
 
+Frequently Asked Questions
+--------------------------
+
+### How to avoid crashes when recording video of OpenVR with VolumeRendering enabled ?
+
+From [@lassoan][lassoan]: [OBS Studio][obsproject] only crashes if NVidia hardware-based compression is used.
+If CPU-based video compression option is chosen then recording works well.
+
+[lassoan]: https://github.com/lassoan
+[obsproject]: https://obsproject.com/
 
 Useful Python Snippets
 ----------------------
