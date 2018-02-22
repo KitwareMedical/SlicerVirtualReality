@@ -277,8 +277,12 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
   {
     this->createRenderWindow();
   }
-  this->DisplayableManagerGroup->SetMRMLDisplayableNode(this->MRMLVirtualRealityViewNode);
-  
+
+  if (this->DisplayableManagerGroup->GetMRMLDisplayableNode() != this->MRMLVirtualRealityViewNode.GetPointer())
+  {
+    this->DisplayableManagerGroup->SetMRMLDisplayableNode(this->MRMLVirtualRealityViewNode);
+  }
+
   this->Renderer->SetGradientBackground(1);
   this->Renderer->SetBackground(this->MRMLVirtualRealityViewNode->GetBackgroundColor());
   this->Renderer->SetBackground2(this->MRMLVirtualRealityViewNode->GetBackgroundColor2());

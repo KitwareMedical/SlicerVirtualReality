@@ -67,8 +67,6 @@ public:
   QToolBar* ToolBar;
   QAction* VirtualRealityToggleAction;
   qMRMLVirtualRealityView* VirtualRealityViewWidget;
-  // If main window owns the widget then we don't need to delete it
-  bool VirtualRealityModuleOwnsViewWidget;
 };
 
 //-----------------------------------------------------------------------------
@@ -80,21 +78,14 @@ qSlicerVirtualRealityModulePrivate::qSlicerVirtualRealityModulePrivate(qSlicerVi
   , ToolBar(NULL)
   , VirtualRealityToggleAction(NULL)
   , VirtualRealityViewWidget(NULL)
-  , VirtualRealityModuleOwnsViewWidget(false)
 {
 }
 
 //-----------------------------------------------------------------------------
 qSlicerVirtualRealityModulePrivate::~qSlicerVirtualRealityModulePrivate()
 {
-  if (this->VirtualRealityModuleOwnsViewWidget)
-  {
-    // the widget has not been added to the main window
-    // so it is still owned by this class, therefore
-    // we are responsible for deleting it
-    delete this->VirtualRealityViewWidget;
-    this->VirtualRealityViewWidget = NULL;
-  }
+  delete this->VirtualRealityViewWidget;
+  this->VirtualRealityViewWidget = NULL;
 }
 
 //-----------------------------------------------------------------------------
@@ -114,9 +105,7 @@ void qSlicerVirtualRealityModulePrivate::addViewWidget()
     return;
   }
 
-  QMainWindow* mainWindow = qSlicerApplication::application()->mainWindow();
-  this->VirtualRealityModuleOwnsViewWidget = (mainWindow == NULL);
-  this->VirtualRealityViewWidget = new qMRMLVirtualRealityView(mainWindow);
+  this->VirtualRealityViewWidget = new qMRMLVirtualRealityView();
   this->VirtualRealityViewWidget->setObjectName(QString("VirtualRealityWidget"));
   this->VirtualRealityViewWidget->setMRMLScene(q->mrmlScene());
 }
