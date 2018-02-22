@@ -45,6 +45,9 @@ class vtkOpenVRCamera;
 /// \brief 3D view for view nodes.
 /// For performance reasons, the view block refreshes when the scene is in
 /// batch process state.
+/// VR hardware connection state is controlled by associated view node's properties:
+/// - Visible: connection is made with OpenVR.
+/// - Active: scene is rendered in the VR headset.
 /// \sa qMRMLVRWidget, qMRMLVRViewControllerWidget, qMRMLSliceView
 class Q_SLICER_QTMODULES_VIRTUALREALITY_WIDGETS_EXPORT qMRMLVirtualRealityView : public QWidget
 {
@@ -72,9 +75,6 @@ public:
   /// Get the 3D View node observed by view.
   Q_INVOKABLE vtkMRMLVirtualRealityViewNode* mrmlVirtualRealityViewNode()const;
 
-  /// Return if rendering is enabled
-  bool renderEnabled() const;
-
   /// Get a reference to the associated vtkRenderer
   vtkOpenVRRenderer* renderer()const;
 
@@ -85,9 +85,6 @@ public:
   Q_INVOKABLE vtkOpenVRRenderWindowInteractor* interactor()const;
 
 public slots:
-  void startVirtualReality();
-  void stopVirtualReality();
-
   /// Set the MRML \a scene that should be listened for events
   /// When the scene is in batch process state, the view blocks all refresh.
   /// \sa renderEnabled
@@ -96,10 +93,15 @@ public slots:
   /// Set the current \a viewNode to observe
   void setMRMLVirtualRealityViewNode(vtkMRMLVirtualRealityViewNode* newViewNode);
 
+protected:
+
+  /// Return if rendering is enabled
+  /// (it is temporarily disabled during batch processing)
+  bool renderEnabled() const;
+
   /// Enable/Disable rendering
   void setRenderEnabled(bool value);
 
-protected:
   QScopedPointer<qMRMLVirtualRealityViewPrivate> d_ptr;
 
 private:

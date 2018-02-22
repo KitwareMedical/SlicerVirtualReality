@@ -60,8 +60,21 @@ public:
   static double* defaultBackgroundColor();
   static double* defaultBackgroundColor2();
 
+  /// Controls two-sided lighting property of the renderer
+  vtkGetMacro(TwoSidedLighting, bool);
+  vtkSetMacro(TwoSidedLighting, bool);
+  vtkBooleanMacro(TwoSidedLighting, bool);
+
+  /// If enabled then 4 lights are used, otherwise just 2.
+  vtkGetMacro(BackLights, bool);
+  vtkSetMacro(BackLights, bool);
+  vtkBooleanMacro(BackLights, bool);
 
 protected:
+
+  bool TwoSidedLighting;
+  bool BackLights;
+
   vtkMRMLVirtualRealityViewNode();
   ~vtkMRMLVirtualRealityViewNode();
   vtkMRMLVirtualRealityViewNode(const vtkMRMLVirtualRealityViewNode&);

@@ -26,9 +26,11 @@
 #include "vtkMRMLScene.h"
 
 //VirtualReality includes
+#include "qMRMLVirtualRealityView.h"
+#include "qSlicerVirtualRealityModule.h"
 #include "vtkMRMLVirtualRealityViewNode.h"
 #include "vtkMRMLVirtualRealityViewDisplayableManagerFactory.h"
-#include "qMRMLVirtualRealityView.h"
+#include "vtkSlicerVirtualRealityLogic.h"
 
 //-----------------------------------------------------------------------------
 /// \ingroup Slicer_QtModules_ExtensionTemplate
@@ -70,56 +72,79 @@ void qSlicerVirtualRealityModuleWidget::setup()
   d->setupUi(this);
   this->Superclass::setup();
 
-  connect(d->initializePushButton, SIGNAL(clicked()), this, SLOT(initializeVirtualReality()));
-  connect(d->startVirtualRealityPushButton, SIGNAL(clicked()), this, SLOT(startVirtualReality()));
-  connect(d->stopVirtualRealityPushButton, SIGNAL(clicked()), this, SLOT(stopVirtualReality()));
+  connect(d->ConnectCheckBox, SIGNAL(toggled(bool)), this, SLOT(setVirtualRealityConnected(bool)));
+  connect(d->RenderingEnabledCheckBox, SIGNAL(toggled(bool)), this, SLOT(setVirtualRealityActive(bool)));
+  connect(d->TwoSidedLightingCheckBox, SIGNAL(toggled(bool)), this, SLOT(setTwoSidedLighting(bool)));
+  connect(d->BackLightsCheckBox, SIGNAL(toggled(bool)), this, SLOT(setBackLights(bool)));
+
+  this->updateWidgetFromMRML();
+
+  // If virtual reality logic is modified it indicates that the view node may changed
+  qvtkConnect(logic(), vtkCommand::ModifiedEvent, this, SLOT(updateWidgetFromMRML()));
 }
 
-//-----------------------------------------------------------------------------
-qMRMLVirtualRealityView* qSlicerVirtualRealityModuleWidget::vrView() const
-{
-  Q_D(const qSlicerVirtualRealityModuleWidget);
-  return d->VirtualRealityView;
-}
-
-//-----------------------------------------------------------------------------
-void qSlicerVirtualRealityModuleWidget::initializeVirtualReality()
-{
-  Q_D(qSlicerVirtualRealityModuleWidget);
-  qDebug() << Q_FUNC_INFO << ": Initialize OpenVirtualReality";
-
-  if (d->VirtualRealityView && this->mrmlScene()->GetNumberOfNodesByClass("vtkMRMLVirtualRealityViewNode") > 0)
-    {
-    qDebug() << Q_FUNC_INFO << ": OpenVirtualReality already initialized";
-    return;
-    }
-
-  // Register VirtualReality view node class
-  this->mrmlScene()->RegisterNodeClass((vtkSmartPointer<vtkMRMLVirtualRealityViewNode>::New()));
-
-  // Create VirtualReality view node
-  vtkNew<vtkMRMLVirtualRealityViewNode> vrViewNode;
-  this->mrmlScene()->AddNode(vrViewNode.GetPointer());
-
-  // Setup VirtualReality view widget
-  d->VirtualRealityView = new qMRMLVirtualRealityView(this);
-  d->VirtualRealityView->setObjectName(QString("VirtualRealityWidget"));
-  d->VirtualRealityView->setMRMLScene(this->mrmlScene());
-  d->VirtualRealityView->setMRMLVirtualRealityViewNode(vrViewNode.GetPointer());
-}
-
-//-----------------------------------------------------------------------------
-void qSlicerVirtualRealityModuleWidget::startVirtualReality()
+//--------------------------------------------------------------------------
+void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
 {
   Q_D(qSlicerVirtualRealityModuleWidget);
-  qDebug() << Q_FUNC_INFO << ": Start VirtualReality";
-  d->VirtualRealityView->startVirtualReality();
+  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
+  
+  bool wasBlocked = d->ConnectCheckBox->blockSignals(true);
+  d->ConnectCheckBox->setChecked(vrViewNode && vrViewNode->GetVisibility());
+  d->ConnectCheckBox->blockSignals(wasBlocked);
+
+  wasBlocked = d->RenderingEnabledCheckBox->blockSignals(true);
+  d->RenderingEnabledCheckBox->setChecked(vrViewNode && vrViewNode->GetActive());
+  d->RenderingEnabledCheckBox->blockSignals(wasBlocked);
+
+  wasBlocked = d->TwoSidedLightingCheckBox->blockSignals(true);
+  d->TwoSidedLightingCheckBox->setChecked(vrViewNode && vrViewNode->GetTwoSidedLighting());
+  d->TwoSidedLightingCheckBox->setEnabled(vrViewNode);
+  d->TwoSidedLightingCheckBox->blockSignals(wasBlocked);
+
+  wasBlocked = d->BackLightsCheckBox->blockSignals(true);
+  d->BackLightsCheckBox->setChecked(vrViewNode && vrViewNode->GetBackLights());
+  d->BackLightsCheckBox->setEnabled(vrViewNode);
+  d->BackLightsCheckBox->blockSignals(wasBlocked);
 }
 
 //-----------------------------------------------------------------------------
-void qSlicerVirtualRealityModuleWidget::stopVirtualReality()
+void qSlicerVirtualRealityModuleWidget::setVirtualRealityConnected(bool connect)
 {
   Q_D(qSlicerVirtualRealityModuleWidget);
-  qDebug() << Q_FUNC_INFO << ": Stop VirtualReality";
-  d->VirtualRealityView->stopVirtualReality();
+  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  vrLogic->SetVirtualRealityConnected(connect);
+}
+
+//-----------------------------------------------------------------------------
+void qSlicerVirtualRealityModuleWidget::setVirtualRealityActive(bool activate)
+{
+  Q_D(qSlicerVirtualRealityModuleWidget);
+  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  vrLogic->SetVirtualRealityActive(activate);
+}
+
+//-----------------------------------------------------------------------------
+void qSlicerVirtualRealityModuleWidget::setTwoSidedLighting(bool active)
+{
+  Q_D(qSlicerVirtualRealityModuleWidget);
+  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
+  if (vrViewNode)
+  {
+    vrViewNode->SetTwoSidedLighting(active);
+  }
+}
+
+//-----------------------------------------------------------------------------
+void qSlicerVirtualRealityModuleWidget::setBackLights(bool active)
+{
+  Q_D(qSlicerVirtualRealityModuleWidget);
+  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
+  if (vrViewNode)
+  {
+    vrViewNode->SetBackLights(active);
+  }
 }

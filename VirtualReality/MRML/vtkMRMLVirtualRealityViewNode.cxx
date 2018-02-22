@@ -28,14 +28,17 @@ vtkMRMLNodeNewMacro(vtkMRMLVirtualRealityViewNode);
 
 //----------------------------------------------------------------------------
 vtkMRMLVirtualRealityViewNode::vtkMRMLVirtualRealityViewNode()
+  : TwoSidedLighting(false)
+  , BackLights(true)
 {
+  this->Visibility = 0; // hidden by default to not connect to the headset until it is needed
   this->BackgroundColor[0] = this->defaultBackgroundColor()[0];
   this->BackgroundColor[1] = this->defaultBackgroundColor()[1];
   this->BackgroundColor[2] = this->defaultBackgroundColor()[2];
   this->BackgroundColor2[0] = this->defaultBackgroundColor2()[0];
   this->BackgroundColor2[1] = this->defaultBackgroundColor2()[1];
   this->BackgroundColor2[2] = this->defaultBackgroundColor2()[2];
- }
+}
 
 //----------------------------------------------------------------------------
 vtkMRMLVirtualRealityViewNode::~vtkMRMLVirtualRealityViewNode()
@@ -51,10 +54,12 @@ const char* vtkMRMLVirtualRealityViewNode::GetNodeTagName()
 //----------------------------------------------------------------------------
 void vtkMRMLVirtualRealityViewNode::WriteXML(ostream& of, int nIndent)
 {
-	// Write all attributes not equal to their defaults
+  this->Superclass::WriteXML(of, nIndent);
 
-	this->Superclass::WriteXML(of, nIndent);
-
+  vtkMRMLWriteXMLBeginMacro(of);
+  vtkMRMLWriteXMLBooleanMacro(twoSidedLighting, TwoSidedLighting);
+  vtkMRMLWriteXMLBooleanMacro(backLights, BackLights);
+  vtkMRMLWriteXMLEndMacro();
 }
 
 //----------------------------------------------------------------------------
@@ -64,16 +69,11 @@ void vtkMRMLVirtualRealityViewNode::ReadXMLAttributes(const char** atts)
 
   this->Superclass::ReadXMLAttributes(atts);
 
-  const char* attName;
-  const char* attValue;
-  while (*atts != NULL)
-  {
-	  attName = *(atts++);
-	  attValue = *(atts++);
+  vtkMRMLReadXMLBeginMacro(atts);
+  vtkMRMLReadXMLBooleanMacro(twoSidedLighting, TwoSidedLighting);
+  vtkMRMLReadXMLBooleanMacro(backLights, BackLights);
+  vtkMRMLReadXMLEndMacro();
 
-    (void)(attName);
-    (void)(attValue);
-  }
   this->EndModify(disabledModify);
 }
 
@@ -85,9 +85,11 @@ void vtkMRMLVirtualRealityViewNode::Copy(vtkMRMLNode *anode)
   int disabledModify = this->StartModify();
 
   this->Superclass::Copy(anode);
-  vtkMRMLVirtualRealityViewNode *node = (vtkMRMLVirtualRealityViewNode *) anode;
 
-  (void)(node);
+  vtkMRMLCopyBeginMacro(anode);
+  vtkMRMLCopyBooleanMacro(TwoSidedLighting);
+  vtkMRMLCopyBooleanMacro(BackLights);
+  vtkMRMLCopyEndMacro();
 
   this->EndModify(disabledModify);
 }
@@ -96,6 +98,11 @@ void vtkMRMLVirtualRealityViewNode::Copy(vtkMRMLNode *anode)
 void vtkMRMLVirtualRealityViewNode::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os,indent);
+
+  vtkMRMLPrintBeginMacro(os, indent);
+  vtkMRMLPrintBooleanMacro(TwoSidedLighting);
+  vtkMRMLPrintBooleanMacro(BackLights);
+  vtkMRMLPrintEndMacro();
 }
 
 //----------------------------------------------------------------------------

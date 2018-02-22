@@ -66,6 +66,7 @@
 #include <vtkCollection.h>
 #include <vtkCullerCollection.h>
 #include <vtkLight.h>
+#include <vtkLightCollection.h>
 #include <vtkNew.h>
 #include <vtkOpenGLFramebufferObject.h>
 #include <vtkPolyDataMapper.h>
@@ -84,34 +85,19 @@
 qMRMLVirtualRealityViewPrivate::qMRMLVirtualRealityViewPrivate(qMRMLVirtualRealityView& object)
   : q_ptr(&object)
 {
-  this->DisplayableManagerGroup = 0;
   this->MRMLScene = 0;
   this->MRMLVirtualRealityViewNode = 0;
-
-//#ifdef Slicer_USE_OpenVR
-  this->Renderer = vtkSmartPointer<vtkOpenVRRenderer>::New();
-  this->RenderWindow = vtkSmartPointer<vtkOpenVRRenderWindow>::New();
-  this->Interactor = vtkSmartPointer<vtkOpenVRRenderWindowInteractor>::New();
-  this->Camera = vtkSmartPointer<vtkOpenVRCamera>::New();
-  this->RenderWindow->AddRenderer(this->Renderer);
-  this->RenderWindow->SetInteractor(this->Interactor);
-  this->Renderer->SetActiveCamera(this->Camera);
-//#endif
 }
 
 //---------------------------------------------------------------------------
 qMRMLVirtualRealityViewPrivate::~qMRMLVirtualRealityViewPrivate()
 {
-  if (this->DisplayableManagerGroup)
-    {
-    this->DisplayableManagerGroup->Delete();
-    }
 }
 
 //---------------------------------------------------------------------------
 void qMRMLVirtualRealityViewPrivate::init()
 {
-  this->initDisplayableManagers();
+  QObject::connect(&this->VirtualRealityLoopTimer, SIGNAL(timeout()), this, SLOT(doOpenVirtualReality()));
 }
 
 //----------------------------------------------------------------------------
@@ -128,13 +114,22 @@ CTK_GET_CPP(qMRMLVirtualRealityView, vtkOpenVRRenderWindow*, renderWindow, Rende
 CTK_GET_CPP(qMRMLVirtualRealityView, vtkOpenVRRenderWindowInteractor*, interactor, Interactor);
 
 //---------------------------------------------------------------------------
-void qMRMLVirtualRealityViewPrivate::initDisplayableManagers()
+void qMRMLVirtualRealityViewPrivate::createRenderWindow()
 {
   Q_Q(qMRMLVirtualRealityView);
-  vtkMRMLVirtualRealityViewDisplayableManagerFactory* factory
-    = vtkMRMLVirtualRealityViewDisplayableManagerFactory::GetInstance();
+
+  this->RenderWindow = vtkSmartPointer<vtkOpenVRRenderWindow>::New();
+  this->Renderer = vtkSmartPointer<vtkOpenVRRenderer>::New();
+  this->Interactor = vtkSmartPointer<vtkOpenVRRenderWindowInteractor>::New();
+  this->Camera = vtkSmartPointer<vtkOpenVRCamera>::New();
+  this->Renderer->SetActiveCamera(this->Camera);
 
   this->RenderWindow->SetMultiSamples(0);
+  this->RenderWindow->AddRenderer(this->Renderer);
+  this->RenderWindow->SetInteractor(this->Interactor);
+
+  vtkMRMLVirtualRealityViewDisplayableManagerFactory* factory
+    = vtkMRMLVirtualRealityViewDisplayableManagerFactory::GetInstance();
 
   QStringList displayableManagers;
   displayableManagers //<< "vtkMRMLCameraDisplayableManager"
@@ -159,8 +154,9 @@ void qMRMLVirtualRealityViewPrivate::initDisplayableManagers()
       }
     }
 
-  this->DisplayableManagerGroup
-    = factory->InstantiateDisplayableManagers(q->renderer());
+  this->DisplayableManagerGroup = vtkSmartPointer<vtkMRMLDisplayableManagerGroup>::Take(
+    factory->InstantiateDisplayableManagers(q->renderer()));
+  this->DisplayableManagerGroup->SetMRMLDisplayableNode(this->MRMLVirtualRealityViewNode);
 
   qDebug() << "this->DisplayableManagerGroup" << this->DisplayableManagerGroup->GetDisplayableManagerCount();
 
@@ -170,45 +166,39 @@ void qMRMLVirtualRealityViewPrivate::initDisplayableManagers()
   this->Renderer->SetBackground(0.7, 0.7, 0.7);
 
   // create 4 lights for even lighting
+  this->Lights = vtkSmartPointer<vtkLightCollection>::New();
   {
     vtkNew<vtkLight> light;
     light->SetPosition(0.0, 1.0, 0.0);
     light->SetIntensity(1.0);
     light->SetLightTypeToSceneLight();
-    this->Renderer->AddLight(light.GetPointer());
+    this->Lights->AddItem(light);
   }
   {
     vtkNew<vtkLight> light;
     light->SetPosition(0.8, -0.2, 0.0);
     light->SetIntensity(0.8);
     light->SetLightTypeToSceneLight();
-    this->Renderer->AddLight(light.GetPointer());
+    this->Lights->AddItem(light);
   }
   {
     vtkNew<vtkLight> light;
     light->SetPosition(-0.3, -0.2, 0.7);
     light->SetIntensity(0.6);
     light->SetLightTypeToSceneLight();
-    this->Renderer->AddLight(light.GetPointer());
+    this->Lights->AddItem(light);
   }
   {
     vtkNew<vtkLight> light;
     light->SetPosition(-0.3, -0.2, -0.7);
     light->SetIntensity(0.4);
     light->SetLightTypeToSceneLight();
-    this->Renderer->AddLight(light.GetPointer());
+    this->Lights->AddItem(light);
   }
-
-  this->Renderer->SetBackground(0, 0, 1);
+  this->Renderer->SetLightCollection(this->Lights);
 
   vtkRenderWindow* refRenderWindow = qSlicerApplication::application()->layoutManager()->threeDWidget(0)->threeDView()->renderWindow();
   this->RenderWindow->InitializeViewFromCamera(refRenderWindow->GetRenderers()->GetFirstRenderer()->GetActiveCamera());
-
-  this->Renderer->SetGradientBackground(1);
-  this->Renderer->SetBackground2(0.7, 0.7, 0.7);
-  this->Renderer->SetBackground(0, 0, 1);
-
-  this->Renderer->SetTwoSidedLighting(0);
 
   this->RenderWindow->Initialize();
   if (!this->RenderWindow->GetHMD())
@@ -216,9 +206,21 @@ void qMRMLVirtualRealityViewPrivate::initDisplayableManagers()
     qWarning() << "Failed to initialize OpenVR RenderWindow";
     return;
     }
-  std::cout << "Loop connection" << std::endl;
-  QObject::connect(&this->VirtualRealityLoopTimer, SIGNAL(timeout()), this, SLOT(doOpenVirtualReality()));
 }
+
+//---------------------------------------------------------------------------
+void qMRMLVirtualRealityViewPrivate::destroyRenderWindow()
+{
+  Q_Q(qMRMLVirtualRealityView);
+  this->VirtualRealityLoopTimer.stop();
+  this->RenderWindow = NULL;
+  this->Interactor = NULL;
+  this->DisplayableManagerGroup = NULL;
+  this->Renderer = NULL;
+  this->Camera = NULL;
+  this->Lights = NULL;
+}
+
 
 //---------------------------------------------------------------------------
 void qMRMLVirtualRealityViewPrivate::setMRMLScene(vtkMRMLScene* newScene)
@@ -261,16 +263,52 @@ void qMRMLVirtualRealityViewPrivate::onSceneEndProcessing()
 void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
 {
   Q_Q(qMRMLVirtualRealityView);
-  if (!this->MRMLVirtualRealityViewNode)
+  if (!this->MRMLVirtualRealityViewNode
+    || !this->MRMLVirtualRealityViewNode->GetVisibility())
+  {
+    if (this->RenderWindow != NULL)
     {
-    return;
+      this->destroyRenderWindow();
     }
+    return;
+  }
+
+  if (!this->RenderWindow)
+  {
+    this->createRenderWindow();
+  }
+  this->DisplayableManagerGroup->SetMRMLDisplayableNode(this->MRMLVirtualRealityViewNode);
+  
+  this->Renderer->SetGradientBackground(1);
+  this->Renderer->SetBackground(this->MRMLVirtualRealityViewNode->GetBackgroundColor());
+  this->Renderer->SetBackground2(this->MRMLVirtualRealityViewNode->GetBackgroundColor2());
+
+  this->Renderer->SetTwoSidedLighting(this->MRMLVirtualRealityViewNode->GetTwoSidedLighting());
+
+  bool switchOnAllLights = this->MRMLVirtualRealityViewNode->GetBackLights();
+  for (int i = 2; i < this->Lights->GetNumberOfItems(); i++)
+  {
+    vtkLight* light = vtkLight::SafeDownCast(this->Lights->GetItemAsObject(i));
+    light->SetSwitch(switchOnAllLights);
+  }
+
+  if (this->MRMLVirtualRealityViewNode->GetActive())
+  {
+    this->VirtualRealityLoopTimer.start(0);
+  }
+  else
+  {
+    this->VirtualRealityLoopTimer.stop();
+  }
 }
 
 // --------------------------------------------------------------------------
 void qMRMLVirtualRealityViewPrivate::doOpenVirtualReality()
 {
-  this->Interactor->DoOneEvent(this->RenderWindow, this->Renderer);
+  if (this->Interactor && this->RenderWindow && this->Renderer && this->RenderEnabled)
+  {
+    this->Interactor->DoOneEvent(this->RenderWindow, this->Renderer);
+  }
 }
 
 // --------------------------------------------------------------------------
@@ -300,22 +338,6 @@ void qMRMLVirtualRealityView::addDisplayableManager(const QString& displayableMa
   d->DisplayableManagerGroup->AddDisplayableManager(displayableManager);
 }
 
-//----------------------------------------------------------------------------
-void qMRMLVirtualRealityView::startVirtualReality()
-{
-  Q_D(qMRMLVirtualRealityView);
-  qDebug() << Q_FUNC_INFO << "Start VirtualReality";
-  d->VirtualRealityLoopTimer.start(0);
-}
-
-//----------------------------------------------------------------------------
-void qMRMLVirtualRealityView::stopVirtualReality()
-{
-  Q_D(qMRMLVirtualRealityView);
-  qDebug() << Q_FUNC_INFO << "Stop VirtualReality";
-  d->VirtualRealityLoopTimer.stop();
-}
-
 //------------------------------------------------------------------------------
 void qMRMLVirtualRealityView::setMRMLScene(vtkMRMLScene* newScene)
 {
@@ -342,7 +364,6 @@ void qMRMLVirtualRealityView::setMRMLVirtualRealityViewNode(vtkMRMLVirtualRealit
     vtkCommand::ModifiedEvent, d, SLOT(updateWidgetFromMRML()));
 
   d->MRMLVirtualRealityViewNode = newViewNode;
-  d->DisplayableManagerGroup->SetMRMLDisplayableNode(newViewNode);
 
   d->updateWidgetFromMRML();
 

@@ -6,36 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>525</width>
-    <height>319</height>
+    <width>192</width>
+    <height>228</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
-    <widget class="QPushButton" name="initializePushButton">
-     <property name="text">
-      <string>Initialize</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QPushButton" name="startVirtualRealityPushButton">
-     <property name="text">
-      <string>StartVirtualReality</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QPushButton" name="stopVirtualRealityPushButton">
-     <property name="text">
-      <string>StopVirtualReality</string>
-     </property>
-    </widget>
-   </item>
-   <item>
+  <layout class="QFormLayout" name="formLayout_2">
+   <item row="4" column="0">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -48,13 +27,88 @@
      </property>
     </spacer>
    </item>
+   <item row="3" column="0" colspan="2">
+    <widget class="ctkCollapsibleButton" name="DisplayCollapsibleButton">
+     <property name="text">
+      <string>Display</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout_3">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Two-sided lighting:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="ctkCheckBox" name="TwoSidedLightingCheckBox"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Back-lights:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="ctkCheckBox" name="BackLightsCheckBox"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <widget class="qMRMLCollapsibleButton" name="MRMLCollapsibleButton">
+     <property name="text">
+      <string>Connection</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout_4">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Connect to hardware:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="ctkCheckBox" name="ConnectCheckBox"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Enable rendering:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="ctkCheckBox" name="RenderingEnabledCheckBox"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
   </layout>
  </widget>
  <customwidgets>
   <customwidget>
+   <class>qMRMLCollapsibleButton</class>
+   <extends>ctkCollapsibleButton</extends>
+   <header>qMRMLCollapsibleButton.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>qSlicerWidget</class>
    <extends>QWidget</extends>
    <header>qSlicerWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ctkCheckBox</class>
+   <extends>QCheckBox</extends>
+   <header>ctkCheckBox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ctkCollapsibleButton</class>
+   <extends>QWidget</extends>
+   <header>ctkCollapsibleButton.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

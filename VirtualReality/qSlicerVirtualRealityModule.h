@@ -23,17 +23,25 @@
 
 #include "qSlicerVirtualRealityModuleExport.h"
 
+#include <ctkVTKObject.h>
+
+class vtkMRMLVirtualRealityViewNode;
 class qSlicerVirtualRealityModulePrivate;
+class QToolBar;
 
 class Q_SLICER_QTMODULES_VIRTUALREALITY_EXPORT
 qSlicerVirtualRealityModule
   : public qSlicerLoadableModule
 {
-  Q_OBJECT
+  Q_OBJECT;
+  QVTK_OBJECT;
 #ifdef Slicer_HAVE_QT5
   Q_PLUGIN_METADATA(IID "org.slicer.modules.loadable.qSlicerLoadableModule/1.0");
 #endif
   Q_INTERFACES(qSlicerLoadableModule);
+
+  /// Visibility of the Virtual Reality toolbar
+  Q_PROPERTY(bool toolBarVisible READ isToolBarVisible WRITE setToolBarVisible)
 
 public:
 
@@ -51,6 +59,16 @@ public:
 
   virtual QStringList categories()const;
   virtual QStringList dependencies() const;
+
+  Q_INVOKABLE bool isToolBarVisible();
+  Q_INVOKABLE QToolBar* toolBar();
+
+public slots:
+  void setToolBarVisible(bool visible);
+  void enableVirtualReality(bool);
+
+protected slots:
+  void onViewNodeModified();
 
 protected:
 

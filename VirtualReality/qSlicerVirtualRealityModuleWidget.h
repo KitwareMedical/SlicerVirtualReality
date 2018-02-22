@@ -25,7 +25,6 @@
 
 class qSlicerVirtualRealityModuleWidgetPrivate;
 class vtkMRMLNode;
-class qMRMLVirtualRealityView;
 
 class Q_SLICER_QTMODULES_VIRTUALREALITY_EXPORT qSlicerVirtualRealityModuleWidget :
   public qSlicerAbstractModuleWidget
@@ -37,12 +36,14 @@ public:
   qSlicerVirtualRealityModuleWidget(QWidget *parent=0);
   virtual ~qSlicerVirtualRealityModuleWidget();
 
-  Q_INVOKABLE qMRMLVirtualRealityView* vrView() const;
-
 public slots:
-  void initializeVirtualReality();
-  void startVirtualReality();
-  void stopVirtualReality();
+  void setVirtualRealityConnected(bool connect);
+  void setVirtualRealityActive(bool activate);
+  void setTwoSidedLighting(bool);
+  void setBackLights(bool);
+
+protected slots:
+  void updateWidgetFromMRML();
 
 protected:
   QScopedPointer<qSlicerVirtualRealityModuleWidgetPrivate> d_ptr;

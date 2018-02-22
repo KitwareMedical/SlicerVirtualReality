@@ -34,6 +34,8 @@
 
 #include "vtkSlicerVirtualRealityModuleLogicExport.h"
 
+class vtkMRMLVirtualRealityViewNode;
+
 class VTK_SLICER_VIRTUALREALITY_MODULE_LOGIC_EXPORT vtkSlicerVirtualRealityLogic :
   public vtkSlicerModuleLogic
 {
@@ -43,9 +45,29 @@ public:
   vtkTypeMacro(vtkSlicerVirtualRealityLogic, vtkSlicerModuleLogic);
   void PrintSelf(ostream& os, vtkIndent indent);
 
+  /// Creates a singleton virtual reality view node and adds it to the scene.
+  /// If there is a virtual reality view node in the scene already then it just returns that.
+  /// If current view node is created, deleted, or modified then a Modified() event is invoked
+  /// for this logic class, to make it easy for modules to detect view changes.
+  vtkMRMLVirtualRealityViewNode* AddVirtualRealityViewNode();
+
+  vtkMRMLVirtualRealityViewNode* GetVirtualRealityViewNode();
+
+  /// Connect/disconnect to headset.
+  /// Adds virtual reality view node if not added yet.
+  void SetVirtualRealityConnected(bool connect);
+
+  /// Enable rendering updates in headset.
+  /// Connects to device if not yet connected.
+  void SetVirtualRealityActive(bool activate);
+
 protected:
   vtkSlicerVirtualRealityLogic();
   virtual ~vtkSlicerVirtualRealityLogic();
+
+  void SetActiveViewNode(vtkMRMLVirtualRealityViewNode* vrViewNode);
+
+  vtkMRMLVirtualRealityViewNode* ActiveViewNode;
 
   virtual void SetMRMLSceneInternal(vtkMRMLScene* newScene);
   /// Register MRML Node classes to Scene. Gets called automatically when the MRMLScene is attached to this logic class.
@@ -53,6 +75,8 @@ protected:
   virtual void UpdateFromMRMLScene();
   virtual void OnMRMLSceneNodeAdded(vtkMRMLNode* node);
   virtual void OnMRMLSceneNodeRemoved(vtkMRMLNode* node);
+  virtual void ProcessMRMLNodesEvents(vtkObject* caller, unsigned long event, void* callData);
+
 private:
 
   vtkSlicerVirtualRealityLogic(const vtkSlicerVirtualRealityLogic&); // Not implemented

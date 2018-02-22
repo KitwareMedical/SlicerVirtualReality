@@ -34,6 +34,7 @@
 
 // VTK includes
 //#include <vtkOpenGLFramebufferObject.h>
+#include <vtkWeakPointer.h>
 
 // CTK includes
 #include <ctkPimpl.h>
@@ -46,6 +47,7 @@
 #include <QTimer>
 
 class QLabel;
+class vtkLightCollection;
 class vtkMRMLDisplayableManagerGroup;
 class vtkMRMLVirtualRealityViewNode;
 class vtkMRMLCameraNode;
@@ -79,16 +81,18 @@ public slots:
   void doOpenVirtualReality();
 
 protected:
-  void initDisplayableManagers();
+  void createRenderWindow();
+  void destroyRenderWindow();
 
-  vtkMRMLDisplayableManagerGroup* DisplayableManagerGroup;
-  vtkMRMLScene* MRMLScene;
-  vtkMRMLVirtualRealityViewNode* MRMLVirtualRealityViewNode;
+  vtkSmartPointer<vtkMRMLDisplayableManagerGroup> DisplayableManagerGroup;
+  vtkWeakPointer<vtkMRMLScene> MRMLScene;
+  vtkWeakPointer<vtkMRMLVirtualRealityViewNode> MRMLVirtualRealityViewNode;
   bool RenderEnabled;
   vtkSmartPointer<vtkOpenVRRenderer> Renderer;
   vtkSmartPointer<vtkOpenVRRenderWindow> RenderWindow;
   vtkSmartPointer<vtkOpenVRRenderWindowInteractor> Interactor;
   vtkSmartPointer<vtkOpenVRCamera> Camera;
+  vtkSmartPointer<vtkLightCollection> Lights;
 
   QTimer VirtualRealityLoopTimer;
 };
