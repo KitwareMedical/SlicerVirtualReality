@@ -27,6 +27,7 @@
 
 class vtkMRMLVirtualRealityViewNode;
 class qSlicerVirtualRealityModulePrivate;
+class qMRMLVirtualRealityView;
 class QToolBar;
 
 class Q_SLICER_QTMODULES_VIRTUALREALITY_EXPORT
@@ -62,6 +63,8 @@ public:
 
   Q_INVOKABLE bool isToolBarVisible();
   Q_INVOKABLE QToolBar* toolBar();
+  
+  Q_INVOKABLE qMRMLVirtualRealityView* viewWidget();
 
 public slots:
   void setToolBarVisible(bool visible);

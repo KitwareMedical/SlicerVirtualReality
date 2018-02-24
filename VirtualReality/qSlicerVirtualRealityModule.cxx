@@ -302,3 +302,10 @@ void qSlicerVirtualRealityModule::enableVirtualReality(bool enable)
   Q_D(qSlicerVirtualRealityModule);
   d->logic()->SetVirtualRealityActive(enable);
 }
+
+// --------------------------------------------------------------------------
+qMRMLVirtualRealityView* qSlicerVirtualRealityModule::viewWidget()
+{
+  Q_D(qSlicerVirtualRealityModule);
+  return d->VirtualRealityViewWidget;
+}
