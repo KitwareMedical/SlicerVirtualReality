@@ -39,16 +39,16 @@ Useful Python Snippets
 ```python
 
 import logging
-
 import slicer
 
 def isVRInitialized():
     """Determine if VR has been initialized
     """
-    vrModuleWidget = slicer.modules.virtualreality.widgetRepresentation()
-    if (vrModuleWidget is None
-        or vrModuleWidget.vrView() is None
-        or vrModuleWidget.vrView().mrmlVirtualRealityViewNode() is None):
+    vrLogic = slicer.modules.virtualreality.logic()
+    if (vrLogic is None
+        or vrLogic.GetVirtualRealityViewNode() is None
+        or not vrLogic.GetVirtualRealityViewNode().GetVisibility()
+        or not vrLogic.GetVirtualRealityViewNode().GetActive()):
         return False
     return True
 
@@ -57,8 +57,10 @@ def vrCamera():
     if not isVRInitialized():
         return None
     # Get VR camera
-    vrModuleWidget = slicer.modules.virtualreality.widgetRepresentation()
-    rendererCollection = vrModuleWidget.vrView().renderWindow().GetRenderers()
+    vrViewWidget = slicer.modules.virtualreality.viewWidget()
+    if vrViewWidget is None:
+      return None
+    rendererCollection = vrViewWidget.renderWindow().GetRenderers()
     if rendererCollection.GetNumberOfItems() < 1:
         logging.error('Unable to access VR renderers')
         return None
@@ -68,7 +70,8 @@ def vrCamera():
 assert isVRInitialized() is False
 assert vrCamera() is None
 
-slicer.modules.virtualreality.widgetRepresentation().initializeVirtualReality()
+vrLogic = slicer.modules.virtualreality.logic()
+vrLogic.SetVirtualRealityActive(True)
 
 assert isVRInitialized() is True
 assert vrCamera() is not None

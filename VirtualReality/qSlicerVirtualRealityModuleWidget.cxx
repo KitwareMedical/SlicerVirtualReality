@@ -22,11 +22,10 @@
 #include "qSlicerVirtualRealityModuleWidget.h"
 #include "ui_qSlicerVirtualRealityModuleWidget.h"
 
-//MRML includes
+// MRML includes
 #include "vtkMRMLScene.h"
 
-//VirtualReality includes
-#include "qMRMLVirtualRealityView.h"
+// VirtualReality includes
 #include "qSlicerVirtualRealityModule.h"
 #include "vtkMRMLVirtualRealityViewNode.h"
 #include "vtkMRMLVirtualRealityViewDisplayableManagerFactory.h"
@@ -38,7 +37,6 @@ class qSlicerVirtualRealityModuleWidgetPrivate: public Ui_qSlicerVirtualRealityM
 {
 public:
   qSlicerVirtualRealityModuleWidgetPrivate();
-  qMRMLVirtualRealityView* VirtualRealityView;
 };
 
 //-----------------------------------------------------------------------------
@@ -46,7 +44,6 @@ public:
 
 //-----------------------------------------------------------------------------
 qSlicerVirtualRealityModuleWidgetPrivate::qSlicerVirtualRealityModuleWidgetPrivate()
- : VirtualRealityView(NULL)
 {
 }
 
