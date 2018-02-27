@@ -22,9 +22,10 @@ Version:   $Revision: 1.3 $
 // STD includes
 #include <sstream>
 
+const char* vtkMRMLVirtualRealityViewNode::ReferenceViewNodeReferenceRole = "ReferenceViewNodeRef";
+
 //----------------------------------------------------------------------------
 vtkMRMLNodeNewMacro(vtkMRMLVirtualRealityViewNode);
-
 
 //----------------------------------------------------------------------------
 vtkMRMLVirtualRealityViewNode::vtkMRMLVirtualRealityViewNode()
@@ -134,4 +135,39 @@ double* vtkMRMLVirtualRealityViewNode::defaultBackgroundColor2()
                                        0.4705882352941176,
                                        0.7450980392156863};
   return backgroundColor2;
+}
+
+//----------------------------------------------------------------------------
+vtkMRMLNode* vtkMRMLVirtualRealityViewNode::GetReferenceViewNode()
+{
+  return this->GetNodeReference(this->ReferenceViewNodeReferenceRole);
+}
+
+//----------------------------------------------------------------------------
+bool vtkMRMLVirtualRealityViewNode::SetAndObserveReferenceViewNodeID(const char* viewNodeId)
+{
+  if (!viewNodeId)
+    {
+    return false;
+    }
+
+  this->SetAndObserveNodeReferenceID(this->ReferenceViewNodeReferenceRole, viewNodeId);
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool vtkMRMLVirtualRealityViewNode::SetAndObserveReferenceViewNode(vtkMRMLNode* node)
+{
+  if (node && this->Scene != node->GetScene())
+    {
+    vtkErrorMacro("SetAndObserveReferenceViewNode: The referenced and referencing node are not in the same scene");
+    return false;
+    }
+  if (!node->IsA("vtkMRMLViewNode"))
+    {
+    vtkErrorMacro("SetAndObserveReferenceViewNode: Wrong node type, vtkMRMLViewNode expected");
+    return false;
+    }
+
+  return this->SetAndObserveReferenceViewNodeID(node ? node->GetID() : NULL);
 }

@@ -45,6 +45,7 @@
 #include "qMRMLColors.h"
 #include "qMRMLThreeDView.h"
 #include "qMRMLThreeDWidget.h"
+#include "qMRMLLayoutViewFactory.h"
 
 // Slicer includes
 #include "qSlicerApplication.h"
@@ -165,7 +166,7 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   this->Renderer->RemoveCuller(this->Renderer->GetCullers()->GetLastItem());
   this->Renderer->SetBackground(0.7, 0.7, 0.7);
 
-  // create 4 lights for even lighting
+  // Create 4 lights for even lighting
   this->Lights = vtkSmartPointer<vtkLightCollection>::New();
   {
     vtkNew<vtkLight> light;
@@ -197,8 +198,8 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   }
   this->Renderer->SetLightCollection(this->Lights);
 
-  vtkRenderWindow* refRenderWindow = qSlicerApplication::application()->layoutManager()->threeDWidget(0)->threeDView()->renderWindow();
-  this->RenderWindow->InitializeViewFromCamera(refRenderWindow->GetRenderers()->GetFirstRenderer()->GetActiveCamera());
+  // Initialize VR view from reference 3D view
+  this->initializeViewFromReferenceView();
 
   this->RenderWindow->Initialize();
   if (!this->RenderWindow->GetHMD())
@@ -221,6 +222,33 @@ void qMRMLVirtualRealityViewPrivate::destroyRenderWindow()
   this->Lights = NULL;
 }
 
+//---------------------------------------------------------------------------
+void qMRMLVirtualRealityViewPrivate::initializeViewFromReferenceView()
+{
+  qMRMLThreeDWidget* referenceWidget = NULL;
+  qMRMLLayoutManager* layoutManager = qSlicerApplication::application()->layoutManager();
+  if ( !this->MRMLVirtualRealityViewNode || !this->MRMLVirtualRealityViewNode->GetReferenceViewNode()
+    || !vtkMRMLViewNode::SafeDownCast(this->MRMLVirtualRealityViewNode->GetReferenceViewNode()) )
+    {
+    // Use first 3D view if reference view not specified
+    referenceWidget = layoutManager->threeDWidget(0);
+    }
+  else
+    {
+    vtkMRMLViewNode* referenceViewNode = vtkMRMLViewNode::SafeDownCast(
+      this->MRMLVirtualRealityViewNode->GetReferenceViewNode() );
+    referenceWidget = qobject_cast<qMRMLThreeDWidget*>(
+      layoutManager->mrmlViewFactory("vtkMRMLViewNode")->viewWidget(referenceViewNode) );
+    }
+  if (!referenceWidget)
+    {
+    qWarning() << "Failed to initialize OpenVR view from reference view";
+    return;
+    }
+
+  this->RenderWindow->InitializeViewFromCamera(
+    referenceWidget->threeDView()->renderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera() );
+}
 
 //---------------------------------------------------------------------------
 void qMRMLVirtualRealityViewPrivate::setMRMLScene(vtkMRMLScene* newScene)
@@ -276,6 +304,10 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
   if (!this->RenderWindow)
   {
     this->createRenderWindow();
+  }
+  else
+  {
+    this->initializeViewFromReferenceView();
   }
 
   if (this->DisplayableManagerGroup->GetMRMLDisplayableNode() != this->MRMLVirtualRealityViewNode.GetPointer())

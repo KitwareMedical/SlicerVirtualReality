@@ -60,6 +60,16 @@ public:
   static double* defaultBackgroundColor();
   static double* defaultBackgroundColor2();
 
+  /// Get reference view node.
+  /// VR view camera is initialized from the camera of the reference view.
+  vtkMRMLNode* GetReferenceViewNode();
+  /// Set reference view node reference
+  /// \sa GetReferenceViewNode
+  bool SetAndObserveReferenceViewNodeID(const char *layoutNodeId);
+  /// Set reference view node reference
+  /// \sa GetReferenceViewNode
+  bool SetAndObserveReferenceViewNode(vtkMRMLNode* node);
+
   /// Controls two-sided lighting property of the renderer
   vtkGetMacro(TwoSidedLighting, bool);
   vtkSetMacro(TwoSidedLighting, bool);
@@ -71,7 +81,6 @@ public:
   vtkBooleanMacro(BackLights, bool);
 
 protected:
-
   bool TwoSidedLighting;
   bool BackLights;
 
@@ -79,6 +88,8 @@ protected:
   ~vtkMRMLVirtualRealityViewNode();
   vtkMRMLVirtualRealityViewNode(const vtkMRMLVirtualRealityViewNode&);
   void operator=(const vtkMRMLVirtualRealityViewNode&);
+
+  static const char* ReferenceViewNodeReferenceRole;
 };
 
 #endif
