@@ -171,9 +171,17 @@ void vtkSlicerVirtualRealityLogic::SetVirtualRealityConnected(bool connect)
   {
     if (!this->ActiveViewNode)
     {
-      this->AddVirtualRealityViewNode();
+      vtkMRMLVirtualRealityViewNode* newViewNode = this->AddVirtualRealityViewNode();
+      this->SetActiveViewNode(newViewNode);
     }
-    this->ActiveViewNode->SetVisibility(1);
+    if (this->ActiveViewNode)
+    {
+      this->ActiveViewNode->SetVisibility(1);
+    }
+    else
+    {
+      vtkErrorMacro("Failed to create virtual reality view node");
+    }
   }
   else
   {
