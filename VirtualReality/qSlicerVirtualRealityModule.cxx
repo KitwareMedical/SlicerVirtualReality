@@ -318,7 +318,7 @@ void qSlicerVirtualRealityModule::onViewNodeModified()
     d->VirtualRealityViewWidget->setMRMLVirtualRealityViewNode(vrViewNode);
     if (oldVrViewNode != vrViewNode)
     {
-      d->logic()->setDefaultReferenceView();
+      d->logic()->SetDefaultReferenceView();
     }
   }
 

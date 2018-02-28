@@ -210,7 +210,7 @@ void vtkSlicerVirtualRealityLogic::SetVirtualRealityActive(bool activate)
 }
 
 //---------------------------------------------------------------------------
-void vtkSlicerVirtualRealityLogic::setDefaultReferenceView()
+void vtkSlicerVirtualRealityLogic::SetDefaultReferenceView()
 {
   if (!this->ActiveViewNode)
   {

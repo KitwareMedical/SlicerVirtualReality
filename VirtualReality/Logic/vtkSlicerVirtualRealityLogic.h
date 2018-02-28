@@ -65,7 +65,7 @@ public:
   /// virtual reality view.
   /// If a reference view has been already set then the
   /// method has no effect.
-  void setDefaultReferenceView();
+  void SetDefaultReferenceView();
 
 protected:
   vtkSlicerVirtualRealityLogic();
