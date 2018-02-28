@@ -17,6 +17,7 @@
 
 // Qt includes
 #include <QAction>
+#include <QDebug>
 #include <QMainWindow>
 #include <QMenu>
 #include <QSettings>
@@ -34,7 +35,9 @@
 
 #include "qSlicerApplication.h"
 #include "qSlicerCoreApplication.h"
+#include "qSlicerModuleManager.h"
 #include "vtkMRMLScene.h"
+#include "vtkSlicerCamerasModuleLogic.h"
 
 //-----------------------------------------------------------------------------
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
@@ -66,6 +69,7 @@ public:
 
   QToolBar* ToolBar;
   QAction* VirtualRealityToggleAction;
+  QAction* UpdateViewFromReferenceViewCameraAction;
   qMRMLVirtualRealityView* VirtualRealityViewWidget;
 };
 
@@ -77,6 +81,7 @@ qSlicerVirtualRealityModulePrivate::qSlicerVirtualRealityModulePrivate(qSlicerVi
   : q_ptr(&object)
   , ToolBar(NULL)
   , VirtualRealityToggleAction(NULL)
+  , UpdateViewFromReferenceViewCameraAction(NULL)
   , VirtualRealityViewWidget(NULL)
 {
 }
@@ -107,6 +112,19 @@ void qSlicerVirtualRealityModulePrivate::addViewWidget()
 
   this->VirtualRealityViewWidget = new qMRMLVirtualRealityView();
   this->VirtualRealityViewWidget->setObjectName(QString("VirtualRealityWidget"));
+
+  qSlicerAbstractCoreModule* camerasModule =
+    qSlicerCoreApplication::application()->moduleManager()->module("Cameras");
+  if (camerasModule)
+  {
+    vtkSlicerCamerasModuleLogic* camerasLogic = vtkSlicerCamerasModuleLogic::SafeDownCast(camerasModule->logic());
+    this->VirtualRealityViewWidget->setCamerasLogic(camerasLogic);
+  }
+  else
+  {
+    qWarning() << "Cameras module is not found";
+  }
+
   this->VirtualRealityViewWidget->setMRMLScene(q->mrmlScene());
 }
 
@@ -128,11 +146,16 @@ void qSlicerVirtualRealityModulePrivate::addToolBar()
     this->ToolBar->setWindowTitle(QObject::tr("Virtual Reality"));
     this->ToolBar->setObjectName("VirtualRealityToolBar");
 
-    this->VirtualRealityToggleAction = this->ToolBar->addAction(QObject::tr("Show scene in virtual reality"));
+    this->VirtualRealityToggleAction = this->ToolBar->addAction(QObject::tr("Show scene in virtual reality."));
     this->VirtualRealityToggleAction->setIcon(QIcon(":/Icons/VirtualRealityHeadset.png"));
     this->VirtualRealityToggleAction->setCheckable(true);
     QObject::connect(this->VirtualRealityToggleAction, SIGNAL(toggled(bool)),
       q, SLOT(enableVirtualReality(bool)));
+
+    this->UpdateViewFromReferenceViewCameraAction = this->ToolBar->addAction(QObject::tr("Set virtual reality view to match reference view."));
+    this->UpdateViewFromReferenceViewCameraAction->setIcon(QIcon(":/Icons/ViewCenter.png"));
+    QObject::connect(this->UpdateViewFromReferenceViewCameraAction, SIGNAL(triggered()),
+      q, SLOT(updateViewFromReferenceViewCamera()));
 
     mainWindow->addToolBar(this->ToolBar);
   }
@@ -181,6 +204,8 @@ void qSlicerVirtualRealityModulePrivate::updateToolBar()
   {
     this->VirtualRealityToggleAction->setChecked(vrViewNode->GetVisibility() && vrViewNode->GetActive());
   }
+
+  this->UpdateViewFromReferenceViewCameraAction->setEnabled(this->VirtualRealityToggleAction->isChecked());
 }
 
 //-----------------------------------------------------------------------------
@@ -233,7 +258,7 @@ QStringList qSlicerVirtualRealityModule::categories() const
 //-----------------------------------------------------------------------------
 QStringList qSlicerVirtualRealityModule::dependencies() const
 {
-  return QStringList();
+  return QStringList() << "Cameras";
 }
 
 //-----------------------------------------------------------------------------
@@ -289,7 +314,12 @@ void qSlicerVirtualRealityModule::onViewNodeModified()
   // Update view node in view widget
   if (d->VirtualRealityViewWidget != NULL)
   {
+    vtkMRMLVirtualRealityViewNode* oldVrViewNode = d->VirtualRealityViewWidget->mrmlVirtualRealityViewNode();
     d->VirtualRealityViewWidget->setMRMLVirtualRealityViewNode(vrViewNode);
+    if (oldVrViewNode != vrViewNode)
+    {
+      d->logic()->setDefaultReferenceView();
+    }
   }
 
   // Update toolbar
@@ -301,6 +331,17 @@ void qSlicerVirtualRealityModule::enableVirtualReality(bool enable)
 {
   Q_D(qSlicerVirtualRealityModule);
   d->logic()->SetVirtualRealityActive(enable);
+}
+
+// --------------------------------------------------------------------------
+void qSlicerVirtualRealityModule::updateViewFromReferenceViewCamera()
+{
+  Q_D(qSlicerVirtualRealityModule);
+  if (d->VirtualRealityViewWidget == NULL)
+  {
+    return;
+  }
+  d->VirtualRealityViewWidget->updateViewFromReferenceViewCamera();
 }
 
 // --------------------------------------------------------------------------

@@ -14,6 +14,7 @@ Version:   $Revision: 1.3 $
 
 // MRML includes
 #include "vtkMRMLScene.h"
+#include "vtkMRMLViewNode.h"
 #include "vtkMRMLVirtualRealityViewNode.h"
 
 // VTK includes
@@ -138,36 +139,30 @@ double* vtkMRMLVirtualRealityViewNode::defaultBackgroundColor2()
 }
 
 //----------------------------------------------------------------------------
-vtkMRMLNode* vtkMRMLVirtualRealityViewNode::GetReferenceViewNode()
+vtkMRMLViewNode* vtkMRMLVirtualRealityViewNode::GetReferenceViewNode()
 {
-  return this->GetNodeReference(this->ReferenceViewNodeReferenceRole);
+  return vtkMRMLViewNode::SafeDownCast(this->GetNodeReference(this->ReferenceViewNodeReferenceRole));
 }
 
 //----------------------------------------------------------------------------
-bool vtkMRMLVirtualRealityViewNode::SetAndObserveReferenceViewNodeID(const char* viewNodeId)
+void vtkMRMLVirtualRealityViewNode::SetAndObserveReferenceViewNodeID(const char* viewNodeId)
 {
-  if (!viewNodeId)
-    {
-    return false;
-    }
-
   this->SetAndObserveNodeReferenceID(this->ReferenceViewNodeReferenceRole, viewNodeId);
-  return true;
 }
 
 //----------------------------------------------------------------------------
-bool vtkMRMLVirtualRealityViewNode::SetAndObserveReferenceViewNode(vtkMRMLNode* node)
+bool vtkMRMLVirtualRealityViewNode::SetAndObserveReferenceViewNode(vtkMRMLViewNode* node)
 {
-  if (node && this->Scene != node->GetScene())
+  if (node == NULL)
+    {
+    this->SetAndObserveReferenceViewNodeID(NULL);
+    return true;
+    }
+  if (this->Scene != node->GetScene() || node->GetID() == NULL)
     {
     vtkErrorMacro("SetAndObserveReferenceViewNode: The referenced and referencing node are not in the same scene");
     return false;
     }
-  if (!node->IsA("vtkMRMLViewNode"))
-    {
-    vtkErrorMacro("SetAndObserveReferenceViewNode: Wrong node type, vtkMRMLViewNode expected");
-    return false;
-    }
-
-  return this->SetAndObserveReferenceViewNodeID(node ? node->GetID() : NULL);
+   this->SetAndObserveReferenceViewNodeID(node->GetID());
+   return true;
 }

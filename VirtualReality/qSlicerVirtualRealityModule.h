@@ -69,6 +69,7 @@ public:
 public slots:
   void setToolBarVisible(bool visible);
   void enableVirtualReality(bool);
+  void updateViewFromReferenceViewCamera();
 
 protected slots:
   void onViewNodeModified();

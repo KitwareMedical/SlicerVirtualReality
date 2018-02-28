@@ -6,58 +6,22 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>192</width>
-    <height>228</height>
+    <width>344</width>
+    <height>429</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QFormLayout" name="formLayout_2">
-   <item row="4" column="0">
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="ctkCollapsibleButton" name="ConnectionCollapsibleButton">
+     <property name="minimumSize">
       <size>
-       <width>0</width>
+       <width>300</width>
        <height>0</height>
       </size>
      </property>
-    </spacer>
-   </item>
-   <item row="3" column="0" colspan="2">
-    <widget class="ctkCollapsibleButton" name="DisplayCollapsibleButton">
-     <property name="text">
-      <string>Display</string>
-     </property>
-     <layout class="QFormLayout" name="formLayout_3">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>Two-sided lighting:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="ctkCheckBox" name="TwoSidedLightingCheckBox"/>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>Back-lights:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="ctkCheckBox" name="BackLightsCheckBox"/>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="1" column="0" colspan="2">
-    <widget class="qMRMLCollapsibleButton" name="MRMLCollapsibleButton">
      <property name="text">
       <string>Connection</string>
      </property>
@@ -85,14 +49,87 @@
      </layout>
     </widget>
    </item>
+   <item>
+    <widget class="ctkCollapsibleButton" name="DisplayCollapsibleButton">
+     <property name="text">
+      <string>Display</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout_3">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Two-sided lighting:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="ctkCheckBox" name="TwoSidedLightingCheckBox"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Back-lights:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="ctkCheckBox" name="BackLightsCheckBox"/>
+      </item>
+      <item row="2" column="1">
+       <widget class="qMRMLNodeComboBox" name="ReferenceViewNodeComboBox">
+        <property name="nodeTypes">
+         <stringlist>
+          <string>vtkMRMLViewNode</string>
+         </stringlist>
+        </property>
+        <property name="showChildNodeTypes">
+         <bool>false</bool>
+        </property>
+        <property name="addEnabled">
+         <bool>false</bool>
+        </property>
+        <property name="removeEnabled">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Reference view:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" colspan="2">
+       <widget class="QPushButton" name="UpdateViewFromReferenceViewCameraButton">
+        <property name="text">
+         <string>Set virtual reality view to match reference view.</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
   </layout>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>qMRMLCollapsibleButton</class>
-   <extends>ctkCollapsibleButton</extends>
-   <header>qMRMLCollapsibleButton.h</header>
-   <container>1</container>
+   <class>qMRMLNodeComboBox</class>
+   <extends>QWidget</extends>
+   <header>qMRMLNodeComboBox.h</header>
   </customwidget>
   <customwidget>
    <class>qSlicerWidget</class>
@@ -113,5 +150,22 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>qSlicerVirtualRealityModuleWidget</sender>
+   <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
+   <receiver>ReferenceViewNodeComboBox</receiver>
+   <slot>setMRMLScene(vtkMRMLScene*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>145</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>192</x>
+     <y>216</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

@@ -36,6 +36,7 @@ class vtkMRMLVirtualRealityViewNode;
 class vtkCollection;
 class vtkGenericOpenGLRenderWindow;
 class vtkRenderWindowInteractor;
+class vtkSlicerCamerasModuleLogic;
 
 class vtkOpenVRRenderer;
 class vtkOpenVRRenderWindow;
@@ -72,6 +73,11 @@ public:
   void addDisplayableManager(const QString& displayableManager);
   Q_INVOKABLE void getDisplayableManagers(vtkCollection *displayableManagers);
 
+  /// Set Cameras module logic.
+  /// Required for updating camera from reference view node.
+  void setCamerasLogic(vtkSlicerCamerasModuleLogic* camerasLogic);
+  vtkSlicerCamerasModuleLogic* camerasLogic()const;
+
   /// Get the 3D View node observed by view.
   Q_INVOKABLE vtkMRMLVirtualRealityViewNode* mrmlVirtualRealityViewNode()const;
 
@@ -83,6 +89,10 @@ public:
 
   /// Get underlying RenderWindow
   Q_INVOKABLE vtkOpenVRRenderWindowInteractor* interactor()const;
+
+  /// Initialize the virtual reality view to most closely
+  /// matched the camera of the reference view camera.
+  Q_INVOKABLE void updateViewFromReferenceViewCamera();
 
 public slots:
   /// Set the MRML \a scene that should be listened for events
