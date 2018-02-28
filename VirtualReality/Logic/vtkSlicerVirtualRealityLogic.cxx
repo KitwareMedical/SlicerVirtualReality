@@ -208,3 +208,36 @@ void vtkSlicerVirtualRealityLogic::SetVirtualRealityActive(bool activate)
     }
   }
 }
+
+//---------------------------------------------------------------------------
+void vtkSlicerVirtualRealityLogic::setDefaultReferenceView()
+{
+  if (!this->ActiveViewNode)
+  {
+    return;
+  }
+  if (this->ActiveViewNode->GetReferenceViewNode() != NULL)
+  {
+    // Reference view is already set, there is nothing to do
+    return;
+  }
+  if (!this->GetMRMLScene())
+  {
+    return;
+  }
+  vtkSmartPointer<vtkCollection> nodes = vtkSmartPointer<vtkCollection>::Take(
+    this->GetMRMLScene()->GetNodesByClass("vtkMRMLViewNode"));
+  vtkMRMLViewNode* viewNode = 0;
+  vtkCollectionSimpleIterator it;
+  for (nodes->InitTraversal(it); (viewNode = vtkMRMLViewNode::SafeDownCast(
+    nodes->GetNextItemAsObject(it)));)
+  {
+    if (viewNode->GetVisibility() && viewNode->IsMappedInLayout())
+    {
+      // Found a view node displayed in current layout, use this
+      break;
+    }
+  }
+  // Either use a view node displayed in current layout or just any 3D view node found in the scene
+  this->ActiveViewNode->SetAndObserveReferenceViewNode(viewNode);
+}

@@ -61,6 +61,12 @@ public:
   /// Connects to device if not yet connected.
   void SetVirtualRealityActive(bool activate);
 
+  /// Set the first visible 3D view as reference view for
+  /// virtual reality view.
+  /// If a reference view has been already set then the
+  /// method has no effect.
+  void setDefaultReferenceView();
+
 protected:
   vtkSlicerVirtualRealityLogic();
   virtual ~vtkSlicerVirtualRealityLogic();

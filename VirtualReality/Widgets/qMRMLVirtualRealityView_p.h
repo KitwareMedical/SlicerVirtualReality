@@ -83,7 +83,8 @@ public slots:
 protected:
   void createRenderWindow();
   void destroyRenderWindow();
-  void initializeViewFromReferenceView();
+
+  vtkSlicerCamerasModuleLogic* CamerasLogic;
 
   vtkSmartPointer<vtkMRMLDisplayableManagerGroup> DisplayableManagerGroup;
   vtkWeakPointer<vtkMRMLScene> MRMLScene;

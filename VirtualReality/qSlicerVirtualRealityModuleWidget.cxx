@@ -27,6 +27,7 @@
 
 // VirtualReality includes
 #include "qSlicerVirtualRealityModule.h"
+#include "qMRMLVirtualRealityView.h"
 #include "vtkMRMLVirtualRealityViewNode.h"
 #include "vtkMRMLVirtualRealityViewDisplayableManagerFactory.h"
 #include "vtkSlicerVirtualRealityLogic.h"
@@ -74,6 +75,9 @@ void qSlicerVirtualRealityModuleWidget::setup()
   connect(d->TwoSidedLightingCheckBox, SIGNAL(toggled(bool)), this, SLOT(setTwoSidedLighting(bool)));
   connect(d->BackLightsCheckBox, SIGNAL(toggled(bool)), this, SLOT(setBackLights(bool)));
 
+  connect(d->ReferenceViewNodeComboBox, SIGNAL(currentNodeChanged(vtkMRMLNode*)), this, SLOT(setReferenceViewNode(vtkMRMLNode*)));
+  connect(d->UpdateViewFromReferenceViewCameraButton, SIGNAL(clicked()), this, SLOT(updateViewFromReferenceViewCamera()));
+
   this->updateWidgetFromMRML();
 
   // If virtual reality logic is modified it indicates that the view node may changed
@@ -86,24 +90,32 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   Q_D(qSlicerVirtualRealityModuleWidget);
   vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
   vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
-  
+
   bool wasBlocked = d->ConnectCheckBox->blockSignals(true);
-  d->ConnectCheckBox->setChecked(vrViewNode && vrViewNode->GetVisibility());
+  d->ConnectCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetVisibility());
   d->ConnectCheckBox->blockSignals(wasBlocked);
 
   wasBlocked = d->RenderingEnabledCheckBox->blockSignals(true);
-  d->RenderingEnabledCheckBox->setChecked(vrViewNode && vrViewNode->GetActive());
+  d->RenderingEnabledCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetActive());
   d->RenderingEnabledCheckBox->blockSignals(wasBlocked);
 
   wasBlocked = d->TwoSidedLightingCheckBox->blockSignals(true);
-  d->TwoSidedLightingCheckBox->setChecked(vrViewNode && vrViewNode->GetTwoSidedLighting());
-  d->TwoSidedLightingCheckBox->setEnabled(vrViewNode);
+  d->TwoSidedLightingCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetTwoSidedLighting());
+  d->TwoSidedLightingCheckBox->setEnabled(vrViewNode != NULL);
   d->TwoSidedLightingCheckBox->blockSignals(wasBlocked);
 
   wasBlocked = d->BackLightsCheckBox->blockSignals(true);
-  d->BackLightsCheckBox->setChecked(vrViewNode && vrViewNode->GetBackLights());
-  d->BackLightsCheckBox->setEnabled(vrViewNode);
+  d->BackLightsCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetBackLights());
+  d->BackLightsCheckBox->setEnabled(vrViewNode != NULL);
   d->BackLightsCheckBox->blockSignals(wasBlocked);
+
+  wasBlocked = d->ReferenceViewNodeComboBox->blockSignals(true);
+  d->ReferenceViewNodeComboBox->setCurrentNode(vrViewNode != NULL ? vrViewNode->GetReferenceViewNode() : NULL);
+  d->ReferenceViewNodeComboBox->blockSignals(wasBlocked);
+  d->ReferenceViewNodeComboBox->setEnabled(vrViewNode != NULL);
+
+  d->UpdateViewFromReferenceViewCameraButton->setEnabled(vrViewNode != NULL
+    && vrViewNode->GetReferenceViewNode() != NULL);
 }
 
 //-----------------------------------------------------------------------------
@@ -144,4 +156,34 @@ void qSlicerVirtualRealityModuleWidget::setBackLights(bool active)
   {
     vrViewNode->SetBackLights(active);
   }
+}
+
+//-----------------------------------------------------------------------------
+void qSlicerVirtualRealityModuleWidget::setReferenceViewNode(vtkMRMLNode* node)
+{
+  Q_D(qSlicerVirtualRealityModuleWidget);
+  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
+  if (vrViewNode)
+  {
+    vtkMRMLViewNode* referenceViewNode = vtkMRMLViewNode::SafeDownCast(node);
+    vrViewNode->SetAndObserveReferenceViewNode(referenceViewNode);
+  }
+}
+
+//-----------------------------------------------------------------------------
+void qSlicerVirtualRealityModuleWidget::updateViewFromReferenceViewCamera()
+{
+  Q_D(qSlicerVirtualRealityModuleWidget);
+  qSlicerVirtualRealityModule* vrModule = dynamic_cast<qSlicerVirtualRealityModule*>(this->module());
+  if (!vrModule)
+  {
+    return;
+  }
+  qMRMLVirtualRealityView* vrView = vrModule->viewWidget();
+  if (!vrView)
+  {
+    return;
+  }
+  vrView->updateViewFromReferenceViewCamera();
 }

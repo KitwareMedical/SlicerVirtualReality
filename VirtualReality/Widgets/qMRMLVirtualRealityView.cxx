@@ -45,12 +45,12 @@
 #include "qMRMLColors.h"
 #include "qMRMLThreeDView.h"
 #include "qMRMLThreeDWidget.h"
-#include "qMRMLLayoutViewFactory.h"
 
 // Slicer includes
 #include "qSlicerApplication.h"
 #include "qSlicerLayoutManager.h"
 #include "vtkSlicerConfigure.h" // For Slicer_USE_OpenVR
+#include <vtkSlicerCamerasModuleLogic.h>
 
 // MRMLDisplayableManager includes
 #include <vtkMRMLAbstractDisplayableManager.h>
@@ -85,6 +85,7 @@
 //---------------------------------------------------------------------------
 qMRMLVirtualRealityViewPrivate::qMRMLVirtualRealityViewPrivate(qMRMLVirtualRealityView& object)
   : q_ptr(&object)
+  , CamerasLogic(NULL)
 {
   this->MRMLScene = 0;
   this->MRMLVirtualRealityViewNode = 0;
@@ -100,6 +101,10 @@ void qMRMLVirtualRealityViewPrivate::init()
 {
   QObject::connect(&this->VirtualRealityLoopTimer, SIGNAL(timeout()), this, SLOT(doOpenVirtualReality()));
 }
+
+//----------------------------------------------------------------------------
+CTK_SET_CPP(qMRMLVirtualRealityView, vtkSlicerCamerasModuleLogic*, setCamerasLogic, CamerasLogic);
+CTK_GET_CPP(qMRMLVirtualRealityView, vtkSlicerCamerasModuleLogic*, camerasLogic, CamerasLogic);
 
 //----------------------------------------------------------------------------
 CTK_SET_CPP(qMRMLVirtualRealityView, bool, setRenderEnabled, RenderEnabled);
@@ -167,6 +172,7 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   this->Renderer->SetBackground(0.7, 0.7, 0.7);
 
   // Create 4 lights for even lighting
+  // without this, one side of models may be very dark.
   this->Lights = vtkSmartPointer<vtkLightCollection>::New();
   {
     vtkNew<vtkLight> light;
@@ -198,8 +204,7 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   }
   this->Renderer->SetLightCollection(this->Lights);
 
-  // Initialize VR view from reference 3D view
-  this->initializeViewFromReferenceView();
+  q->updateViewFromReferenceViewCamera();
 
   this->RenderWindow->Initialize();
   if (!this->RenderWindow->GetHMD())
@@ -223,31 +228,82 @@ void qMRMLVirtualRealityViewPrivate::destroyRenderWindow()
 }
 
 //---------------------------------------------------------------------------
-void qMRMLVirtualRealityViewPrivate::initializeViewFromReferenceView()
+void qMRMLVirtualRealityView::updateViewFromReferenceViewCamera()
 {
-  qMRMLThreeDWidget* referenceWidget = NULL;
-  qMRMLLayoutManager* layoutManager = qSlicerApplication::application()->layoutManager();
-  if ( !this->MRMLVirtualRealityViewNode || !this->MRMLVirtualRealityViewNode->GetReferenceViewNode()
-    || !vtkMRMLViewNode::SafeDownCast(this->MRMLVirtualRealityViewNode->GetReferenceViewNode()) )
-    {
-    // Use first 3D view if reference view not specified
-    referenceWidget = layoutManager->threeDWidget(0);
-    }
-  else
-    {
-    vtkMRMLViewNode* referenceViewNode = vtkMRMLViewNode::SafeDownCast(
-      this->MRMLVirtualRealityViewNode->GetReferenceViewNode() );
-    referenceWidget = qobject_cast<qMRMLThreeDWidget*>(
-      layoutManager->mrmlViewFactory("vtkMRMLViewNode")->viewWidget(referenceViewNode) );
-    }
-  if (!referenceWidget)
-    {
-    qWarning() << "Failed to initialize OpenVR view from reference view";
+  Q_D(qMRMLVirtualRealityView);
+  if (!d->MRMLVirtualRealityViewNode)
+  {
     return;
-    }
+  }
+  vtkMRMLViewNode* refrenceViewNode = d->MRMLVirtualRealityViewNode->GetReferenceViewNode();
+  if (!refrenceViewNode)
+  {
+    qWarning() << Q_FUNC_INFO << " failed: no reference view node is set";
+    return;
+  }
+  if (!d->CamerasLogic)
+  {
+    qWarning() << Q_FUNC_INFO << " failed: cameras module logic is not set";
+    return;
+  }
+  vtkMRMLCameraNode* cameraNode = d->CamerasLogic->GetViewActiveCameraNode(refrenceViewNode);
+  if (!cameraNode || !cameraNode->GetCamera())
+  {
+    qWarning() << Q_FUNC_INFO << " failed: camera node is not found";
+    return;
+  }
+  if (!d->RenderWindow)
+  {
+    qWarning() << Q_FUNC_INFO << " failed: RenderWindow has not been created";
+    return;
+  }
 
-  this->RenderWindow->InitializeViewFromCamera(
-    referenceWidget->threeDView()->renderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera() );
+  // The following is based on d->RenderWindow->InitializeViewFromCamera(sourceCamera),
+  // but that is not usable for us, as it puts the headset in the focal point (so we
+  // need to step back to see the full content) and snaps view direction to the closest axis.
+
+  vtkCamera *sourceCamera = cameraNode->GetCamera();
+
+  vtkRenderer *ren = static_cast<vtkRenderer *>(d->RenderWindow->GetRenderers()->GetItemAsObject(0));
+  if (!ren)
+  {
+    qWarning() << Q_FUNC_INFO << "The renderer must be set prior to calling InitializeViewFromCamera";
+    return;
+  }
+  vtkOpenVRCamera *cam = vtkOpenVRCamera::SafeDownCast(ren->GetActiveCamera());
+  if (!cam)
+  {
+    qWarning() << Q_FUNC_INFO << "The renderer's active camera must be set prior to calling InitializeViewFromCamera";
+    return;
+  }
+
+  double distance =
+    sin(vtkMath::RadiansFromDegrees(sourceCamera->GetViewAngle()) / 2.0) *
+    sourceCamera->GetDistance() /
+    sin(vtkMath::RadiansFromDegrees(cam->GetViewAngle()) / 2.0);
+
+  double* sourceViewUp = sourceCamera->GetViewUp();
+  cam->SetViewUp(sourceViewUp);
+  d->RenderWindow->SetPhysicalViewUp(sourceViewUp);
+
+  double* sourcePosition = sourceCamera->GetPosition();
+  double* viewUp = cam->GetViewUp();
+  cam->SetFocalPoint(sourcePosition);
+  d->RenderWindow->SetPhysicalTranslation(
+    viewUp[0] * distance - sourcePosition[0],
+    viewUp[1] * distance - sourcePosition[1],
+    viewUp[2] * distance - sourcePosition[2]);
+  d->RenderWindow->SetPhysicalScale(distance);
+
+  double* sourceDirectionOfProjection = sourceCamera->GetDirectionOfProjection();
+  d->RenderWindow->SetPhysicalViewDirection(sourceDirectionOfProjection);
+  double *idop = d->RenderWindow->GetPhysicalViewDirection();
+  cam->SetPosition(
+    -idop[0] * distance + sourcePosition[0],
+    -idop[1] * distance + sourcePosition[1],
+    -idop[2] * distance + sourcePosition[2]);
+
+  ren->ResetCameraClippingRange();
 }
 
 //---------------------------------------------------------------------------
@@ -304,10 +360,6 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
   if (!this->RenderWindow)
   {
     this->createRenderWindow();
-  }
-  else
-  {
-    this->initializeViewFromReferenceView();
   }
 
   if (this->DisplayableManagerGroup->GetMRMLDisplayableNode() != this->MRMLVirtualRealityViewNode.GetPointer())
