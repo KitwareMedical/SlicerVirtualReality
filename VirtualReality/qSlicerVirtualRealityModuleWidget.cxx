@@ -78,6 +78,9 @@ void qSlicerVirtualRealityModuleWidget::setup()
   connect(d->ReferenceViewNodeComboBox, SIGNAL(currentNodeChanged(vtkMRMLNode*)), this, SLOT(setReferenceViewNode(vtkMRMLNode*)));
   connect(d->UpdateViewFromReferenceViewCameraButton, SIGNAL(clicked()), this, SLOT(updateViewFromReferenceViewCamera()));
 
+  connect(d->DesiredUpdateRateSlider, SIGNAL(valueChanged(double)), this, SLOT(onDesiredUpdateRateChanged(double)));
+
+
   this->updateWidgetFromMRML();
 
   // If virtual reality logic is modified it indicates that the view node may changed
@@ -98,6 +101,11 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   wasBlocked = d->RenderingEnabledCheckBox->blockSignals(true);
   d->RenderingEnabledCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetActive());
   d->RenderingEnabledCheckBox->blockSignals(wasBlocked);
+
+  wasBlocked = d->DesiredUpdateRateSlider->blockSignals(true);
+  d->DesiredUpdateRateSlider->setValue(vrViewNode != NULL ? vrViewNode->GetDesiredUpdateRate() : 0);
+  d->DesiredUpdateRateSlider->setEnabled(vrViewNode != NULL);
+  d->DesiredUpdateRateSlider->blockSignals(wasBlocked);
 
   wasBlocked = d->TwoSidedLightingCheckBox->blockSignals(true);
   d->TwoSidedLightingCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetTwoSidedLighting());
@@ -186,4 +194,18 @@ void qSlicerVirtualRealityModuleWidget::updateViewFromReferenceViewCamera()
     return;
   }
   vrView->updateViewFromReferenceViewCamera();
+}
+
+
+
+//-----------------------------------------------------------------------------
+void qSlicerVirtualRealityModuleWidget::onDesiredUpdateRateChanged(double fps)
+{
+  Q_D(qSlicerVirtualRealityModuleWidget);
+  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
+  if (vrViewNode)
+  {
+    vrViewNode->SetDesiredUpdateRate(fps);
+  }
 }

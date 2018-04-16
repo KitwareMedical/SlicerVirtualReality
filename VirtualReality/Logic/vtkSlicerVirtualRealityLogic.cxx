@@ -198,7 +198,14 @@ void vtkSlicerVirtualRealityLogic::SetVirtualRealityActive(bool activate)
   if (activate)
   {
     this->SetVirtualRealityConnected(true);
-    this->ActiveViewNode->SetActive(1);
+    if (this->ActiveViewNode)
+    {
+      this->ActiveViewNode->SetActive(1);
+    }
+    else
+    {
+      vtkErrorMacro("vtkSlicerVirtualRealityLogic::SetVirtualRealityActive failed: view node is not available");
+    }
   }
   else
   {

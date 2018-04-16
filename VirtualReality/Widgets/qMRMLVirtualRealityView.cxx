@@ -380,6 +380,20 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
     light->SetSwitch(switchOnAllLights);
   }
 
+  if (this->RenderWindow)
+  {
+    double desiredUpdateRate = this->MRMLVirtualRealityViewNode->GetDesiredUpdateRate();
+
+    // enforce non-zero frame rate to avoid division by zero errors
+    const double defaultStaticViewUpdateRate = 0.0001;
+    if (desiredUpdateRate < defaultStaticViewUpdateRate)
+    {
+      desiredUpdateRate = defaultStaticViewUpdateRate;
+    }
+
+    this->RenderWindow->SetDesiredUpdateRate(desiredUpdateRate);
+  }
+
   if (this->MRMLVirtualRealityViewNode->GetActive())
   {
     this->VirtualRealityLoopTimer.start(0);

@@ -81,9 +81,16 @@ public:
   vtkSetMacro(BackLights, bool);
   vtkBooleanMacro(BackLights, bool);
 
+  /// Desired frame rate. Volume renderer may use this information
+  /// for determining sampling distances (and other LOD actors, to
+  /// determine display quality).
+  vtkGetMacro(DesiredUpdateRate, double);
+  vtkSetMacro(DesiredUpdateRate, double);
+
 protected:
   bool TwoSidedLighting;
   bool BackLights;
+  double DesiredUpdateRate;
 
   vtkMRMLVirtualRealityViewNode();
   ~vtkMRMLVirtualRealityViewNode();

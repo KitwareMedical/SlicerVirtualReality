@@ -43,6 +43,7 @@ public slots:
   void setBackLights(bool);
   void setReferenceViewNode(vtkMRMLNode*);
   void updateViewFromReferenceViewCamera();
+  void onDesiredUpdateRateChanged(double);
 
 protected slots:
   void updateWidgetFromMRML();
