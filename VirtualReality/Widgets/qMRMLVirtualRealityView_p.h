@@ -72,12 +72,7 @@ public:
   void stopVirtualReality();
 
 public slots:
-  /// Handle MRML scene event
-  void onSceneStartProcessing();
-  void onSceneEndProcessing();
-
   void updateWidgetFromMRML();
-
   void doOpenVirtualReality();
 
 protected:
@@ -89,7 +84,6 @@ protected:
   vtkSmartPointer<vtkMRMLDisplayableManagerGroup> DisplayableManagerGroup;
   vtkWeakPointer<vtkMRMLScene> MRMLScene;
   vtkWeakPointer<vtkMRMLVirtualRealityViewNode> MRMLVirtualRealityViewNode;
-  bool RenderEnabled;
   vtkSmartPointer<vtkOpenVRRenderer> Renderer;
   vtkSmartPointer<vtkOpenVRRenderWindow> RenderWindow;
   vtkSmartPointer<vtkOpenVRRenderWindowInteractor> Interactor;

@@ -105,13 +105,6 @@ public slots:
 
 protected:
 
-  /// Return if rendering is enabled
-  /// (it is temporarily disabled during batch processing)
-  bool renderEnabled() const;
-
-  /// Enable/Disable rendering
-  void setRenderEnabled(bool value);
-
   QScopedPointer<qMRMLVirtualRealityViewPrivate> d_ptr;
 
 private:

@@ -107,10 +107,6 @@ CTK_SET_CPP(qMRMLVirtualRealityView, vtkSlicerCamerasModuleLogic*, setCamerasLog
 CTK_GET_CPP(qMRMLVirtualRealityView, vtkSlicerCamerasModuleLogic*, camerasLogic, CamerasLogic);
 
 //----------------------------------------------------------------------------
-CTK_SET_CPP(qMRMLVirtualRealityView, bool, setRenderEnabled, RenderEnabled);
-CTK_GET_CPP(qMRMLVirtualRealityView, bool, renderEnabled, RenderEnabled);
-
-//----------------------------------------------------------------------------
 CTK_GET_CPP(qMRMLVirtualRealityView, vtkOpenVRRenderer*, renderer, Renderer);
 
 //----------------------------------------------------------------------------
@@ -314,33 +310,7 @@ void qMRMLVirtualRealityViewPrivate::setMRMLScene(vtkMRMLScene* newScene)
     {
     return;
     }
-
-  this->qvtkReconnect(
-    this->MRMLScene, newScene,
-    vtkMRMLScene::StartBatchProcessEvent, this, SLOT(onSceneStartProcessing()));
-
-  this->qvtkReconnect(
-    this->MRMLScene, newScene,
-    vtkMRMLScene::EndBatchProcessEvent, this, SLOT(onSceneEndProcessing()));
-
   this->MRMLScene = newScene;
-  q->setRenderEnabled(
-    this->MRMLScene != 0 && !this->MRMLScene->IsBatchProcessing());
-}
-
-// --------------------------------------------------------------------------
-void qMRMLVirtualRealityViewPrivate::onSceneStartProcessing()
-{
-  Q_Q(qMRMLVirtualRealityView);
-  q->setRenderEnabled(false);
-}
-
-//
-// --------------------------------------------------------------------------
-void qMRMLVirtualRealityViewPrivate::onSceneEndProcessing()
-{
-  Q_Q(qMRMLVirtualRealityView);
-  q->setRenderEnabled(true);
 }
 
 // --------------------------------------------------------------------------
@@ -407,7 +377,7 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
 // --------------------------------------------------------------------------
 void qMRMLVirtualRealityViewPrivate::doOpenVirtualReality()
 {
-  if (this->Interactor && this->RenderWindow && this->Renderer && this->RenderEnabled)
+  if (this->Interactor && this->RenderWindow && this->Renderer)
   {
     this->Interactor->DoOneEvent(this->RenderWindow, this->Renderer);
   }
