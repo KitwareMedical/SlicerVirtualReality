@@ -40,7 +40,8 @@ vtkMRMLVirtualRealityViewNode::vtkMRMLVirtualRealityViewNode()
   this->BackgroundColor2[0] = this->defaultBackgroundColor2()[0];
   this->BackgroundColor2[1] = this->defaultBackgroundColor2()[1];
   this->BackgroundColor2[2] = this->defaultBackgroundColor2()[2];
-  this->DesiredUpdateRate = 90;
+  this->DesiredUpdateRate = 60;
+  this->MotionSensitivity = 0.5;
 }
 
 //----------------------------------------------------------------------------
@@ -63,6 +64,7 @@ void vtkMRMLVirtualRealityViewNode::WriteXML(ostream& of, int nIndent)
   vtkMRMLWriteXMLBooleanMacro(twoSidedLighting, TwoSidedLighting);
   vtkMRMLWriteXMLBooleanMacro(backLights, BackLights);
   vtkMRMLWriteXMLFloatMacro(desiredUpdateRate, DesiredUpdateRate);
+  vtkMRMLWriteXMLFloatMacro(motionSensitivity, MotionSensitivity);
   vtkMRMLWriteXMLEndMacro();
 }
 
@@ -77,6 +79,7 @@ void vtkMRMLVirtualRealityViewNode::ReadXMLAttributes(const char** atts)
   vtkMRMLReadXMLBooleanMacro(twoSidedLighting, TwoSidedLighting);
   vtkMRMLReadXMLBooleanMacro(backLights, BackLights);
   vtkMRMLReadXMLFloatMacro(desiredUpdateRate, DesiredUpdateRate);
+  vtkMRMLReadXMLFloatMacro(motionSensitivity, MotionSensitivity);
   vtkMRMLReadXMLEndMacro();
 
   this->EndModify(disabledModify);
@@ -95,6 +98,7 @@ void vtkMRMLVirtualRealityViewNode::Copy(vtkMRMLNode *anode)
   vtkMRMLCopyBooleanMacro(TwoSidedLighting);
   vtkMRMLCopyBooleanMacro(BackLights);
   vtkMRMLCopyFloatMacro(DesiredUpdateRate);
+  vtkMRMLCopyFloatMacro(MotionSensitivity);
   vtkMRMLCopyEndMacro();
 
   this->EndModify(disabledModify);
@@ -109,6 +113,7 @@ void vtkMRMLVirtualRealityViewNode::PrintSelf(ostream& os, vtkIndent indent)
   vtkMRMLPrintBooleanMacro(TwoSidedLighting);
   vtkMRMLPrintBooleanMacro(BackLights);
   vtkMRMLPrintFloatMacro(DesiredUpdateRate);
+  vtkMRMLPrintFloatMacro(MotionSensitivity);
   vtkMRMLPrintEndMacro();
 }
 

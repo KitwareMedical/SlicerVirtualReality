@@ -87,10 +87,17 @@ public:
   vtkGetMacro(DesiredUpdateRate, double);
   vtkSetMacro(DesiredUpdateRate, double);
 
+  /// Motion sensitivity (between 0.0 and 1.0).
+  /// If virtual reality headset is not moving then update rate
+  /// is decreased to allow higher quality rendering.
+  vtkGetMacro(MotionSensitivity, double);
+  vtkSetMacro(MotionSensitivity, double);
+
 protected:
   bool TwoSidedLighting;
   bool BackLights;
   double DesiredUpdateRate;
+  double MotionSensitivity;
 
   vtkMRMLVirtualRealityViewNode();
   ~vtkMRMLVirtualRealityViewNode();

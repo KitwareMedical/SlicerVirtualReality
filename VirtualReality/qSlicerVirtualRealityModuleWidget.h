@@ -44,6 +44,7 @@ public slots:
   void setReferenceViewNode(vtkMRMLNode*);
   void updateViewFromReferenceViewCamera();
   void onDesiredUpdateRateChanged(double);
+  void onMotionSensitivityChanged(double);
 
 protected slots:
   void updateWidgetFromMRML();

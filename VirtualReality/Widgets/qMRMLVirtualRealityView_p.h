@@ -52,6 +52,7 @@ class vtkMRMLDisplayableManagerGroup;
 class vtkMRMLVirtualRealityViewNode;
 class vtkMRMLCameraNode;
 class vtkObject;
+class vtkTimerLog;
 
 //-----------------------------------------------------------------------------
 class qMRMLVirtualRealityViewPrivate: public QObject
@@ -71,6 +72,9 @@ public:
   void startVirtualReality();
   void stopVirtualReality();
 
+  double desiredUpdateRate();
+  double stillUpdateRate();
+
 public slots:
   void updateWidgetFromMRML();
   void doOpenVirtualReality();
@@ -89,6 +93,11 @@ protected:
   vtkSmartPointer<vtkOpenVRRenderWindowInteractor> Interactor;
   vtkSmartPointer<vtkOpenVRCamera> Camera;
   vtkSmartPointer<vtkLightCollection> Lights;
+
+  vtkSmartPointer<vtkTimerLog> LastViewUpdateTime;
+  double LastViewDirection[3];
+  double LastViewUp[3];
+  double LastViewPosition[3];
 
   QTimer VirtualRealityLoopTimer;
 };

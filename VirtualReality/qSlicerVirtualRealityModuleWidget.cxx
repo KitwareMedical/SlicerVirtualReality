@@ -79,7 +79,7 @@ void qSlicerVirtualRealityModuleWidget::setup()
   connect(d->UpdateViewFromReferenceViewCameraButton, SIGNAL(clicked()), this, SLOT(updateViewFromReferenceViewCamera()));
 
   connect(d->DesiredUpdateRateSlider, SIGNAL(valueChanged(double)), this, SLOT(onDesiredUpdateRateChanged(double)));
-
+  connect(d->MotionSensitivitySlider, SIGNAL(valueChanged(double)), this, SLOT(onMotionSensitivityChanged(double)));
 
   this->updateWidgetFromMRML();
 
@@ -106,6 +106,11 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   d->DesiredUpdateRateSlider->setValue(vrViewNode != NULL ? vrViewNode->GetDesiredUpdateRate() : 0);
   d->DesiredUpdateRateSlider->setEnabled(vrViewNode != NULL);
   d->DesiredUpdateRateSlider->blockSignals(wasBlocked);
+
+  wasBlocked = d->MotionSensitivitySlider->blockSignals(true);
+  d->MotionSensitivitySlider->setValue(vrViewNode != NULL ? vrViewNode->GetMotionSensitivity() * 100.0 : 0);
+  d->MotionSensitivitySlider->setEnabled(vrViewNode != NULL);
+  d->MotionSensitivitySlider->blockSignals(wasBlocked);
 
   wasBlocked = d->TwoSidedLightingCheckBox->blockSignals(true);
   d->TwoSidedLightingCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetTwoSidedLighting());
@@ -196,8 +201,6 @@ void qSlicerVirtualRealityModuleWidget::updateViewFromReferenceViewCamera()
   vrView->updateViewFromReferenceViewCamera();
 }
 
-
-
 //-----------------------------------------------------------------------------
 void qSlicerVirtualRealityModuleWidget::onDesiredUpdateRateChanged(double fps)
 {
@@ -207,5 +210,17 @@ void qSlicerVirtualRealityModuleWidget::onDesiredUpdateRateChanged(double fps)
   if (vrViewNode)
   {
     vrViewNode->SetDesiredUpdateRate(fps);
+  }
+}
+
+//-----------------------------------------------------------------------------
+void qSlicerVirtualRealityModuleWidget::onMotionSensitivityChanged(double percent)
+{
+  Q_D(qSlicerVirtualRealityModuleWidget);
+  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
+  if (vrViewNode)
+  {
+    vrViewNode->SetMotionSensitivity(percent * 0.01);
   }
 }

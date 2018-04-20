@@ -76,6 +76,7 @@
 #include <vtkSmartPointer.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
+#include <vtkTimerLog.h>
 
 #include "qSlicerApplication.h"
 
@@ -119,6 +120,19 @@ CTK_GET_CPP(qMRMLVirtualRealityView, vtkOpenVRRenderWindowInteractor*, interacto
 void qMRMLVirtualRealityViewPrivate::createRenderWindow()
 {
   Q_Q(qMRMLVirtualRealityView);
+
+  this->LastViewUpdateTime = vtkSmartPointer<vtkTimerLog>::New();
+  this->LastViewUpdateTime->StartTimer();
+  this->LastViewUpdateTime->StopTimer();
+  this->LastViewDirection[0] = 0.0;
+  this->LastViewDirection[1] = 0.0;
+  this->LastViewDirection[2] = 1.0;
+  this->LastViewUp[0] = 0.0;
+  this->LastViewUp[1] = 1.0;
+  this->LastViewUp[2] = 0.0;
+  this->LastViewPosition[0] = 0.0;
+  this->LastViewPosition[1] = 0.0;
+  this->LastViewPosition[2] = 0.0;
 
   this->RenderWindow = vtkSmartPointer<vtkOpenVRRenderWindow>::New();
   this->Renderer = vtkSmartPointer<vtkOpenVRRenderer>::New();
@@ -352,16 +366,7 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
 
   if (this->RenderWindow)
   {
-    double desiredUpdateRate = this->MRMLVirtualRealityViewNode->GetDesiredUpdateRate();
-
-    // enforce non-zero frame rate to avoid division by zero errors
-    const double defaultStaticViewUpdateRate = 0.0001;
-    if (desiredUpdateRate < defaultStaticViewUpdateRate)
-    {
-      desiredUpdateRate = defaultStaticViewUpdateRate;
-    }
-
-    this->RenderWindow->SetDesiredUpdateRate(desiredUpdateRate);
+    this->RenderWindow->SetDesiredUpdateRate(this->desiredUpdateRate());
   }
 
   if (this->MRMLVirtualRealityViewNode->GetActive())
@@ -374,12 +379,85 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
   }
 }
 
+//---------------------------------------------------------------------------
+double qMRMLVirtualRealityViewPrivate::desiredUpdateRate()
+{
+  Q_Q(qMRMLVirtualRealityView);
+  double rate = this->MRMLVirtualRealityViewNode->GetDesiredUpdateRate();
+
+  // enforce non-zero frame rate to avoid division by zero errors
+  const double defaultStaticViewUpdateRate = 0.0001;
+  if (rate < defaultStaticViewUpdateRate)
+  {
+    rate = defaultStaticViewUpdateRate;
+  }
+
+  return rate;
+}
+
+//---------------------------------------------------------------------------
+double qMRMLVirtualRealityViewPrivate::stillUpdateRate()
+{
+  Q_Q(qMRMLVirtualRealityView);
+  return 0.0001;
+}
+
 // --------------------------------------------------------------------------
 void qMRMLVirtualRealityViewPrivate::doOpenVirtualReality()
 {
   if (this->Interactor && this->RenderWindow && this->Renderer)
   {
     this->Interactor->DoOneEvent(this->RenderWindow, this->Renderer);
+    bool quickViewMotion = true;
+
+    this->LastViewUpdateTime->StopTimer();
+    if (this->LastViewUpdateTime->GetElapsedTime() > 0.0)
+    {
+      if (this->MRMLVirtualRealityViewNode->GetMotionSensitivity() >= 1.0)
+      {
+        quickViewMotion = true;
+      }
+      else if (this->MRMLVirtualRealityViewNode->GetMotionSensitivity() <= 0.0)
+      {
+        quickViewMotion = false;
+      }
+      else if (this->LastViewUpdateTime->GetElapsedTime() < 3.0) // don't consider stale measurements
+      {
+        // limit scale:
+        // sensitivity = 0    -> limit = 10.0x
+        // sensitivity = 50%  -> limit =  1.0x
+        // sensitivity = 100% -> limit =  0.1x
+        double limitScale = pow(100, 0.5-this->MRMLVirtualRealityViewNode->GetMotionSensitivity());
+
+        const double angularSpeedLimitRadiansPerSec = vtkMath::RadiansFromDegrees(5.0 * limitScale);
+        double viewDirectionChangeSpeed = vtkMath::AngleBetweenVectors(this->LastViewDirection,
+          this->Camera->GetViewPlaneNormal()) / this->LastViewUpdateTime->GetElapsedTime();
+        double viewUpDirectionChangeSpeed = vtkMath::AngleBetweenVectors(this->LastViewUp,
+          this->Camera->GetViewUp()) / this->LastViewUpdateTime->GetElapsedTime();
+
+        const double translationSpeedLimitMmPerSec = 100.0 * limitScale;
+        // Physical scale = 100 if virtual objects are real-world size; <100 if virtual objects are larger
+        double viewTranslationSpeedMmPerSec = this->RenderWindow->GetPhysicalScale() * 0.01 *
+          sqrt(vtkMath::Distance2BetweenPoints(this->LastViewPosition, this->Camera->GetPosition()))
+          / this->LastViewUpdateTime->GetElapsedTime();
+
+        if (viewDirectionChangeSpeed < angularSpeedLimitRadiansPerSec
+          && viewUpDirectionChangeSpeed < angularSpeedLimitRadiansPerSec
+          && viewTranslationSpeedMmPerSec  < translationSpeedLimitMmPerSec)
+        {
+          quickViewMotion = false;
+        }
+      }
+
+      double updateRate = quickViewMotion ? this->desiredUpdateRate() : this->stillUpdateRate();
+      this->RenderWindow->SetDesiredUpdateRate(updateRate);
+
+      this->Camera->GetViewPlaneNormal(this->LastViewDirection);
+      this->Camera->GetViewUp(this->LastViewUp);
+      this->Camera->GetPosition(this->LastViewPosition);
+      this->LastViewUpdateTime->StartTimer();
+    }
+
   }
 }
 
