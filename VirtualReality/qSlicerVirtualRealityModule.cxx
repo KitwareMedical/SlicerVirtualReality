@@ -70,6 +70,7 @@ public:
   QToolBar* ToolBar;
   QAction* VirtualRealityToggleAction;
   QAction* UpdateViewFromReferenceViewCameraAction;
+  QAction* ConfigureAction;
   qMRMLVirtualRealityView* VirtualRealityViewWidget;
 };
 
@@ -82,6 +83,7 @@ qSlicerVirtualRealityModulePrivate::qSlicerVirtualRealityModulePrivate(qSlicerVi
   , ToolBar(NULL)
   , VirtualRealityToggleAction(NULL)
   , UpdateViewFromReferenceViewCameraAction(NULL)
+  , ConfigureAction(NULL)
   , VirtualRealityViewWidget(NULL)
 {
 }
@@ -156,6 +158,13 @@ void qSlicerVirtualRealityModulePrivate::addToolBar()
     this->UpdateViewFromReferenceViewCameraAction->setIcon(QIcon(":/Icons/ViewCenter.png"));
     QObject::connect(this->UpdateViewFromReferenceViewCameraAction, SIGNAL(triggered()),
       q, SLOT(updateViewFromReferenceViewCamera()));
+
+    this->ToolBar->addSeparator();
+
+    this->ConfigureAction = this->ToolBar->addAction(QObject::tr("Configure virtual reality settings."));
+    this->ConfigureAction->setIcon(QIcon(":/Icons/Small/SlicerConfigure.png"));
+    QObject::connect(this->ConfigureAction, SIGNAL(triggered()),
+      q, SLOT(switchToVirtualRealityModule()));
 
     mainWindow->addToolBar(this->ToolBar);
   }
@@ -342,6 +351,24 @@ void qSlicerVirtualRealityModule::updateViewFromReferenceViewCamera()
     return;
   }
   d->VirtualRealityViewWidget->updateViewFromReferenceViewCamera();
+}
+
+// --------------------------------------------------------------------------
+void qSlicerVirtualRealityModule::switchToVirtualRealityModule()
+{
+  Q_D(qSlicerVirtualRealityModule);
+  if (!qSlicerApplication::application()
+    || !qSlicerApplication::application()->moduleManager())
+  {
+    return;
+  }
+  qSlicerAbstractCoreModule* module = qSlicerApplication::application()->moduleManager()->module("VirtualReality");
+  qSlicerAbstractModule* moduleWithAction = qobject_cast<qSlicerAbstractModule*>(module);
+  if (!module)
+  {
+    return;
+  }
+  moduleWithAction->action()->trigger();
 }
 
 // --------------------------------------------------------------------------

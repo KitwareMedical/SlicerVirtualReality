@@ -408,16 +408,17 @@ void qMRMLVirtualRealityViewPrivate::doOpenVirtualReality()
   if (this->Interactor && this->RenderWindow && this->Renderer)
   {
     this->Interactor->DoOneEvent(this->RenderWindow, this->Renderer);
-    bool quickViewMotion = true;
 
     this->LastViewUpdateTime->StopTimer();
     if (this->LastViewUpdateTime->GetElapsedTime() > 0.0)
     {
-      if (this->MRMLVirtualRealityViewNode->GetMotionSensitivity() >= 1.0)
+      bool quickViewMotion = true;
+
+      if (this->MRMLVirtualRealityViewNode->GetMotionSensitivity() > 0.999)
       {
         quickViewMotion = true;
       }
-      else if (this->MRMLVirtualRealityViewNode->GetMotionSensitivity() <= 0.0)
+      else if (this->MRMLVirtualRealityViewNode->GetMotionSensitivity() <= 0.001)
       {
         quickViewMotion = false;
       }
@@ -447,6 +448,12 @@ void qMRMLVirtualRealityViewPrivate::doOpenVirtualReality()
         {
           quickViewMotion = false;
         }
+      }
+
+
+      if (quickViewMotion)
+      {
+        qDebug() << "Quick";
       }
 
       double updateRate = quickViewMotion ? this->desiredUpdateRate() : this->stillUpdateRate();
