@@ -125,9 +125,9 @@ vtkMRMLVirtualRealityViewNode* vtkSlicerVirtualRealityLogic::AddVirtualRealityVi
   }
 
   // Create VirtualReality view node. Use CreateNodeByClass so that node properties
-  // can be overridden with deafult node properties defined in the scene.
-  vtkMRMLVirtualRealityViewNode* vrViewNode = vtkMRMLVirtualRealityViewNode::SafeDownCast(
-    this->GetMRMLScene()->CreateNodeByClass("vtkMRMLVirtualRealityViewNode"));
+  // can be overridden with default node properties defined in the scene.
+  vtkSmartPointer<vtkMRMLVirtualRealityViewNode> vrViewNode = vtkSmartPointer<vtkMRMLVirtualRealityViewNode>::Take(
+    vtkMRMLVirtualRealityViewNode::SafeDownCast(this->GetMRMLScene()->CreateNodeByClass("vtkMRMLVirtualRealityViewNode")) );
   // We create the node as a singleton to make sure there is only one VR view node in the scene.
   vrViewNode->SetSingletonTag("Active");
   // If a singleton node by that name exists already then it is overwritten

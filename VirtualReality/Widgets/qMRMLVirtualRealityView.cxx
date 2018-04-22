@@ -450,12 +450,6 @@ void qMRMLVirtualRealityViewPrivate::doOpenVirtualReality()
         }
       }
 
-
-      if (quickViewMotion)
-      {
-        qDebug() << "Quick";
-      }
-
       double updateRate = quickViewMotion ? this->desiredUpdateRate() : this->stillUpdateRate();
       this->RenderWindow->SetDesiredUpdateRate(updateRate);
 
