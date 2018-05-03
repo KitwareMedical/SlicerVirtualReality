@@ -1,19 +1,26 @@
 SlicerVirtualReality
 ====================
 
-A Slicer extension that enables user to interact with a Slicer scene using virtual reality.
+Extension for 3D slicer that enables user to interact with the 3D scene using virtual reality.
 
 ![](SlicerVirtualReality.png)
 
-Building steps
+The extension works with all OpenVR-compatible headsets, such as HTC Vive, all Windows Mixed Reality headsets (by Acer, Lenovo, HP, etc,), and Oculus Rift. Currently, a limitation is that [Oculus Rift controllers are not supported](https://github.com/KitwareMedical/SlicerVirtualReality/issues/28), so the user can see and explore the scene in 3D but cannot fly or manipulate objects.
+
+Frequently Asked Questions
+--------------------------
+
+### How to avoid crashes when recording video of OpenVR with VolumeRendering enabled ?
+
+[OBS Studio][obsproject] crashes if NVidia hardware-based compression is used. If CPU-based video compression option is chosen then recording works well.
+
+For developers
 --------------
 
 **This Slicer extension is in active development. The API may change from version to version without notice.**
 
-Waiting it is available in the Slicer Extension Manager, follow these instructions:
-
+Build instructions:
 - Build the extension against the newly built Slicer with Qt5 and VTK9 enabled.
-
 - To start Slicer from a build tree and ensure the extension is properly loaded, considering using the ``--launcher-additional-settings`` option:
 
    ```
@@ -21,17 +28,6 @@ Waiting it is available in the Slicer Extension Manager, follow these instructio
    ```
 
 Note that specifying the top-level build directory of the extension ensures that Slicer find all types of modules.
-
-Frequently Asked Questions
---------------------------
-
-### How to avoid crashes when recording video of OpenVR with VolumeRendering enabled ?
-
-From [@lassoan][lassoan]: [OBS Studio][obsproject] only crashes if NVidia hardware-based compression is used.
-If CPU-based video compression option is chosen then recording works well.
-
-[lassoan]: https://github.com/lassoan
-[obsproject]: https://obsproject.com/
 
 Useful Python Snippets
 ----------------------
