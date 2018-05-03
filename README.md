@@ -33,8 +33,7 @@ Build instructions:
 
 Note that specifying the top-level build directory of the extension ensures that Slicer find all types of modules.
 
-Useful Python Snippets
-----------------------
+### Useful Python Snippets
 
 ```python
 
