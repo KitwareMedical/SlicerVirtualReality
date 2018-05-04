@@ -24,6 +24,8 @@ Version:   $Revision: 1.3 $
 #include <sstream>
 
 const char* vtkMRMLVirtualRealityViewNode::ReferenceViewNodeReferenceRole = "ReferenceViewNodeRef";
+const char* vtkMRMLVirtualRealityViewNode::LeftControllerTransformRole = "LeftController";
+const char* vtkMRMLVirtualRealityViewNode::RightControllerTransformRole = "RightController";
 
 //----------------------------------------------------------------------------
 vtkMRMLNodeNewMacro(vtkMRMLVirtualRealityViewNode);
@@ -151,13 +153,13 @@ double* vtkMRMLVirtualRealityViewNode::defaultBackgroundColor2()
 //----------------------------------------------------------------------------
 vtkMRMLViewNode* vtkMRMLVirtualRealityViewNode::GetReferenceViewNode()
 {
-  return vtkMRMLViewNode::SafeDownCast(this->GetNodeReference(this->ReferenceViewNodeReferenceRole));
+  return vtkMRMLViewNode::SafeDownCast(this->GetNodeReference(vtkMRMLVirtualRealityViewNode::ReferenceViewNodeReferenceRole));
 }
 
 //----------------------------------------------------------------------------
 void vtkMRMLVirtualRealityViewNode::SetAndObserveReferenceViewNodeID(const char* viewNodeId)
 {
-  this->SetAndObserveNodeReferenceID(this->ReferenceViewNodeReferenceRole, viewNodeId);
+  this->SetAndObserveNodeReferenceID(vtkMRMLVirtualRealityViewNode::ReferenceViewNodeReferenceRole, viewNodeId);
 }
 
 //----------------------------------------------------------------------------
@@ -175,4 +177,79 @@ bool vtkMRMLVirtualRealityViewNode::SetAndObserveReferenceViewNode(vtkMRMLViewNo
     }
    this->SetAndObserveReferenceViewNodeID(node->GetID());
    return true;
+}
+
+//----------------------------------------------------------------------------
+vtkMRMLLinearTransformNode* vtkMRMLVirtualRealityViewNode::GetControllerTransformNode(vtkEventDataDevice device)
+{
+  if (device == vtkEventDataDevice::LeftController)
+  {
+    return this->GetLeftControllerTransformNode();
+  }
+  else if(device == vtkEventDataDevice::RightController)
+  {
+    return this->GetRightControllerTransformNode();
+  }
+  else
+  {
+    return NULL;
+  }
+}
+
+//----------------------------------------------------------------------------
+vtkMRMLLinearTransformNode* vtkMRMLVirtualRealityViewNode::GetLeftControllerTransformNode()
+{
+  return vtkMRMLLinearTransformNode::SafeDownCast(this->GetNodeReference(vtkMRMLVirtualRealityViewNode::LeftControllerTransformRole));
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLVirtualRealityViewNode::SetAndObserveLeftControllerTransformNodeID(const char *nodeId)
+{
+  this->SetAndObserveNodeReferenceID(vtkMRMLVirtualRealityViewNode::LeftControllerTransformRole, nodeId);
+}
+
+//----------------------------------------------------------------------------
+bool vtkMRMLVirtualRealityViewNode::SetAndObserveLeftControllerTransformNode(vtkMRMLLinearTransformNode* node)
+{
+  if (node == NULL)
+  {
+    this->SetAndObserveLeftControllerTransformNodeID(NULL);
+    return true;
+  }
+  if (this->Scene != node->GetScene() || node->GetID() == NULL)
+  {
+    vtkErrorMacro("SetAndObserveLeftControllerTransformNode: The referenced and referencing node are not in the same scene");
+    return false;
+  }
+  this->SetAndObserveLeftControllerTransformNodeID(node->GetID());
+  return true;
+}
+
+//----------------------------------------------------------------------------
+vtkMRMLLinearTransformNode* vtkMRMLVirtualRealityViewNode::GetRightControllerTransformNode()
+{
+  return vtkMRMLLinearTransformNode::SafeDownCast(this->GetNodeReference(vtkMRMLVirtualRealityViewNode::RightControllerTransformRole));
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLVirtualRealityViewNode::SetAndObserveRightControllerTransformNodeID(const char *nodeId)
+{
+  this->SetAndObserveNodeReferenceID(vtkMRMLVirtualRealityViewNode::RightControllerTransformRole, nodeId);
+}
+
+//----------------------------------------------------------------------------
+bool vtkMRMLVirtualRealityViewNode::SetAndObserveRightControllerTransformNode(vtkMRMLLinearTransformNode* node)
+{
+  if (node == NULL)
+  {
+    this->SetAndObserveRightControllerTransformNodeID(NULL);
+    return true;
+  }
+  if (this->Scene != node->GetScene() || node->GetID() == NULL)
+  {
+    vtkErrorMacro("SetAndObserveRightControllerTransformNode: The referenced and referencing node are not in the same scene");
+    return false;
+  }
+  this->SetAndObserveRightControllerTransformNodeID(node->GetID());
+  return true;
 }

@@ -34,6 +34,7 @@
 
 // VTK includes
 //#include <vtkOpenGLFramebufferObject.h>
+#include <vtkEventData.h>
 #include <vtkWeakPointer.h>
 
 // CTK includes
@@ -48,10 +49,11 @@
 
 class QLabel;
 class vtkLightCollection;
+class vtkMRMLCameraNode;
 class vtkMRMLDisplayableManagerGroup;
 class vtkMRMLVirtualRealityViewNode;
-class vtkMRMLCameraNode;
 class vtkObject;
+class vtkOpenVRInteractorStyle;
 class vtkTimerLog;
 
 //-----------------------------------------------------------------------------
@@ -80,6 +82,7 @@ public slots:
   void doOpenVirtualReality();
 
 protected:
+  void updateTransformNodeWithControllerPose(vtkEventDataDevice device);
   void createRenderWindow();
   void destroyRenderWindow();
 
@@ -91,6 +94,7 @@ protected:
   vtkSmartPointer<vtkOpenVRRenderer> Renderer;
   vtkSmartPointer<vtkOpenVRRenderWindow> RenderWindow;
   vtkSmartPointer<vtkOpenVRRenderWindowInteractor> Interactor;
+  vtkSmartPointer<vtkOpenVRInteractorStyle> InteractorStyle;
   vtkSmartPointer<vtkOpenVRCamera> Camera;
   vtkSmartPointer<vtkLightCollection> Lights;
 

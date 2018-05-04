@@ -15,8 +15,12 @@
 #ifndef __vtkMRMLVirtualRealityViewNode_h
 #define __vtkMRMLVirtualRealityViewNode_h
 
+// MRML includes
+#include <vtkMRMLViewNode.h>
+#include <vtkMRMLLinearTransformNode.h>
+
 // VTK includes
-#include "vtkMRMLViewNode.h"
+#include <vtkEventData.h>
 
 #include "vtkSlicerVirtualRealityModuleMRMLExport.h"
 
@@ -71,6 +75,29 @@ public:
   /// \sa GetReferenceViewNode
   bool SetAndObserveReferenceViewNode(vtkMRMLViewNode* node);
 
+  /// Get controller node by device identifier
+  vtkMRMLLinearTransformNode* GetControllerTransformNode(vtkEventDataDevice device);
+
+  /// Get left controller transform node.
+  /// Left controller transform node contains the 3D pose of the left controller
+  vtkMRMLLinearTransformNode* GetLeftControllerTransformNode();
+  /// Set left controller transform node.
+  /// \sa GetLeftControllerTransformNode
+  void SetAndObserveLeftControllerTransformNodeID(const char *nodeId);
+  /// Set left controller transform node.
+  /// \sa GetLeftControllerTransformNode
+  bool SetAndObserveLeftControllerTransformNode(vtkMRMLLinearTransformNode* node);
+
+  /// Get right controller transform node.
+  /// Right controller transform node contains the 3D pose of the right controller
+  vtkMRMLLinearTransformNode* GetRightControllerTransformNode();
+  /// Set right controller transform node.
+  /// \sa GetRightControllerTransformNode
+  void SetAndObserveRightControllerTransformNodeID(const char *nodeId);
+  /// Set right controller transform node.
+  /// \sa GetRightControllerTransformNode
+  bool SetAndObserveRightControllerTransformNode(vtkMRMLLinearTransformNode* node);
+
   /// Controls two-sided lighting property of the renderer
   vtkGetMacro(TwoSidedLighting, bool);
   vtkSetMacro(TwoSidedLighting, bool);
@@ -105,6 +132,8 @@ protected:
   void operator=(const vtkMRMLVirtualRealityViewNode&);
 
   static const char* ReferenceViewNodeReferenceRole;
+  static const char* LeftControllerTransformRole;
+  static const char* RightControllerTransformRole;
 };
 
 #endif
