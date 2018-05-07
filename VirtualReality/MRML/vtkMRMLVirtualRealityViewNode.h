@@ -75,12 +75,16 @@ public:
   /// \sa GetReferenceViewNode
   bool SetAndObserveReferenceViewNode(vtkMRMLViewNode* node);
 
+  /// Create controller transform nodes if not set already.
+  void CreateDefaultControllerTransformNodes();
+
   /// Get controller node by device identifier
   vtkMRMLLinearTransformNode* GetControllerTransformNode(vtkEventDataDevice device);
 
   /// Get left controller transform node.
   /// Left controller transform node contains the 3D pose of the left controller
   vtkMRMLLinearTransformNode* GetLeftControllerTransformNode();
+  const char* GetLeftControllerTransformNodeID();
   /// Set left controller transform node.
   /// \sa GetLeftControllerTransformNode
   void SetAndObserveLeftControllerTransformNodeID(const char *nodeId);
@@ -91,6 +95,7 @@ public:
   /// Get right controller transform node.
   /// Right controller transform node contains the 3D pose of the right controller
   vtkMRMLLinearTransformNode* GetRightControllerTransformNode();
+  const char* GetRightControllerTransformNodeID();
   /// Set right controller transform node.
   /// \sa GetRightControllerTransformNode
   void SetAndObserveRightControllerTransformNodeID(const char *nodeId);
@@ -120,11 +125,17 @@ public:
   vtkGetMacro(MotionSensitivity, double);
   vtkSetMacro(MotionSensitivity, double);
 
+  /// If enabled then pose of controllers are saved in the scene as transforms.
+  vtkGetMacro(ControllerTransformsUpdate, bool);
+  void SetControllerTransformsUpdate(bool enable);
+  vtkBooleanMacro(ControllerTransformsUpdate, bool);
+
 protected:
   bool TwoSidedLighting;
   bool BackLights;
   double DesiredUpdateRate;
   double MotionSensitivity;
+  bool ControllerTransformsUpdate;
 
   vtkMRMLVirtualRealityViewNode();
   ~vtkMRMLVirtualRealityViewNode();

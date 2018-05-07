@@ -461,8 +461,12 @@ void qMRMLVirtualRealityViewPrivate::doOpenVirtualReality()
       this->Camera->GetViewUp(this->LastViewUp);
       this->Camera->GetPosition(this->LastViewPosition);
 
-      updateTransformNodeWithControllerPose(vtkEventDataDevice::LeftController);
-      updateTransformNodeWithControllerPose(vtkEventDataDevice::RightController);
+      if (this->MRMLVirtualRealityViewNode->GetControllerTransformsUpdate())
+      {
+        this->MRMLVirtualRealityViewNode->CreateDefaultControllerTransformNodes();
+        updateTransformNodeWithControllerPose(vtkEventDataDevice::LeftController);
+        updateTransformNodeWithControllerPose(vtkEventDataDevice::RightController);
+      }
 
       this->LastViewUpdateTime->StartTimer();
     }

@@ -45,6 +45,7 @@ public slots:
   void updateViewFromReferenceViewCamera();
   void onDesiredUpdateRateChanged(double);
   void onMotionSensitivityChanged(double);
+  void setControllerTransformsUpdate(bool);
 
 protected slots:
   void updateWidgetFromMRML();

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>344</width>
-    <height>429</height>
+    <height>393</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -75,35 +75,10 @@
       <item row="1" column="1">
        <widget class="ctkCheckBox" name="BackLightsCheckBox"/>
       </item>
-      <item row="4" column="1">
-       <widget class="qMRMLNodeComboBox" name="ReferenceViewNodeComboBox">
-        <property name="nodeTypes">
-         <stringlist>
-          <string>vtkMRMLViewNode</string>
-         </stringlist>
-        </property>
-        <property name="showChildNodeTypes">
-         <bool>false</bool>
-        </property>
-        <property name="addEnabled">
-         <bool>false</bool>
-        </property>
-        <property name="removeEnabled">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="label_5">
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_6">
         <property name="text">
-         <string>Reference view:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0" colspan="2">
-       <widget class="QPushButton" name="UpdateViewFromReferenceViewCameraButton">
-        <property name="text">
-         <string>Set virtual reality view to match reference view.</string>
+         <string>Update rate:</string>
         </property>
        </widget>
       </item>
@@ -126,21 +101,55 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_6">
+      <item row="3" column="0" colspan="2">
+       <widget class="QPushButton" name="UpdateViewFromReferenceViewCameraButton">
         <property name="text">
-         <string>Update rate:</string>
+         <string>Set virtual reality view to match reference view.</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="ctkCollapsibleButton" name="AdvancedCollapsibleButton">
+     <property name="text">
+      <string>Advanced</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout_5">
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Reference view:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="qMRMLNodeComboBox" name="ReferenceViewNodeComboBox">
+        <property name="nodeTypes">
+         <stringlist>
+          <string>vtkMRMLViewNode</string>
+         </stringlist>
+        </property>
+        <property name="showChildNodeTypes">
+         <bool>false</bool>
+        </property>
+        <property name="addEnabled">
+         <bool>false</bool>
+        </property>
+        <property name="removeEnabled">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
        <widget class="QLabel" name="label_7">
         <property name="text">
          <string>Motion sensitivity:</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
+      <item row="2" column="1">
        <widget class="ctkSliderWidget" name="MotionSensitivitySlider">
         <property name="toolTip">
          <string>If no motion of the virtual reality headsets is detected then update rate is decreased to allow higher quality display.</string>
@@ -159,6 +168,20 @@
         </property>
         <property name="suffix">
          <string>%</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_8">
+        <property name="text">
+         <string>Controller transforms:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="ctkCheckBox" name="ControllerTransformsUpdateCheckBox">
+        <property name="toolTip">
+         <string>If checked, then position and orientation of each controller will be exposed in the scene as a transform node</string>
         </property>
        </widget>
       </item>
