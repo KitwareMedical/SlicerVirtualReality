@@ -219,8 +219,6 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
 
   q->updateViewFromReferenceViewCamera();
 
-  this->InteractorStyle->ToggleDrawControls();
-
   this->RenderWindow->Initialize();
   if (!this->RenderWindow->GetHMD())
   {
@@ -463,10 +461,8 @@ void qMRMLVirtualRealityViewPrivate::doOpenVirtualReality()
       this->Camera->GetViewUp(this->LastViewUp);
       this->Camera->GetPosition(this->LastViewPosition);
 
-      int disabledModify = this->MRMLVirtualRealityViewNode->StartModify();
       updateTransformNodeWithControllerPose(vtkEventDataDevice::LeftController);
       updateTransformNodeWithControllerPose(vtkEventDataDevice::RightController);
-      this->MRMLVirtualRealityViewNode->EndModify(disabledModify);
 
       this->LastViewUpdateTime->StartTimer();
     }
@@ -484,10 +480,12 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodeWithControllerPose(vtkEv
     return;
   }
 
+  int disabledModify = node->StartModify();
   if (this->RenderWindow->GetTrackedDeviceIndexForDevice(device) == vr::k_unTrackedDeviceIndexInvalid)
   {
     node->SetAttribute("VirtualReality.ControllerActive", "0");
     node->SetAttribute("VirtualReality.ControllerConnected", "0");
+    node->EndModify(disabledModify);
     return;
   }
 
@@ -515,13 +513,15 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodeWithControllerPose(vtkEv
   double wxyz[4];
   double wdir[3];
   this->Interactor->ConvertPoseToWorldCoordinates(pose, pos, wxyz, ppos, wdir);
-  vtkSmartPointer<vtkTransform> transform = vtkSmartPointer<vtkTransform>::New();
+  vtkNew<vtkTransform> transform;
   transform->Translate(pos);
   transform->RotateWXYZ(wxyz[0], wxyz[1], wxyz[2], wxyz[3]);
   if (node != nullptr)
   {
     node->SetMatrixTransformToParent(transform->GetMatrix());
   }
+
+  node->EndModify(disabledModify);
 }
 
 // --------------------------------------------------------------------------
