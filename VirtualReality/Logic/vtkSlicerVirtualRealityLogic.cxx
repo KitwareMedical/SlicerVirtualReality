@@ -16,11 +16,13 @@
 ==============================================================================*/
 
 // VirtualReality Logic includes
-#include "vtkSlicerVirtualRealityLogic.h"
 #include "vtkMRMLVirtualRealityViewNode.h"
+#include "vtkSlicerVirtualRealityLogic.h"
 
 // MRML includes
+#include <vtkMRMLLinearTransformNode.h>
 #include <vtkMRMLScene.h>
+
 // VTK includes
 #include <vtkIntArray.h>
 #include <vtkNew.h>
@@ -151,6 +153,36 @@ void vtkSlicerVirtualRealityLogic::SetActiveViewNode(vtkMRMLVirtualRealityViewNo
   }
 
   this->GetMRMLNodesObserverManager()->SetAndObserveObject(vtkObjectPointer(&this->ActiveViewNode), vrViewNode);
+
+  if (this->ActiveViewNode == NULL)
+  {
+    this->Modified();
+    return;
+  }
+
+  // We create or get and update the linear transform nodes that correspond to left and right controllers
+  vtkSmartPointer<vtkMRMLLinearTransformNode> linearTransformNode = vtkMRMLLinearTransformNode::SafeDownCast(this->GetMRMLScene()->GetSingletonNode("VirtualReality.LeftController", "vtkMRMLLinearTransformNode"));
+  if (linearTransformNode == NULL)
+  {
+    linearTransformNode = vtkSmartPointer<vtkMRMLLinearTransformNode>::Take(
+      vtkMRMLLinearTransformNode::SafeDownCast(this->GetMRMLScene()->CreateNodeByClass("vtkMRMLLinearTransformNode")));
+    linearTransformNode->SetSingletonTag("VirtualReality.LeftController");
+    linearTransformNode->SetName("VirtualReality.LeftController");
+    this->GetMRMLScene()->AddNode(linearTransformNode);
+  }
+  this->ActiveViewNode->SetAndObserveLeftControllerTransformNode(linearTransformNode);
+
+  // Right
+  linearTransformNode = vtkMRMLLinearTransformNode::SafeDownCast(this->GetMRMLScene()->GetSingletonNode("VirtualReality.RightController", "vtkMRMLLinearTransformNode"));
+  if (linearTransformNode == NULL)
+  {
+    linearTransformNode = vtkSmartPointer<vtkMRMLLinearTransformNode>::Take(
+      vtkMRMLLinearTransformNode::SafeDownCast(this->GetMRMLScene()->CreateNodeByClass("vtkMRMLLinearTransformNode")));
+    linearTransformNode->SetSingletonTag("VirtualReality.RightController");
+    linearTransformNode->SetName("VirtualReality.RightController");
+    this->GetMRMLScene()->AddNode(linearTransformNode);
+  }
+  this->ActiveViewNode->SetAndObserveRightControllerTransformNode(linearTransformNode);
 
   this->Modified();
 }

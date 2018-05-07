@@ -19,10 +19,11 @@
 ==============================================================================*/
 
 // Need to be included before qMRMLVRView_p
-#include <vtkOpenVRRenderer.h>
+#include <vtkOpenVRCamera.h>
+#include <vtkOpenVRInteractorStyle.h>
 #include <vtkOpenVRRenderWindow.h>
 #include <vtkOpenVRRenderWindowInteractor.h>
-#include <vtkOpenVRCamera.h>
+#include <vtkOpenVRRenderer.h>
 
 #include "qMRMLVirtualRealityView_p.h"
 
@@ -59,6 +60,7 @@
 #include <vtkThreeDViewInteractorStyle.h>
 
 // MRML includes
+#include <vtkMRMLLinearTransformNode.h>
 #include <vtkMRMLVirtualRealityViewNode.h>
 #include <vtkMRMLScene.h>
 #include <vtkMRMLCameraNode.h>
@@ -71,14 +73,12 @@
 #include <vtkNew.h>
 #include <vtkOpenGLFramebufferObject.h>
 #include <vtkPolyDataMapper.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderWindowInteractor.h>
 #include <vtkRenderer.h>
 #include <vtkRendererCollection.h>
 #include <vtkSmartPointer.h>
-#include <vtkRenderWindow.h>
-#include <vtkRenderWindowInteractor.h>
 #include <vtkTimerLog.h>
-
-#include "qSlicerApplication.h"
 
 //--------------------------------------------------------------------------
 // qMRMLVirtualRealityViewPrivate methods
@@ -137,6 +137,9 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   this->RenderWindow = vtkSmartPointer<vtkOpenVRRenderWindow>::New();
   this->Renderer = vtkSmartPointer<vtkOpenVRRenderer>::New();
   this->Interactor = vtkSmartPointer<vtkOpenVRRenderWindowInteractor>::New();
+  this->InteractorStyle = vtkSmartPointer<vtkOpenVRInteractorStyle>::New();
+  this->Interactor->SetInteractorStyle(this->InteractorStyle);
+  this->InteractorStyle->SetInteractor(this->Interactor);
   this->Camera = vtkSmartPointer<vtkOpenVRCamera>::New();
   this->Renderer->SetActiveCamera(this->Camera);
 
@@ -149,29 +152,29 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
 
   QStringList displayableManagers;
   displayableManagers //<< "vtkMRMLCameraDisplayableManager"
-                      //<< "vtkMRMLViewDisplayableManager"
-                      << "vtkMRMLModelDisplayableManager"
-                      << "vtkMRMLThreeDReformatDisplayableManager"
-                      << "vtkMRMLCrosshairDisplayableManager3D"
-                      //<< "vtkMRMLOrientationMarkerDisplayableManager" // Not supported in VR
-                      //<< "vtkMRMLRulerDisplayableManager" // Not supported in VR
-                      << "vtkMRMLAnnotationDisplayableManager"
-                      << "vtkMRMLMarkupsFiducialDisplayableManager3D"
-                      << "vtkMRMLSegmentationsDisplayableManager3D"
-                      << "vtkMRMLTransformsDisplayableManager3D"
-                      << "vtkMRMLLinearTransformsDisplayableManager3D"
-                      << "vtkMRMLVolumeRenderingDisplayableManager"
-                      ;
-  foreach(const QString& displayableManager, displayableManagers)
+  //<< "vtkMRMLViewDisplayableManager"
+      << "vtkMRMLModelDisplayableManager"
+      << "vtkMRMLThreeDReformatDisplayableManager"
+      << "vtkMRMLCrosshairDisplayableManager3D"
+      //<< "vtkMRMLOrientationMarkerDisplayableManager" // Not supported in VR
+      //<< "vtkMRMLRulerDisplayableManager" // Not supported in VR
+      << "vtkMRMLAnnotationDisplayableManager"
+      << "vtkMRMLMarkupsFiducialDisplayableManager3D"
+      << "vtkMRMLSegmentationsDisplayableManager3D"
+      << "vtkMRMLTransformsDisplayableManager3D"
+      << "vtkMRMLLinearTransformsDisplayableManager3D"
+      << "vtkMRMLVolumeRenderingDisplayableManager"
+      ;
+  foreach (const QString& displayableManager, displayableManagers)
+  {
+    if (!factory->IsDisplayableManagerRegistered(displayableManager.toLatin1()))
     {
-    if(!factory->IsDisplayableManagerRegistered(displayableManager.toLatin1()))
-      {
       factory->RegisterDisplayableManager(displayableManager.toLatin1());
-      }
     }
+  }
 
   this->DisplayableManagerGroup = vtkSmartPointer<vtkMRMLDisplayableManagerGroup>::Take(
-    factory->InstantiateDisplayableManagers(q->renderer()));
+                                    factory->InstantiateDisplayableManagers(q->renderer()));
   this->DisplayableManagerGroup->SetMRMLDisplayableNode(this->MRMLVirtualRealityViewNode);
 
   qDebug() << "this->DisplayableManagerGroup" << this->DisplayableManagerGroup->GetDisplayableManagerCount();
@@ -218,10 +221,10 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
 
   this->RenderWindow->Initialize();
   if (!this->RenderWindow->GetHMD())
-    {
+  {
     qWarning() << "Failed to initialize OpenVR RenderWindow";
     return;
-    }
+  }
 }
 
 //---------------------------------------------------------------------------
@@ -231,6 +234,7 @@ void qMRMLVirtualRealityViewPrivate::destroyRenderWindow()
   this->VirtualRealityLoopTimer.stop();
   this->RenderWindow = NULL;
   this->Interactor = NULL;
+  this->InteractorStyle = NULL;
   this->DisplayableManagerGroup = NULL;
   this->Renderer = NULL;
   this->Camera = NULL;
@@ -272,15 +276,15 @@ void qMRMLVirtualRealityView::updateViewFromReferenceViewCamera()
   // but that is not usable for us, as it puts the headset in the focal point (so we
   // need to step back to see the full content) and snaps view direction to the closest axis.
 
-  vtkCamera *sourceCamera = cameraNode->GetCamera();
+  vtkCamera* sourceCamera = cameraNode->GetCamera();
 
-  vtkRenderer *ren = static_cast<vtkRenderer *>(d->RenderWindow->GetRenderers()->GetItemAsObject(0));
+  vtkRenderer* ren = static_cast<vtkRenderer*>(d->RenderWindow->GetRenderers()->GetItemAsObject(0));
   if (!ren)
   {
     qWarning() << Q_FUNC_INFO << "The renderer must be set prior to calling InitializeViewFromCamera";
     return;
   }
-  vtkOpenVRCamera *cam = vtkOpenVRCamera::SafeDownCast(ren->GetActiveCamera());
+  vtkOpenVRCamera* cam = vtkOpenVRCamera::SafeDownCast(ren->GetActiveCamera());
   if (!cam)
   {
     qWarning() << Q_FUNC_INFO << "The renderer's active camera must be set prior to calling InitializeViewFromCamera";
@@ -307,7 +311,7 @@ void qMRMLVirtualRealityView::updateViewFromReferenceViewCamera()
 
   double* sourceDirectionOfProjection = sourceCamera->GetDirectionOfProjection();
   d->RenderWindow->SetPhysicalViewDirection(sourceDirectionOfProjection);
-  double *idop = d->RenderWindow->GetPhysicalViewDirection();
+  double* idop = d->RenderWindow->GetPhysicalViewDirection();
   cam->SetPosition(
     -idop[0] * distance + sourcePosition[0],
     -idop[1] * distance + sourcePosition[1],
@@ -321,9 +325,9 @@ void qMRMLVirtualRealityViewPrivate::setMRMLScene(vtkMRMLScene* newScene)
 {
   Q_Q(qMRMLVirtualRealityView);
   if (newScene == this->MRMLScene)
-    {
+  {
     return;
-    }
+  }
   this->MRMLScene = newScene;
 }
 
@@ -332,7 +336,7 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
 {
   Q_Q(qMRMLVirtualRealityView);
   if (!this->MRMLVirtualRealityViewNode
-    || !this->MRMLVirtualRealityViewNode->GetVisibility())
+      || !this->MRMLVirtualRealityViewNode->GetVisibility())
   {
     if (this->RenderWindow != NULL)
     {
@@ -428,23 +432,23 @@ void qMRMLVirtualRealityViewPrivate::doOpenVirtualReality()
         // sensitivity = 0    -> limit = 10.0x
         // sensitivity = 50%  -> limit =  1.0x
         // sensitivity = 100% -> limit =  0.1x
-        double limitScale = pow(100, 0.5-this->MRMLVirtualRealityViewNode->GetMotionSensitivity());
+        double limitScale = pow(100, 0.5 - this->MRMLVirtualRealityViewNode->GetMotionSensitivity());
 
         const double angularSpeedLimitRadiansPerSec = vtkMath::RadiansFromDegrees(5.0 * limitScale);
         double viewDirectionChangeSpeed = vtkMath::AngleBetweenVectors(this->LastViewDirection,
-          this->Camera->GetViewPlaneNormal()) / this->LastViewUpdateTime->GetElapsedTime();
+                                          this->Camera->GetViewPlaneNormal()) / this->LastViewUpdateTime->GetElapsedTime();
         double viewUpDirectionChangeSpeed = vtkMath::AngleBetweenVectors(this->LastViewUp,
-          this->Camera->GetViewUp()) / this->LastViewUpdateTime->GetElapsedTime();
+                                            this->Camera->GetViewUp()) / this->LastViewUpdateTime->GetElapsedTime();
 
         const double translationSpeedLimitMmPerSec = 100.0 * limitScale;
         // Physical scale = 100 if virtual objects are real-world size; <100 if virtual objects are larger
         double viewTranslationSpeedMmPerSec = this->RenderWindow->GetPhysicalScale() * 0.01 *
-          sqrt(vtkMath::Distance2BetweenPoints(this->LastViewPosition, this->Camera->GetPosition()))
-          / this->LastViewUpdateTime->GetElapsedTime();
+                                              sqrt(vtkMath::Distance2BetweenPoints(this->LastViewPosition, this->Camera->GetPosition()))
+                                              / this->LastViewUpdateTime->GetElapsedTime();
 
         if (viewDirectionChangeSpeed < angularSpeedLimitRadiansPerSec
-          && viewUpDirectionChangeSpeed < angularSpeedLimitRadiansPerSec
-          && viewTranslationSpeedMmPerSec  < translationSpeedLimitMmPerSec)
+            && viewUpDirectionChangeSpeed < angularSpeedLimitRadiansPerSec
+            && viewTranslationSpeedMmPerSec  < translationSpeedLimitMmPerSec)
         {
           quickViewMotion = false;
         }
@@ -456,10 +460,68 @@ void qMRMLVirtualRealityViewPrivate::doOpenVirtualReality()
       this->Camera->GetViewPlaneNormal(this->LastViewDirection);
       this->Camera->GetViewUp(this->LastViewUp);
       this->Camera->GetPosition(this->LastViewPosition);
+
+      updateTransformNodeWithControllerPose(vtkEventDataDevice::LeftController);
+      updateTransformNodeWithControllerPose(vtkEventDataDevice::RightController);
+
       this->LastViewUpdateTime->StartTimer();
     }
-
   }
+}
+
+// --------------------------------------------------------------------------
+void qMRMLVirtualRealityViewPrivate::updateTransformNodeWithControllerPose(vtkEventDataDevice device)
+{
+  vtkMRMLLinearTransformNode* node = this->MRMLVirtualRealityViewNode->GetControllerTransformNode(device);
+
+  if (node == NULL)
+  {
+    qCritical() << "Unable to retrieve linear transform node for device: " << (int)device;
+    return;
+  }
+
+  int disabledModify = node->StartModify();
+  if (this->RenderWindow->GetTrackedDeviceIndexForDevice(device) == vr::k_unTrackedDeviceIndexInvalid)
+  {
+    node->SetAttribute("VirtualReality.ControllerActive", "0");
+    node->SetAttribute("VirtualReality.ControllerConnected", "0");
+    node->EndModify(disabledModify);
+    return;
+  }
+
+  vr::TrackedDevicePose_t& pose = this->RenderWindow->GetTrackedDevicePose(this->RenderWindow->GetTrackedDeviceIndexForDevice(device));
+  if (pose.eTrackingResult != vr::TrackingResult_Running_OK)
+  {
+    node->SetAttribute("VirtualReality.ControllerActive", "0");
+  }
+  else
+  {
+    node->SetAttribute("VirtualReality.ControllerActive", "1");
+  }
+
+  if (!pose.bDeviceIsConnected)
+  {
+    node->SetAttribute("VirtualReality.ControllerConnected", "0");
+  }
+  else
+  {
+    node->SetAttribute("VirtualReality.ControllerConnected", "1");
+  }
+
+  double pos[3];
+  double ppos[3];
+  double wxyz[4];
+  double wdir[3];
+  this->Interactor->ConvertPoseToWorldCoordinates(pose, pos, wxyz, ppos, wdir);
+  vtkNew<vtkTransform> transform;
+  transform->Translate(pos);
+  transform->RotateWXYZ(wxyz[0], wxyz[1], wxyz[2], wxyz[3]);
+  if (node != nullptr)
+  {
+    node->SetMatrixTransformToParent(transform->GetMatrix());
+  }
+
+  node->EndModify(disabledModify);
 }
 
 // --------------------------------------------------------------------------
@@ -496,9 +558,9 @@ void qMRMLVirtualRealityView::setMRMLScene(vtkMRMLScene* newScene)
   d->setMRMLScene(newScene);
 
   if (d->MRMLVirtualRealityViewNode && newScene != d->MRMLVirtualRealityViewNode->GetScene())
-    {
+  {
     this->setMRMLVirtualRealityViewNode(0);
-    }
+  }
 }
 
 //---------------------------------------------------------------------------
@@ -506,9 +568,9 @@ void qMRMLVirtualRealityView::setMRMLVirtualRealityViewNode(vtkMRMLVirtualRealit
 {
   Q_D(qMRMLVirtualRealityView);
   if (d->MRMLVirtualRealityViewNode == newViewNode)
-    {
+  {
     return;
-    }
+  }
 
   d->qvtkReconnect(
     d->MRMLVirtualRealityViewNode, newViewNode,
@@ -530,17 +592,17 @@ vtkMRMLVirtualRealityViewNode* qMRMLVirtualRealityView::mrmlVirtualRealityViewNo
 }
 
 //------------------------------------------------------------------------------
-void qMRMLVirtualRealityView::getDisplayableManagers(vtkCollection *displayableManagers)
+void qMRMLVirtualRealityView::getDisplayableManagers(vtkCollection* displayableManagers)
 {
   Q_D(qMRMLVirtualRealityView);
 
   if (!displayableManagers || !d->DisplayableManagerGroup)
-    {
+  {
     return;
-    }
+  }
   int num = d->DisplayableManagerGroup->GetDisplayableManagerCount();
   for (int n = 0; n < num; n++)
-    {
+  {
     displayableManagers->AddItem(d->DisplayableManagerGroup->GetNthDisplayableManager(n));
-    }
+  }
 }
