@@ -338,3 +338,33 @@ void vtkMRMLVirtualRealityViewNode::SetControllerTransformsUpdate(bool enable)
 
   this->Modified();
 }
+
+//----------------------------------------------------------------------------
+bool  vtkMRMLVirtualRealityViewNode::HasError()
+{
+  return !this->LastErrorMessage.empty();
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLVirtualRealityViewNode::ClearError()
+{
+  this->SetError("");
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLVirtualRealityViewNode::SetError(const std::string& errorText)
+{
+  if (this->LastErrorMessage == errorText)
+  {
+    // no change
+    return;
+  }
+  this->LastErrorMessage = errorText;
+  this->Modified();
+}
+
+//----------------------------------------------------------------------------
+std::string vtkMRMLVirtualRealityViewNode::GetError() const
+{
+  return this->LastErrorMessage;
+}

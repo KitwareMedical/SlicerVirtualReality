@@ -2,5 +2,6 @@
   <qresource>
     <file>Icons/VirtualReality.png</file>
     <file>Icons/VirtualRealityHeadset.png</file>
+    <file>Icons/VirtualRealityHeadsetError.png</file>
   </qresource>
 </RCC>

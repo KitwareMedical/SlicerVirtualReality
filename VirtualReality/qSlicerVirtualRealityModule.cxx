@@ -205,14 +205,25 @@ void qSlicerVirtualRealityModulePrivate::updateToolBar()
 
   vtkMRMLVirtualRealityViewNode* vrViewNode = this->logic()->GetVirtualRealityViewNode();
 
+  bool wasBlocked = this->VirtualRealityToggleAction->blockSignals(true);
   if (!vrViewNode)
   {
     this->VirtualRealityToggleAction->setChecked(false);
+    this->VirtualRealityToggleAction->setIcon(QIcon(":/Icons/VirtualRealityHeadset.png"));
   }
   else
   {
     this->VirtualRealityToggleAction->setChecked(vrViewNode->GetVisibility() && vrViewNode->GetActive());
+    if (vrViewNode->HasError())
+    {
+      this->VirtualRealityToggleAction->setIcon(QIcon(":/Icons/VirtualRealityHeadsetError.png"));
+    }
+    else
+    {
+      this->VirtualRealityToggleAction->setIcon(QIcon(":/Icons/VirtualRealityHeadset.png"));
+    }
   }
+  this->VirtualRealityToggleAction->blockSignals(wasBlocked);
 
   this->UpdateViewFromReferenceViewCameraAction->setEnabled(this->VirtualRealityToggleAction->isChecked());
 }
@@ -339,7 +350,9 @@ void qSlicerVirtualRealityModule::onViewNodeModified()
 void qSlicerVirtualRealityModule::enableVirtualReality(bool enable)
 {
   Q_D(qSlicerVirtualRealityModule);
+  QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
   d->logic()->SetVirtualRealityActive(enable);
+  QApplication::restoreOverrideCursor();
 }
 
 // --------------------------------------------------------------------------

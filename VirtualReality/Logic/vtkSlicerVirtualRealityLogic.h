@@ -56,10 +56,12 @@ public:
   /// Connect/disconnect to headset.
   /// Adds virtual reality view node if not added yet.
   void SetVirtualRealityConnected(bool connect);
+  bool GetVirtualRealityConnected();
 
   /// Enable rendering updates in headset.
   /// Connects to device if not yet connected.
   void SetVirtualRealityActive(bool activate);
+  bool GetVirtualRealityActive();
 
   /// Set the first visible 3D view as reference view for
   /// virtual reality view.

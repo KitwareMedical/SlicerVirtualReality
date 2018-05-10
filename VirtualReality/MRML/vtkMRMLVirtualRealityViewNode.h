@@ -130,12 +130,27 @@ public:
   void SetControllerTransformsUpdate(bool enable);
   vtkBooleanMacro(ControllerTransformsUpdate, bool);
 
+  /// Return true if an error has occurred.
+  /// "Connected" member requests connection but this method can tell if the
+  /// hardware connection has been actually successfully established.
+  bool HasError();
+
+  /// Clear error state.
+  void ClearError();
+
+  /// Set error message. Non-empty string means that an error has occurred.
+  void SetError(const std::string& errorText);
+
+/// Get error message. Non-empty string means that an error has occurred.
+  std::string GetError() const;
+
 protected:
   bool TwoSidedLighting;
   bool BackLights;
   double DesiredUpdateRate;
   double MotionSensitivity;
   bool ControllerTransformsUpdate;
+  std::string LastErrorMessage;
 
   vtkMRMLVirtualRealityViewNode();
   ~vtkMRMLVirtualRealityViewNode();

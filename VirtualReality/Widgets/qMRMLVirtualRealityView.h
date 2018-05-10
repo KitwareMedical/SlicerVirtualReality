@@ -94,6 +94,9 @@ public:
   /// matched the camera of the reference view camera.
   Q_INVOKABLE void updateViewFromReferenceViewCamera();
 
+  /// Get underlying RenderWindow
+  Q_INVOKABLE bool isHardwareConnected()const;
+
 public slots:
   /// Set the MRML \a scene that should be listened for events
   /// When the scene is in batch process state, the view blocks all refresh.

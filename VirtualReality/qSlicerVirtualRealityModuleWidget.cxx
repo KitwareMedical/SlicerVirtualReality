@@ -100,6 +100,13 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   d->ConnectCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetVisibility());
   d->ConnectCheckBox->blockSignals(wasBlocked);
 
+  QString errorText;
+  if (vrViewNode && vrViewNode->HasError())
+  {
+    errorText = vrViewNode->GetError().c_str();
+  }
+  d->ConnectionStatusLabel->setText(errorText);
+
   wasBlocked = d->RenderingEnabledCheckBox->blockSignals(true);
   d->RenderingEnabledCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetActive());
   d->RenderingEnabledCheckBox->blockSignals(wasBlocked);
@@ -133,7 +140,6 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   d->ControllerTransformsUpdateCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetControllerTransformsUpdate());
   d->ControllerTransformsUpdateCheckBox->setEnabled(vrViewNode != NULL);
   d->ControllerTransformsUpdateCheckBox->blockSignals(wasBlocked);
-
 
   d->UpdateViewFromReferenceViewCameraButton->setEnabled(vrViewNode != NULL
     && vrViewNode->GetReferenceViewNode() != NULL);

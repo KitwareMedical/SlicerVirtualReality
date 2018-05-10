@@ -342,12 +342,24 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
     {
       this->destroyRenderWindow();
     }
+    if (this->MRMLVirtualRealityViewNode)
+    {
+      this->MRMLVirtualRealityViewNode->ClearError();
+    }
     return;
   }
 
   if (!this->RenderWindow)
   {
+    QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
     this->createRenderWindow();
+    QApplication::restoreOverrideCursor();
+    if (!q->isHardwareConnected())
+    {
+      this->MRMLVirtualRealityViewNode->SetError("Connection failed");
+      return;
+    }
+    this->MRMLVirtualRealityViewNode->ClearError();
   }
 
   if (this->DisplayableManagerGroup->GetMRMLDisplayableNode() != this->MRMLVirtualRealityViewNode.GetPointer())
@@ -409,7 +421,7 @@ double qMRMLVirtualRealityViewPrivate::stillUpdateRate()
 // --------------------------------------------------------------------------
 void qMRMLVirtualRealityViewPrivate::doOpenVirtualReality()
 {
-  if (this->Interactor && this->RenderWindow && this->Renderer)
+  if (this->Interactor && this->RenderWindow && this->RenderWindow->GetHMD() && this->Renderer)
   {
     this->Interactor->DoOneEvent(this->RenderWindow, this->Renderer);
 
@@ -609,4 +621,20 @@ void qMRMLVirtualRealityView::getDisplayableManagers(vtkCollection* displayableM
   {
     displayableManagers->AddItem(d->DisplayableManagerGroup->GetNthDisplayableManager(n));
   }
+}
+
+//------------------------------------------------------------------------------
+bool qMRMLVirtualRealityView::isHardwareConnected()const
+{
+  vtkOpenVRRenderWindow* renWin = this->renderWindow();
+  if (!renWin)
+  {
+    return false;
+  }
+  if (!renWin->GetHMD())
+  {
+    return false;
+  }
+  // connected successfully
+  return true;
 }

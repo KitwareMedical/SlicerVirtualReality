@@ -199,10 +199,28 @@ void vtkSlicerVirtualRealityLogic::SetVirtualRealityConnected(bool connect)
 }
 
 //-----------------------------------------------------------------------------
+bool vtkSlicerVirtualRealityLogic::GetVirtualRealityConnected()
+{
+  if (!this->ActiveViewNode)
+  {
+    return false;
+  }
+  return (this->ActiveViewNode->GetVisibility() != 0);
+}
+
+//-----------------------------------------------------------------------------
 void vtkSlicerVirtualRealityLogic::SetVirtualRealityActive(bool activate)
 {
   if (activate)
   {
+    if (this->GetVirtualRealityConnected()
+      && this->GetVirtualRealityViewNode()
+      && this->GetVirtualRealityViewNode()->HasError())
+    {
+      // If it is connected already but there is an error then disconnect first then reconnect
+      // as the error may be resolved by reconnecting.
+      this->SetVirtualRealityConnected(false);
+    }
     this->SetVirtualRealityConnected(true);
     if (this->ActiveViewNode)
     {
@@ -220,6 +238,16 @@ void vtkSlicerVirtualRealityLogic::SetVirtualRealityActive(bool activate)
       this->ActiveViewNode->SetActive(0);
     }
   }
+}
+
+//-----------------------------------------------------------------------------
+bool vtkSlicerVirtualRealityLogic::GetVirtualRealityActive()
+{
+  if (!this->ActiveViewNode)
+  {
+    return false;
+  }
+  return (this->ActiveViewNode->GetVisibility() != 0 && this->ActiveViewNode->GetActive() != 0);
 }
 
 //---------------------------------------------------------------------------
