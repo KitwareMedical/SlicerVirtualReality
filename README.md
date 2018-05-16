@@ -36,6 +36,8 @@ Note that specifying the top-level build directory of the extension ensures that
 
 ### Useful Python Snippets
 
+Activate virtual reality view:
+
 ```python
 
 import logging
@@ -76,6 +78,17 @@ vrLogic.SetVirtualRealityActive(True)
 assert isVRInitialized() is True
 assert vrCamera() is not None
 
+
+```
+
+Set virtual reality view background color to black:
+
+```python
+
+color = [0,0,0]
+vrView=getNode('VirtualRealityView')
+vrView.SetBackgroundColor(color)
+vrView.SetBackgroundColor2(color)
 
 ```
 
