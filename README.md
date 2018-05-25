@@ -32,6 +32,12 @@ For developers
    ./Slicer.exe  --launcher-additional-settings C:\path\to\SlicerVirtualReality-build\inner-build\AdditionalLauncherSettings.ini --additional-module-paths C:\path\to\SlicerVirtualReality-build\inner-build\
    ```
 
+Alternatively, to avoid the need to specify additional command-line parameters, virtual reality extension can be set up in Slicer by:
+- Copy these files to (SlicerVirtualReality-binary)\inner-build\lib\Slicer-4.9\qt-loadable-modules\Release:
+  - (SlicerVirtualReality-binary)\bin\Release\vtkRenderingOpenVR-9.0.dll
+  - (SlicerVirtualReality-binary)\OpenVR\bin\win64\openvr_api.dll
+- Add (SlicerVirtualReality-binary)\inner-build\lib\Slicer-4.9\qt-loadable-modules\Release folder to additional module paths in Slicer application settings.
+
 Note that specifying the top-level build directory of the extension ensures that Slicer find all types of modules.
 
 ### Useful Python Snippets
