@@ -7,9 +7,10 @@ Extension for 3D slicer that enables user to interact with the 3D scene using vi
 
 The extension works with all OpenVR-compatible headsets, such as [HTC Vive](#setup-htc-vive), all [Windows Mixed Reality headsets](#setup-windows-mixed-reality) (by Acer, Lenovo, HP, etc.), and with [some limitations on Oculus Rift](#setup-oculus-rift).
 
-Selected features:
-- View all content of any of the 3D viewers in Slicer: volumes (as 2D image slices or using volume rendering), surfaces, points, etc.
-- Viewing of 4D data sets (using volume rendering, surface rendering, etc.) using Sequences extension
+Features include:
+- View all content of any of the 3D viewers in Slicer, anytime, by a single click.
+- Show volumes as 2D image slices or volume rendering, render surfaces, points, etc.
+- View any 4D data sets, using any rendering technique (including volume rendering) - provided by Sequences extension
 - Align the headset's view to match viewpoint of the selected 3D view in Slicer
 - Fly around using the touchpad of the right controller: direction is specified by orientation of the controller; speed is determined by the position of the finger on the touchpad. Currently not supported on Oculus Rift (#28).
 - Grab and reposition objects using the trigger on the right controller. Experimental (#12). Currently not supported on Oculus Rift (#28).
