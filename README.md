@@ -7,6 +7,14 @@ Extension for 3D slicer that enables user to interact with the 3D scene using vi
 
 The extension works with all OpenVR-compatible headsets, such as [HTC Vive](#setup-htc-vive), all [Windows Mixed Reality headsets](#setup-windows-mixed-reality) (by Acer, Lenovo, HP, etc.), and with [some limitations on Oculus Rift](#setup-oculus-rift).
 
+Selected features:
+- View all content of any of the 3D viewers in Slicer: volumes (as 2D image slices or using volume rendering), surfaces, points, etc.
+- Viewing of 4D data sets (using volume rendering, surface rendering, etc.) using Sequences extension
+- Align the headset's view to match viewpoint of the selected 3D view in Slicer
+- Fly around using the touchpad of the right controller: direction is specified by orientation of the controller; speed is determined by the position of the finger on the touchpad. Currently not supported on Oculus Rift (#28).
+- Grab and reposition objects using the trigger on the right controller. Experimental (#12). Currently not supported on Oculus Rift (#28).
+- Advanced volume rendering performance tuning: available in Virtual Reality module, to find good balance between image quality and refresh rate.
+
 Feature set of the extension is continuously improved. You can give us feedback and propose ideas for improvements by submitting them on the [issue tracker](https://github.com/KitwareMedical/SlicerVirtualReality/issues).
 
 Frequently Asked Questions
@@ -39,7 +47,7 @@ Frequently Asked Questions
   - Start Oculus app (put on the headset for a moment and it will be started)
   - Click the "Show scene in virtual reality" button <img src="https://github.com/KitwareMedical/SlicerVirtualReality/raw/master/VirtualReality/Resources/Icons/VirtualRealityHeadset.png" width="24"> on the toolbar in Slicer.
 
-Currently, a limitation is that [Oculus Rift controllers are not supported](https://github.com/KitwareMedical/SlicerVirtualReality/issues/28), so the user can see and explore the scene in 3D but cannot fly or manipulate objects.
+Currently, a limitation is that [Oculus Rift controllers are not supported](https://github.com/KitwareMedical/SlicerVirtualReality/issues/28), so the user can see and explore the scene in 3D but can only change the viewpoint by physically moving (not by flying using the controllers) and cannot grab and reposition objects.
 
 ### How to record virtual reality videos?
 
