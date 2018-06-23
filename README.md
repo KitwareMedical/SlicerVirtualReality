@@ -53,9 +53,7 @@ Currently, a limitation is that [Oculus Rift controllers are not supported](http
 
 Enable screen mirroring in SteamVR and use the free of [OBS Studio](https://obsproject.com/) software to capture VR headset content, application window, webcam, etc.
 
-### How to avoid crashes when recording video of OpenVR with VolumeRendering enabled?
-
-[OBS Studio](https://obsproject.com/) crashes if NVidia hardware-based compression is used. If CPU-based video compression option is chosen then recording works well.
+Note that [OBS Studio](https://obsproject.com/) may crash if NVidia hardware-based compression is used. If this happens, choose CPU-based video compression option for recording.
 
 For developers
 --------------
