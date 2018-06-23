@@ -14,6 +14,7 @@ Selected features:
 - Fly around using the touchpad of the right controller: direction is specified by orientation of the controller; speed is determined by the position of the finger on the touchpad. Currently not supported on Oculus Rift (#28).
 - Grab and reposition objects using the trigger on the right controller. Experimental (#12). Currently not supported on Oculus Rift (#28).
 - Advanced volume rendering performance tuning: available in Virtual Reality module, to find good balance between image quality and refresh rate.
+- Make position of controllers available as transforms in the Slicer scene. These transforms can be used in custom modules to reslice volumes (using Volume Reslice Driver module in SlicerIGT extension) or transform any nodes in the scene.
 
 Feature set of the extension is continuously improved. You can give us feedback and propose ideas for improvements by submitting them on the [issue tracker](https://github.com/KitwareMedical/SlicerVirtualReality/issues).
 
