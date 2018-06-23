@@ -5,29 +5,33 @@ Extension for 3D slicer that enables user to interact with the 3D scene using vi
 
 ![](SlicerVirtualReality.png)
 
-The extension works with all OpenVR-compatible headsets, such as [HTC Vive](#setup-htc-vive), all [Windows Mixed Reality headsets](#setup-windows-mixed-reality) (by Acer, Lenovo, HP, etc.), and with [some limitations on Oculus Rift](#setup-oculus-rift). 
+The extension works with all OpenVR-compatible headsets, such as [HTC Vive](#setup-htc-vive), all [Windows Mixed Reality headsets](#setup-windows-mixed-reality) (by Acer, Lenovo, HP, etc.), and with [some limitations on Oculus Rift](#setup-oculus-rift).
+
+Feature set of the extension is continuously improved. You can give us feedback and propose ideas for improvements by submitting them on the [issue tracker](https://github.com/KitwareMedical/SlicerVirtualReality/issues).
 
 Frequently Asked Questions
 --------------------------
 
-### How to set up my HTC Vive headset
 <a name="setup-htc-vive" />
+
+### How to set up my HTC Vive headset
 
 - Install Steam and SteamVR and set up your headset (you should be able to see SteanVR home application running in your headset).
 - Install Slicer and SlicerVirtualReality extension.
 - To see content of content of the 3D view in your headset: click "Show scene in virtual reality" button <img src="https://github.com/KitwareMedical/SlicerVirtualReality/raw/master/VirtualReality/Resources/Icons/VirtualRealityHeadset.png" width="24"> on the toolbar in Slicer.
 
-### How to set up my Windows Mixed Reality headset
 <a name="setup-windows-mixed-reality" />
+
+### How to set up my Windows Mixed Reality headset
 
 - Install Steam and SteamVR and set up your headset.
 - Set up [Windows Mixed Reality for SteamVR](https://docs.microsoft.com/en-us/windows/mixed-reality/enthusiast-guide/using-steamvr-with-windows-mixed-reality) (you should be able to see SteanVR home application running in your headset).
 - Install Slicer and SlicerVirtualReality extension.
 - To see content of content of the 3D view in your headset: click "Show scene in virtual reality" button <img src="https://github.com/KitwareMedical/SlicerVirtualReality/raw/master/VirtualReality/Resources/Icons/VirtualRealityHeadset.png" width="24"> on the toolbar in Slicer.
 
+<a name="setup-oculus-rift" />
 
 ### How to set up my Oculus Rift headset
-<a name="setup-oculus-rift" />
 
 - Install Steam and SteamVR and set up your headset to work with SteamVR.
 - Install Slicer and SlicerVirtualReality extension.
