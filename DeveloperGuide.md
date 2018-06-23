@@ -1,7 +1,7 @@
 Information for developers
 ==========================
 
-**This Slicer extension is in active development. The API may change from version to version without notice.**
+This Slicer extension is in active development. The API may change from version to version without notice.
 
 Build instructions
 ------------------
