@@ -63,6 +63,9 @@ else()
 endif()
 
 #-----------------------------------------------------------------------------
-set(CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${CMAKE_BINARY_DIR};${EXTENSION_NAME};ALL;/")
-set(CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${VTKRenderingOpenVR_DIR};VTKRenderingOpenVR;RuntimeLibraries;/")
-include(${Slicer_EXTENSION_CPACK})
+set(SlicerVirtualReality_CPACK_INSTALL_CMAKE_PROJECTS "${VTKRenderingOpenVR_DIR};VTKRenderingOpenVR;RuntimeLibraries;/" CACHE STRING "List of CMake projects to install" FORCE)
+if (NOT Slicer_SOURCE_DIR)
+  set(CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${CMAKE_BINARY_DIR};${EXTENSION_NAME};ALL;/")
+  set(CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${SlicerVirtualReality_CPACK_INSTALL_CMAKE_PROJECTS}")
+  include(${Slicer_EXTENSION_CPACK})
+endif()
