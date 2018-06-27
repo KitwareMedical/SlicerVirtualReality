@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>344</width>
-    <height>393</height>
+    <width>386</width>
+    <height>543</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,14 +15,14 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="ctkCollapsibleButton" name="ConnectionCollapsibleButton">
+    <widget class="ctkCollapsibleButton" name="ConnectionCollapsibleButton" native="true">
      <property name="minimumSize">
       <size>
        <width>300</width>
        <height>0</height>
       </size>
      </property>
-     <property name="text">
+     <property name="text" stdset="0">
       <string>Connection</string>
      </property>
      <layout class="QFormLayout" name="formLayout_4">
@@ -104,8 +104,8 @@
     </widget>
    </item>
    <item>
-    <widget class="ctkCollapsibleButton" name="DisplayCollapsibleButton">
-     <property name="text">
+    <widget class="ctkCollapsibleButton" name="DisplayCollapsibleButton" native="true">
+     <property name="text" stdset="0">
       <string>Display</string>
      </property>
      <layout class="QFormLayout" name="formLayout_3">
@@ -137,20 +137,20 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="ctkSliderWidget" name="DesiredUpdateRateSlider">
+       <widget class="ctkSliderWidget" name="DesiredUpdateRateSlider" native="true">
         <property name="toolTip">
          <string>Desired update rate of the view. Higher value reduces time lag but may decrease display quality of volume rendering. It has only effect if volume rendering quality setting is Adaptive.</string>
         </property>
-        <property name="decimals">
+        <property name="decimals" stdset="0">
          <number>0</number>
         </property>
-        <property name="maximum">
+        <property name="maximum" stdset="0">
          <double>120.000000000000000</double>
         </property>
-        <property name="value">
+        <property name="value" stdset="0">
          <double>60.000000000000000</double>
         </property>
-        <property name="suffix">
+        <property name="suffix" stdset="0">
          <string> fps</string>
         </property>
        </widget>
@@ -166,8 +166,8 @@
     </widget>
    </item>
    <item>
-    <widget class="ctkCollapsibleButton" name="AdvancedCollapsibleButton">
-     <property name="text">
+    <widget class="ctkCollapsibleButton" name="AdvancedCollapsibleButton" native="true">
+     <property name="text" stdset="0">
       <string>Advanced</string>
      </property>
      <layout class="QFormLayout" name="formLayout_5">
@@ -179,19 +179,19 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="qMRMLNodeComboBox" name="ReferenceViewNodeComboBox">
-        <property name="nodeTypes">
+       <widget class="qMRMLNodeComboBox" name="ReferenceViewNodeComboBox" native="true">
+        <property name="nodeTypes" stdset="0">
          <stringlist>
           <string>vtkMRMLViewNode</string>
          </stringlist>
         </property>
-        <property name="showChildNodeTypes">
+        <property name="showChildNodeTypes" stdset="0">
          <bool>false</bool>
         </property>
-        <property name="addEnabled">
+        <property name="addEnabled" stdset="0">
          <bool>false</bool>
         </property>
-        <property name="removeEnabled">
+        <property name="removeEnabled" stdset="0">
          <bool>false</bool>
         </property>
        </widget>
@@ -204,38 +204,96 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="ctkSliderWidget" name="MotionSensitivitySlider">
+       <widget class="ctkSliderWidget" name="MotionSensitivitySlider" native="true">
         <property name="toolTip">
          <string>If no motion of the virtual reality headsets is detected then update rate is decreased to allow higher quality display.</string>
         </property>
-        <property name="decimals">
+        <property name="decimals" stdset="0">
          <number>0</number>
         </property>
-        <property name="minimum">
+        <property name="minimum" stdset="0">
          <double>0.000000000000000</double>
         </property>
-        <property name="maximum">
+        <property name="maximum" stdset="0">
          <double>100.000000000000000</double>
         </property>
-        <property name="value">
+        <property name="value" stdset="0">
          <double>50.000000000000000</double>
         </property>
-        <property name="suffix">
+        <property name="suffix" stdset="0">
          <string>%</string>
         </property>
        </widget>
       </item>
       <item row="3" column="0">
-       <widget class="QLabel" name="label_8">
+       <widget class="QLabel" name="label_9">
         <property name="text">
-         <string>Controller transforms:</string>
+         <string>Physical Scale:</string>
         </property>
        </widget>
       </item>
       <item row="3" column="1">
+       <widget class="ctkSliderWidget" name="PhysicalScaleSlider" native="true">
+        <property name="toolTip">
+         <string> n/a </string>
+        </property>
+        <property name="decimals" stdset="0">
+         <number>0</number>
+        </property>
+        <property name="minimum" stdset="0">
+         <double>0.000000000000000</double>
+        </property>
+        <property name="maximum" stdset="0">
+         <double>1000.000000000000000</double>
+        </property>
+        <property name="value" stdset="0">
+         <double>10.000000000000000</double>
+        </property>
+        <property name="suffix" stdset="0">
+         <string>%</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>Motion Speed:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="ctkSliderWidget" name="MotionSpeedSlider" native="true">
+        <property name="toolTip">
+         <string>Changes the speed of the dolly's physical translation</string>
+        </property>
+        <property name="decimals" stdset="0">
+         <number>0</number>
+        </property>
+        <property name="minimum" stdset="0">
+         <double>0.000000000000000</double>
+        </property>
+        <property name="maximum" stdset="0">
+         <double>100.000000000000000</double>
+        </property>
+        <property name="value" stdset="0">
+         <double>50.000000000000000</double>
+        </property>
+        <property name="suffix" stdset="0">
+         <string>%</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
        <widget class="ctkCheckBox" name="ControllerTransformsUpdateCheckBox">
         <property name="toolTip">
          <string>If checked, then position and orientation of each controller will be exposed in the scene as a transform node</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="label_8">
+        <property name="text">
+         <string>Controller transforms:</string>
         </property>
        </widget>
       </item>
@@ -299,8 +357,8 @@
      <y>145</y>
     </hint>
     <hint type="destinationlabel">
-     <x>192</x>
-     <y>216</y>
+     <x>322</x>
+     <y>198</y>
     </hint>
    </hints>
   </connection>

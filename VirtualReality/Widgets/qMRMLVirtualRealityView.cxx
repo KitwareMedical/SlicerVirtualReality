@@ -25,6 +25,7 @@
 #include <vtkOpenVRRenderWindow.h>
 #include <vtkOpenVRRenderWindowInteractor.h>
 #include <vtkOpenVRRenderer.h>
+#include <vtkInteractorStyle3D.h> 
 
 #include "qMRMLVirtualRealityView_p.h"
 
@@ -53,6 +54,11 @@
 #include "qSlicerLayoutManager.h"
 #include "vtkSlicerConfigure.h" // For Slicer_USE_OpenVR
 #include <vtkSlicerCamerasModuleLogic.h>
+
+// VirtualReality includes
+#include "vtkMRMLVirtualRealityViewNode.h"
+
+
 
 // MRMLDisplayableManager includes
 #include <vtkMRMLAbstractDisplayableManager.h>
@@ -291,11 +297,8 @@ void qMRMLVirtualRealityView::updateViewFromReferenceViewCamera()
     qWarning() << Q_FUNC_INFO << "The renderer's active camera must be set prior to calling InitializeViewFromCamera";
     return;
   }
-
-  double distance =
-    sin(vtkMath::RadiansFromDegrees(sourceCamera->GetViewAngle()) / 2.0) *
-    sourceCamera->GetDistance() /
-    sin(vtkMath::RadiansFromDegrees(cam->GetViewAngle()) / 2.0);
+  
+  double distance = 100; //no particular reason for this value. 
 
   double* sourceViewUp = sourceCamera->GetViewUp();
   cam->SetViewUp(sourceViewUp);
@@ -308,7 +311,6 @@ void qMRMLVirtualRealityView::updateViewFromReferenceViewCamera()
     viewUp[0] * distance - sourcePosition[0],
     viewUp[1] * distance - sourcePosition[1],
     viewUp[2] * distance - sourcePosition[2]);
-  d->RenderWindow->SetPhysicalScale(distance);
 
   double* sourceDirectionOfProjection = sourceCamera->GetDirectionOfProjection();
   d->RenderWindow->SetPhysicalViewDirection(sourceDirectionOfProjection);
@@ -324,6 +326,7 @@ void qMRMLVirtualRealityView::updateViewFromReferenceViewCamera()
 // --------------------------------------------------------------------------
 void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
 {
+
   Q_Q(qMRMLVirtualRealityView);
   if (!this->MRMLVirtualRealityViewNode
       || !this->MRMLVirtualRealityViewNode->GetVisibility())
@@ -375,6 +378,29 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
     this->RenderWindow->SetDesiredUpdateRate(this->desiredUpdateRate());
   }
 
+  if (this->RenderWindow)
+  {
+    double PhysicalScale = this->MRMLVirtualRealityViewNode->GetPhysicalScale()*100;
+    if (PhysicalScale == 0)   
+    {  
+      PhysicalScale = 1;
+      this->RenderWindow->SetPhysicalScale(PhysicalScale);
+    }else
+    {
+    this->RenderWindow->SetPhysicalScale(PhysicalScale);
+    }  
+  }
+
+  if (this->RenderWindow)
+  {
+    double DollyPhysicalSpeed = this ->MRMLVirtualRealityViewNode->GetMotionSpeed();
+    vtkInteractorStyle3D *is =
+      static_cast<vtkInteractorStyle3D *>(RenderWindow->GetInteractor()->GetInteractorStyle());
+      //the value 120000 was chosen because the slider uses a scale from 0 to 1
+      //when the dolly speed is set to 60,000, it seems to have a reasonable speed.
+      //the default slider value is 0.5. 
+      is->SetDollyPhysicalSpeed(DollyPhysicalSpeed*120000); 
+  }
   if (this->MRMLVirtualRealityViewNode->GetActive())
   {
     this->VirtualRealityLoopTimer.start(0);

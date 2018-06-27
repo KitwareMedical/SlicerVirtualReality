@@ -121,6 +121,14 @@ public:
   vtkGetMacro(DesiredUpdateRate, double);
   vtkSetMacro(DesiredUpdateRate, double);
 
+  // scale of actors (0.0 - 1.0)
+  vtkGetMacro(PhysicalScale,double);
+  vtkSetMacro(PhysicalScale,double);
+
+  //Slider to configure dolly physical speed (between 0.0 and 1.0)/
+  vtkGetMacro(MotionSpeed,double);
+  vtkSetMacro(MotionSpeed,double);
+
   /// Motion sensitivity (between 0.0 and 1.0).
   /// If virtual reality headset is not moving then update rate
   /// is decreased to allow higher quality rendering.
@@ -150,6 +158,8 @@ protected:
   bool TwoSidedLighting;
   bool BackLights;
   double DesiredUpdateRate;
+  double PhysicalScale;
+  double MotionSpeed;
   double MotionSensitivity;
   bool ControllerTransformsUpdate;
   std::string LastErrorMessage;

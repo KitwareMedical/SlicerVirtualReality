@@ -45,6 +45,8 @@ public slots:
   void updateViewFromReferenceViewCamera();
   void onDesiredUpdateRateChanged(double);
   void onMotionSensitivityChanged(double);
+  void onMotionSpeedChanged(double);
+  void onPhysicalScaleChanged(double); 
   void setControllerTransformsUpdate(bool);
 
 protected slots:
