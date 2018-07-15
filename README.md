@@ -26,7 +26,7 @@ Frequently Asked Questions
 
 ### How to set up my HTC Vive headset
 
-- Install Steam and SteamVR and set up your headset (you should be able to see SteanVR home application running in your headset).
+- Install [Steam](http://store.steampowered.com/about/) and [SteamVR](https://store.steampowered.com/steamvr) and set up your headset (you should be able to see SteanVR home application running in your headset).
 - Install Slicer and SlicerVirtualReality extension.
 - To see content of content of the 3D view in your headset: click "Show scene in virtual reality" button <img src="https://github.com/KitwareMedical/SlicerVirtualReality/raw/master/VirtualReality/Resources/Icons/VirtualRealityHeadset.png" width="24"> on the toolbar in Slicer.
 
