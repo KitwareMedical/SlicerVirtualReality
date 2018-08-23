@@ -45,6 +45,14 @@ find_package(VTK COMPONENTS vtkRenderingOpenVR REQUIRED)
 ")
 include(${Slicer_EXTENSION_GENERATE_CONFIG})
 
+# Generate convenience files
+IF(WIN32)
+  CONFIGURE_FILE(
+    ${CMAKE_CURRENT_SOURCE_DIR}/StartSlicerWithPaths.bat.in
+    ${CMAKE_CURRENT_BINARY_DIR}/StartSlicerWithPaths.bat
+    )
+ENDIF()
+
 #-----------------------------------------------------------------------------
 # Install OpenVR
 set(_platform)
