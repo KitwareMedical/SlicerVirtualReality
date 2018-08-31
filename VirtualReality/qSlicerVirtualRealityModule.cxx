@@ -335,11 +335,11 @@ void qSlicerVirtualRealityModule::onViewNodeModified()
   if (d->VirtualRealityViewWidget != NULL)
   {
     vtkMRMLVirtualRealityViewNode* oldVrViewNode = d->VirtualRealityViewWidget->mrmlVirtualRealityViewNode();
-    d->VirtualRealityViewWidget->setMRMLVirtualRealityViewNode(vrViewNode);
     if (oldVrViewNode != vrViewNode)
     {
       d->logic()->SetDefaultReferenceView();
     }
+    d->VirtualRealityViewWidget->setMRMLVirtualRealityViewNode(vrViewNode);
   }
 
   // Update toolbar

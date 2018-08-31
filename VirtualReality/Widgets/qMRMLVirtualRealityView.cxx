@@ -20,7 +20,8 @@
 
 // Need to be included before qMRMLVRView_p
 #include <vtkOpenVRCamera.h>
-#include <vtkOpenVRInteractorStyle.h>
+#include <vtkVirtualRealityViewInteractorStyle.h>
+//#include <vtkOpenVRInteractorStyle.h> //TODO: For debugging the original interactor
 #include <vtkOpenVRRenderWindow.h>
 #include <vtkOpenVRRenderWindowInteractor.h>
 #include <vtkOpenVRRenderer.h>
@@ -137,7 +138,8 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   this->RenderWindow = vtkSmartPointer<vtkOpenVRRenderWindow>::New();
   this->Renderer = vtkSmartPointer<vtkOpenVRRenderer>::New();
   this->Interactor = vtkSmartPointer<vtkOpenVRRenderWindowInteractor>::New();
-  this->InteractorStyle = vtkSmartPointer<vtkOpenVRInteractorStyle>::New();
+  this->InteractorStyle = vtkSmartPointer<vtkVirtualRealityViewInteractorStyle>::New();
+  //this->InteractorStyle = vtkSmartPointer<vtkOpenVRInteractorStyle>::New(); //TODO: For debugging the original interactor
   this->Interactor->SetInteractorStyle(this->InteractorStyle);
   this->InteractorStyle->SetInteractor(this->Interactor);
   this->Camera = vtkSmartPointer<vtkOpenVRCamera>::New();
@@ -176,6 +178,7 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   this->DisplayableManagerGroup = vtkSmartPointer<vtkMRMLDisplayableManagerGroup>::Take(
                                     factory->InstantiateDisplayableManagers(q->renderer()));
   this->DisplayableManagerGroup->SetMRMLDisplayableNode(this->MRMLVirtualRealityViewNode);
+  this->InteractorStyle->SetDisplayableManagerGroup(this->DisplayableManagerGroup);
 
   qDebug() << "this->DisplayableManagerGroup" << this->DisplayableManagerGroup->GetDisplayableManagerCount();
 

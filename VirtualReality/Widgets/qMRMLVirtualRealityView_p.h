@@ -53,7 +53,7 @@ class vtkMRMLCameraNode;
 class vtkMRMLDisplayableManagerGroup;
 class vtkMRMLVirtualRealityViewNode;
 class vtkObject;
-class vtkOpenVRInteractorStyle;
+class vtkVirtualRealityViewInteractorStyle;
 class vtkTimerLog;
 
 //-----------------------------------------------------------------------------
@@ -94,7 +94,7 @@ protected:
   vtkSmartPointer<vtkOpenVRRenderer> Renderer;
   vtkSmartPointer<vtkOpenVRRenderWindow> RenderWindow;
   vtkSmartPointer<vtkOpenVRRenderWindowInteractor> Interactor;
-  vtkSmartPointer<vtkOpenVRInteractorStyle> InteractorStyle;
+  vtkSmartPointer<vtkVirtualRealityViewInteractorStyle> InteractorStyle;
   vtkSmartPointer<vtkOpenVRCamera> Camera;
   vtkSmartPointer<vtkLightCollection> Lights;
 
