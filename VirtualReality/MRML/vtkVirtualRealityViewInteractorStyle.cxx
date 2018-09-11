@@ -60,13 +60,11 @@ public:
   ~vtkInternal();
 
 public:
-  vtkWeakPointer<vtkMRMLDisplayableNode> PickedNode;
-
-  /**
-  * Store required controllers information when performing action
-  */
+  // Store required controllers information when performing action
   int InteractionState[vtkEventDataNumberOfDevices];
-  vtkWeakPointer<vtkMRMLDisplayableNode> PickedNodes[vtkEventDataNumberOfDevices];
+
+  vtkWeakPointer<vtkMRMLDisplayableNode> PickedNode[vtkEventDataNumberOfDevices];
+
   //vtkPlane* ClippingPlanes[vtkEventDataNumberOfDevices];
 };
 
@@ -76,12 +74,10 @@ public:
 //---------------------------------------------------------------------------
 vtkVirtualRealityViewInteractorStyle::vtkInternal::vtkInternal()
 {
-  this->PickedNode = nullptr;
-
   for (int d = 0; d < vtkEventDataNumberOfDevices; ++d)
   {
     this->InteractionState[d] = VTKIS_NONE;
-    this->PickedNodes[d] = nullptr;
+    this->PickedNode[d] = nullptr;
     //this->ClippingPlanes[d] = nullptr;
   }
 }
@@ -112,9 +108,12 @@ vtkVirtualRealityViewInteractorStyle::vtkVirtualRealityViewInteractorStyle()
 
   // Create default inputs mapping
   this->MapInputToAction(vtkEventDataDevice::RightController,
-    vtkEventDataDeviceInput::Trigger, VTKIS_POSITION_PROP);
+    vtkEventDataDeviceInput::Grip, VTKIS_POSITION_PROP);
   this->MapInputToAction(vtkEventDataDevice::RightController,
     vtkEventDataDeviceInput::TrackPad, VTKIS_DOLLY);
+
+  this->MapInputToAction(vtkEventDataDevice::LeftController,
+    vtkEventDataDeviceInput::Grip, VTKIS_POSITION_PROP);
 }
 
 //----------------------------------------------------------------------------
@@ -143,9 +142,6 @@ void vtkVirtualRealityViewInteractorStyle::OnMove3D(vtkEventData* edata)
     return;
   }
   int idev = static_cast<int>(edd->GetDevice());
-
-  // Set current state and interaction prop
-  this->Internal->PickedNode = this->Internal->PickedNodes[idev];
 
   // Update current state
   int x = this->Interactor->GetEventPosition()[0];
@@ -214,7 +210,15 @@ void vtkVirtualRealityViewInteractorStyle::OnButton3D(vtkEventData* edata)
 //----------------------------------------------------------------------------
 void vtkVirtualRealityViewInteractorStyle::PositionProp(vtkEventData* ed)
 {
-  if ( this->Internal->PickedNode == nullptr || !this->Internal->PickedNode->GetSelectable()
+  vtkEventDataDevice3D *edd = ed->GetAsEventDataDevice3D();
+  if (!edd)
+  {
+    return;
+  }
+  int deviceIndex = static_cast<int>(edd->GetDevice());
+  vtkMRMLDisplayableNode* pickedNode = this->Internal->PickedNode[deviceIndex];
+
+  if ( pickedNode == nullptr || !pickedNode->GetSelectable()
     || this->CurrentRenderer == nullptr || !this->DisplayableManagerGroup )
   {
     return;
@@ -226,7 +230,6 @@ void vtkVirtualRealityViewInteractorStyle::PositionProp(vtkEventData* ed)
   }
 
   // Get positions and orientations
-  vtkEventDataDevice3D *edd = static_cast<vtkEventDataDevice3D*>(ed);
   vtkRenderWindowInteractor3D* rwi = static_cast<vtkRenderWindowInteractor3D*>(this->Interactor);
   double worldPos[3] = {0.0};
   edd->GetWorldPosition(worldPos);
@@ -257,7 +260,7 @@ void vtkVirtualRealityViewInteractorStyle::PositionProp(vtkEventData* ed)
   interactionTransform->Translate(translation[0], translation[1], translation[2]);
 
   // Make sure that the topmost parent transform is the VR interaction transform
-  vtkMRMLTransformNode* topTransformNode = this->Internal->PickedNode->GetParentTransformNode();
+  vtkMRMLTransformNode* topTransformNode = pickedNode->GetParentTransformNode();
   while (topTransformNode && topTransformNode->GetParentTransformNode())
   {
     topTransformNode = topTransformNode->GetParentTransformNode();
@@ -268,18 +271,18 @@ void vtkVirtualRealityViewInteractorStyle::PositionProp(vtkEventData* ed)
   {
     // Create interaction transform if not found
     vtkNew<vtkMRMLTransformNode> newTransformNode;
-    std::string vrTransformNodeName(this->Internal->PickedNode->GetName());
+    std::string vrTransformNodeName(pickedNode->GetName());
     vrTransformNodeName.append("_VR_Interaction_Transform");
     newTransformNode->SetName(vrTransformNodeName.c_str());
     newTransformNode->SetAttribute(vtkMRMLVirtualRealityViewNode::GetVirtualRealityInteractionTransformAttributeName(), "1");
-    this->Internal->PickedNode->GetScene()->AddNode(newTransformNode);
+    pickedNode->GetScene()->AddNode(newTransformNode);
     if (topTransformNode)
     {
       topTransformNode->SetAndObserveTransformNodeID(newTransformNode->GetID());
     }
     else
     {
-      this->Internal->PickedNode->SetAndObserveTransformNodeID(newTransformNode->GetID());
+      pickedNode->SetAndObserveTransformNodeID(newTransformNode->GetID());
     }
     vrTransformNode = newTransformNode.GetPointer();
   }
@@ -294,7 +297,7 @@ void vtkVirtualRealityViewInteractorStyle::PositionProp(vtkEventData* ed)
   if (vrTransformNode->GetTransformToParent() && !lastVrInteractionTransform)
   {
     //TODO: Remove constraint
-    vtkErrorMacro("PositionProp: Node " << this->Internal->PickedNode->GetName() << " contains non-linear transform");
+    vtkErrorMacro("PositionProp: Node " << pickedNode->GetName() << " contains non-linear transform");
     return;
   }
   // Use the interaction transform with the flattened matrix to prevent concatenation
@@ -326,6 +329,8 @@ void vtkVirtualRealityViewInteractorStyle::StartPositionProp(vtkEventDataDevice3
     return;
   }
 
+  int deviceIndex = static_cast<int>(edata->GetDevice());
+
   double pos[3] = {0.0};
   edata->GetWorldPosition(pos);
 
@@ -346,16 +351,16 @@ void vtkVirtualRealityViewInteractorStyle::StartPositionProp(vtkEventDataDevice3
     {
       continue;
     }
-    this->Internal->PickedNode = displayNode->GetDisplayableNode();
+    //TODO: Only the first picked node in the last displayable manager will be picked
+    this->Internal->PickedNode[deviceIndex] = displayNode->GetDisplayableNode();
   }
 
-  this->Internal->InteractionState[static_cast<int>(edata->GetDevice())] = VTKIS_POSITION_PROP;
-  this->Internal->PickedNodes[static_cast<int>(edata->GetDevice())] = this->Internal->PickedNode;
+  this->Internal->InteractionState[deviceIndex] = VTKIS_POSITION_PROP;
 
   // Don't start action if a controller is already positioning the prop
   int rc = static_cast<int>(vtkEventDataDevice::RightController);
   int lc = static_cast<int>(vtkEventDataDevice::LeftController);
-  if (this->Internal->PickedNodes[rc] == this->Internal->PickedNodes[lc])
+  if (this->Internal->PickedNode[rc] == this->Internal->PickedNode[lc])
   {
     this->EndPositionProp(edata);
     return;
@@ -370,9 +375,9 @@ void vtkVirtualRealityViewInteractorStyle::StartPositionProp(vtkEventDataDevice3
 //----------------------------------------------------------------------------
 void vtkVirtualRealityViewInteractorStyle::EndPositionProp(vtkEventDataDevice3D* edata)
 {
-  vtkEventDataDevice dev = edata->GetDevice();
-  this->Internal->InteractionState[static_cast<int>(dev)] = VTKIS_NONE;
-  this->Internal->PickedNodes[static_cast<int>(dev)] = nullptr;
+  int deviceIndex = static_cast<int>(edata->GetDevice());
+  this->Internal->InteractionState[deviceIndex] = VTKIS_NONE;
+  this->Internal->PickedNode[deviceIndex] = nullptr;
 }
 
 //----------------------------------------------------------------------------
