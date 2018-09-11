@@ -31,6 +31,8 @@ class VTK_SLICER_VIRTUALREALITY_MODULE_MRML_EXPORT vtkMRMLVirtualRealityViewNode
   : public vtkMRMLViewNode
 {
 public:
+  static const char* GetVirtualRealityInteractionTransformAttributeName() { return "VirtualReality.InteractionTransform"; }; 
+
   static vtkMRMLVirtualRealityViewNode *New();
   vtkTypeMacro(vtkMRMLVirtualRealityViewNode,vtkMRMLViewNode);
   void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;

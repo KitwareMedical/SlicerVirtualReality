@@ -31,7 +31,6 @@
 #include "qSlicerVirtualRealityModuleWidgetsExport.h"
 
 class qMRMLVirtualRealityViewPrivate;
-class vtkMRMLScene;
 class vtkMRMLVirtualRealityViewNode;
 class vtkCollection;
 class vtkGenericOpenGLRenderWindow;
@@ -98,11 +97,6 @@ public:
   Q_INVOKABLE bool isHardwareConnected()const;
 
 public slots:
-  /// Set the MRML \a scene that should be listened for events
-  /// When the scene is in batch process state, the view blocks all refresh.
-  /// \sa renderEnabled
-  void setMRMLScene(vtkMRMLScene* newScene);
-
   /// Set the current \a viewNode to observe
   void setMRMLVirtualRealityViewNode(vtkMRMLVirtualRealityViewNode* newViewNode);
 

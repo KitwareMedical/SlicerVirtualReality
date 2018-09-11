@@ -70,7 +70,6 @@ public:
 
   virtual void init();
 
-  void setMRMLScene(vtkMRMLScene* scene);
   void startVirtualReality();
   void stopVirtualReality();
 
@@ -89,7 +88,6 @@ protected:
   vtkSlicerCamerasModuleLogic* CamerasLogic;
 
   vtkSmartPointer<vtkMRMLDisplayableManagerGroup> DisplayableManagerGroup;
-  vtkWeakPointer<vtkMRMLScene> MRMLScene;
   vtkWeakPointer<vtkMRMLVirtualRealityViewNode> MRMLVirtualRealityViewNode;
   vtkSmartPointer<vtkOpenVRRenderer> Renderer;
   vtkSmartPointer<vtkOpenVRRenderWindow> RenderWindow;

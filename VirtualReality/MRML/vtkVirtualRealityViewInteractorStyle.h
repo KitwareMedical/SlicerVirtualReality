@@ -32,7 +32,7 @@
 
 #include "vtkSlicerVirtualRealityModuleMRMLExport.h"
 
-class vtkCellPicker;
+class vtkMRMLScene;
 
 /// \brief Virtual reality interactions
 ///
@@ -46,6 +46,9 @@ public:
   vtkTypeMacro(vtkVirtualRealityViewInteractorStyle,vtkInteractorStyle3D);
   void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
   
+  /// Get MRML scene from the displayable manager group (the first displayable manager's if any)
+  vtkMRMLScene* GetMRMLScene();
+
   //@{
   /**
   * Override generic event bindings to call the corresponding action.
@@ -131,9 +134,10 @@ public:
   //// allow the user to add options to the menu
   //vtkOpenVRMenuWidget *GetMenu() {
   //  return this->Menu.Get(); }
-
-  /// Get/Set the displayable managers
+  
+  /// Get the displayable managers
   vtkGetObjectMacro(DisplayableManagerGroup, vtkMRMLDisplayableManagerGroup);
+  /// Set the displayable managers
   vtkSetObjectMacro(DisplayableManagerGroup, vtkMRMLDisplayableManagerGroup);
 
 protected:

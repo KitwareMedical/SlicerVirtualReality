@@ -126,8 +126,6 @@ void qSlicerVirtualRealityModulePrivate::addViewWidget()
   {
     qWarning() << "Cameras module is not found";
   }
-
-  this->VirtualRealityViewWidget->setMRMLScene(q->mrmlScene());
 }
 
 //-----------------------------------------------------------------------------

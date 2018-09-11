@@ -20,6 +20,9 @@
 
 #include "vtkVirtualRealityViewInteractorStyle.h"
 
+// VR MRML includes
+#include "vtkMRMLVirtualRealityViewNode.h"
+
 // MRML includes
 #include "vtkMRMLScene.h"
 #include "vtkMRMLModelNode.h"
@@ -56,6 +59,7 @@ public:
   vtkInternal();
   ~vtkInternal();
 
+public:
   vtkWeakPointer<vtkMRMLDisplayableNode> PickedNode;
 
   /**
@@ -253,19 +257,21 @@ void vtkVirtualRealityViewInteractorStyle::PositionProp(vtkEventData* ed)
   interactionTransform->Translate(translation[0], translation[1], translation[2]);
 
   // Make sure that the topmost parent transform is the VR interaction transform
-  std::string vrTransformNodeName(this->Internal->PickedNode->GetName());
-  vrTransformNodeName.append("_VR_Interaction_Transform");
   vtkMRMLTransformNode* topTransformNode = this->Internal->PickedNode->GetParentTransformNode();
   while (topTransformNode && topTransformNode->GetParentTransformNode())
   {
     topTransformNode = topTransformNode->GetParentTransformNode();
   }
   vtkMRMLTransformNode* vrTransformNode = NULL;
-  if (!topTransformNode || vrTransformNodeName.compare(topTransformNode->GetName()))
+  if ( !topTransformNode
+    || !topTransformNode->GetAttribute(vtkMRMLVirtualRealityViewNode::GetVirtualRealityInteractionTransformAttributeName()) )
   {
     // Create interaction transform if not found
     vtkNew<vtkMRMLTransformNode> newTransformNode;
+    std::string vrTransformNodeName(this->Internal->PickedNode->GetName());
+    vrTransformNodeName.append("_VR_Interaction_Transform");
     newTransformNode->SetName(vrTransformNodeName.c_str());
+    newTransformNode->SetAttribute(vtkMRMLVirtualRealityViewNode::GetVirtualRealityInteractionTransformAttributeName(), "1");
     this->Internal->PickedNode->GetScene()->AddNode(newTransformNode);
     if (topTransformNode)
     {
@@ -279,7 +285,7 @@ void vtkVirtualRealityViewInteractorStyle::PositionProp(vtkEventData* ed)
   }
   else
   {
-    // VR interaction transform found
+    // VR interaction transform found (i.e. the top transform has the VR interaction transform attribute)
     vrTransformNode = topTransformNode;
   }
 
@@ -314,21 +320,22 @@ void vtkVirtualRealityViewInteractorStyle::PositionProp(vtkEventData* ed)
 //----------------------------------------------------------------------------
 void vtkVirtualRealityViewInteractorStyle::StartPositionProp(vtkEventDataDevice3D* edata)
 {
+  vtkMRMLScene* scene = this->GetMRMLScene();
+  if (!scene)
+  {
+    return;
+  }
+
   double pos[3] = {0.0};
   edata->GetWorldPosition(pos);
 
   // Get MRML node to move
   vtkMRMLDisplayableNode* pickedNode = NULL;
-  vtkMRMLScene* scene = NULL;
   for (int i=0; i<this->DisplayableManagerGroup->GetDisplayableManagerCount(); ++i)
   {
     vtkMRMLAbstractThreeDViewDisplayableManager* currentDisplayableManager =
       vtkMRMLAbstractThreeDViewDisplayableManager::SafeDownCast(this->DisplayableManagerGroup->GetNthDisplayableManager(i));
-    if (!scene)
-    {
-      scene = currentDisplayableManager->GetMRMLScene();
-    }
-    if (!scene || !currentDisplayableManager)
+    if (!currentDisplayableManager)
     {
       continue;
     }
@@ -483,4 +490,16 @@ void vtkVirtualRealityViewInteractorStyle::EndAction(int state, vtkEventDataDevi
   //      break;
   //  }
   //}
+}
+
+//---------------------------------------------------------------------------
+vtkMRMLScene* vtkVirtualRealityViewInteractorStyle::GetMRMLScene()
+{
+  if (!this->DisplayableManagerGroup
+    || this->DisplayableManagerGroup->GetDisplayableManagerCount() == 0)
+  {
+    return nullptr;
+  }
+
+  return this->DisplayableManagerGroup->GetNthDisplayableManager(0)->GetMRMLScene();
 }

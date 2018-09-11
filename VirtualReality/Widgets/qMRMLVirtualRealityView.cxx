@@ -63,7 +63,6 @@
 // MRML includes
 #include <vtkMRMLLinearTransformNode.h>
 #include <vtkMRMLVirtualRealityViewNode.h>
-#include <vtkMRMLScene.h>
 #include <vtkMRMLCameraNode.h>
 
 // VTK includes
@@ -89,7 +88,6 @@ qMRMLVirtualRealityViewPrivate::qMRMLVirtualRealityViewPrivate(qMRMLVirtualReali
   : q_ptr(&object)
   , CamerasLogic(NULL)
 {
-  this->MRMLScene = 0;
   this->MRMLVirtualRealityViewNode = 0;
 }
 
@@ -321,17 +319,6 @@ void qMRMLVirtualRealityView::updateViewFromReferenceViewCamera()
     -idop[2] * distance + sourcePosition[2]);
 
   ren->ResetCameraClippingRange();
-}
-
-//---------------------------------------------------------------------------
-void qMRMLVirtualRealityViewPrivate::setMRMLScene(vtkMRMLScene* newScene)
-{
-  Q_Q(qMRMLVirtualRealityView);
-  if (newScene == this->MRMLScene)
-  {
-    return;
-  }
-  this->MRMLScene = newScene;
 }
 
 // --------------------------------------------------------------------------
@@ -571,18 +558,6 @@ void qMRMLVirtualRealityView::addDisplayableManager(const QString& displayableMa
 }
 
 //------------------------------------------------------------------------------
-void qMRMLVirtualRealityView::setMRMLScene(vtkMRMLScene* newScene)
-{
-  Q_D(qMRMLVirtualRealityView);
-  d->setMRMLScene(newScene);
-
-  if (d->MRMLVirtualRealityViewNode && newScene != d->MRMLVirtualRealityViewNode->GetScene())
-  {
-    this->setMRMLVirtualRealityViewNode(0);
-  }
-}
-
-//---------------------------------------------------------------------------
 void qMRMLVirtualRealityView::setMRMLVirtualRealityViewNode(vtkMRMLVirtualRealityViewNode* newViewNode)
 {
   Q_D(qMRMLVirtualRealityView);
