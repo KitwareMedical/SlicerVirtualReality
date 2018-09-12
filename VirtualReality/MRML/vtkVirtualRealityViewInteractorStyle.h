@@ -73,14 +73,14 @@ public:
   virtual void EndDolly3D(vtkEventDataDevice3D *);
   //@}
 
-  ////@{
-  ///**
-  //* Multitouch events binding.
-  //*/
-  //void OnPan() override;
-  //void OnPinch() override;
-  //void OnRotate() override;
-  ////@}
+  //@{
+  /**
+  * Multitouch events binding.
+  */
+  void OnPan() override;
+  void OnPinch() override;
+  void OnRotate() override;
+  //@}
 
   //@{
   /**

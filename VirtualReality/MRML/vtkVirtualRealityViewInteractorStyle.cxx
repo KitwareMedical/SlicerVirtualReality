@@ -219,11 +219,10 @@ void vtkVirtualRealityViewInteractorStyle::PositionProp(vtkEventData* ed)
   vtkMRMLDisplayableNode* pickedNode = this->Internal->PickedNode[deviceIndex];
 
   if ( pickedNode == nullptr || !pickedNode->GetSelectable()
-    || this->CurrentRenderer == nullptr || !this->DisplayableManagerGroup )
+    || !this->CurrentRenderer || !this->DisplayableManagerGroup )
   {
     return;
   }
-  
   if (ed->GetType() != vtkCommand::Move3DEvent)
   {
     return;
@@ -307,8 +306,6 @@ void vtkVirtualRealityViewInteractorStyle::PositionProp(vtkEventData* ed)
     interactionTransform->Concatenate(lastVrInteractionTransform->GetMatrix());
   }
   vrTransformNode->SetAndObserveTransformToParent(interactionTransform);
-
-  //interactionTransform->GetMatrix()->PrintSelf(std::cout, vtkIndent());
 
   if (this->AutoAdjustCameraClippingRange)
   {
@@ -398,6 +395,116 @@ void vtkVirtualRealityViewInteractorStyle::EndDolly3D(vtkEventDataDevice3D* ed)
 {
   vtkEventDataDevice dev = ed->GetDevice();
   this->Internal->InteractionState[static_cast<int>(dev)] = VTKIS_NONE;
+}
+
+//----------------------------------------------------------------------------
+// Multitouch interaction methods
+//----------------------------------------------------------------------------
+
+//----------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractorStyle::OnPan()
+{
+  int rc = static_cast<int>(vtkEventDataDevice::RightController);
+  int lc = static_cast<int>(vtkEventDataDevice::LeftController);
+
+  if (!this->Internal->PickedNode[rc] && !this->Internal->PickedNode[lc])
+  {
+    this->Internal->InteractionState[rc] = VTKIS_PAN;
+    this->Internal->InteractionState[lc] = VTKIS_PAN;
+
+    int pointer = this->Interactor->GetPointerIndex();
+
+    this->FindPokedRenderer(this->Interactor->GetEventPositions(pointer)[0],
+      this->Interactor->GetEventPositions(pointer)[1]);
+
+    if (this->CurrentRenderer == nullptr)
+    {
+      return;
+    }
+
+    vtkCamera *camera = this->CurrentRenderer->GetActiveCamera();
+    vtkRenderWindowInteractor3D *rwi =
+      static_cast<vtkRenderWindowInteractor3D *>(this->Interactor);
+
+    double t[3] = {
+      rwi->GetTranslation3D()[0] - rwi->GetLastTranslation3D()[0],
+      rwi->GetTranslation3D()[1] - rwi->GetLastTranslation3D()[1],
+      rwi->GetTranslation3D()[2] - rwi->GetLastTranslation3D()[2]};
+
+    double *ptrans = rwi->GetPhysicalTranslation(camera);
+    double distance = rwi->GetPhysicalScale();
+
+    //TODO: Act on the matrix that is currently the variables like PhysicalViewUp etc.
+    rwi->SetPhysicalTranslation(camera,
+      ptrans[0] + t[0] * distance,
+      ptrans[1] + t[1] * distance,
+      ptrans[2] + t[2] * distance);
+
+    // clean up
+    if (this->Interactor->GetLightFollowCamera())
+    {
+      this->CurrentRenderer->UpdateLightsGeometryToFollowCamera();
+    }
+  }
+}
+//----------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractorStyle::OnPinch()
+{
+  int rc = static_cast<int>(vtkEventDataDevice::RightController);
+  int lc = static_cast<int>(vtkEventDataDevice::LeftController);
+
+  if (!this->Internal->PickedNode[rc] && !this->Internal->PickedNode[lc])
+  {
+    this->Internal->InteractionState[rc] = VTKIS_ZOOM;
+    this->Internal->InteractionState[lc] = VTKIS_ZOOM;
+
+    int pointer = this->Interactor->GetPointerIndex();
+
+    this->FindPokedRenderer(this->Interactor->GetEventPositions(pointer)[0],
+      this->Interactor->GetEventPositions(pointer)[1]);
+
+    if (this->CurrentRenderer == nullptr)
+    {
+      return;
+    }
+
+    double dyf = this->Interactor->GetScale() / this->Interactor->GetLastScale();
+    vtkCamera *camera = this->CurrentRenderer->GetActiveCamera();
+    vtkRenderWindowInteractor3D *rwi =
+      static_cast<vtkRenderWindowInteractor3D *>(this->Interactor);
+    double distance = rwi->GetPhysicalScale();
+
+    this->SetScale(camera, distance / dyf);
+  }
+}
+
+//----------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractorStyle::OnRotate()
+{
+  int rc = static_cast<int>(vtkEventDataDevice::RightController);
+  int lc = static_cast<int>(vtkEventDataDevice::LeftController);
+
+  // Rotate only when one controller is not interacting
+  if ( (this->Internal->PickedNode[rc] || this->Internal->PickedNode[lc])
+    && (!this->Internal->PickedNode[rc] || !this->Internal->PickedNode[lc]) )
+  {
+    this->Internal->InteractionState[rc] = VTKIS_ROTATE;
+    this->Internal->InteractionState[lc] = VTKIS_ROTATE;
+
+    double angle = this->Interactor->GetRotation() - this->Interactor->GetLastRotation();
+
+    //TODO: Rotate the world instead of the node (the matrix that is currently the variables like PhysicalViewUp etc.)
+    if (this->Internal->PickedNode[rc])
+    {
+      int i=0; ++i;
+      //this->InteractionProps[rc]->RotateY(angle);
+    }
+    if (this->Internal->PickedNode[lc])
+    {
+      int i=0; ++i;
+      //this->InteractionProps[lc]->RotateY(angle);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------

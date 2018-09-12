@@ -152,13 +152,13 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
 
   QStringList displayableManagers;
   displayableManagers //<< "vtkMRMLCameraDisplayableManager"
-  //<< "vtkMRMLViewDisplayableManager"
+      //<< "vtkMRMLViewDisplayableManager"
       << "vtkMRMLModelDisplayableManager"
       << "vtkMRMLThreeDReformatDisplayableManager"
       << "vtkMRMLCrosshairDisplayableManager3D"
       //<< "vtkMRMLOrientationMarkerDisplayableManager" // Not supported in VR
       //<< "vtkMRMLRulerDisplayableManager" // Not supported in VR
-      << "vtkMRMLAnnotationDisplayableManager"
+      //<< "vtkMRMLAnnotationDisplayableManager" // Not supported in VR
       << "vtkMRMLMarkupsFiducialDisplayableManager3D"
       << "vtkMRMLSegmentationsDisplayableManager3D"
       << "vtkMRMLTransformsDisplayableManager3D"
