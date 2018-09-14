@@ -94,7 +94,6 @@ void vtkMRMLVirtualRealityViewNode::ReadXMLAttributes(const char** atts)
   vtkMRMLReadXMLEndMacro();
 
   this->EndModify(disabledModify);
-
 }
 
 //----------------------------------------------------------------------------

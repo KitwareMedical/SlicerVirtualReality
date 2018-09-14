@@ -74,7 +74,6 @@ void qSlicerVirtualRealityModuleWidget::setup()
   connect(d->RenderingEnabledCheckBox, SIGNAL(toggled(bool)), this, SLOT(setVirtualRealityActive(bool)));
   connect(d->TwoSidedLightingCheckBox, SIGNAL(toggled(bool)), this, SLOT(setTwoSidedLighting(bool)));
   connect(d->BackLightsCheckBox, SIGNAL(toggled(bool)), this, SLOT(setBackLights(bool)));
-  
   connect(d->ReferenceViewNodeComboBox, SIGNAL(currentNodeChanged(vtkMRMLNode*)), this, SLOT(setReferenceViewNode(vtkMRMLNode*)));
   connect(d->UpdateViewFromReferenceViewCameraButton, SIGNAL(clicked()), this, SLOT(updateViewFromReferenceViewCamera()));
 
@@ -118,7 +117,7 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   d->DesiredUpdateRateSlider->blockSignals(wasBlocked);
 
   wasBlocked = d ->PhysicalScaleSlider->blockSignals(true);
-  d->PhysicalScaleSlider->setValue(vrViewNode != nullptr ? vrViewNode->GetPhysicalScale() * 100.0 : 100.0 );
+  d->PhysicalScaleSlider->setValue(vrViewNode != nullptr ? vrViewNode->GetPhysicalScale() * 100.0 : 10.0);
   d->PhysicalScaleSlider->setEnabled(vrViewNode != nullptr);
   d->PhysicalScaleSlider->blockSignals(wasBlocked);
 
@@ -128,7 +127,7 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   d->MotionSensitivitySlider->blockSignals(wasBlocked);
 
   wasBlocked = d->MotionSpeedSlider->blockSignals(true);
-  d->MotionSpeedSlider->setValue(vrViewNode != NULL ? vrViewNode->GetMotionSpeed() * 100.0 : 0);
+  d->MotionSpeedSlider->setValue(vrViewNode != NULL ? vrViewNode->GetMotionSpeed() * 100.0 : 50);
   d->MotionSpeedSlider->setEnabled(vrViewNode != NULL);
   d->MotionSpeedSlider->blockSignals(wasBlocked);
 
@@ -162,8 +161,8 @@ void qSlicerVirtualRealityModuleWidget::setVirtualRealityConnected(bool connect)
   Q_D(qSlicerVirtualRealityModuleWidget);
   vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
   vrLogic->SetVirtualRealityConnected(connect);
-
 }
+
 //-----------------------------------------------------------------------------
 void qSlicerVirtualRealityModuleWidget::setVirtualRealityActive(bool activate)
 {
@@ -190,7 +189,7 @@ void qSlicerVirtualRealityModuleWidget::setBackLights(bool active)
   Q_D(qSlicerVirtualRealityModuleWidget);
   vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
   vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
-  if (vrViewNode)    
+  if (vrViewNode)
   {
     vrViewNode->SetBackLights(active);
   }
@@ -247,8 +246,6 @@ void qSlicerVirtualRealityModuleWidget::onMotionSensitivityChanged(double percen
   if (vrViewNode)
   {
     vrViewNode->SetMotionSensitivity(percent * 0.01);
-    //TODO:  Debug
-    std::cout << "Motion sensativity: " << percent << std::endl;
   }
 }
 
@@ -273,13 +270,9 @@ void qSlicerVirtualRealityModuleWidget::onPhysicalScaleChanged(double percent)
   vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
   if (vrViewNode)
   {
-    vrViewNode->SetPhysicalScale(percent/100.0);
-
-    //TODO: Debug
-    std::cout << "New scale: " << percent << std::endl;
+    vrViewNode->SetPhysicalScale(percent * 0.01);
   }
 }
-
 
 //-----------------------------------------------------------------------------
 void qSlicerVirtualRealityModuleWidget::setControllerTransformsUpdate(bool active)

@@ -25,7 +25,6 @@
 #include <vtkOpenVRRenderWindow.h>
 #include <vtkOpenVRRenderWindowInteractor.h>
 #include <vtkOpenVRRenderer.h>
-#include <vtkInteractorStyle3D.h> 
 
 #include "qMRMLVirtualRealityView_p.h"
 
@@ -57,8 +56,6 @@
 
 // VirtualReality includes
 #include "vtkMRMLVirtualRealityViewNode.h"
-
-
 
 // MRMLDisplayableManager includes
 #include <vtkMRMLAbstractDisplayableManager.h>
@@ -298,7 +295,7 @@ void qMRMLVirtualRealityView::updateViewFromReferenceViewCamera()
     return;
   }
   
-  double distance = 100; //no particular reason for this value. 
+  double distance = 100; //no particular reason for this value. //TODO: ???
 
   double* sourceViewUp = sourceCamera->GetViewUp();
   cam->SetViewUp(sourceViewUp);
@@ -326,7 +323,6 @@ void qMRMLVirtualRealityView::updateViewFromReferenceViewCamera()
 // --------------------------------------------------------------------------
 void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
 {
-
   Q_Q(qMRMLVirtualRealityView);
   if (!this->MRMLVirtualRealityViewNode
       || !this->MRMLVirtualRealityViewNode->GetVisibility())
@@ -380,26 +376,28 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
 
   if (this->RenderWindow)
   {
-    double PhysicalScale = this->MRMLVirtualRealityViewNode->GetPhysicalScale()*100;
-    if (PhysicalScale == 0)   
+    double physicalScale = this->MRMLVirtualRealityViewNode->GetPhysicalScale() * 100.0;
+    if (physicalScale <= 0.01)
     {  
-      PhysicalScale = 1;
-      this->RenderWindow->SetPhysicalScale(PhysicalScale);
-    }else
+      // Very small values are not allowed
+      physicalScale = 1.0;
+      this->RenderWindow->SetPhysicalScale(physicalScale);
+    }
+    else
     {
-    this->RenderWindow->SetPhysicalScale(PhysicalScale);
+      this->RenderWindow->SetPhysicalScale(physicalScale);
     }  
   }
 
   if (this->RenderWindow)
   {
-    double DollyPhysicalSpeed = this ->MRMLVirtualRealityViewNode->GetMotionSpeed();
-    vtkInteractorStyle3D *is =
-      static_cast<vtkInteractorStyle3D *>(RenderWindow->GetInteractor()->GetInteractorStyle());
-      //the value 120000 was chosen because the slider uses a scale from 0 to 1
-      //when the dolly speed is set to 60,000, it seems to have a reasonable speed.
-      //the default slider value is 0.5. 
-      is->SetDollyPhysicalSpeed(DollyPhysicalSpeed*120000); 
+    double dollyPhysicalSpeed = this ->MRMLVirtualRealityViewNode->GetMotionSpeed();
+    // The value 120,000 was chosen because the slider uses a scale from 0 to 1
+    // when the dolly speed is set to 60,000, it seems to have a reasonable speed.
+    // the default slider value is 0.5. 
+    //TODO: Uncomment when method is accessible (need input from Sal, method does not exist)
+    //this->InteractorStyle->SetDollyPhysicalSpeed(dollyPhysicalSpeed * 120000);
+    this->InteractorStyle->SetDollyMotionFactor(dollyPhysicalSpeed * 4); //TODO: Test call to existing function
   }
   if (this->MRMLVirtualRealityViewNode->GetActive())
   {

@@ -121,13 +121,13 @@ public:
   vtkGetMacro(DesiredUpdateRate, double);
   vtkSetMacro(DesiredUpdateRate, double);
 
-  // scale of actors (0.0 - 1.0)
-  vtkGetMacro(PhysicalScale,double);
-  vtkSetMacro(PhysicalScale,double);
+  /// Physical scale of world (0, 1]
+  vtkGetMacro(PhysicalScale, double);
+  vtkSetMacro(PhysicalScale, double);
 
-  //Slider to configure dolly physical speed (between 0.0 and 1.0)/
-  vtkGetMacro(MotionSpeed,double);
-  vtkSetMacro(MotionSpeed,double);
+  /// Motion speed of fly (i.e. dolly) (0, 1]
+  vtkGetMacro(MotionSpeed, double);
+  vtkSetMacro(MotionSpeed, double);
 
   /// Motion sensitivity (between 0.0 and 1.0).
   /// If virtual reality headset is not moving then update rate
@@ -151,7 +151,7 @@ public:
   /// Set error message. Non-empty string means that an error has occurred.
   void SetError(const std::string& errorText);
 
-/// Get error message. Non-empty string means that an error has occurred.
+  /// Get error message. Non-empty string means that an error has occurred.
   std::string GetError() const;
 
 protected:
