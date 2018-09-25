@@ -59,6 +59,12 @@ public:
   vtkInternal();
   ~vtkInternal();
 
+  /// Calculate the average pose of the two controllers for pinch 3D operations
+  /// \return Success flag. Failure happens when the average orientation coincides
+  ///         with the direction of the displacement of the two controllers
+  bool CalculateCombinedControllerPose(
+    vtkMatrix4x4* controller0Pose, vtkMatrix4x4* controller1Pose, vtkMatrix4x4* combinedPose);
+
 public:
   // Store required controllers information when performing action
   int InteractionState[vtkEventDataNumberOfDevices];
@@ -66,6 +72,11 @@ public:
   vtkWeakPointer<vtkMRMLDisplayableNode> PickedNode[vtkEventDataNumberOfDevices];
 
   //vtkPlane* ClippingPlanes[vtkEventDataNumberOfDevices];
+
+  vtkNew<vtkMatrix4x4> CombinedStartingControllerPose;
+  bool StartingControllerPoseValid;
+  vtkNew<vtkMatrix4x4> LastValidCombinedControllerPose;
+  bool LastValidCombinedControllerPoseExists;
 };
 
 //---------------------------------------------------------------------------
@@ -85,6 +96,72 @@ vtkVirtualRealityViewInteractorStyle::vtkInternal::vtkInternal()
 //---------------------------------------------------------------------------
 vtkVirtualRealityViewInteractorStyle::vtkInternal::~vtkInternal()
 {
+}
+
+//---------------------------------------------------------------------------
+bool vtkVirtualRealityViewInteractorStyle::vtkInternal::CalculateCombinedControllerPose(
+  vtkMatrix4x4* controller0Pose, vtkMatrix4x4* controller1Pose, vtkMatrix4x4* combinedPose )
+{
+  if (!controller0Pose || !controller1Pose || !combinedPose)
+  {
+    return false;
+  }
+
+  // The position will be the average position
+  double controllerCenterPos[3] = {
+    (controller0Pose->GetElement(0,3) + controller1Pose->GetElement(0,3)) / 2.0,
+    (controller0Pose->GetElement(1,3) + controller1Pose->GetElement(1,3)) / 2.0,
+    (controller0Pose->GetElement(2,3) + controller1Pose->GetElement(2,3)) / 2.0 };
+
+  // Scaling will be the distance between the two controllers
+  double controllerDistance = sqrt(
+    (controller0Pose->GetElement(0,3) - controller1Pose->GetElement(0,3))
+      * (controller0Pose->GetElement(0,3) - controller1Pose->GetElement(0,3)) +
+    (controller0Pose->GetElement(1,3) - controller1Pose->GetElement(1,3))
+      * (controller0Pose->GetElement(1,3) - controller1Pose->GetElement(1,3)) +
+    (controller0Pose->GetElement(2,3) - controller1Pose->GetElement(2,3))
+      * (controller0Pose->GetElement(2,3) - controller1Pose->GetElement(2,3)) );
+
+  // X axis is the displacement vector from controller 0 to 1
+  double xAxis[3] = {
+    controller1Pose->GetElement(0,3) - controller0Pose->GetElement(0,3),
+    controller1Pose->GetElement(1,3) - controller0Pose->GetElement(1,3),
+    controller1Pose->GetElement(2,3) - controller0Pose->GetElement(2,3) };
+  vtkMath::Normalize(xAxis);
+
+  // Y axis is calculated from a Y' and Z.
+  // 1. Y' is the average orientation of the two controller directions
+  // 2. If X and Y' are almost parallel, then return failure
+  // 3. Z is the cross product of X and Y'
+  // 4. Y is then the cross product of Z and X
+  double yAxisPrime[3] = {
+    controller0Pose->GetElement(0,1) + controller1Pose->GetElement(0,1),
+    controller0Pose->GetElement(1,1) + controller1Pose->GetElement(1,1),
+    controller0Pose->GetElement(2,1) + controller1Pose->GetElement(2,1) };
+  vtkMath::Normalize(yAxisPrime);
+
+  if (fabs(vtkMath::Dot(xAxis, yAxisPrime)) > 0.75)
+  {
+    // The two axes are almost parallel
+    return false;
+  }
+
+  double zAxis[3] = {0.0};
+  vtkMath::Cross(xAxis, yAxisPrime, zAxis);
+
+  double yAxis[3] = {0.0};
+  vtkMath::Cross(zAxis, xAxis, yAxis);
+
+  // Assemble matrix from the axes, the scaling, and the position
+  for (int row=0;row<3;++row)
+  {
+    combinedPose->SetElement(row, 0, xAxis[row]*controllerDistance);
+    combinedPose->SetElement(row, 1, yAxis[row]*controllerDistance);
+    combinedPose->SetElement(row, 2, zAxis[row]*controllerDistance);
+    combinedPose->SetElement(row, 3, controllerCenterPos[row]);
+  }
+
+  return true;
 }
 
 //---------------------------------------------------------------------------
@@ -114,6 +191,8 @@ vtkVirtualRealityViewInteractorStyle::vtkVirtualRealityViewInteractorStyle()
 
   this->MapInputToAction(vtkEventDataDevice::LeftController,
     vtkEventDataDeviceInput::Grip, VTKIS_POSITION_PROP);
+
+  this->EventCallbackCommand->SetCallback(vtkVirtualRealityViewInteractorStyle::ProcessEvents);
 }
 
 //----------------------------------------------------------------------------
@@ -128,6 +207,69 @@ void vtkVirtualRealityViewInteractorStyle::PrintSelf(ostream& os, vtkIndent inde
 {
   this->Superclass::PrintSelf(os,indent);
 } 
+
+//----------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractorStyle::SetInteractor(vtkRenderWindowInteractor *i)
+{
+  if (i == this->Interactor)
+  {
+    return;
+  }
+
+  this->Superclass::SetInteractor(i);
+
+  // add observers for each of the events handled in ProcessEvents
+  if (i)
+  {
+    i->AddObserver(vtkCommand::StartPinchEvent,
+                   this->EventCallbackCommand,
+                   this->Priority);
+
+    i->AddObserver(vtkCommand::StartRotateEvent,
+                   this->EventCallbackCommand,
+                   this->Priority);
+
+    i->AddObserver(vtkCommand::StartPanEvent,
+                   this->EventCallbackCommand,
+                   this->Priority);
+
+    i->AddObserver(vtkCommand::EndPinchEvent,
+                   this->EventCallbackCommand,
+                   this->Priority);
+
+    i->AddObserver(vtkCommand::EndRotateEvent,
+                   this->EventCallbackCommand,
+                   this->Priority);
+
+    i->AddObserver(vtkCommand::EndPanEvent,
+                   this->EventCallbackCommand,
+                   this->Priority);
+  }
+}
+
+//----------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractorStyle::ProcessEvents(
+  vtkObject* object, unsigned long event, void* clientdata, void* calldata)
+{
+  Superclass::ProcessEvents(object, event, clientdata, calldata);
+
+  vtkVirtualRealityViewInteractorStyle* self =
+    reinterpret_cast<vtkVirtualRealityViewInteractorStyle*>(clientdata);
+
+  switch (event)
+  {
+    case vtkCommand::StartPinchEvent:
+    case vtkCommand::StartRotateEvent:
+    case vtkCommand::StartPanEvent:
+      self->OnStartGesture();
+      break;
+    case vtkCommand::EndPinchEvent:
+    case vtkCommand::EndRotateEvent:
+    case vtkCommand::EndPanEvent:
+      self->OnEndGesture();
+      break;
+  }
+}
 
 //----------------------------------------------------------------------------
 // Generic events binding
@@ -404,51 +546,23 @@ void vtkVirtualRealityViewInteractorStyle::EndDolly3D(vtkEventDataDevice3D* ed)
 //----------------------------------------------------------------------------
 void vtkVirtualRealityViewInteractorStyle::OnPan()
 {
-  int rc = static_cast<int>(vtkEventDataDevice::RightController);
-  int lc = static_cast<int>(vtkEventDataDevice::LeftController);
-
-  if (!this->Internal->PickedNode[rc] && !this->Internal->PickedNode[lc])
-  {
-    this->Internal->InteractionState[rc] = VTKIS_PAN;
-    this->Internal->InteractionState[lc] = VTKIS_PAN;
-
-    int pointer = this->Interactor->GetPointerIndex();
-
-    this->FindPokedRenderer(this->Interactor->GetEventPositions(pointer)[0],
-      this->Interactor->GetEventPositions(pointer)[1]);
-
-    if (this->CurrentRenderer == nullptr)
-    {
-      return;
-    }
-
-    vtkCamera *camera = this->CurrentRenderer->GetActiveCamera();
-    vtkRenderWindowInteractor3D *rwi =
-      static_cast<vtkRenderWindowInteractor3D *>(this->Interactor);
-
-    double t[3] = {
-      rwi->GetTranslation3D()[0] - rwi->GetLastTranslation3D()[0],
-      rwi->GetTranslation3D()[1] - rwi->GetLastTranslation3D()[1],
-      rwi->GetTranslation3D()[2] - rwi->GetLastTranslation3D()[2]};
-
-    double *ptrans = rwi->GetPhysicalTranslation(camera);
-    double distance = rwi->GetPhysicalScale();
-
-    //TODO: Act on the matrix that is currently the variables like PhysicalViewUp etc.
-    rwi->SetPhysicalTranslation(camera,
-      ptrans[0] + t[0] * distance,
-      ptrans[1] + t[1] * distance,
-      ptrans[2] + t[2] * distance);
-
-    // clean up
-    if (this->Interactor->GetLightFollowCamera())
-    {
-      this->CurrentRenderer->UpdateLightsGeometryToFollowCamera();
-    }
-  }
+  this->OnPinch3D();
 }
+
 //----------------------------------------------------------------------------
 void vtkVirtualRealityViewInteractorStyle::OnPinch()
+{
+  this->OnPinch3D();
+}
+
+//----------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractorStyle::OnRotate()
+{
+  this->OnPinch3D();
+}
+
+//----------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractorStyle::OnPinch3D()
 {
   int rc = static_cast<int>(vtkEventDataDevice::RightController);
   int lc = static_cast<int>(vtkEventDataDevice::LeftController);
@@ -458,53 +572,103 @@ void vtkVirtualRealityViewInteractorStyle::OnPinch()
     this->Internal->InteractionState[rc] = VTKIS_ZOOM;
     this->Internal->InteractionState[lc] = VTKIS_ZOOM;
 
-    int pointer = this->Interactor->GetPointerIndex();
-
-    this->FindPokedRenderer(this->Interactor->GetEventPositions(pointer)[0],
-      this->Interactor->GetEventPositions(pointer)[1]);
-
     if (this->CurrentRenderer == nullptr)
     {
       return;
     }
+    if (!this->Internal->StartingControllerPoseValid)
+    {
+      // If starting pose is not valid then cannot do the pinch 3D operation
+      return;
+    }
 
-    double dyf = this->Interactor->GetScale() / this->Interactor->GetLastScale();
-    vtkCamera *camera = this->CurrentRenderer->GetActiveCamera();
-    vtkRenderWindowInteractor3D *rwi =
-      static_cast<vtkRenderWindowInteractor3D *>(this->Interactor);
-    double distance = rwi->GetPhysicalScale();
+    vtkOpenVRRenderWindowInteractor* rwi = static_cast<vtkOpenVRRenderWindowInteractor*>(this->Interactor);
+    vtkOpenVRRenderWindow* rw = static_cast<vtkOpenVRRenderWindow*>(rwi->GetRenderWindow());
 
-    this->SetScale(camera, distance / dyf);
+    int pointer = this->Interactor->GetPointerIndex();
+
+    this->FindPokedRenderer(
+      this->Interactor->GetEventPositions(pointer)[0], this->Interactor->GetEventPositions(pointer)[1]);
+
+    // Get current controller poses
+    vtkNew<vtkMatrix4x4> currentController0Pose_Physical;
+    rwi->GetPhysicalEventPose(currentController0Pose_Physical, 0);
+    vtkNew<vtkMatrix4x4> currentController1Pose_Physical;
+    rwi->GetPhysicalEventPose(currentController1Pose_Physical, 1);
+
+    // Get combined current controller pose
+    vtkNew<vtkMatrix4x4> combinedCurrentControllerPose;
+    if ( !this->Internal->CalculateCombinedControllerPose(
+      currentController0Pose_Physical, currentController1Pose_Physical, combinedCurrentControllerPose ) )
+    {
+      // If combined pose is invalid, then use the last valid pose if it exists
+      if (this->Internal->LastValidCombinedControllerPoseExists)
+      {
+        combinedCurrentControllerPose->DeepCopy(this->Internal->LastValidCombinedControllerPose);
+      }
+      else
+      {
+        // There is no valid last position so cannot do the pinch 3D operation
+        return;
+      }
+    }
+    else
+    {
+      // Save current as last valid pose
+      this->Internal->LastValidCombinedControllerPose->DeepCopy(combinedCurrentControllerPose);
+    }
+
+    // Calculate modifier matrix
+    vtkNew<vtkMatrix4x4> inverseCombinedCurrentControllerPose;
+    vtkMatrix4x4::Invert(combinedCurrentControllerPose, inverseCombinedCurrentControllerPose);
+
+    vtkNew<vtkMatrix4x4> modifyPhysicalToWorldMatrix;
+    vtkMatrix4x4::Multiply4x4(
+      this->Internal->CombinedStartingControllerPose, inverseCombinedCurrentControllerPose, modifyPhysicalToWorldMatrix);
+
+    // Calculate new physical to world matrix
+    vtkNew<vtkMatrix4x4> startingPhysicalToWorldMatrix;
+    rwi->GetStartingPhysicalToWorldMatrix(startingPhysicalToWorldMatrix);
+    vtkNew<vtkMatrix4x4> newPhysicalToWorldMatrix;
+    vtkMatrix4x4::Multiply4x4(
+      startingPhysicalToWorldMatrix, modifyPhysicalToWorldMatrix, newPhysicalToWorldMatrix);
+
+    // Set new physical to world matrix
+    rw->SetPhysicalToWorldMatrix(newPhysicalToWorldMatrix);
+
+    if (this->AutoAdjustCameraClippingRange)
+    {
+      this->CurrentRenderer->ResetCameraClippingRange();
+    }
+    if (this->Interactor->GetLightFollowCamera())
+    {
+      this->CurrentRenderer->UpdateLightsGeometryToFollowCamera();
+    }
   }
 }
 
 //----------------------------------------------------------------------------
-void vtkVirtualRealityViewInteractorStyle::OnRotate()
+void vtkVirtualRealityViewInteractorStyle::OnStartGesture()
 {
-  int rc = static_cast<int>(vtkEventDataDevice::RightController);
-  int lc = static_cast<int>(vtkEventDataDevice::LeftController);
+  // Store combined starting controller pose
+  vtkOpenVRRenderWindowInteractor* rwi = static_cast<vtkOpenVRRenderWindowInteractor*>(this->Interactor);
+  vtkNew<vtkMatrix4x4> startingController0Pose_Physical;
+  rwi->GetStartingPhysicalEventPose(startingController0Pose_Physical, 0);
+  vtkNew<vtkMatrix4x4> startingController1Pose_Physical;
+  rwi->GetStartingPhysicalEventPose(startingController1Pose_Physical, 1);
 
-  // Rotate only when one controller is not interacting
-  if ( (this->Internal->PickedNode[rc] || this->Internal->PickedNode[lc])
-    && (!this->Internal->PickedNode[rc] || !this->Internal->PickedNode[lc]) )
+  if ( this->Internal->CalculateCombinedControllerPose(
+    startingController0Pose_Physical, startingController1Pose_Physical, this->Internal->CombinedStartingControllerPose) )
   {
-    this->Internal->InteractionState[rc] = VTKIS_ROTATE;
-    this->Internal->InteractionState[lc] = VTKIS_ROTATE;
-
-    double angle = this->Interactor->GetRotation() - this->Interactor->GetLastRotation();
-
-    //TODO: Rotate the world instead of the node (the matrix that is currently the variables like PhysicalViewUp etc.)
-    if (this->Internal->PickedNode[rc])
-    {
-      int i=0; ++i;
-      //this->InteractionProps[rc]->RotateY(angle);
-    }
-    if (this->Internal->PickedNode[lc])
-    {
-      int i=0; ++i;
-      //this->InteractionProps[lc]->RotateY(angle);
-    }
+    this->Internal->StartingControllerPoseValid = true;
   }
+}
+
+//----------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractorStyle::OnEndGesture()
+{
+  this->Internal->StartingControllerPoseValid = false;
+  this->Internal->LastValidCombinedControllerPoseExists = false;
 }
 
 //----------------------------------------------------------------------------
