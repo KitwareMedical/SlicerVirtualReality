@@ -398,9 +398,7 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
     // The value 120,000 was chosen because the slider uses a scale from 0 to 1
     // when the dolly speed is set to 60,000, it seems to have a reasonable speed.
     // the default slider value is 0.5. 
-    //TODO: Uncomment when method is accessible (need input from Sal, method does not exist)
-    //this->InteractorStyle->SetDollyPhysicalSpeed(dollyPhysicalSpeed * 120000);
-    this->InteractorStyle->SetDollyMotionFactor(dollyPhysicalSpeed * 4); //TODO: Test call to existing function
+    this->InteractorStyle->SetDollyPhysicalSpeed(dollyPhysicalSpeed * 12000);
   }
   if (this->MRMLVirtualRealityViewNode->GetActive())
   {
