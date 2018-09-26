@@ -36,7 +36,7 @@ vtkMRMLVirtualRealityViewNode::vtkMRMLVirtualRealityViewNode()
   , BackLights(true)
   , DesiredUpdateRate(60.0)
   , MotionSensitivity(0.5)
-  , PhysicalScale(1.0)
+  , Magnification(10.0)
   , MotionSpeed(0.5)
   , ControllerTransformsUpdate(false)
 {
@@ -69,7 +69,7 @@ void vtkMRMLVirtualRealityViewNode::WriteXML(ostream& of, int nIndent)
   vtkMRMLWriteXMLBooleanMacro(twoSidedLighting, TwoSidedLighting);
   vtkMRMLWriteXMLBooleanMacro(backLights, BackLights);
   vtkMRMLWriteXMLFloatMacro(desiredUpdateRate, DesiredUpdateRate);
-  vtkMRMLWriteXMLFloatMacro(physicalScale, PhysicalScale);
+  vtkMRMLWriteXMLFloatMacro(physicalScale, Magnification);
   vtkMRMLWriteXMLFloatMacro(motionSpeed,MotionSpeed);
   vtkMRMLWriteXMLFloatMacro(motionSensitivity, MotionSensitivity);
   vtkMRMLWriteXMLBooleanMacro(controllerTransformsUpdate, ControllerTransformsUpdate);
@@ -87,7 +87,7 @@ void vtkMRMLVirtualRealityViewNode::ReadXMLAttributes(const char** atts)
   vtkMRMLReadXMLBooleanMacro(twoSidedLighting, TwoSidedLighting);
   vtkMRMLReadXMLBooleanMacro(backLights, BackLights);
   vtkMRMLReadXMLFloatMacro(desiredUpdateRate, DesiredUpdateRate);
-  vtkMRMLReadXMLFloatMacro(physicalScale,PhysicalScale);
+  vtkMRMLReadXMLFloatMacro(physicalScale, Magnification);
   vtkMRMLReadXMLFloatMacro(motionSpeed, MotionSpeed);
   vtkMRMLReadXMLFloatMacro(motionSensitivity, MotionSensitivity);
   vtkMRMLReadXMLBooleanMacro(controllerTransformsUpdate, ControllerTransformsUpdate);
@@ -109,7 +109,7 @@ void vtkMRMLVirtualRealityViewNode::Copy(vtkMRMLNode *anode)
   vtkMRMLCopyBooleanMacro(TwoSidedLighting);
   vtkMRMLCopyBooleanMacro(BackLights);
   vtkMRMLCopyFloatMacro(DesiredUpdateRate);
-  vtkMRMLCopyFloatMacro(PhysicalScale);
+  vtkMRMLCopyFloatMacro(Magnification);
   vtkMRMLCopyFloatMacro(MotionSpeed);
   vtkMRMLCopyFloatMacro(MotionSensitivity);
   vtkMRMLCopyBooleanMacro(ControllerTransformsUpdate);
@@ -127,7 +127,7 @@ void vtkMRMLVirtualRealityViewNode::PrintSelf(ostream& os, vtkIndent indent)
   vtkMRMLPrintBooleanMacro(TwoSidedLighting);
   vtkMRMLPrintBooleanMacro(BackLights);
   vtkMRMLPrintFloatMacro(DesiredUpdateRate);
-  vtkMRMLPrintFloatMacro(PhysicalScale);
+  vtkMRMLPrintFloatMacro(Magnification);
   vtkMRMLPrintFloatMacro(MotionSpeed);
   vtkMRMLPrintFloatMacro(MotionSensitivity);
   vtkMRMLPrintBooleanMacro(ControllerTransformsUpdate);
@@ -350,7 +350,7 @@ void vtkMRMLVirtualRealityViewNode::SetControllerTransformsUpdate(bool enable)
 }
 
 //----------------------------------------------------------------------------
-bool  vtkMRMLVirtualRealityViewNode::HasError()
+bool vtkMRMLVirtualRealityViewNode::HasError()
 {
   return !this->LastErrorMessage.empty();
 }

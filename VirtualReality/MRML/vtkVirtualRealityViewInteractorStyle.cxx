@@ -43,7 +43,8 @@
 #include <vtkObjectFactory.h>
 #include <vtkPoints.h>
 #include <vtkRenderer.h>
-#include "vtkQuaternion.h"
+#include <vtkQuaternion.h>
+#include <vtkTransform.h>
 #include <vtkWeakPointer.h>
 
 #include "vtkOpenVRRenderWindow.h"
@@ -566,84 +567,85 @@ void vtkVirtualRealityViewInteractorStyle::OnPinch3D()
 {
   int rc = static_cast<int>(vtkEventDataDevice::RightController);
   int lc = static_cast<int>(vtkEventDataDevice::LeftController);
-
-  if (!this->Internal->PickedNode[rc] && !this->Internal->PickedNode[lc])
+  if (this->Internal->PickedNode[rc] || this->Internal->PickedNode[lc])
   {
-    this->Internal->InteractionState[rc] = VTKIS_ZOOM;
-    this->Internal->InteractionState[lc] = VTKIS_ZOOM;
+    // If a node is being picked then don't do the pinch 3D operation
+    return;
+  }
 
-    if (this->CurrentRenderer == nullptr)
+  this->Internal->InteractionState[rc] = VTKIS_ZOOM;
+  this->Internal->InteractionState[lc] = VTKIS_ZOOM;
+
+  if (this->CurrentRenderer == nullptr)
+  {
+    return;
+  }
+  if (!this->Internal->StartingControllerPoseValid)
+  {
+    // If starting pose is not valid then cannot do the pinch 3D operation
+    return;
+  }
+
+  vtkOpenVRRenderWindowInteractor* rwi = static_cast<vtkOpenVRRenderWindowInteractor*>(this->Interactor);
+  vtkOpenVRRenderWindow* rw = static_cast<vtkOpenVRRenderWindow*>(rwi->GetRenderWindow());
+
+  int pointer = this->Interactor->GetPointerIndex();
+
+  this->FindPokedRenderer(
+    this->Interactor->GetEventPositions(pointer)[0], this->Interactor->GetEventPositions(pointer)[1]);
+
+  // Get current controller poses
+  vtkNew<vtkMatrix4x4> currentController0Pose_Physical;
+  rwi->GetPhysicalEventPose(currentController0Pose_Physical, 0);
+  vtkNew<vtkMatrix4x4> currentController1Pose_Physical;
+  rwi->GetPhysicalEventPose(currentController1Pose_Physical, 1);
+
+  // Get combined current controller pose
+  vtkNew<vtkMatrix4x4> combinedCurrentControllerPose;
+  if ( !this->Internal->CalculateCombinedControllerPose(
+    currentController0Pose_Physical, currentController1Pose_Physical, combinedCurrentControllerPose ) )
+  {
+    // If combined pose is invalid, then use the last valid pose if it exists
+    if (this->Internal->LastValidCombinedControllerPoseExists)
     {
-      return;
-    }
-    if (!this->Internal->StartingControllerPoseValid)
-    {
-      // If starting pose is not valid then cannot do the pinch 3D operation
-      return;
-    }
-
-    vtkOpenVRRenderWindowInteractor* rwi = static_cast<vtkOpenVRRenderWindowInteractor*>(this->Interactor);
-    vtkOpenVRRenderWindow* rw = static_cast<vtkOpenVRRenderWindow*>(rwi->GetRenderWindow());
-
-    int pointer = this->Interactor->GetPointerIndex();
-
-    this->FindPokedRenderer(
-      this->Interactor->GetEventPositions(pointer)[0], this->Interactor->GetEventPositions(pointer)[1]);
-
-    // Get current controller poses
-    vtkNew<vtkMatrix4x4> currentController0Pose_Physical;
-    rwi->GetPhysicalEventPose(currentController0Pose_Physical, 0);
-    vtkNew<vtkMatrix4x4> currentController1Pose_Physical;
-    rwi->GetPhysicalEventPose(currentController1Pose_Physical, 1);
-
-    // Get combined current controller pose
-    vtkNew<vtkMatrix4x4> combinedCurrentControllerPose;
-    if ( !this->Internal->CalculateCombinedControllerPose(
-      currentController0Pose_Physical, currentController1Pose_Physical, combinedCurrentControllerPose ) )
-    {
-      // If combined pose is invalid, then use the last valid pose if it exists
-      if (this->Internal->LastValidCombinedControllerPoseExists)
-      {
-        combinedCurrentControllerPose->DeepCopy(this->Internal->LastValidCombinedControllerPose);
-      }
-      else
-      {
-        // There is no valid last position so cannot do the pinch 3D operation
-        return;
-      }
+      combinedCurrentControllerPose->DeepCopy(this->Internal->LastValidCombinedControllerPose);
     }
     else
     {
-      // Save current as last valid pose
-      this->Internal->LastValidCombinedControllerPose->DeepCopy(combinedCurrentControllerPose);
+      // There is no valid last position so cannot do the pinch 3D operation
+      return;
     }
+  }
+  else
+  {
+    // Save current as last valid pose
+    this->Internal->LastValidCombinedControllerPose->DeepCopy(combinedCurrentControllerPose);
+  }
 
-    // Calculate modifier matrix
-    vtkNew<vtkMatrix4x4> inverseCombinedCurrentControllerPose;
-    vtkMatrix4x4::Invert(combinedCurrentControllerPose, inverseCombinedCurrentControllerPose);
+  // Calculate modifier matrix
+  vtkNew<vtkMatrix4x4> inverseCombinedCurrentControllerPose;
+  vtkMatrix4x4::Invert(combinedCurrentControllerPose, inverseCombinedCurrentControllerPose);
 
-    vtkNew<vtkMatrix4x4> modifyPhysicalToWorldMatrix;
-    vtkMatrix4x4::Multiply4x4(
-      this->Internal->CombinedStartingControllerPose, inverseCombinedCurrentControllerPose, modifyPhysicalToWorldMatrix);
+  vtkNew<vtkMatrix4x4> modifyPhysicalToWorldMatrix;
+  vtkMatrix4x4::Multiply4x4(
+    this->Internal->CombinedStartingControllerPose, inverseCombinedCurrentControllerPose, modifyPhysicalToWorldMatrix);
 
-    // Calculate new physical to world matrix
-    vtkNew<vtkMatrix4x4> startingPhysicalToWorldMatrix;
-    rwi->GetStartingPhysicalToWorldMatrix(startingPhysicalToWorldMatrix);
-    vtkNew<vtkMatrix4x4> newPhysicalToWorldMatrix;
-    vtkMatrix4x4::Multiply4x4(
-      startingPhysicalToWorldMatrix, modifyPhysicalToWorldMatrix, newPhysicalToWorldMatrix);
+  // Calculate new physical to world matrix
+  vtkNew<vtkMatrix4x4> startingPhysicalToWorldMatrix;
+  rwi->GetStartingPhysicalToWorldMatrix(startingPhysicalToWorldMatrix);
+  vtkNew<vtkMatrix4x4> newPhysicalToWorldMatrix;
+  vtkMatrix4x4::Multiply4x4(
+    startingPhysicalToWorldMatrix, modifyPhysicalToWorldMatrix, newPhysicalToWorldMatrix);
 
-    // Set new physical to world matrix
-    rw->SetPhysicalToWorldMatrix(newPhysicalToWorldMatrix);
-
-    if (this->AutoAdjustCameraClippingRange)
-    {
-      this->CurrentRenderer->ResetCameraClippingRange();
-    }
-    if (this->Interactor->GetLightFollowCamera())
-    {
-      this->CurrentRenderer->UpdateLightsGeometryToFollowCamera();
-    }
+  // Set new physical to world matrix
+  rw->SetPhysicalToWorldMatrix(newPhysicalToWorldMatrix);
+  if (this->AutoAdjustCameraClippingRange)
+  {
+    this->CurrentRenderer->ResetCameraClippingRange();
+  }
+  if (this->Interactor->GetLightFollowCamera())
+  {
+    this->CurrentRenderer->UpdateLightsGeometryToFollowCamera();
   }
 }
 
@@ -778,4 +780,88 @@ vtkMRMLScene* vtkVirtualRealityViewInteractorStyle::GetMRMLScene()
   }
 
   return this->DisplayableManagerGroup->GetNthDisplayableManager(0)->GetMRMLScene();
+}
+
+//---------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractorStyle::SetMagnification(double magnification)
+{
+  if (this->CurrentRenderer == nullptr)
+  {
+    return;
+  }
+
+  vtkOpenVRRenderWindowInteractor* rwi = static_cast<vtkOpenVRRenderWindowInteractor*>(this->Interactor);
+  vtkOpenVRRenderWindow* rw = static_cast<vtkOpenVRRenderWindow*>(rwi->GetRenderWindow());
+
+  double currentPhysicalScale = rw->GetPhysicalScale();
+  double newPhysicalScale = 1000.0 / magnification;
+  double scaleFactor = newPhysicalScale / currentPhysicalScale;
+  if (fabs(scaleFactor - 1.0) < 0.001)
+  {
+    return;
+  }
+
+  // Get Physical to World_Origin matrix
+  vtkNew<vtkMatrix4x4> physicalToWorldOriginMatrix;
+  rw->GetPhysicalToWorldMatrix(physicalToWorldOriginMatrix);
+
+  // Calculate World_Origin to World_FocusPoint matrix
+  double bounds[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+  this->CurrentRenderer->ComputeVisiblePropBounds(bounds);
+  double focusPoint_World[3] = { (bounds[1] + bounds[0]) / 2.0,
+                                 (bounds[3] + bounds[2]) / 2.0,
+                                 (bounds[5] + bounds[4]) / 2.0 };
+  vtkNew<vtkMatrix4x4> worldOriginToWorldFocusPointMatrix;
+  for (int i=0; i<3; ++i)
+  {
+    worldOriginToWorldFocusPointMatrix->SetElement(i,3, -focusPoint_World[i]);
+  }
+
+  // Calculate World_FocusPoint to World_ScaledFocusPoint matrix
+  vtkNew<vtkMatrix4x4> worldFocusPointToWorldScaledFocusPointMatrix;
+  for (int i=0; i<3; ++i)
+  {
+    worldFocusPointToWorldScaledFocusPointMatrix->SetElement(i,i, scaleFactor);
+  }
+
+  // Calculate World_ScaledFocusPoint to World_ScaledOrigin matrix
+  vtkNew<vtkMatrix4x4> worldScaledFocusPointToWorldScaledOriginMatrix;
+  for (int i=0; i<3; ++i)
+  {
+    worldScaledFocusPointToWorldScaledOriginMatrix->SetElement(i,3, focusPoint_World[i]);
+  }
+
+  // Calculate Physical to World_ScaledOrigin matrix
+  vtkNew<vtkMatrix4x4> worldFocusPointToWorldScaledOriginMatrix;
+  vtkMatrix4x4::Multiply4x4( worldScaledFocusPointToWorldScaledOriginMatrix, worldFocusPointToWorldScaledFocusPointMatrix,
+    worldFocusPointToWorldScaledOriginMatrix );
+
+  vtkNew<vtkMatrix4x4> worldOriginToWorldScaledOriginMatrix;
+  vtkMatrix4x4::Multiply4x4( worldFocusPointToWorldScaledOriginMatrix, worldOriginToWorldFocusPointMatrix,
+    worldOriginToWorldScaledOriginMatrix );
+
+  // Physical to World_ScaledOrigin
+  vtkNew<vtkMatrix4x4> physicalToWorldScaledOriginMatrix;
+  vtkMatrix4x4::Multiply4x4( worldOriginToWorldScaledOriginMatrix, physicalToWorldOriginMatrix,
+    physicalToWorldScaledOriginMatrix );
+
+  rw->SetPhysicalToWorldMatrix(physicalToWorldScaledOriginMatrix);
+
+  if (this->AutoAdjustCameraClippingRange)
+  {
+    this->CurrentRenderer->ResetCameraClippingRange();
+  }
+  if (this->Interactor->GetLightFollowCamera())
+  {
+    this->CurrentRenderer->UpdateLightsGeometryToFollowCamera();
+  }
+}
+
+//---------------------------------------------------------------------------
+double vtkVirtualRealityViewInteractorStyle::GetMagnification()
+{
+  vtkOpenVRRenderWindowInteractor* rwi = static_cast<vtkOpenVRRenderWindowInteractor*>(this->Interactor);
+  vtkOpenVRRenderWindow* rw = static_cast<vtkOpenVRRenderWindow*>(rwi->GetRenderWindow());
+
+  return 1000.0 / rw->GetPhysicalScale();
 }

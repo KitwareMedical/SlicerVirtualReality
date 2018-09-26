@@ -52,7 +52,7 @@
 #include "qSlicerApplication.h"
 #include "qSlicerLayoutManager.h"
 #include "vtkSlicerConfigure.h" // For Slicer_USE_OpenVR
-#include <vtkSlicerCamerasModuleLogic.h>
+#include "vtkSlicerCamerasModuleLogic.h"
 
 // VirtualReality includes
 #include "vtkMRMLVirtualRealityViewNode.h"
@@ -65,7 +65,6 @@
 
 // MRML includes
 #include <vtkMRMLLinearTransformNode.h>
-#include <vtkMRMLVirtualRealityViewNode.h>
 #include <vtkMRMLCameraNode.h>
 
 // VTK includes
@@ -149,6 +148,11 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   this->RenderWindow->SetMultiSamples(0);
   this->RenderWindow->AddRenderer(this->Renderer);
   this->RenderWindow->SetInteractor(this->Interactor);
+  // Set default 10x magnification (conversion: PhysicalScale = 1000 / Magnification)
+  this->RenderWindow->SetPhysicalScale(100.0);
+  // Observe VR render window event
+  qvtkReconnect( this->RenderWindow, vtkOpenVRRenderWindow::PhysicalToWorldMatrixModified,
+    q, SLOT(onPhysicalToWorldMatrixModified()) );
 
   vtkMRMLVirtualRealityViewDisplayableManagerFactory* factory
     = vtkMRMLVirtualRealityViewDisplayableManagerFactory::GetInstance();
@@ -376,17 +380,16 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
 
   if (this->RenderWindow)
   {
-    double physicalScale = this->MRMLVirtualRealityViewNode->GetPhysicalScale() * 100.0;
-    if (physicalScale <= 0.01)
-    {  
-      // Very small values are not allowed
-      physicalScale = 1.0;
-      this->RenderWindow->SetPhysicalScale(physicalScale);
-    }
-    else
+    double magnification = this->MRMLVirtualRealityViewNode->GetMagnification();
+    if (magnification < 0.01)
     {
-      this->RenderWindow->SetPhysicalScale(physicalScale);
-    }  
+      magnification = 0.01;
+    }
+    else if (magnification > 100.0)
+    {
+      magnification = 100.0;
+    }
+    this->InteractorStyle->SetMagnification(magnification);
   }
 
   if (this->RenderWindow)
@@ -639,4 +642,14 @@ bool qMRMLVirtualRealityView::isHardwareConnected()const
   }
   // connected successfully
   return true;
+}
+
+//------------------------------------------------------------------------------
+void qMRMLVirtualRealityView::onPhysicalToWorldMatrixModified()
+{
+  Q_D(qMRMLVirtualRealityView);
+
+  d->MRMLVirtualRealityViewNode->SetMagnification(d->InteractorStyle->GetMagnification());
+
+  emit physicalToWorldMatrixModified();
 }

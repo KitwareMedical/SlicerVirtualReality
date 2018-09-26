@@ -46,16 +46,21 @@ public slots:
   void onDesiredUpdateRateChanged(double);
   void onMotionSensitivityChanged(double);
   void onMotionSpeedChanged(double);
-  void onPhysicalScaleChanged(double); 
+  void onMagnificationChanged(double); 
   void setControllerTransformsUpdate(bool);
 
 protected slots:
   void updateWidgetFromMRML();
 
+  void onPhysicalToWorldMatrixModified();
+
 protected:
   QScopedPointer<qSlicerVirtualRealityModuleWidgetPrivate> d_ptr;
 
   virtual void setup();
+
+  double getMagnificationFromPower(double powerOfTen);
+  double getPowerFromMagnification(double magnification);
 
 private:
   Q_DECLARE_PRIVATE(qSlicerVirtualRealityModuleWidget);

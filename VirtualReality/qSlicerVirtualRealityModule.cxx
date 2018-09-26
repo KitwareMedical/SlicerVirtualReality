@@ -126,6 +126,14 @@ void qSlicerVirtualRealityModulePrivate::addViewWidget()
   {
     qWarning() << "Cameras module is not found";
   }
+
+  qSlicerVirtualRealityModuleWidget* moduleWidget =
+    dynamic_cast<qSlicerVirtualRealityModuleWidget*>(q->widgetRepresentation());
+  if (moduleWidget)
+  {
+    QObject::connect(this->VirtualRealityViewWidget, SIGNAL(physicalToWorldMatrixModified()),
+      moduleWidget, SLOT(onPhysicalToWorldMatrixModified()));
+  }
 }
 
 //-----------------------------------------------------------------------------

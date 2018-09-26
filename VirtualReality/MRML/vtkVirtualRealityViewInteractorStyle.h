@@ -143,8 +143,6 @@ public:
 
   //void ToggleDrawControls();
 
-  //void SetInteractor(vtkRenderWindowInteractor* iren) override;
-
   //// allow the user to add options to the menu
   //vtkOpenVRMenuWidget *GetMenu() {
   //  return this->Menu.Get(); }
@@ -153,6 +151,11 @@ public:
   vtkGetObjectMacro(DisplayableManagerGroup, vtkMRMLDisplayableManagerGroup);
   /// Set the displayable managers
   vtkSetObjectMacro(DisplayableManagerGroup, vtkMRMLDisplayableManagerGroup);
+
+  /// Set physical to world magnification. Valid value range is [0.01, 100].
+  /// Note: Conversion is physicalScale = 1000 / magnification
+  void SetMagnification(double magnification);
+  double GetMagnification();
 
 protected:
   //void EndPickCallback(vtkSelection *sel);

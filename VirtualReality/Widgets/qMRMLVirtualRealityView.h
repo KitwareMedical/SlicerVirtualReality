@@ -30,6 +30,9 @@
 
 #include "qSlicerVirtualRealityModuleWidgetsExport.h"
 
+// CTK includes
+#include <ctkVTKObject.h> 
+
 class qMRMLVirtualRealityViewPrivate;
 class vtkMRMLVirtualRealityViewNode;
 class vtkCollection;
@@ -52,6 +55,7 @@ class vtkOpenVRCamera;
 class Q_SLICER_QTMODULES_VIRTUALREALITY_WIDGETS_EXPORT qMRMLVirtualRealityView : public QWidget
 {
   Q_OBJECT
+  QVTK_OBJECT
 public:
   /// Superclass typedef
   typedef QWidget Superclass;
@@ -96,9 +100,14 @@ public:
   /// Get underlying RenderWindow
   Q_INVOKABLE bool isHardwareConnected()const;
 
+signals:
+  void physicalToWorldMatrixModified();
+
 public slots:
   /// Set the current \a viewNode to observe
   void setMRMLVirtualRealityViewNode(vtkMRMLVirtualRealityViewNode* newViewNode);
+
+  void onPhysicalToWorldMatrixModified();
 
 protected:
 

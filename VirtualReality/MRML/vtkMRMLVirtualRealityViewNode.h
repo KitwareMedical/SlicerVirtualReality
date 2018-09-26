@@ -43,19 +43,15 @@ public:
 
   virtual vtkMRMLNode* CreateNodeInstance() VTK_OVERRIDE;
 
-  ///
   /// Read node attributes from XML file
   virtual void ReadXMLAttributes( const char** atts) VTK_OVERRIDE;
 
-  ///
   /// Write this node's information to a MRML file in XML format.
   virtual void WriteXML(ostream& of, int indent) VTK_OVERRIDE;
 
-  ///
   /// Copy the node's attributes to this object
   virtual void Copy(vtkMRMLNode *node) VTK_OVERRIDE;
 
-  ///
   /// Get node XML tag name (like Volume, Model)
   virtual const char* GetNodeTagName() VTK_OVERRIDE;
 
@@ -121,9 +117,10 @@ public:
   vtkGetMacro(DesiredUpdateRate, double);
   vtkSetMacro(DesiredUpdateRate, double);
 
-  /// Physical scale of world (0, 1]
-  vtkGetMacro(PhysicalScale, double);
-  vtkSetMacro(PhysicalScale, double);
+  /// Magnification of world [0.01, 100].
+  /// Translated to physical scale of the VR render window
+  vtkGetMacro(Magnification, double);
+  vtkSetMacro(Magnification, double);
 
   /// Motion speed of fly (i.e. dolly) (0, 1]
   vtkGetMacro(MotionSpeed, double);
@@ -158,7 +155,7 @@ protected:
   bool TwoSidedLighting;
   bool BackLights;
   double DesiredUpdateRate;
-  double PhysicalScale;
+  double Magnification;
   double MotionSpeed;
   double MotionSensitivity;
   bool ControllerTransformsUpdate;

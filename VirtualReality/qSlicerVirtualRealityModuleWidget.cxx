@@ -22,6 +22,9 @@
 #include "qSlicerVirtualRealityModuleWidget.h"
 #include "ui_qSlicerVirtualRealityModuleWidget.h"
 
+// CTK includes
+#include "ctkDoubleSpinBox.h"
+
 // MRML includes
 #include "vtkMRMLScene.h"
 
@@ -79,9 +82,13 @@ void qSlicerVirtualRealityModuleWidget::setup()
 
   connect(d->DesiredUpdateRateSlider, SIGNAL(valueChanged(double)), this, SLOT(onDesiredUpdateRateChanged(double)));
   connect(d->MotionSensitivitySlider, SIGNAL(valueChanged(double)), this, SLOT(onMotionSensitivityChanged(double)));
-  connect(d->PhysicalScaleSlider, SIGNAL(valueChanged(double)), this, SLOT(onPhysicalScaleChanged(double)));
+  connect(d->MagnificationSlider, SIGNAL(valueChanged(double)), this, SLOT(onMagnificationChanged(double)));
   connect(d->MotionSpeedSlider, SIGNAL(valueChanged(double)), this, SLOT(onMotionSpeedChanged(double)));
   connect(d->ControllerTransformsUpdateCheckBox, SIGNAL(toggled(bool)), this, SLOT(setControllerTransformsUpdate(bool)));
+
+  // Make magnification label same width as motion sensitivity spinbox
+  ctkDoubleSpinBox* motionSpeedSpinBox = d->MotionSpeedSlider->findChild<ctkDoubleSpinBox*>("SpinBox");
+  d->MagnificationLabel->setMinimumWidth(motionSpeedSpinBox->sizeHint().width());
 
   this->updateWidgetFromMRML();
 
@@ -116,10 +123,12 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   d->DesiredUpdateRateSlider->setEnabled(vrViewNode != NULL);
   d->DesiredUpdateRateSlider->blockSignals(wasBlocked);
 
-  wasBlocked = d ->PhysicalScaleSlider->blockSignals(true);
-  d->PhysicalScaleSlider->setValue(vrViewNode != nullptr ? vrViewNode->GetPhysicalScale() * 100.0 : 10.0);
-  d->PhysicalScaleSlider->setEnabled(vrViewNode != nullptr);
-  d->PhysicalScaleSlider->blockSignals(wasBlocked);
+  wasBlocked = d ->MagnificationSlider->blockSignals(true);
+  d->MagnificationSlider->setValue( vrViewNode != nullptr ?
+    this->getPowerFromMagnification(vrViewNode->GetMagnification())
+    : 1.0 );
+  d->MagnificationSlider->setEnabled(vrViewNode != nullptr);
+  d->MagnificationSlider->blockSignals(wasBlocked);
 
   wasBlocked = d->MotionSensitivitySlider->blockSignals(true);
   d->MotionSensitivitySlider->setValue(vrViewNode != NULL ? vrViewNode->GetMotionSensitivity() * 100.0 : 0);
@@ -262,16 +271,67 @@ void qSlicerVirtualRealityModuleWidget::onMotionSpeedChanged(double percent)
 }
  
 //----------------------------------------------------------------------------------
-
-void qSlicerVirtualRealityModuleWidget::onPhysicalScaleChanged(double percent)
+void qSlicerVirtualRealityModuleWidget::onMagnificationChanged(double powerOfTen)
 {
   Q_D(qSlicerVirtualRealityModuleWidget);
+
+  double magnification = this->getMagnificationFromPower(powerOfTen);
+
   vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
   vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
   if (vrViewNode)
   {
-    vrViewNode->SetPhysicalScale(percent * 0.01);
+    vrViewNode->SetMagnification(magnification);
   }
+
+  d->MagnificationLabel->setText(QString("%1x").arg(magnification, 3, 'f', 2));
+}
+
+//----------------------------------------------------------------------------------
+void qSlicerVirtualRealityModuleWidget::onPhysicalToWorldMatrixModified()
+{
+  Q_D(qSlicerVirtualRealityModuleWidget);
+
+  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
+  if (vrViewNode)
+  {
+    double magnification = vrViewNode->GetMagnification();
+    bool wasBlocked = d->MagnificationSlider->blockSignals(true);
+    d->MagnificationSlider->setValue(this->getPowerFromMagnification(magnification));
+    d->MagnificationSlider->blockSignals(wasBlocked);
+    d->MagnificationLabel->setText(QString("%1x").arg(magnification, 3, 'f', 2));
+  }
+}
+
+//----------------------------------------------------------------------------------
+double qSlicerVirtualRealityModuleWidget::getMagnificationFromPower(double powerOfTen)
+{
+  if (powerOfTen < -2.0)
+  {
+    powerOfTen = -2.0;
+  }
+  else if (powerOfTen > 2.0)
+  {
+    powerOfTen = 2.0;
+  }
+
+  return pow(10.0, powerOfTen);
+}
+
+//----------------------------------------------------------------------------------
+double qSlicerVirtualRealityModuleWidget::getPowerFromMagnification(double magnification)
+{
+  if (magnification < 0.01)
+  {
+    magnification = 0.01;
+  }
+  else if (magnification > 100.0)
+  {
+    magnification = 100.0;
+  }
+
+  return log10(magnification);
 }
 
 //-----------------------------------------------------------------------------

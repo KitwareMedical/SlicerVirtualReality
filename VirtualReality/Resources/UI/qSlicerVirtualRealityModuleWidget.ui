@@ -225,43 +225,66 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
+      <item row="4" column="0">
        <widget class="QLabel" name="label_9">
         <property name="text">
-         <string>Physical Scale:</string>
+         <string>Magnification:</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
-       <widget class="ctkSliderWidget" name="PhysicalScaleSlider">
-        <property name="toolTip">
-         <string>Scale of the world in VR view</string>
-        </property>
-        <property name="decimals">
-         <number>0</number>
-        </property>
-        <property name="minimum">
-         <double>0.010000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>100.000000000000000</double>
-        </property>
-        <property name="value">
-         <double>10.000000000000000</double>
-        </property>
-        <property name="suffix">
-         <string>%</string>
-        </property>
-       </widget>
+      <item row="4" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="ctkSliderWidget" name="MagnificationSlider">
+          <property name="toolTip">
+           <string>Scale of the world in VR view</string>
+          </property>
+          <property name="decimals">
+           <number>2</number>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
+          </property>
+          <property name="pageStep">
+           <double>0.250000000000000</double>
+          </property>
+          <property name="minimum">
+           <double>-2.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>2.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>1.000000000000000</double>
+          </property>
+          <property name="spinBoxVisible">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="MagnificationLabel">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="text">
+           <string>10x</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="label_7">
+      <item row="5" column="0">
+       <widget class="QLabel" name="label_10">
         <property name="text">
          <string>Motion Speed:</string>
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
+      <item row="5" column="1">
        <widget class="ctkSliderWidget" name="MotionSpeedSlider">
         <property name="toolTip">
          <string>Changes the speed of the dolly's physical translation</string>
@@ -283,17 +306,17 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="1">
-       <widget class="ctkCheckBox" name="ControllerTransformsUpdateCheckBox">
-        <property name="toolTip">
-         <string>If checked, then position and orientation of each controller will be exposed in the scene as a transform node</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
+      <item row="6" column="0">
        <widget class="QLabel" name="label_8">
         <property name="text">
          <string>Controller transforms:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="ctkCheckBox" name="ControllerTransformsUpdateCheckBox">
+        <property name="toolTip">
+         <string>If checked, then position and orientation of each controller will be exposed in the scene as a transform node</string>
         </property>
        </widget>
       </item>
