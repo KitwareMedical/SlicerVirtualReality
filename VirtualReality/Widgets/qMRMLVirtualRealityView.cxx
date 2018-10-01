@@ -394,11 +394,9 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
 
   if (this->RenderWindow)
   {
-    double dollyPhysicalSpeed = this ->MRMLVirtualRealityViewNode->GetMotionSpeed();
-    // The value 120,000 was chosen because the slider uses a scale from 0 to 1
-    // when the dolly speed is set to 60,000, it seems to have a reasonable speed.
-    // the default slider value is 0.5. 
-    this->InteractorStyle->SetDollyPhysicalSpeed(dollyPhysicalSpeed * 12000);
+    double dollyPhysicalSpeedMps = this ->MRMLVirtualRealityViewNode->GetMotionSpeed();
+    // 1.6666 m/s is walking speed (= 6 km/h), which is the default. We multipy it with the factor
+    this->InteractorStyle->SetDollyPhysicalSpeed(dollyPhysicalSpeedMps);
   }
   if (this->MRMLVirtualRealityViewNode->GetActive())
   {

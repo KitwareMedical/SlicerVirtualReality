@@ -122,7 +122,8 @@ public:
   vtkGetMacro(Magnification, double);
   vtkSetMacro(Magnification, double);
 
-  /// Motion speed of fly (i.e. dolly) (0, 1]
+  /// Motion speed of fly (i.e. dolly) in meters per second.
+  /// Default is walking speed: 6 km/h = 1.66 m/s
   vtkGetMacro(MotionSpeed, double);
   vtkSetMacro(MotionSpeed, double);
 

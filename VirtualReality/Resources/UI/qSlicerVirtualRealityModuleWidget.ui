@@ -237,7 +237,7 @@
         <item>
          <widget class="ctkSliderWidget" name="MagnificationSlider">
           <property name="toolTip">
-           <string>Scale of the world in VR view</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Scale of the world in VR view.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;1x magnification means that objects appear in real size, 10x means they appear ten times larger.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="decimals">
            <number>2</number>
@@ -280,29 +280,35 @@
       <item row="5" column="0">
        <widget class="QLabel" name="label_10">
         <property name="text">
-         <string>Motion Speed:</string>
+         <string>Motion speed:</string>
         </property>
        </widget>
       </item>
       <item row="5" column="1">
        <widget class="ctkSliderWidget" name="MotionSpeedSlider">
         <property name="toolTip">
-         <string>Changes the speed of the dolly's physical translation</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Speed of flying in virtual reality in m/s.&lt;/p&gt;&lt;p&gt;This speed applies in the &amp;quot;physical&amp;quot; coordinate system, which corresponds to physical head and controller movement. This means that if magnification is 10x, then flying will appear 10x slower relative to the scene, but in the physical scale it is constant.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="decimals">
-         <number>0</number>
+         <number>1</number>
+        </property>
+        <property name="singleStep">
+         <double>0.500000000000000</double>
+        </property>
+        <property name="pageStep">
+         <double>2.000000000000000</double>
         </property>
         <property name="minimum">
-         <double>0.010000000000000</double>
+         <double>0.100000000000000</double>
         </property>
         <property name="maximum">
-         <double>100.000000000000000</double>
+         <double>10.000000000000000</double>
         </property>
         <property name="value">
-         <double>50.000000000000000</double>
+         <double>1.660000000000000</double>
         </property>
         <property name="suffix">
-         <string>%</string>
+         <string>m/s</string>
         </property>
        </widget>
       </item>

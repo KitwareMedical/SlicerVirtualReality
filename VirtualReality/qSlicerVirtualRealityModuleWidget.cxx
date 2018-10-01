@@ -136,7 +136,7 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   d->MotionSensitivitySlider->blockSignals(wasBlocked);
 
   wasBlocked = d->MotionSpeedSlider->blockSignals(true);
-  d->MotionSpeedSlider->setValue(vrViewNode != NULL ? vrViewNode->GetMotionSpeed() * 100.0 : 50);
+  d->MotionSpeedSlider->setValue(vrViewNode != NULL ? vrViewNode->GetMotionSpeed() : 1.6666);
   d->MotionSpeedSlider->setEnabled(vrViewNode != NULL);
   d->MotionSpeedSlider->blockSignals(wasBlocked);
 
@@ -259,14 +259,14 @@ void qSlicerVirtualRealityModuleWidget::onMotionSensitivityChanged(double percen
 }
 
 //-----------------------------------------------------------------------------
-void qSlicerVirtualRealityModuleWidget::onMotionSpeedChanged(double percent)
+void qSlicerVirtualRealityModuleWidget::onMotionSpeedChanged(double speedMps)
 {
   Q_D(qSlicerVirtualRealityModuleWidget);
   vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
   vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
   if (vrViewNode)
   {
-    vrViewNode->SetMotionSpeed(percent * 0.01);
+    vrViewNode->SetMotionSpeed(speedMps);
   }
 }
  

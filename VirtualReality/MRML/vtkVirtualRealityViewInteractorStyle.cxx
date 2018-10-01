@@ -44,6 +44,7 @@
 #include <vtkPoints.h>
 #include <vtkRenderer.h>
 #include <vtkQuaternion.h>
+#include <vtkTimerLog.h>
 #include <vtkTransform.h>
 #include <vtkWeakPointer.h>
 
@@ -529,6 +530,7 @@ void vtkVirtualRealityViewInteractorStyle::StartDolly3D(vtkEventDataDevice3D* ed
   }
   vtkEventDataDevice dev = ed->GetDevice();
   this->Internal->InteractionState[static_cast<int>(dev)] = VTKIS_DOLLY;
+  this->LastDolly3DEventTime->StartTimer();
 
   // this->GrabFocus(this->EventCallbackCommand);
 }
@@ -538,6 +540,8 @@ void vtkVirtualRealityViewInteractorStyle::EndDolly3D(vtkEventDataDevice3D* ed)
 {
   vtkEventDataDevice dev = ed->GetDevice();
   this->Internal->InteractionState[static_cast<int>(dev)] = VTKIS_NONE;
+
+  this->LastDolly3DEventTime->StopTimer();
 }
 
 //----------------------------------------------------------------------------

@@ -37,7 +37,7 @@ vtkMRMLVirtualRealityViewNode::vtkMRMLVirtualRealityViewNode()
   , DesiredUpdateRate(60.0)
   , MotionSensitivity(0.5)
   , Magnification(10.0)
-  , MotionSpeed(0.5)
+  , MotionSpeed(1.6666)
   , ControllerTransformsUpdate(false)
 {
   this->Visibility = 0; // hidden by default to not connect to the headset until it is needed
@@ -69,7 +69,7 @@ void vtkMRMLVirtualRealityViewNode::WriteXML(ostream& of, int nIndent)
   vtkMRMLWriteXMLBooleanMacro(twoSidedLighting, TwoSidedLighting);
   vtkMRMLWriteXMLBooleanMacro(backLights, BackLights);
   vtkMRMLWriteXMLFloatMacro(desiredUpdateRate, DesiredUpdateRate);
-  vtkMRMLWriteXMLFloatMacro(physicalScale, Magnification);
+  vtkMRMLWriteXMLFloatMacro(magnification, Magnification);
   vtkMRMLWriteXMLFloatMacro(motionSpeed,MotionSpeed);
   vtkMRMLWriteXMLFloatMacro(motionSensitivity, MotionSensitivity);
   vtkMRMLWriteXMLBooleanMacro(controllerTransformsUpdate, ControllerTransformsUpdate);
@@ -87,7 +87,7 @@ void vtkMRMLVirtualRealityViewNode::ReadXMLAttributes(const char** atts)
   vtkMRMLReadXMLBooleanMacro(twoSidedLighting, TwoSidedLighting);
   vtkMRMLReadXMLBooleanMacro(backLights, BackLights);
   vtkMRMLReadXMLFloatMacro(desiredUpdateRate, DesiredUpdateRate);
-  vtkMRMLReadXMLFloatMacro(physicalScale, Magnification);
+  vtkMRMLReadXMLFloatMacro(magnification, Magnification);
   vtkMRMLReadXMLFloatMacro(motionSpeed, MotionSpeed);
   vtkMRMLReadXMLFloatMacro(motionSensitivity, MotionSensitivity);
   vtkMRMLReadXMLBooleanMacro(controllerTransformsUpdate, ControllerTransformsUpdate);
