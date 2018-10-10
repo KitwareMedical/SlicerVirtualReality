@@ -44,7 +44,7 @@ class VTK_SLICER_VIRTUALREALITY_MODULE_MRML_EXPORT vtkVirtualRealityViewInteract
 public:
   static vtkVirtualRealityViewInteractorStyle *New();
   vtkTypeMacro(vtkVirtualRealityViewInteractorStyle,vtkInteractorStyle3D);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   
   /**
    * Set/Get the Interactor wrapper being controlled by this object.
@@ -202,7 +202,7 @@ protected:
 
 protected:
   vtkVirtualRealityViewInteractorStyle();
-  ~vtkVirtualRealityViewInteractorStyle() VTK_OVERRIDE;
+  ~vtkVirtualRealityViewInteractorStyle() override;
 
 private:
   vtkVirtualRealityViewInteractorStyle(const vtkVirtualRealityViewInteractorStyle&);  /// Not implemented.

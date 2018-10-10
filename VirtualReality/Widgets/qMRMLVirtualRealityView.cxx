@@ -22,8 +22,9 @@
 #include <vtkOpenVRCamera.h>
 #include <vtkVirtualRealityViewInteractorStyle.h>
 //#include <vtkOpenVRInteractorStyle.h> //TODO: For debugging the original interactor
+#include <vtkVirtualRealityViewInteractor.h>
+//#include <vtkOpenVRRenderWindowInteractor.h> //TODO: For debugging the original interactor
 #include <vtkOpenVRRenderWindow.h>
-#include <vtkOpenVRRenderWindowInteractor.h>
 #include <vtkOpenVRRenderer.h>
 
 #include "qMRMLVirtualRealityView_p.h"
@@ -75,8 +76,6 @@
 #include <vtkNew.h>
 #include <vtkOpenGLFramebufferObject.h>
 #include <vtkPolyDataMapper.h>
-#include <vtkRenderWindow.h>
-#include <vtkRenderWindowInteractor.h>
 #include <vtkRenderer.h>
 #include <vtkRendererCollection.h>
 #include <vtkSmartPointer.h>
@@ -137,11 +136,13 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
 
   this->RenderWindow = vtkSmartPointer<vtkOpenVRRenderWindow>::New();
   this->Renderer = vtkSmartPointer<vtkOpenVRRenderer>::New();
-  this->Interactor = vtkSmartPointer<vtkOpenVRRenderWindowInteractor>::New();
+  this->Interactor = vtkSmartPointer<vtkVirtualRealityViewInteractor>::New();
+  //this->Interactor = vtkSmartPointer<vtkOpenVRRenderWindowInteractor>::New(); //TODO: For debugging the original interactor
   this->InteractorStyle = vtkSmartPointer<vtkVirtualRealityViewInteractorStyle>::New();
   //this->InteractorStyle = vtkSmartPointer<vtkOpenVRInteractorStyle>::New(); //TODO: For debugging the original interactor
   this->Interactor->SetInteractorStyle(this->InteractorStyle);
   this->InteractorStyle->SetInteractor(this->Interactor);
+  this->InteractorStyle->SetCurrentRenderer(this->Renderer);
   this->Camera = vtkSmartPointer<vtkOpenVRCamera>::New();
   this->Renderer->SetActiveCamera(this->Camera);
 

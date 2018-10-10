@@ -390,9 +390,11 @@ void vtkVirtualRealityViewInteractorStyle::PositionProp(vtkEventData* ed)
     translation[i] = worldPos[i] - lastWorldPos[i];
   }
   vtkQuaternion<double> q1;
-  q1.SetRotationAngleAndAxis(vtkMath::RadiansFromDegrees(lastWorldOrientation[0]), lastWorldOrientation[1], lastWorldOrientation[2], lastWorldOrientation[3]);
+  q1.SetRotationAngleAndAxis(vtkMath::RadiansFromDegrees(
+    lastWorldOrientation[0]), lastWorldOrientation[1], lastWorldOrientation[2], lastWorldOrientation[3]);
   vtkQuaternion<double> q2;
-  q2.SetRotationAngleAndAxis(vtkMath::RadiansFromDegrees(worldOrientation[0]), worldOrientation[1], worldOrientation[2], worldOrientation[3]);
+  q2.SetRotationAngleAndAxis(vtkMath::RadiansFromDegrees(
+    worldOrientation[0]), worldOrientation[1], worldOrientation[2], worldOrientation[3]);
   q1.Conjugate();
   q2 = q2*q1;
   double axis[4] = {0.0};
@@ -409,28 +411,30 @@ void vtkVirtualRealityViewInteractorStyle::PositionProp(vtkEventData* ed)
     topTransformNode = topTransformNode->GetParentTransformNode();
   }
   vtkMRMLTransformNode* vrTransformNode = NULL;
-  if ( !topTransformNode
-    || !topTransformNode->GetAttribute(vtkMRMLVirtualRealityViewNode::GetVirtualRealityInteractionTransformAttributeName()) )
+  if (!topTransformNode)
   {
-    // Create interaction transform if not found
+    // Create interaction transform if no transform found
     vtkNew<vtkMRMLTransformNode> newTransformNode;
     std::string vrTransformNodeName(pickedNode->GetName());
     vrTransformNodeName.append("_VR_Interaction_Transform");
     newTransformNode->SetName(vrTransformNodeName.c_str());
-    newTransformNode->SetAttribute(vtkMRMLVirtualRealityViewNode::GetVirtualRealityInteractionTransformAttributeName(), "1");
+    newTransformNode->SetAttribute(
+      vtkMRMLVirtualRealityViewNode::GetVirtualRealityInteractionTransformAttributeName(), "1");
     pickedNode->GetScene()->AddNode(newTransformNode);
-    if (topTransformNode)
-    {
-      topTransformNode->SetAndObserveTransformNodeID(newTransformNode->GetID());
-    }
-    else
-    {
-      pickedNode->SetAndObserveTransformNodeID(newTransformNode->GetID());
-    }
+    pickedNode->SetAndObserveTransformNodeID(newTransformNode->GetID());
     vrTransformNode = newTransformNode.GetPointer();
   }
   else
   {
+    // Make top transform the VR interaction transform
+    if (!topTransformNode->GetAttribute(
+      vtkMRMLVirtualRealityViewNode::GetVirtualRealityInteractionTransformAttributeName()) )
+    {
+      vtkInfoMacro("PositionProp: Transform " << topTransformNode->GetName() <<
+        " is now used as VR interaction transform for node " << pickedNode->GetName());
+      topTransformNode->SetAttribute(
+        vtkMRMLVirtualRealityViewNode::GetVirtualRealityInteractionTransformAttributeName(), "1");
+    }
     // VR interaction transform found (i.e. the top transform has the VR interaction transform attribute)
     vrTransformNode = topTransformNode;
   }
@@ -448,8 +452,12 @@ void vtkVirtualRealityViewInteractorStyle::PositionProp(vtkEventData* ed)
   if (lastVrInteractionTransform)
   {
     interactionTransform->Concatenate(lastVrInteractionTransform->GetMatrix());
+    lastVrInteractionTransform->DeepCopy(interactionTransform);
   }
-  vrTransformNode->SetAndObserveTransformToParent(interactionTransform);
+  else
+  {
+    vrTransformNode->SetAndObserveTransformToParent(interactionTransform);
+  }
 
   if (this->AutoAdjustCameraClippingRange)
   {
@@ -571,7 +579,8 @@ void vtkVirtualRealityViewInteractorStyle::OnPinch3D()
 {
   int rc = static_cast<int>(vtkEventDataDevice::RightController);
   int lc = static_cast<int>(vtkEventDataDevice::LeftController);
-  if (this->Internal->PickedNode[rc] || this->Internal->PickedNode[lc])
+  if ( (this->Internal->PickedNode[rc] && this->Internal->PickedNode[rc]->GetSelectable())
+    || (this->Internal->PickedNode[lc] && this->Internal->PickedNode[lc]->GetSelectable()) )
   {
     // If a node is being picked then don't do the pinch 3D operation
     return;

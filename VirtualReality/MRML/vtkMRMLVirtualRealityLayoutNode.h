@@ -32,24 +32,24 @@ class VTK_SLICER_VIRTUALREALITY_MODULE_MRML_EXPORT vtkMRMLVirtualRealityLayoutNo
 public:
   static vtkMRMLVirtualRealityLayoutNode *New();
   vtkTypeMacro(vtkMRMLVirtualRealityLayoutNode,vtkMRMLAbstractLayoutNode);
-  virtual vtkMRMLNode* CreateNodeInstance() VTK_OVERRIDE;
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  virtual vtkMRMLNode* CreateNodeInstance() override;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //--------------------------------------------------------------------------
   /// MRML methods
   //--------------------------------------------------------------------------
 
   /// Set node attributes
-  virtual void ReadXMLAttributes( const char** atts) VTK_OVERRIDE;
+  virtual void ReadXMLAttributes( const char** atts) override;
 
   /// Write this node's information to a MRML file in XML format.
-  virtual void WriteXML(ostream& of, int indent) VTK_OVERRIDE;
+  virtual void WriteXML(ostream& of, int indent) override;
 
   /// Copy the node's attributes to this object
-  virtual void Copy(vtkMRMLNode *node) VTK_OVERRIDE;
+  virtual void Copy(vtkMRMLNode *node) override;
 
   /// Get node XML tag name (like Volume, Model)
-  virtual const char* GetNodeTagName() VTK_OVERRIDE {return "VirtualRealityLayout";}
+  virtual const char* GetNodeTagName() override {return "VirtualRealityLayout";}
 
   /// Adds a layout description with integer identifier
   /// "layout". Returns false without making any modifications if the
