@@ -396,3 +396,29 @@ qMRMLVirtualRealityView* qSlicerVirtualRealityModule::viewWidget()
   Q_D(qSlicerVirtualRealityModule);
   return d->VirtualRealityViewWidget;
 }
+
+//-----------------------------------------------------------------------------
+void qSlicerVirtualRealityModule::setMRMLScene(vtkMRMLScene* scene)
+{
+  this->Superclass::setMRMLScene(scene);
+
+  vtkSlicerVirtualRealityLogic* logic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  if (!logic)
+  {
+    qCritical() << Q_FUNC_INFO << " failed: logic is invalid";
+    return;
+  }
+
+  vtkMRMLVirtualRealityViewNode* defaultViewNode = logic->GetDefaultVirtualRealityViewNode();
+  if (!defaultViewNode)
+  {
+    qCritical() << Q_FUNC_INFO << " failed: defaultViewNode is invalid";
+    return;
+  }
+  QSettings settings;
+  settings.beginGroup("Default3DView");
+  if (settings.contains("UseDepthPeeling"))
+  {
+    defaultViewNode->SetUseDepthPeeling(settings.value("UseDepthPeeling").toBool());
+  }
+}

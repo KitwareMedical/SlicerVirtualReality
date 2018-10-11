@@ -282,3 +282,22 @@ void vtkSlicerVirtualRealityLogic::SetDefaultReferenceView()
   // Either use a view node displayed in current layout or just any 3D view node found in the scene
   this->ActiveViewNode->SetAndObserveReferenceViewNode(viewNode);
 }
+
+//-----------------------------------------------------------------------------
+vtkMRMLVirtualRealityViewNode* vtkSlicerVirtualRealityLogic::GetDefaultVirtualRealityViewNode()
+{
+  vtkMRMLScene *scene = this->GetMRMLScene();
+  if (!scene)
+    {
+    vtkErrorMacro("vtkSlicerViewControllersLogic::GetDefaultVirtualRealityViewNode failed: invalid scene");
+    return NULL;
+    }
+  vtkMRMLNode* defaultNode = scene->GetDefaultNodeByClass("vtkMRMLVirtualRealityViewNode");
+  if (!defaultNode)
+    {
+    defaultNode = scene->CreateNodeByClass("vtkMRMLVirtualRealityViewNode");
+    scene->AddDefaultNode(defaultNode);
+    defaultNode->Delete(); // scene owns it now
+    }
+  return vtkMRMLVirtualRealityViewNode::SafeDownCast(defaultNode);
+}

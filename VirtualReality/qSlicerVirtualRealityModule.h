@@ -31,8 +31,7 @@ class qMRMLVirtualRealityView;
 class QToolBar;
 
 class Q_SLICER_QTMODULES_VIRTUALREALITY_EXPORT
-qSlicerVirtualRealityModule
-  : public qSlicerLoadableModule
+qSlicerVirtualRealityModule : public qSlicerLoadableModule
 {
   Q_OBJECT;
   QVTK_OBJECT;
@@ -71,6 +70,10 @@ public slots:
   void enableVirtualReality(bool);
   void updateViewFromReferenceViewCamera();
   void switchToVirtualRealityModule();
+
+  /// Set MRML scene for the module. Updates the default view settings based on
+  /// the application settings.
+  virtual void setMRMLScene(vtkMRMLScene* scene);
 
 protected slots:
   void onViewNodeModified();

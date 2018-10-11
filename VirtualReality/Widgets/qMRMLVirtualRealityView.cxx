@@ -329,8 +329,7 @@ void qMRMLVirtualRealityView::updateViewFromReferenceViewCamera()
 void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
 {
   Q_Q(qMRMLVirtualRealityView);
-  if (!this->MRMLVirtualRealityViewNode
-      || !this->MRMLVirtualRealityViewNode->GetVisibility())
+  if (!this->MRMLVirtualRealityViewNode || !this->MRMLVirtualRealityViewNode->GetVisibility())
   {
     if (this->RenderWindow != NULL)
     {
@@ -361,6 +360,7 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
     this->DisplayableManagerGroup->SetMRMLDisplayableNode(this->MRMLVirtualRealityViewNode);
   }
 
+  // Renderer properties
   this->Renderer->SetGradientBackground(1);
   this->Renderer->SetBackground(this->MRMLVirtualRealityViewNode->GetBackgroundColor());
   this->Renderer->SetBackground2(this->MRMLVirtualRealityViewNode->GetBackgroundColor2());
@@ -374,13 +374,16 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
     light->SetSwitch(switchOnAllLights);
   }
 
-  if (this->RenderWindow)
-  {
-    this->RenderWindow->SetDesiredUpdateRate(this->desiredUpdateRate());
-  }
+  this->Renderer->SetUseDepthPeeling(this->MRMLVirtualRealityViewNode->GetUseDepthPeeling() != 0);
+  this->Renderer->SetUseDepthPeelingForVolumes(this->MRMLVirtualRealityViewNode->GetUseDepthPeeling() != 0);
 
+  // Render window properties
   if (this->RenderWindow)
   {
+    // Desired update rate
+    this->RenderWindow->SetDesiredUpdateRate(this->desiredUpdateRate());
+
+    // Magnification
     double magnification = this->MRMLVirtualRealityViewNode->GetMagnification();
     if (magnification < 0.01)
     {
@@ -391,14 +394,13 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
       magnification = 100.0;
     }
     this->InteractorStyle->SetMagnification(magnification);
-  }
 
-  if (this->RenderWindow)
-  {
+    // Dolly physical speed
     double dollyPhysicalSpeedMps = this ->MRMLVirtualRealityViewNode->GetMotionSpeed();
     // 1.6666 m/s is walking speed (= 6 km/h), which is the default. We multipy it with the factor
     this->InteractorStyle->SetDollyPhysicalSpeed(dollyPhysicalSpeedMps);
   }
+
   if (this->MRMLVirtualRealityViewNode->GetActive())
   {
     this->VirtualRealityLoopTimer.start(0);
