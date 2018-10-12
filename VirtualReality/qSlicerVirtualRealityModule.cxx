@@ -24,6 +24,10 @@
 #include <QToolBar>
 #include <QtPlugin>
 
+// SubjectHierarchy Plugins includes
+#include "qSlicerSubjectHierarchyPluginHandler.h"
+#include "qSlicerSubjectHierarchyVirtualRealityPlugin.h" 
+
 // VirtualReality Logic includes
 #include <vtkSlicerVirtualRealityLogic.h>
 
@@ -296,6 +300,10 @@ void qSlicerVirtualRealityModule::setup()
   d->addViewWidget();
   // If virtual reality logic is modified it indicates that the view node may changed
   qvtkConnect(logic(), vtkCommand::ModifiedEvent, this, SLOT(onViewNodeModified()));
+
+  // Register Subject Hierarchy plugins
+  qSlicerSubjectHierarchyVirtualRealityPlugin* shPlugin = new qSlicerSubjectHierarchyVirtualRealityPlugin();
+  qSlicerSubjectHierarchyPluginHandler::instance()->registerPlugin(shPlugin); 
 }
 
 //-----------------------------------------------------------------------------
