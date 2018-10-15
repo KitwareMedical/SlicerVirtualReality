@@ -7,11 +7,11 @@ set(proj VTKRenderingOpenVR)
 # Dependencies
 set(${proj}_DEPENDENCIES OpenVR)
 if(DEFINED Slicer_SOURCE_DIR)
-  list(APPEND ${proj}_DEPENDENCIES VTKv9)
+  list(APPEND ${proj}_DEPENDENCIES VTK)
 endif()
 ExternalProject_Include_Dependencies(${proj} PROJECT_VAR proj DEPENDS_VAR ${proj}_DEPENDENCIES)
 
-set(VTK_SOURCE_DIR ${VTK_DIR}/../VTKv${Slicer_VTK_VERSION_MAJOR})
+set(VTK_SOURCE_DIR ${VTK_DIR}/../VTK)
 set(${proj}_SOURCE_DIR ${VTK_SOURCE_DIR}/Rendering/OpenVR)
 ExternalProject_Message(${proj} "VTK_SOURCE_DIR:${VTK_SOURCE_DIR}")
 ExternalProject_Message(${proj} "${proj}_SOURCE_DIR:${${proj}_SOURCE_DIR}")
