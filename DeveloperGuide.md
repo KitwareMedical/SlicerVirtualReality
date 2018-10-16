@@ -79,3 +79,12 @@ vrView.SetBackgroundColor(color)
 vrView.SetBackgroundColor2(color)
 
 ```
+
+Set whether a node can be selected/grabbed/moved:
+
+```python
+
+nodeLocked.SetSelectable(0)
+nodeMovable.SetSelectable(1)
+
+```
