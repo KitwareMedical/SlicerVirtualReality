@@ -75,6 +75,7 @@ public:
   QAction* VirtualRealityToggleAction;
   QAction* UpdateViewFromReferenceViewCameraAction;
   QAction* ConfigureAction;
+  QAction* OptimizeSceneAction;
   qMRMLVirtualRealityView* VirtualRealityViewWidget;
 };
 
@@ -88,6 +89,7 @@ qSlicerVirtualRealityModulePrivate::qSlicerVirtualRealityModulePrivate(qSlicerVi
   , VirtualRealityToggleAction(NULL)
   , UpdateViewFromReferenceViewCameraAction(NULL)
   , ConfigureAction(NULL)
+  , OptimizeSceneAction(NULL)
   , VirtualRealityViewWidget(NULL)
 {
 }
@@ -170,6 +172,11 @@ void qSlicerVirtualRealityModulePrivate::addToolBar()
       q, SLOT(updateViewFromReferenceViewCamera()));
 
     this->ToolBar->addSeparator();
+
+    this->OptimizeSceneAction = this->ToolBar->addAction(QObject::tr("Optimize scene for virtual reality."));
+    this->OptimizeSceneAction->setIcon(QIcon(":/Icons/MagicWand.png"));
+    QObject::connect(this->OptimizeSceneAction, SIGNAL(triggered()),
+      q, SLOT(optimizeSceneForVirtualReality()));
 
     this->ConfigureAction = this->ToolBar->addAction(QObject::tr("Configure virtual reality settings."));
     this->ConfigureAction->setIcon(QIcon(":/Icons/Small/SlicerConfigure.png"));
@@ -396,6 +403,19 @@ void qSlicerVirtualRealityModule::switchToVirtualRealityModule()
     return;
   }
   moduleWithAction->action()->trigger();
+}
+
+// --------------------------------------------------------------------------
+void qSlicerVirtualRealityModule::optimizeSceneForVirtualReality()
+{
+  vtkSlicerVirtualRealityLogic* logic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  if (!logic)
+  {
+    qCritical() << Q_FUNC_INFO << " failed: logic is invalid";
+    return;
+  }
+
+  logic->OptimizeSceneForVirtualReality();
 }
 
 // --------------------------------------------------------------------------

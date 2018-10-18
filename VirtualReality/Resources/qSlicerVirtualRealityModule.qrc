@@ -3,5 +3,6 @@
     <file>Icons/VirtualReality.png</file>
     <file>Icons/VirtualRealityHeadset.png</file>
     <file>Icons/VirtualRealityHeadsetError.png</file>
+    <file>Icons/MagicWand.png</file>
   </qresource>
 </RCC>

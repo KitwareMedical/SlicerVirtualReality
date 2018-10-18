@@ -73,6 +73,13 @@ public:
   /// method has no effect.
   void SetDefaultReferenceView();
 
+  /// Modify MRML scene to be better suited for virtual reality, e.g.
+  /// - Turn off backface culling for all models for better visibility when clipping,
+  ///   which occurs on head movement
+  /// - Turn off slice intersection visibility for all models and segmentations
+  ///   for performance improvement
+  void OptimizeSceneForVirtualReality();
+
 protected:
   vtkSlicerVirtualRealityLogic();
   virtual ~vtkSlicerVirtualRealityLogic();

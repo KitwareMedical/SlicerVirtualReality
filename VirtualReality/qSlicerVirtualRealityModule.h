@@ -70,6 +70,7 @@ public slots:
   void enableVirtualReality(bool);
   void updateViewFromReferenceViewCamera();
   void switchToVirtualRealityModule();
+  void optimizeSceneForVirtualReality();
 
   /// Set MRML scene for the module. Updates the default view settings based on
   /// the application settings.

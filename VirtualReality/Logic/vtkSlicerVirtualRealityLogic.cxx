@@ -21,7 +21,9 @@
 
 // MRML includes
 #include <vtkMRMLLinearTransformNode.h>
+#include <vtkMRMLModelDisplayNode.h>
 #include <vtkMRMLScene.h>
+#include <vtkMRMLSegmentationDisplayNode.h>
 
 // VTK includes
 #include <vtkIntArray.h>
@@ -289,7 +291,7 @@ vtkMRMLVirtualRealityViewNode* vtkSlicerVirtualRealityLogic::GetDefaultVirtualRe
   vtkMRMLScene *scene = this->GetMRMLScene();
   if (!scene)
     {
-    vtkErrorMacro("vtkSlicerViewControllersLogic::GetDefaultVirtualRealityViewNode failed: invalid scene");
+    vtkErrorMacro("GetDefaultVirtualRealityViewNode failed: invalid scene");
     return NULL;
     }
   vtkMRMLNode* defaultNode = scene->GetDefaultNodeByClass("vtkMRMLVirtualRealityViewNode");
@@ -300,4 +302,60 @@ vtkMRMLVirtualRealityViewNode* vtkSlicerVirtualRealityLogic::GetDefaultVirtualRe
     defaultNode->Delete(); // scene owns it now
     }
   return vtkMRMLVirtualRealityViewNode::SafeDownCast(defaultNode);
+}
+
+//---------------------------------------------------------------------------
+void vtkSlicerVirtualRealityLogic::OptimizeSceneForVirtualReality()
+{
+  vtkMRMLScene *scene = this->GetMRMLScene();
+  if (!scene)
+    {
+    vtkErrorMacro("OptimizeSceneForVirtualReality failed: invalid scene");
+    return;
+    }
+
+  // Steps to optimize MRML scene for virtual reality:
+  // - Turn off backface culling for all existing models
+  // - Turn off slice intersection visibility for all existing models and segmentations
+  // - Apply settings in default display nodes
+
+  std::vector<vtkMRMLNode*> modelDisplayNodes;
+  scene->GetNodesByClass("vtkMRMLModelDisplayNode", modelDisplayNodes);
+  for ( std::vector<vtkMRMLNode*>::iterator mdIt=modelDisplayNodes.begin();
+    mdIt!=modelDisplayNodes.end(); ++mdIt )
+  {
+    vtkMRMLModelDisplayNode* modelDisplayNode = vtkMRMLModelDisplayNode::SafeDownCast(*mdIt);
+    modelDisplayNode->SetBackfaceCulling(0);
+    modelDisplayNode->SetSliceIntersectionVisibility(0);
+  }
+
+  std::vector<vtkMRMLNode*> segmentationDisplayNodes;
+  scene->GetNodesByClass("vtkMRMLSegmentationDisplayNode", segmentationDisplayNodes);
+  for ( std::vector<vtkMRMLNode*>::iterator sdIt=segmentationDisplayNodes.begin();
+    sdIt!=segmentationDisplayNodes.end(); ++sdIt )
+  {
+    vtkMRMLSegmentationDisplayNode* segmentationDisplayNode = vtkMRMLSegmentationDisplayNode::SafeDownCast(*sdIt);
+    segmentationDisplayNode->SetVisibility2DFill(0);
+    segmentationDisplayNode->SetVisibility2DOutline(0);
+  }
+
+
+  vtkMRMLNode* defaultModelDisplayNode = scene->GetDefaultNodeByClass("vtkMRMLModelDisplayNode");
+  if (!defaultModelDisplayNode)
+    {
+    defaultModelDisplayNode = scene->CreateNodeByClass("vtkMRMLModelDisplayNode");
+    scene->AddDefaultNode(defaultModelDisplayNode);
+    defaultModelDisplayNode->Delete(); // scene owns it now
+    }
+  vtkMRMLModelDisplayNode::SafeDownCast(defaultModelDisplayNode)->SetBackfaceCulling(0);
+  vtkMRMLModelDisplayNode::SafeDownCast(defaultModelDisplayNode)->SetSliceIntersectionVisibility(0);
+
+  vtkMRMLNode* defaultSegmentationDisplayNode = scene->GetDefaultNodeByClass("vtkMRMLSegmentationDisplayNode");
+  if (!defaultSegmentationDisplayNode)
+    {
+    defaultSegmentationDisplayNode = scene->CreateNodeByClass("vtkMRMLSegmentationDisplayNode");
+    scene->AddDefaultNode(defaultSegmentationDisplayNode);
+    defaultSegmentationDisplayNode->Delete(); // scene owns it now
+    }
+  vtkMRMLSegmentationDisplayNode::SafeDownCast(defaultSegmentationDisplayNode)->SetSliceIntersectionVisibility(0);
 }
