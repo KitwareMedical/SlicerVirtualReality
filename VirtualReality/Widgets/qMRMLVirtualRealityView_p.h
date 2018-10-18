@@ -40,6 +40,9 @@
 #include <ctkPimpl.h>
 #include <ctkVTKObject.h>
 
+// VirtualReality Widgets includes
+#include "qMRMLVirtualRealityHomeWidget.h"
+
 // qMRML includes
 #include "qMRMLVirtualRealityView.h"
 
@@ -115,6 +118,8 @@ protected:
   double LastViewPosition[3];
 
   QTimer VirtualRealityLoopTimer;
+
+  qMRMLVirtualRealityHomeWidget* HomeWidget;
 };
 
 #endif

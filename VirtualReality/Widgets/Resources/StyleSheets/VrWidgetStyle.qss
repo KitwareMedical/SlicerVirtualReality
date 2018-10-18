@@ -1,0 +1,50 @@
+QWidget {
+	font: 20px;
+}
+
+QAbstractButton {
+    color: #3a3a3a;
+    border-color: #3a3a3a;
+	border-style: solid;
+    border-width: 1px;
+    border-radius: 10px;
+    padding: 4px;
+}
+
+QAbstractButton:hover {
+	background-color:#ABABAB;
+}
+
+QAbstractButton:pressed {
+    background-color: #525252;
+}
+
+QSlider {
+    min-height: 68px;
+    max-height: 68px;
+    background: white;
+}
+
+QSlider::groove:horizontal {
+    border: 1px solid #262626;
+	height: 5px;
+    background: #399aef;
+    margin: 0 12px;
+}
+
+QSlider::handle:horizontal {
+    background: white;
+    border: 2px solid black;
+	border-radius: 10px;
+    width: 23px;
+    height: 100px;
+    margin: -24px -12px;
+}
+
+QSlider::handle:horizontal:hover {
+	background: #ABABAB;
+}
+
+QSlider::handle:horizontal:pressed {
+	background: #525252;
+}
