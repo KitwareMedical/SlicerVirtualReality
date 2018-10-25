@@ -250,81 +250,6 @@ void qMRMLVirtualRealityViewPrivate::destroyRenderWindow()
   this->Lights = NULL;
 }
 
-//---------------------------------------------------------------------------
-void qMRMLVirtualRealityView::updateViewFromReferenceViewCamera()
-{
-  Q_D(qMRMLVirtualRealityView);
-  if (!d->MRMLVirtualRealityViewNode)
-  {
-    return;
-  }
-  vtkMRMLViewNode* refrenceViewNode = d->MRMLVirtualRealityViewNode->GetReferenceViewNode();
-  if (!refrenceViewNode)
-  {
-    qWarning() << Q_FUNC_INFO << " failed: no reference view node is set";
-    return;
-  }
-  if (!d->CamerasLogic)
-  {
-    qWarning() << Q_FUNC_INFO << " failed: cameras module logic is not set";
-    return;
-  }
-  vtkMRMLCameraNode* cameraNode = d->CamerasLogic->GetViewActiveCameraNode(refrenceViewNode);
-  if (!cameraNode || !cameraNode->GetCamera())
-  {
-    qWarning() << Q_FUNC_INFO << " failed: camera node is not found";
-    return;
-  }
-  if (!d->RenderWindow)
-  {
-    qWarning() << Q_FUNC_INFO << " failed: RenderWindow has not been created";
-    return;
-  }
-
-  // The following is based on d->RenderWindow->InitializeViewFromCamera(sourceCamera),
-  // but that is not usable for us, as it puts the headset in the focal point (so we
-  // need to step back to see the full content) and snaps view direction to the closest axis.
-
-  vtkCamera* sourceCamera = cameraNode->GetCamera();
-
-  vtkRenderer* ren = static_cast<vtkRenderer*>(d->RenderWindow->GetRenderers()->GetItemAsObject(0));
-  if (!ren)
-  {
-    qWarning() << Q_FUNC_INFO << "The renderer must be set prior to calling InitializeViewFromCamera";
-    return;
-  }
-  vtkOpenVRCamera* cam = vtkOpenVRCamera::SafeDownCast(ren->GetActiveCamera());
-  if (!cam)
-  {
-    qWarning() << Q_FUNC_INFO << "The renderer's active camera must be set prior to calling InitializeViewFromCamera";
-    return;
-  }
-  
-  double distance = 100; //no particular reason for this value. //TODO: ???
-
-  double* sourceViewUp = sourceCamera->GetViewUp();
-  cam->SetViewUp(sourceViewUp);
-  d->RenderWindow->SetPhysicalViewUp(sourceViewUp);
-
-  double* sourcePosition = sourceCamera->GetPosition();
-  double* viewUp = cam->GetViewUp();
-  cam->SetFocalPoint(sourcePosition);
-  d->RenderWindow->SetPhysicalTranslation(
-    viewUp[0] * distance - sourcePosition[0],
-    viewUp[1] * distance - sourcePosition[1],
-    viewUp[2] * distance - sourcePosition[2]);
-
-  double* sourceDirectionOfProjection = sourceCamera->GetDirectionOfProjection();
-  d->RenderWindow->SetPhysicalViewDirection(sourceDirectionOfProjection);
-  double* idop = d->RenderWindow->GetPhysicalViewDirection();
-  cam->SetPosition(
-    -idop[0] * distance + sourcePosition[0],
-    -idop[1] * distance + sourcePosition[1],
-    -idop[2] * distance + sourcePosition[2]);
-
-  ren->ResetCameraClippingRange();
-}
-
 // --------------------------------------------------------------------------
 void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
 {
@@ -651,4 +576,81 @@ void qMRMLVirtualRealityView::onPhysicalToWorldMatrixModified()
   d->MRMLVirtualRealityViewNode->SetMagnification(d->InteractorStyle->GetMagnification());
 
   emit physicalToWorldMatrixModified();
+}
+
+//---------------------------------------------------------------------------
+void qMRMLVirtualRealityView::updateViewFromReferenceViewCamera()
+{
+  Q_D(qMRMLVirtualRealityView);
+  if (!d->MRMLVirtualRealityViewNode)
+  {
+    return;
+  }
+  vtkMRMLViewNode* refrenceViewNode = d->MRMLVirtualRealityViewNode->GetReferenceViewNode();
+  if (!refrenceViewNode)
+  {
+    qWarning() << Q_FUNC_INFO << " failed: no reference view node is set";
+    return;
+  }
+  if (!d->CamerasLogic)
+  {
+    qWarning() << Q_FUNC_INFO << " failed: cameras module logic is not set";
+    return;
+  }
+  vtkMRMLCameraNode* cameraNode = d->CamerasLogic->GetViewActiveCameraNode(refrenceViewNode);
+  if (!cameraNode || !cameraNode->GetCamera())
+  {
+    qWarning() << Q_FUNC_INFO << " failed: camera node is not found";
+    return;
+  }
+  if (!d->RenderWindow)
+  {
+    qWarning() << Q_FUNC_INFO << " failed: RenderWindow has not been created";
+    return;
+  }
+
+  // The following is based on d->RenderWindow->InitializeViewFromCamera(sourceCamera),
+  // but that is not usable for us, as it puts the headset in the focal point (so we
+  // need to step back to see the full content) and snaps view direction to the closest axis.
+
+  vtkCamera* sourceCamera = cameraNode->GetCamera();
+
+  vtkRenderer* ren = static_cast<vtkRenderer*>(d->RenderWindow->GetRenderers()->GetItemAsObject(0));
+  if (!ren)
+  {
+    qWarning() << Q_FUNC_INFO << "The renderer must be set prior to calling InitializeViewFromCamera";
+    return;
+  }
+  vtkOpenVRCamera* cam = vtkOpenVRCamera::SafeDownCast(ren->GetActiveCamera());
+  if (!cam)
+  {
+    qWarning() << Q_FUNC_INFO << "The renderer's active camera must be set prior to calling InitializeViewFromCamera";
+    return;
+  }
+  
+  double newPhysicalScale = 100.0; // Default 10x magnification
+
+  double* sourceViewUp = sourceCamera->GetViewUp();
+  cam->SetViewUp(sourceViewUp);
+  d->RenderWindow->SetPhysicalViewUp(sourceViewUp);
+
+  double* sourcePosition = sourceCamera->GetPosition();
+  double* viewUp = cam->GetViewUp();
+  cam->SetFocalPoint(sourcePosition);
+  d->RenderWindow->SetPhysicalTranslation(
+    viewUp[0] * newPhysicalScale - sourcePosition[0],
+    viewUp[1] * newPhysicalScale - sourcePosition[1],
+    viewUp[2] * newPhysicalScale - sourcePosition[2]);
+
+  double* sourceDirectionOfProjection = sourceCamera->GetDirectionOfProjection();
+  d->RenderWindow->SetPhysicalViewDirection(sourceDirectionOfProjection);
+  double* idop = d->RenderWindow->GetPhysicalViewDirection();
+  cam->SetPosition(
+    -idop[0] * newPhysicalScale + sourcePosition[0],
+    -idop[1] * newPhysicalScale + sourcePosition[1],
+    -idop[2] * newPhysicalScale + sourcePosition[2]);
+
+  d->RenderWindow->SetPhysicalScale(newPhysicalScale);
+
+  ren->ResetCameraClippingRange();
 }
