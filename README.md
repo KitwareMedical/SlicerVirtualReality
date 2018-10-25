@@ -62,6 +62,14 @@ For developers
 
 Information for developers is available in the [Developer Guide](DeveloperGuide.md).
 
+Contributors
+-------
+
+Contributors include:
+- Kitware: Jean-Christophe Fillion-Robin, Jean-Baptiste Vimort
+- PerkLab (Queen's University): Csaba Pinter, Andras Lasso
+- VASST Lab (Robarts Research Insitute): Adam Rankin
+
 License
 -------
 
