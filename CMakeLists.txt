@@ -4,7 +4,7 @@ project(SlicerVirtualReality)
 
 #-----------------------------------------------------------------------------
 # Extension meta-information
-set(EXTENSION_HOMEPAGE "http://slicer.org/slicerWiki/index.php/Documentation/Nightly/Extensions/SlicerVirtualReality")
+set(EXTENSION_HOMEPAGE "https://github.com/KitwareMedical/SlicerVirtualReality")
 set(EXTENSION_CATEGORY "Virtual Reality")
 set(EXTENSION_CONTRIBUTORS "Jean-Baptiste Vimort (Kitware), Jean-Christophe Fillion-Robin (Kitware), Csaba Pinter (PerkLab, Queen's University), Adam Rankin (VASST Lab, Robarts Research Institute, Western University)")
 set(EXTENSION_DESCRIPTION "Allows user to interact with a Slicer scene using virtual reality.")

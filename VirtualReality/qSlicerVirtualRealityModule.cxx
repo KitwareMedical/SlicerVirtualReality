@@ -263,20 +263,28 @@ qSlicerVirtualRealityModule::~qSlicerVirtualRealityModule()
 //-----------------------------------------------------------------------------
 QString qSlicerVirtualRealityModule::helpText() const
 {
-  return "This is a loadable module that can be bundled in an extension";
+  return "This module shows 3D scene in virtual reality. It works with all"
+    " OpenVR-compatible headsets, such as HTC Vive, all Windows Mixed Reality"
+    " headsets (by Acer, Lenovo, HP, etc.), and Oculus Rift."
+    "<a href=\"https://github.com/KitwareMedical/SlicerVirtualReality#frequently-asked-questions\">"
+    "See setup instructions on the extension's website.</a>";
 }
 
 //-----------------------------------------------------------------------------
 QString qSlicerVirtualRealityModule::acknowledgementText() const
 {
-  return "This work was partially funded by NIH grant NXNNXXNNNNNN-NNXN";
+  return "This work was partially funded by CANARIE's Research Software Program (Canada).";
 }
 
 //-----------------------------------------------------------------------------
 QStringList qSlicerVirtualRealityModule::contributors() const
 {
   QStringList moduleContributors;
-  moduleContributors << QString("John Doe (AnyWare Corp.)");
+  moduleContributors << QString("Jean-Christophe Fillion-Robin (Kitware)")
+    << QString("Csaba Pinter (PerkLab)")
+    << QString("Andras Lasso (PerkLab)")
+    << QString("Jean-Baptiste Vimort (Kitware)")
+    << QString("Adam Rankin (Robarts)");
   return moduleContributors;
 }
 
