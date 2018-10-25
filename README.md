@@ -5,15 +5,18 @@ Extension for 3D slicer that enables user to interact with the 3D scene using vi
 
 ![](SlicerVirtualReality.png)
 
-The extension works with all OpenVR-compatible headsets, such as [HTC Vive](#setup-htc-vive), all [Windows Mixed Reality headsets](#setup-windows-mixed-reality) (by Acer, Lenovo, HP, etc.), and with [some limitations on Oculus Rift](#setup-oculus-rift).
+The extension works with all OpenVR-compatible headsets, such as [HTC Vive](#setup-htc-vive), all [Windows Mixed Reality headsets](#setup-windows-mixed-reality) (by Acer, Lenovo, HP, etc.), and with [Oculus Rift](#setup-oculus-rift). See the YouTube video below or this [Kitware blog post](https://blog.kitware.com/slicervirtualreality/) for some more background and application examples.
+
+[![Demo: Pedicle screw insertion in virtual reality using Slicer](https://img.youtube.com/vi/F_UBoE4FaoY/0.jpg)](https://www.youtube.com/watch?v=F_UBoE4FaoY)
 
 Features include:
 - View all content of any of the 3D viewers in Slicer, anytime, by a single click.
 - Show volumes as 2D image slices or volume rendering, render surfaces, points, etc.
 - View any 4D data sets, using any rendering technique (including volume rendering) - provided by Sequences extension
 - Align the headset's view to match viewpoint of the selected 3D view in Slicer
-- Fly around using the touchpad of the right controller: direction is specified by orientation of the controller; speed is determined by the position of the finger on the touchpad. Currently not supported on Oculus Rift (#28).
-- Grab and reposition objects using the trigger on the right controller. Experimental (#12). Currently not supported on Oculus Rift (#28).
+- Fly around using the touchpad of the right controller: direction is specified by orientation of the controller; speed is determined by the position of the finger on the touchpad (touch at the top to fly forward, touch at the bottom to fly backward).
+- Grab and reposition objects using the grab button on the controller.
+- Translate, rotate, scale the world (all objects) by pressing grab buttons on both controllers at the same time.
 - Advanced volume rendering performance tuning: available in Virtual Reality module, to find good balance between image quality and refresh rate.
 - Make position of controllers available as transforms in the Slicer scene. These transforms can be used in custom modules to reslice volumes (using Volume Reslice Driver module in SlicerIGT extension) or transform any nodes in the scene.
 
