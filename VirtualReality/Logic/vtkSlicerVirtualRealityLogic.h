@@ -51,7 +51,7 @@ public:
   /// for this logic class, to make it easy for modules to detect view changes.
   vtkMRMLVirtualRealityViewNode* AddVirtualRealityViewNode();
 
-  /// Get singleton virtual reality node
+  /// Get active singleton virtual reality node
   vtkMRMLVirtualRealityViewNode* GetVirtualRealityViewNode();
 
   /// Retrieves the default VR view node from the scene. Creates it if does not exist.
