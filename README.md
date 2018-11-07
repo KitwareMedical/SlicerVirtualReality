@@ -22,10 +22,12 @@ Features include:
 
 Feature set of the extension is continuously improved. You can give us feedback and propose ideas for improvements by submitting them on the [issue tracker](https://github.com/KitwareMedical/SlicerVirtualReality/issues).
 
-Frequently Asked Questions
---------------------------
+Usage
+-----
 
-<a name="setup-htc-vive" />
+## Setup
+
+<a name="setup-htc-vive" ></a>
 
 ### How to set up my HTC Vive headset
 
@@ -33,7 +35,7 @@ Frequently Asked Questions
 - Install Slicer and SlicerVirtualReality extension.
 - To see content of content of the 3D view in your headset: click "Show scene in virtual reality" button <img src="https://github.com/KitwareMedical/SlicerVirtualReality/raw/master/VirtualReality/Resources/Icons/VirtualRealityHeadset.png" width="24"> on the toolbar in Slicer.
 
-<a name="setup-windows-mixed-reality" />
+<a name="setup-windows-mixed-reality" ></a>
 
 ### How to set up my Windows Mixed Reality headset
 
@@ -42,7 +44,7 @@ Frequently Asked Questions
 - Install Slicer and SlicerVirtualReality extension.
 - To see content of content of the 3D view in your headset: click "Show scene in virtual reality" button <img src="https://github.com/KitwareMedical/SlicerVirtualReality/raw/master/VirtualReality/Resources/Icons/VirtualRealityHeadset.png" width="24"> on the toolbar in Slicer.
 
-<a name="setup-oculus-rift" />
+<a name="setup-oculus-rift" ></a>
 
 ### How to set up my Oculus Rift headset
 
@@ -53,6 +55,54 @@ Frequently Asked Questions
   - Click the "Show scene in virtual reality" button <img src="https://github.com/KitwareMedical/SlicerVirtualReality/raw/master/VirtualReality/Resources/Icons/VirtualRealityHeadset.png" width="24"> on the toolbar in Slicer.
 
 Currently, a limitation is that [Oculus Rift controllers are not supported](https://github.com/KitwareMedical/SlicerVirtualReality/issues/28), so the user can see and explore the scene in 3D but can only change the viewpoint by physically moving (not by flying using the controllers) and cannot grab and reposition objects.
+
+<a name="controllers" ></a>
+
+## How to use controllers
+
+![HTC Vive Controller](ControllerHtcVive.jpg)
+
+### Fly
+
+Move around in space. Equivalent to physically walking around.
+
+Controls:
+- Touchpad forward: fly forward
+- Touchpad backwad: fly backward
+
+Notes:
+- Flying direction is specified by the orientation of the controller.
+- Speed is proportional to distance of the fingertip from the touchpad center.
+- Maximum speed is configurable in Virtual Reality module.
+
+### Transform entire scene
+
+Translate/rotate/scale the entire rendered scene.
+
+Controls: while keeping grip button depressed on both controllers
+- Move controllers closer together/farther apart: scale size of the entire scene
+- Translate controllers in parallel up/down/left/right/forward/backward: translate the entire scene
+- Pivot controllers around: rotate the entire scene
+
+Notes:
+- Object positions in the scene are not modified.
+- Controllers must be outside of all selectable objects when grip buttons are pressed.
+
+### Transform objects
+
+Translate/rotate a selected object.
+
+Controls: press grip button when a controller is inside a selectable object
+- Move controllers closer together/farther apart: scale size of the entire rendered scene
+- Translate controllers in parallel up/down/left/right/forward/backward: translate all objects
+- Move controller
+
+Notes:
+- Selected object position is modified in the scene by changing a parent transform (if the object has no parent transform then a new transform is added).
+- Either left or right controller can be used to grab an object. Each controller can be used to grab an object and move independently.
+- By default all objects are selectable. An object can be made non-selectable (thus non-movable) in Data module / Subject hierarchy tab, right-clicking on the node and unchecking "Toggle Selectable".
+
+## Frequently asked questions
 
 ### How to record virtual reality videos?
 
@@ -66,7 +116,7 @@ For developers
 Information for developers is available in the [Developer Guide](DeveloperGuide.md).
 
 Contributors
--------
+------------
 
 Contributors include:
 - Kitware: Jean-Christophe Fillion-Robin, Jean-Baptiste Vimort
