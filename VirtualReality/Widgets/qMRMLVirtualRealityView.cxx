@@ -241,13 +241,17 @@ void qMRMLVirtualRealityViewPrivate::destroyRenderWindow()
 {
   Q_Q(qMRMLVirtualRealityView);
   this->VirtualRealityLoopTimer.stop();
-  this->RenderWindow = NULL;
+  // Must break the connection between interactor and render window,
+  // otherwise they would circularly refer to each other and would not
+  // be deleted.
+  this->Interactor->SetRenderWindow(NULL);
   this->Interactor = NULL;
   this->InteractorStyle = NULL;
   this->DisplayableManagerGroup = NULL;
   this->Renderer = NULL;
   this->Camera = NULL;
   this->Lights = NULL;
+  this->RenderWindow = NULL;
 }
 
 // --------------------------------------------------------------------------
