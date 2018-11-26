@@ -24,6 +24,7 @@
 //#include <vtkOpenVRInteractorStyle.h> //TODO: For debugging the original interactor
 #include <vtkVirtualRealityViewInteractor.h>
 //#include <vtkOpenVRRenderWindowInteractor.h> //TODO: For debugging the original interactor
+#include <vtkOpenVRModel.h>
 #include <vtkOpenVRRenderWindow.h>
 #include <vtkOpenVRRenderer.h>
 
@@ -328,6 +329,17 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
     double dollyPhysicalSpeedMps = this ->MRMLVirtualRealityViewNode->GetMotionSpeed();
     // 1.6666 m/s is walking speed (= 6 km/h), which is the default. We multipy it with the factor
     this->InteractorStyle->SetDollyPhysicalSpeed(dollyPhysicalSpeedMps);
+
+    vtkEventDataDevice deviceIdsToUpdate[] = { vtkEventDataDevice::RightController, vtkEventDataDevice::LeftController, vtkEventDataDevice::Unknown };
+    for (int deviceIdIndex = 0; deviceIdsToUpdate[deviceIdIndex] != vtkEventDataDevice::Unknown; deviceIdIndex++)
+    {
+      vtkOpenVRModel *model = this->RenderWindow->GetTrackedDeviceModel(deviceIdsToUpdate[deviceIdIndex]);
+      if (!model)
+      {
+        continue;
+      }
+      model->SetVisibility(this->MRMLVirtualRealityViewNode->GetControllerModelsVisible());
+    }
   }
 
   if (this->MRMLVirtualRealityViewNode->GetActive())

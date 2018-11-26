@@ -39,6 +39,7 @@ vtkMRMLVirtualRealityViewNode::vtkMRMLVirtualRealityViewNode()
   , Magnification(10.0)
   , MotionSpeed(1.6666)
   , ControllerTransformsUpdate(false)
+  , ControllerModelsVisible(true)
 {
   this->Visibility = 0; // hidden by default to not connect to the headset until it is needed
   this->BackgroundColor[0] = this->defaultBackgroundColor()[0];
@@ -73,6 +74,7 @@ void vtkMRMLVirtualRealityViewNode::WriteXML(ostream& of, int nIndent)
   vtkMRMLWriteXMLFloatMacro(motionSpeed,MotionSpeed);
   vtkMRMLWriteXMLFloatMacro(motionSensitivity, MotionSensitivity);
   vtkMRMLWriteXMLBooleanMacro(controllerTransformsUpdate, ControllerTransformsUpdate);
+  vtkMRMLWriteXMLBooleanMacro(controllerModelsVisible, ControllerModelsVisible);
   vtkMRMLWriteXMLEndMacro();
 }
 
@@ -91,6 +93,7 @@ void vtkMRMLVirtualRealityViewNode::ReadXMLAttributes(const char** atts)
   vtkMRMLReadXMLFloatMacro(motionSpeed, MotionSpeed);
   vtkMRMLReadXMLFloatMacro(motionSensitivity, MotionSensitivity);
   vtkMRMLReadXMLBooleanMacro(controllerTransformsUpdate, ControllerTransformsUpdate);
+  vtkMRMLReadXMLBooleanMacro(controllerModelsVisible, ControllerModelsVisible);
   vtkMRMLReadXMLEndMacro();
 
   this->EndModify(disabledModify);
@@ -113,6 +116,7 @@ void vtkMRMLVirtualRealityViewNode::Copy(vtkMRMLNode *anode)
   vtkMRMLCopyFloatMacro(MotionSpeed);
   vtkMRMLCopyFloatMacro(MotionSensitivity);
   vtkMRMLCopyBooleanMacro(ControllerTransformsUpdate);
+  vtkMRMLCopyBooleanMacro(ControllerModelsVisible);
   vtkMRMLCopyEndMacro();
 
   this->EndModify(disabledModify);
@@ -131,6 +135,7 @@ void vtkMRMLVirtualRealityViewNode::PrintSelf(ostream& os, vtkIndent indent)
   vtkMRMLPrintFloatMacro(MotionSpeed);
   vtkMRMLPrintFloatMacro(MotionSensitivity);
   vtkMRMLPrintBooleanMacro(ControllerTransformsUpdate);
+  vtkMRMLPrintBooleanMacro(ControllerModelsVisible);
   vtkMRMLPrintEndMacro();
 }
 

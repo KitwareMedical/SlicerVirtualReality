@@ -41,6 +41,7 @@ public slots:
   void setVirtualRealityActive(bool activate);
   void setTwoSidedLighting(bool);
   void setBackLights(bool);
+  void setControllerModelsVisible(bool);
   void setReferenceViewNode(vtkMRMLNode*);
   void updateViewFromReferenceViewCamera();
   void onDesiredUpdateRateChanged(double);

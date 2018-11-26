@@ -138,6 +138,11 @@ public:
   void SetControllerTransformsUpdate(bool enable);
   vtkBooleanMacro(ControllerTransformsUpdate, bool);
 
+  /// If set to true then controllers are visible in virtual reality view.
+  vtkGetMacro(ControllerModelsVisible, bool);
+  vtkSetMacro(ControllerModelsVisible, bool);
+  vtkBooleanMacro(ControllerModelsVisible, bool);
+
   /// Return true if an error has occurred.
   /// "Connected" member requests connection but this method can tell if the
   /// hardware connection has been actually successfully established.
@@ -160,6 +165,8 @@ protected:
   double MotionSpeed;
   double MotionSensitivity;
   bool ControllerTransformsUpdate;
+  bool ControllerModelsVisible;
+
   std::string LastErrorMessage;
 
   vtkMRMLVirtualRealityViewNode();

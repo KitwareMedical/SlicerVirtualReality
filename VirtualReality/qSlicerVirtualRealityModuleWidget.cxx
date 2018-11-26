@@ -77,6 +77,7 @@ void qSlicerVirtualRealityModuleWidget::setup()
   connect(d->RenderingEnabledCheckBox, SIGNAL(toggled(bool)), this, SLOT(setVirtualRealityActive(bool)));
   connect(d->TwoSidedLightingCheckBox, SIGNAL(toggled(bool)), this, SLOT(setTwoSidedLighting(bool)));
   connect(d->BackLightsCheckBox, SIGNAL(toggled(bool)), this, SLOT(setBackLights(bool)));
+  connect(d->ControllerModelsVisibleCheckBox, SIGNAL(toggled(bool)), this, SLOT(setControllerModelsVisible(bool)));
   connect(d->ReferenceViewNodeComboBox, SIGNAL(currentNodeChanged(vtkMRMLNode*)), this, SLOT(setReferenceViewNode(vtkMRMLNode*)));
   connect(d->UpdateViewFromReferenceViewCameraButton, SIGNAL(clicked()), this, SLOT(updateViewFromReferenceViewCamera()));
 
@@ -150,6 +151,11 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   d->BackLightsCheckBox->setEnabled(vrViewNode != NULL);
   d->BackLightsCheckBox->blockSignals(wasBlocked);
 
+  wasBlocked = d->ControllerModelsVisibleCheckBox->blockSignals(true);
+  d->ControllerModelsVisibleCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetControllerModelsVisible());
+  d->ControllerModelsVisibleCheckBox->setEnabled(vrViewNode != NULL);
+  d->ControllerModelsVisibleCheckBox->blockSignals(wasBlocked);
+
   wasBlocked = d->ReferenceViewNodeComboBox->blockSignals(true);
   d->ReferenceViewNodeComboBox->setCurrentNode(vrViewNode != NULL ? vrViewNode->GetReferenceViewNode() : NULL);
   d->ReferenceViewNodeComboBox->blockSignals(wasBlocked);
@@ -201,6 +207,18 @@ void qSlicerVirtualRealityModuleWidget::setBackLights(bool active)
   if (vrViewNode)
   {
     vrViewNode->SetBackLights(active);
+  }
+}
+
+//-----------------------------------------------------------------------------
+void qSlicerVirtualRealityModuleWidget::setControllerModelsVisible(bool visible)
+{
+  Q_D(qSlicerVirtualRealityModuleWidget);
+  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
+  if (vrViewNode)
+  {
+    vrViewNode->SetControllerModelsVisible(visible);
   }
 }
 
