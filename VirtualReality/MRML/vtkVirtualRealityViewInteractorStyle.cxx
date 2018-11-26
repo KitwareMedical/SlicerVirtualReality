@@ -142,7 +142,7 @@ bool vtkVirtualRealityViewInteractorStyle::vtkInternal::CalculateCombinedControl
     controller0Pose->GetElement(2,1) + controller1Pose->GetElement(2,1) };
   vtkMath::Normalize(yAxisPrime);
 
-  if (fabs(vtkMath::Dot(xAxis, yAxisPrime)) > 0.75)
+  if (fabs(vtkMath::Dot(xAxis, yAxisPrime)) > 0.99)
   {
     // The two axes are almost parallel
     return false;
@@ -150,9 +150,11 @@ bool vtkVirtualRealityViewInteractorStyle::vtkInternal::CalculateCombinedControl
 
   double zAxis[3] = {0.0};
   vtkMath::Cross(xAxis, yAxisPrime, zAxis);
+  vtkMath::Normalize(zAxis);
 
   double yAxis[3] = {0.0};
   vtkMath::Cross(zAxis, xAxis, yAxis);
+  vtkMath::Normalize(yAxis);
 
   // Assemble matrix from the axes, the scaling, and the position
   for (int row=0;row<3;++row)
