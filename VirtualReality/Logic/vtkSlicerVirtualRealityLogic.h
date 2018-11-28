@@ -34,13 +34,13 @@
 
 #include "vtkSlicerVirtualRealityModuleLogicExport.h"
 
+class vtkSlicerVolumeRenderingLogic;
 class vtkMRMLVirtualRealityViewNode;
 
 class VTK_SLICER_VIRTUALREALITY_MODULE_LOGIC_EXPORT vtkSlicerVirtualRealityLogic :
   public vtkSlicerModuleLogic
 {
 public:
-
   static vtkSlicerVirtualRealityLogic *New();
   vtkTypeMacro(vtkSlicerVirtualRealityLogic, vtkSlicerModuleLogic);
   void PrintSelf(ostream& os, vtkIndent indent);
@@ -74,19 +74,21 @@ public:
   void SetDefaultReferenceView();
 
   /// Modify MRML scene to be better suited for virtual reality, e.g.
+  /// - Make sure volume rendering uses GPU
   /// - Turn off backface culling for all models for better visibility when clipping,
   ///   which occurs on head movement
   /// - Turn off slice intersection visibility for all models and segmentations
   ///   for performance improvement
   void OptimizeSceneForVirtualReality();
 
+  /// Set volume rendering logic
+  void SetVolumeRenderingLogic(vtkSlicerVolumeRenderingLogic* volumeRenderingLogic);
+
 protected:
   vtkSlicerVirtualRealityLogic();
   virtual ~vtkSlicerVirtualRealityLogic();
 
   void SetActiveViewNode(vtkMRMLVirtualRealityViewNode* vrViewNode);
-
-  vtkMRMLVirtualRealityViewNode* ActiveViewNode;
 
   virtual void SetMRMLSceneInternal(vtkMRMLScene* newScene);
   /// Register MRML Node classes to Scene. Gets called automatically when the MRMLScene is attached to this logic class.
@@ -96,8 +98,14 @@ protected:
   virtual void OnMRMLSceneNodeRemoved(vtkMRMLNode* node);
   virtual void ProcessMRMLNodesEvents(vtkObject* caller, unsigned long event, void* callData);
 
-private:
+protected:
+  /// Active VR view node
+  vtkMRMLVirtualRealityViewNode* ActiveViewNode;
 
+  /// Volume rendering logic
+  vtkSlicerVolumeRenderingLogic* VolumeRenderingLogic;
+
+private:
   vtkSlicerVirtualRealityLogic(const vtkSlicerVirtualRealityLogic&); // Not implemented
   void operator=(const vtkSlicerVirtualRealityLogic&); // Not implemented
 };

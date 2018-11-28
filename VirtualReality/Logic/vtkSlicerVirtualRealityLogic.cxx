@@ -25,6 +25,9 @@
 #include <vtkMRMLScene.h>
 #include <vtkMRMLSegmentationDisplayNode.h>
 
+// Slicer includes
+#include "vtkSlicerVolumeRenderingLogic.h"
+
 // VTK includes
 #include <vtkIntArray.h>
 #include <vtkNew.h>
@@ -35,16 +38,19 @@
 
 //----------------------------------------------------------------------------
 vtkStandardNewMacro(vtkSlicerVirtualRealityLogic);
+vtkCxxSetObjectMacro(vtkSlicerVirtualRealityLogic, VolumeRenderingLogic, vtkSlicerVolumeRenderingLogic);
 
 //----------------------------------------------------------------------------
 vtkSlicerVirtualRealityLogic::vtkSlicerVirtualRealityLogic()
   : ActiveViewNode(NULL)
+  , VolumeRenderingLogic(NULL)
 {
 }
 
 //----------------------------------------------------------------------------
 vtkSlicerVirtualRealityLogic::~vtkSlicerVirtualRealityLogic()
 {
+  this->SetVolumeRenderingLogic(NULL);
 }
 
 //----------------------------------------------------------------------------
@@ -315,17 +321,17 @@ vtkMRMLVirtualRealityViewNode* vtkSlicerVirtualRealityLogic::GetDefaultVirtualRe
 {
   vtkMRMLScene *scene = this->GetMRMLScene();
   if (!scene)
-    {
+  {
     vtkErrorMacro("GetDefaultVirtualRealityViewNode failed: invalid scene");
     return NULL;
-    }
+  }
   vtkMRMLNode* defaultNode = scene->GetDefaultNodeByClass("vtkMRMLVirtualRealityViewNode");
   if (!defaultNode)
-    {
+  {
     defaultNode = scene->CreateNodeByClass("vtkMRMLVirtualRealityViewNode");
     scene->AddDefaultNode(defaultNode);
     defaultNode->Delete(); // scene owns it now
-    }
+  }
   return vtkMRMLVirtualRealityViewNode::SafeDownCast(defaultNode);
 }
 
@@ -334,16 +340,28 @@ void vtkSlicerVirtualRealityLogic::OptimizeSceneForVirtualReality()
 {
   vtkMRMLScene *scene = this->GetMRMLScene();
   if (!scene)
-    {
-    vtkErrorMacro("OptimizeSceneForVirtualReality failed: invalid scene");
+  {
+    vtkErrorMacro("OptimizeSceneForVirtualReality failed: Invalid scene");
     return;
-    }
+  }
 
   // Steps to optimize MRML scene for virtual reality:
+  // - Make sure volume rendering uses GPU
   // - Turn off backface culling for all existing models
   // - Turn off slice intersection visibility for all existing models and segmentations
   // - Apply settings in default display nodes
 
+  // Set volume rendering method to "VTK GPU Ray Casting"
+  if (this->VolumeRenderingLogic)
+  {
+    this->VolumeRenderingLogic->ChangeVolumeRenderingMethod("vtkMRMLGPURayCastVolumeRenderingDisplayNode");
+  }
+  else
+  {
+    vtkErrorMacro("OptimizeSceneForVirtualReality: Unable to access volume rendering logic");
+  }
+
+  // Set properties to existing model and segmentation display nodes
   std::vector<vtkMRMLNode*> modelDisplayNodes;
   scene->GetNodesByClass("vtkMRMLModelDisplayNode", modelDisplayNodes);
   for ( std::vector<vtkMRMLNode*>::iterator mdIt=modelDisplayNodes.begin();
@@ -364,24 +382,24 @@ void vtkSlicerVirtualRealityLogic::OptimizeSceneForVirtualReality()
     segmentationDisplayNode->SetVisibility2DOutline(0);
   }
 
-
+  // Set properties in default display nodes for models and segmentations so that they are propagated to new nodes
   vtkMRMLNode* defaultModelDisplayNode = scene->GetDefaultNodeByClass("vtkMRMLModelDisplayNode");
   if (!defaultModelDisplayNode)
-    {
+  {
     defaultModelDisplayNode = scene->CreateNodeByClass("vtkMRMLModelDisplayNode");
     scene->AddDefaultNode(defaultModelDisplayNode);
     defaultModelDisplayNode->Delete(); // scene owns it now
-    }
+  }
   vtkMRMLModelDisplayNode::SafeDownCast(defaultModelDisplayNode)->SetBackfaceCulling(0);
   vtkMRMLModelDisplayNode::SafeDownCast(defaultModelDisplayNode)->SetSliceIntersectionVisibility(0);
 
   vtkMRMLNode* defaultSegmentationDisplayNode = scene->GetDefaultNodeByClass("vtkMRMLSegmentationDisplayNode");
   if (!defaultSegmentationDisplayNode)
-    {
+  {
     defaultSegmentationDisplayNode = scene->CreateNodeByClass("vtkMRMLSegmentationDisplayNode");
     scene->AddDefaultNode(defaultSegmentationDisplayNode);
     defaultSegmentationDisplayNode->Delete(); // scene owns it now
-    }
+  }
   vtkMRMLSegmentationDisplayNode::SafeDownCast(defaultSegmentationDisplayNode)->SetVisibility2DFill(0);
   vtkMRMLSegmentationDisplayNode::SafeDownCast(defaultSegmentationDisplayNode)->SetVisibility2DOutline(0);
 }

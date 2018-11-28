@@ -37,11 +37,17 @@
 #include "qMRMLVirtualRealityView.h"
 #include "vtkMRMLVirtualRealityViewNode.h"
 
+// SlicerQt includes
 #include "qSlicerApplication.h"
 #include "qSlicerCoreApplication.h"
 #include "qSlicerModuleManager.h"
+
+// MRML includes
 #include "vtkMRMLScene.h"
+
+// Slicer includes
 #include "vtkSlicerCamerasModuleLogic.h"
+#include "vtkSlicerVolumeRenderingLogic.h"
 
 //-----------------------------------------------------------------------------
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
@@ -303,7 +309,7 @@ QStringList qSlicerVirtualRealityModule::categories() const
 //-----------------------------------------------------------------------------
 QStringList qSlicerVirtualRealityModule::dependencies() const
 {
-  return QStringList() << "Cameras";
+  return QStringList() << "Cameras" << "VolumeRendering";
 }
 
 //-----------------------------------------------------------------------------
@@ -311,10 +317,26 @@ void qSlicerVirtualRealityModule::setup()
 {
   Q_D(qSlicerVirtualRealityModule);
   this->Superclass::setup();
+
   d->addToolBar();
   d->addViewWidget();
+
+  // Set volume rendering logic to VR logic
+  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  qSlicerAbstractCoreModule* volumeRenderingModule =
+    qSlicerCoreApplication::application()->moduleManager()->module("VolumeRendering");
+  if (volumeRenderingModule)
+  {
+    vtkSlicerVolumeRenderingLogic* volumeRenderingLogic = vtkSlicerVolumeRenderingLogic::SafeDownCast(volumeRenderingModule->logic());
+    vrLogic->SetVolumeRenderingLogic(volumeRenderingLogic);
+  }
+  else
+  {
+    qWarning() << "Volume rendering module is not found";
+  }
+
   // If virtual reality logic is modified it indicates that the view node may changed
-  qvtkConnect(logic(), vtkCommand::ModifiedEvent, this, SLOT(onViewNodeModified()));
+  qvtkConnect(vrLogic, vtkCommand::ModifiedEvent, this, SLOT(onViewNodeModified()));
 
   // Register Subject Hierarchy plugins
   qSlicerSubjectHierarchyVirtualRealityPlugin* shPlugin = new qSlicerSubjectHierarchyVirtualRealityPlugin();
