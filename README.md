@@ -104,6 +104,18 @@ Notes:
 
 ## Frequently asked questions
 
+### Rendering is slow
+
+There are several settings that help in increasing the performance of VR rendering:
+
+- Optimize scene for virtual reality button (magic wand icon on toolbar)
+- Settings in VR module panel related to performance (click on wrench icon in toolbar):
+  - Update rate: Volume rendering quality is set to produce the highest possible quality while keeping the desired frame per second
+  - Motion sensitivity: It is very important to keep rendering smooth when moving. This setting detects head movement and significantly lowers volume rendering quality while it is happening. At value of 0 motion is never detected, at high values a little motion triggers the quality change
+- Switch layout of desktop Slicer: Any additional 3D view to render decreases VR performance. By switching to a layout that contains no 3D view (e.g. Red slice only), this can be prevented
+
+Some scenes are too complex to render fluently by mid-range graphics cards. If the scene includes volume rendering of high-resolution CT for example, then it may be time to upgrade to a high-end GPU.
+
 ### How to record virtual reality videos?
 
 Enable screen mirroring in SteamVR and use the free of [OBS Studio](https://obsproject.com/) software to capture VR headset content, application window, webcam, etc.
