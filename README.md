@@ -101,6 +101,7 @@ Notes:
 - Selected object position is modified in the scene by changing a parent transform (if the object has no parent transform then a new transform is added).
 - Either left or right controller can be used to grab an object. Each controller can be used to grab an object and move independently.
 - By default all objects are selectable. An object can be made non-selectable (thus non-movable) in Data module / Subject hierarchy tab, right-clicking on the node and unchecking "Toggle Selectable".
+- When you grab and move object, a parent transform is automatically created for it (if no parent transform was created already) and modified. To link movements of multiple objects, assign the same parent transform to them. You can do that in _Data_ module's _Transform hierarchy_ tab by drag-and-drop nodes under transforms.
 
 ## Frequently asked questions
 
