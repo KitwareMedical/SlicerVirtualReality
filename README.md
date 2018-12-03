@@ -105,6 +105,14 @@ Notes:
 
 ## Frequently asked questions
 
+### How to ask questions, report problems, or suggest new features
+
+Visit [Slicer forum](https://discourse.slicer.org) and search for similar discussions. If you do not find related topics then createa a new one. Add _virtual-reality_ tag to make sure people who monitor virtual reality related questions get a notification about your question.
+
+If you are certain that you have found a software bug and no similar issue has been reported in the [issue tracker](https://github.com/KitwareMedical/SlicerVirtualReality/issues)) then please submit a new issue.
+
+Please do not use "VR" acronym (you can spell out "virtual reality" instead), because "VR" may mean "volume rendering" just as well as "virtual reality" - you can even do volume rendering in virtual reality in Slicer - and so it becomes confusing very quickly.
+
 ### Rendering is slow
 
 There are several settings that help in increasing the performance of VR rendering:
