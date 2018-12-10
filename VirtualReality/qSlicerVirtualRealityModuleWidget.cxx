@@ -86,6 +86,7 @@ void qSlicerVirtualRealityModuleWidget::setup()
   connect(d->MagnificationSlider, SIGNAL(valueChanged(double)), this, SLOT(onMagnificationChanged(double)));
   connect(d->MotionSpeedSlider, SIGNAL(valueChanged(double)), this, SLOT(onMotionSpeedChanged(double)));
   connect(d->ControllerTransformsUpdateCheckBox, SIGNAL(toggled(bool)), this, SLOT(setControllerTransformsUpdate(bool)));
+  connect(d->TrackHMDCheckBox, SIGNAL(toggled(bool)), this, SLOT(setTrackHMD(bool)));
 
   // Make magnification label same width as motion sensitivity spinbox
   ctkDoubleSpinBox* motionSpeedSpinBox = d->MotionSpeedSlider->findChild<ctkDoubleSpinBox*>("SpinBox");
@@ -166,6 +167,11 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   d->ControllerTransformsUpdateCheckBox->setEnabled(vrViewNode != NULL);
   d->ControllerTransformsUpdateCheckBox->blockSignals(wasBlocked);
 
+  wasBlocked = d->TrackHMDCheckBox->blockSignals(true);
+  d->TrackHMDCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetTrackHMD());
+  d->TrackHMDCheckBox->setEnabled(vrViewNode != NULL);
+  d->TrackHMDCheckBox->blockSignals(wasBlocked);
+
   d->UpdateViewFromReferenceViewCameraButton->setEnabled(vrViewNode != NULL
     && vrViewNode->GetReferenceViewNode() != NULL);
 }
@@ -219,6 +225,18 @@ void qSlicerVirtualRealityModuleWidget::setControllerModelsVisible(bool visible)
   if (vrViewNode)
   {
     vrViewNode->SetControllerModelsVisible(visible);
+  }
+}
+
+//-----------------------------------------------------------------------------
+void qSlicerVirtualRealityModuleWidget::setTrackHMD(bool track)
+{
+  Q_D(qSlicerVirtualRealityModuleWidget);
+  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
+  if (vrViewNode)
+  {
+    vrViewNode->SetTrackHMD(track);
   }
 }
 

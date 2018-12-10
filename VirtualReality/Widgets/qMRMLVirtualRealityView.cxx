@@ -353,6 +353,8 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
   {
     this->VirtualRealityLoopTimer.stop();
   }
+
+  this->RenderWindow->SetTrackHMD(this->MRMLVirtualRealityViewNode->GetTrackHMD());
 }
 
 //---------------------------------------------------------------------------

@@ -143,6 +143,11 @@ public:
   vtkSetMacro(ControllerModelsVisible, bool);
   vtkBooleanMacro(ControllerModelsVisible, bool);
 
+  /// If set to true then VTK camera is updated with headset's physical location
+  vtkGetMacro(TrackHMD, bool);
+  vtkSetMacro(TrackHMD, bool);
+  vtkBooleanMacro(TrackHMD, bool);
+
   /// Return true if an error has occurred.
   /// "Connected" member requests connection but this method can tell if the
   /// hardware connection has been actually successfully established.
@@ -166,6 +171,7 @@ protected:
   double MotionSensitivity;
   bool ControllerTransformsUpdate;
   bool ControllerModelsVisible;
+  bool TrackHMD;
 
   std::string LastErrorMessage;
 
