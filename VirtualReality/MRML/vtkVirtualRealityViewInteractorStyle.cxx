@@ -486,7 +486,6 @@ void vtkVirtualRealityViewInteractorStyle::StartPositionProp(vtkEventDataDevice3
   edata->GetWorldPosition(pos);
 
   // Get MRML node to move
-  vtkMRMLDisplayableNode* pickedNode = NULL;
   for (int i=0; i<this->DisplayableManagerGroup->GetDisplayableManagerCount(); ++i)
   {
     vtkMRMLAbstractThreeDViewDisplayableManager* currentDisplayableManager =
