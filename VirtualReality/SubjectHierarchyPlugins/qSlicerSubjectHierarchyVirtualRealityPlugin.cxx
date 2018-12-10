@@ -144,6 +144,7 @@ void qSlicerSubjectHierarchyVirtualRealityPlugin::showContextMenuActionsForItem(
 //---------------------------------------------------------------------------
 bool qSlicerSubjectHierarchyVirtualRealityPlugin::getItemSelectable(vtkIdType itemID)
 {
+  Q_UNUSED(itemID);
   Q_D(qSlicerSubjectHierarchyVirtualRealityPlugin);
 
   vtkMRMLSubjectHierarchyNode* shNode = qSlicerSubjectHierarchyPluginHandler::instance()->subjectHierarchyNode();
