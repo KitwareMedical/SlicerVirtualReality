@@ -42,6 +42,7 @@ public slots:
   void setTwoSidedLighting(bool);
   void setBackLights(bool);
   void setControllerModelsVisible(bool);
+  void setTrackingReferenceModelsVisible(bool);
   void setReferenceViewNode(vtkMRMLNode*);
   void updateViewFromReferenceViewCamera();
   void onDesiredUpdateRateChanged(double);

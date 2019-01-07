@@ -129,14 +129,14 @@
       <item row="1" column="1">
        <widget class="ctkCheckBox" name="BackLightsCheckBox"/>
       </item>
-      <item row="3" column="0">
+      <item row="5" column="0">
        <widget class="QLabel" name="label_6">
         <property name="text">
          <string>Update rate:</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
+      <item row="5" column="1">
        <widget class="ctkSliderWidget" name="DesiredUpdateRateSlider">
         <property name="toolTip">
          <string>Desired update rate of the view. Higher value reduces time lag but may decrease display quality of volume rendering. It has only effect if volume rendering quality setting is Adaptive.</string>
@@ -155,24 +155,41 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="0" colspan="2">
+      <item row="6" column="0" colspan="2">
        <widget class="QPushButton" name="UpdateViewFromReferenceViewCameraButton">
         <property name="text">
          <string>Set virtual reality view to match reference view.</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
+      <item row="3" column="0">
        <widget class="QLabel" name="ControllerModelsVisibleLabel">
         <property name="text">
          <string>Controllers visible:</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
+      <item row="3" column="1">
        <widget class="ctkCheckBox" name="ControllerModelsVisibleCheckBox">
         <property name="toolTip">
          <string>If checked, then controllers are displayed in virtual reality view.</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="TrackersVisibleLabel">
+        <property name="text">
+         <string>Trackers Visible:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QCheckBox" name="TrackersVisibleCheckBox">
+        <property name="text">
+         <string/>
         </property>
         <property name="checked">
          <bool>true</bool>
