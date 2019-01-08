@@ -143,6 +143,11 @@ public:
   vtkSetMacro(ControllerModelsVisible, bool);
   vtkBooleanMacro(ControllerModelsVisible, bool);
 
+  /// If set to true then tracking references (Lighthouses) are visible in virtual reality view.
+  vtkGetMacro(TrackerReferenceModelsVisible, bool);
+  vtkSetMacro(TrackerReferenceModelsVisible, bool);
+  vtkBooleanMacro(TrackerReferenceModelsVisible, bool);
+
   /// Return true if an error has occurred.
   /// "Connected" member requests connection but this method can tell if the
   /// hardware connection has been actually successfully established.
@@ -166,6 +171,7 @@ protected:
   double MotionSensitivity;
   bool ControllerTransformsUpdate;
   bool ControllerModelsVisible;
+  bool TrackerReferenceModelsVisible;
 
   std::string LastErrorMessage;
 

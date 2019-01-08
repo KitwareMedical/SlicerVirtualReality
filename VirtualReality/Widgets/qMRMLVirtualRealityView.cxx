@@ -327,7 +327,8 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
 
     // Dolly physical speed
     double dollyPhysicalSpeedMps = this ->MRMLVirtualRealityViewNode->GetMotionSpeed();
-    // 1.6666 m/s is walking speed (= 6 km/h), which is the default. We multipy it with the factor
+
+    // 1.6666 m/s is walking speed (= 6 km/h), which is the default. We multiply it with the factor
     this->InteractorStyle->SetDollyPhysicalSpeed(dollyPhysicalSpeedMps);
 
     if (this->RenderWindow->GetHMD())
@@ -341,6 +342,20 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
           continue;
         }
         model->SetVisibility(this->MRMLVirtualRealityViewNode->GetControllerModelsVisible());
+      }
+
+      // Update tracking reference visibility
+      for (uint32_t deviceIdIndex = 0; deviceIdIndex < vr::k_unMaxTrackedDeviceCount; ++deviceIdIndex)
+      {
+        if (this->RenderWindow->GetHMD()->GetTrackedDeviceClass(deviceIdIndex) == vr::TrackedDeviceClass_TrackingReference)
+        {
+          vtkOpenVRModel *model = this->RenderWindow->GetTrackedDeviceModel(deviceIdIndex);
+          if (!model)
+          {
+            continue;
+          }
+          model->SetVisibility(this->MRMLVirtualRealityViewNode->GetTrackerReferenceModelsVisible());
+        }
       }
     }
   }

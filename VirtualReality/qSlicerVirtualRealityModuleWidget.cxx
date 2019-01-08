@@ -78,6 +78,7 @@ void qSlicerVirtualRealityModuleWidget::setup()
   connect(d->TwoSidedLightingCheckBox, SIGNAL(toggled(bool)), this, SLOT(setTwoSidedLighting(bool)));
   connect(d->BackLightsCheckBox, SIGNAL(toggled(bool)), this, SLOT(setBackLights(bool)));
   connect(d->ControllerModelsVisibleCheckBox, SIGNAL(toggled(bool)), this, SLOT(setControllerModelsVisible(bool)));
+  connect(d->TrackersVisibleCheckBox, SIGNAL(toggled(bool)), this, SLOT(setTrackingReferenceModelsVisible(bool)));
   connect(d->ReferenceViewNodeComboBox, SIGNAL(currentNodeChanged(vtkMRMLNode*)), this, SLOT(setReferenceViewNode(vtkMRMLNode*)));
   connect(d->UpdateViewFromReferenceViewCameraButton, SIGNAL(clicked()), this, SLOT(updateViewFromReferenceViewCamera()));
 
@@ -156,6 +157,11 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   d->ControllerModelsVisibleCheckBox->setEnabled(vrViewNode != NULL);
   d->ControllerModelsVisibleCheckBox->blockSignals(wasBlocked);
 
+  wasBlocked = d->TrackersVisibleCheckBox->blockSignals(true);
+  d->TrackersVisibleCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetTrackerReferenceModelsVisible());
+  d->TrackersVisibleCheckBox->setEnabled(vrViewNode != NULL);
+  d->TrackersVisibleCheckBox->blockSignals(wasBlocked);
+
   wasBlocked = d->ReferenceViewNodeComboBox->blockSignals(true);
   d->ReferenceViewNodeComboBox->setCurrentNode(vrViewNode != NULL ? vrViewNode->GetReferenceViewNode() : NULL);
   d->ReferenceViewNodeComboBox->blockSignals(wasBlocked);
@@ -219,6 +225,18 @@ void qSlicerVirtualRealityModuleWidget::setControllerModelsVisible(bool visible)
   if (vrViewNode)
   {
     vrViewNode->SetControllerModelsVisible(visible);
+  }
+}
+
+//-----------------------------------------------------------------------------
+void qSlicerVirtualRealityModuleWidget::setTrackingReferenceModelsVisible(bool visible)
+{
+  Q_D(qSlicerVirtualRealityModuleWidget);
+  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
+  if (vrViewNode)
+  {
+    vrViewNode->SetTrackerReferenceModelsVisible(visible);
   }
 }
 
