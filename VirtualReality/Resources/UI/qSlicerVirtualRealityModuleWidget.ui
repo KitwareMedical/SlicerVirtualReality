@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>318</width>
-    <height>426</height>
+    <height>470</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,14 +27,14 @@
      </property>
      <layout class="QFormLayout" name="formLayout_4">
       <item row="0" column="0">
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="ConnectToHardwareLabel">
         <property name="text">
          <string>Connect to hardware:</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
-       <layout class="QHBoxLayout" name="horizontalLayout">
+       <layout class="QHBoxLayout" name="ConnectionLayout">
         <item>
          <widget class="ctkCheckBox" name="ConnectCheckBox"/>
         </item>
@@ -91,7 +91,7 @@
        </layout>
       </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="label_4">
+       <widget class="QLabel" name="EnableRenderingLabel">
         <property name="text">
          <string>Enable rendering:</string>
         </property>
@@ -110,7 +110,7 @@
      </property>
      <layout class="QFormLayout" name="formLayout_3">
       <item row="0" column="0">
-       <widget class="QLabel" name="label_2">
+       <widget class="QLabel" name="TwoSidedLightingLabel">
         <property name="text">
          <string>Two-sided lighting:</string>
         </property>
@@ -120,7 +120,7 @@
        <widget class="ctkCheckBox" name="TwoSidedLightingCheckBox"/>
       </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="label_3">
+       <widget class="QLabel" name="BackLightsLabel">
         <property name="text">
          <string>Back-lights:</string>
         </property>
@@ -130,7 +130,7 @@
        <widget class="ctkCheckBox" name="BackLightsCheckBox"/>
       </item>
       <item row="5" column="0">
-       <widget class="QLabel" name="label_6">
+       <widget class="QLabel" name="UpdateRateLabel">
         <property name="text">
          <string>Update rate:</string>
         </property>
@@ -206,7 +206,7 @@
      </property>
      <layout class="QFormLayout" name="formLayout_5">
       <item row="0" column="0">
-       <widget class="QLabel" name="label_5">
+       <widget class="QLabel" name="ReferenceViewLabel">
         <property name="text">
          <string>Reference view:</string>
         </property>
@@ -231,7 +231,7 @@
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="label_7">
+       <widget class="QLabel" name="MotionSensitivityLabel">
         <property name="text">
          <string>Motion sensitivity:</string>
         </property>
@@ -260,14 +260,14 @@
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="label_9">
+       <widget class="QLabel" name="MagnificationLabel">
         <property name="text">
          <string>Magnification:</string>
         </property>
        </widget>
       </item>
       <item row="2" column="1">
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <layout class="QHBoxLayout" name="AdvancedLayout">
         <item>
          <widget class="ctkSliderWidget" name="MagnificationSlider">
           <property name="toolTip">
@@ -297,7 +297,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="MagnificationLabel">
+         <widget class="QLabel" name="MagnificationValueLabel">
           <property name="frameShape">
            <enum>QFrame::StyledPanel</enum>
           </property>
@@ -312,7 +312,7 @@
        </layout>
       </item>
       <item row="3" column="0">
-       <widget class="QLabel" name="label_10">
+       <widget class="QLabel" name="MotionSpeedLabel">
         <property name="text">
          <string>Motion speed:</string>
         </property>
@@ -347,7 +347,7 @@
        </widget>
       </item>
       <item row="4" column="0">
-       <widget class="QLabel" name="label_8">
+       <widget class="QLabel" name="ControllerTransformsLabel">
         <property name="text">
          <string>Controller transforms:</string>
         </property>
@@ -357,6 +357,20 @@
        <widget class="ctkCheckBox" name="ControllerTransformsUpdateCheckBox">
         <property name="toolTip">
          <string>If checked, then position and orientation of each controller will be exposed in the scene as a transform node</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="HMDTransformLabel">
+        <property name="text">
+         <string>HMD transform:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QCheckBox" name="HMDTransformCheckBox">
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </item>

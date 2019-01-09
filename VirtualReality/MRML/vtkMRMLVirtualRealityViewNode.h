@@ -76,6 +76,9 @@ public:
   /// Create controller transform nodes if not set already.
   void CreateDefaultControllerTransformNodes();
 
+  /// Create camera transform node if not set already.
+  void CreateDefaultHMDTransformNode();
+
   /// Get controller node by device identifier
   vtkMRMLLinearTransformNode* GetControllerTransformNode(vtkEventDataDevice device);
 
@@ -100,6 +103,16 @@ public:
   /// Set right controller transform node.
   /// \sa GetRightControllerTransformNode
   bool SetAndObserveRightControllerTransformNode(vtkMRMLLinearTransformNode* node);
+
+  /// Get HMD transform node
+  vtkMRMLLinearTransformNode* GetHMDTransformNode();
+  const char* GetHMDTransformNodeID();
+  /// Set HMD transform node.
+  /// \sa GetHMDTransformNode
+  void SetAndObserveHMDTransformNodeID(const char *nodeId);
+  /// Set HMD transform node.
+  /// \sa GetHMDTransformNode
+  bool SetAndObserveHMDTransformNode(vtkMRMLLinearTransformNode* node);
 
   /// Controls two-sided lighting property of the renderer
   vtkGetMacro(TwoSidedLighting, bool);
@@ -138,6 +151,10 @@ public:
   void SetControllerTransformsUpdate(bool enable);
   vtkBooleanMacro(ControllerTransformsUpdate, bool);
 
+  vtkGetMacro(HMDTransformUpdate, bool);
+  void SetHMDTransformUpdate(bool enable);
+  vtkBooleanMacro(HMDTransformUpdate, bool);
+
   /// If set to true then controllers are visible in virtual reality view.
   vtkGetMacro(ControllerModelsVisible, bool);
   vtkSetMacro(ControllerModelsVisible, bool);
@@ -170,6 +187,7 @@ protected:
   double MotionSpeed;
   double MotionSensitivity;
   bool ControllerTransformsUpdate;
+  bool HMDTransformUpdate;
   bool ControllerModelsVisible;
   bool TrackerReferenceModelsVisible;
 
@@ -183,6 +201,7 @@ protected:
   static const char* ReferenceViewNodeReferenceRole;
   static const char* LeftControllerTransformRole;
   static const char* RightControllerTransformRole;
+  static const char* HMDTransformRole;
 };
 
 #endif

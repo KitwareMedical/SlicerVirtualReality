@@ -50,6 +50,7 @@ public slots:
   void onMotionSpeedChanged(double);
   void onMagnificationChanged(double); 
   void setControllerTransformsUpdate(bool);
+  void setHMDTransformUpdate(bool);
 
 protected slots:
   void updateWidgetFromMRML();

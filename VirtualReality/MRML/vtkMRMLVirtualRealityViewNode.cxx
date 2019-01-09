@@ -26,6 +26,7 @@ Version:   $Revision: 1.3 $
 const char* vtkMRMLVirtualRealityViewNode::ReferenceViewNodeReferenceRole = "ReferenceViewNodeRef";
 const char* vtkMRMLVirtualRealityViewNode::LeftControllerTransformRole = "LeftController";
 const char* vtkMRMLVirtualRealityViewNode::RightControllerTransformRole = "RightController";
+const char* vtkMRMLVirtualRealityViewNode::HMDTransformRole = "HMD";
 
 //----------------------------------------------------------------------------
 vtkMRMLNodeNewMacro(vtkMRMLVirtualRealityViewNode);
@@ -75,6 +76,7 @@ void vtkMRMLVirtualRealityViewNode::WriteXML(ostream& of, int nIndent)
   vtkMRMLWriteXMLFloatMacro(motionSpeed,MotionSpeed);
   vtkMRMLWriteXMLFloatMacro(motionSensitivity, MotionSensitivity);
   vtkMRMLWriteXMLBooleanMacro(controllerTransformsUpdate, ControllerTransformsUpdate);
+  vtkMRMLWriteXMLBooleanMacro(hmdTransformUpdate, HMDTransformUpdate);
   vtkMRMLWriteXMLBooleanMacro(controllerModelsVisible, ControllerModelsVisible);
   vtkMRMLWriteXMLBooleanMacro(trackerReferenceModelsVisible, TrackerReferenceModelsVisible);
   vtkMRMLWriteXMLEndMacro();
@@ -95,6 +97,7 @@ void vtkMRMLVirtualRealityViewNode::ReadXMLAttributes(const char** atts)
   vtkMRMLReadXMLFloatMacro(motionSpeed, MotionSpeed);
   vtkMRMLReadXMLFloatMacro(motionSensitivity, MotionSensitivity);
   vtkMRMLReadXMLBooleanMacro(controllerTransformsUpdate, ControllerTransformsUpdate);
+  vtkMRMLReadXMLBooleanMacro(hmdTransformUpdate, HMDTransformUpdate);
   vtkMRMLReadXMLBooleanMacro(controllerModelsVisible, ControllerModelsVisible);
   vtkMRMLReadXMLBooleanMacro(trackerReferenceModelsVisible, TrackerReferenceModelsVisible);
   vtkMRMLReadXMLEndMacro();
@@ -119,6 +122,7 @@ void vtkMRMLVirtualRealityViewNode::Copy(vtkMRMLNode *anode)
   vtkMRMLCopyFloatMacro(MotionSpeed);
   vtkMRMLCopyFloatMacro(MotionSensitivity);
   vtkMRMLCopyBooleanMacro(ControllerTransformsUpdate);
+  vtkMRMLCopyBooleanMacro(HMDTransformUpdate);
   vtkMRMLCopyBooleanMacro(ControllerModelsVisible);
   vtkMRMLCopyBooleanMacro(TrackerReferenceModelsVisible);
   vtkMRMLCopyEndMacro();
@@ -139,6 +143,7 @@ void vtkMRMLVirtualRealityViewNode::PrintSelf(ostream& os, vtkIndent indent)
   vtkMRMLPrintFloatMacro(MotionSpeed);
   vtkMRMLPrintFloatMacro(MotionSensitivity);
   vtkMRMLPrintBooleanMacro(ControllerTransformsUpdate);
+  vtkMRMLPrintBooleanMacro(HMDTransformUpdate);
   vtkMRMLPrintBooleanMacro(ControllerModelsVisible);
   vtkMRMLPrintBooleanMacro(TrackerReferenceModelsVisible);
   vtkMRMLPrintEndMacro();
@@ -292,6 +297,41 @@ bool vtkMRMLVirtualRealityViewNode::SetAndObserveRightControllerTransformNode(vt
 }
 
 //----------------------------------------------------------------------------
+vtkMRMLLinearTransformNode* vtkMRMLVirtualRealityViewNode::GetHMDTransformNode()
+{
+  return vtkMRMLLinearTransformNode::SafeDownCast(this->GetNodeReference(vtkMRMLVirtualRealityViewNode::HMDTransformRole));
+}
+
+//----------------------------------------------------------------------------
+const char* vtkMRMLVirtualRealityViewNode::GetHMDTransformNodeID()
+{
+  return this->GetNodeReferenceID(vtkMRMLVirtualRealityViewNode::HMDTransformRole);
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLVirtualRealityViewNode::SetAndObserveHMDTransformNodeID(const char *nodeId)
+{
+  this->SetAndObserveNodeReferenceID(vtkMRMLVirtualRealityViewNode::HMDTransformRole, nodeId);
+}
+
+//----------------------------------------------------------------------------
+bool vtkMRMLVirtualRealityViewNode::SetAndObserveHMDTransformNode(vtkMRMLLinearTransformNode* node)
+{
+  if (node == NULL)
+  {
+    this->SetAndObserveHMDTransformNodeID(NULL);
+    return true;
+  }
+  if (this->Scene != node->GetScene() || node->GetID() == NULL)
+  {
+    vtkErrorMacro("SetAndObserveHMDTransformNode: The referenced and referencing node are not in the same scene");
+    return false;
+  }
+  this->SetAndObserveHMDTransformNodeID(node->GetID());
+  return true;
+}
+
+//----------------------------------------------------------------------------
 void vtkMRMLVirtualRealityViewNode::CreateDefaultControllerTransformNodes()
 {
   if (!this->GetScene())
@@ -330,6 +370,30 @@ void vtkMRMLVirtualRealityViewNode::CreateDefaultControllerTransformNodes()
 }
 
 //----------------------------------------------------------------------------
+void vtkMRMLVirtualRealityViewNode::CreateDefaultHMDTransformNode()
+{
+  if (!this->GetScene())
+  {
+    return;
+  }
+
+  if (!this->GetHMDTransformNodeID())
+  {
+    // We create or get and update the linear transform nodes that correspond to left and right controllers
+    vtkSmartPointer<vtkMRMLLinearTransformNode> linearTransformNode = vtkMRMLLinearTransformNode::SafeDownCast(this->GetScene()->GetSingletonNode("VirtualReality.HMD", "vtkMRMLLinearTransformNode"));
+    if (linearTransformNode == NULL)
+    {
+      linearTransformNode = vtkSmartPointer<vtkMRMLLinearTransformNode>::Take(
+        vtkMRMLLinearTransformNode::SafeDownCast(this->GetScene()->CreateNodeByClass("vtkMRMLLinearTransformNode")));
+      linearTransformNode->SetSingletonTag("VirtualReality.HMD");
+      linearTransformNode->SetName("VirtualReality.HMD");
+      this->GetScene()->AddNode(linearTransformNode);
+    }
+    this->SetAndObserveHMDTransformNode(linearTransformNode);
+  }
+}
+
+//----------------------------------------------------------------------------
 void vtkMRMLVirtualRealityViewNode::SetControllerTransformsUpdate(bool enable)
 {
   if (enable == this->ControllerTransformsUpdate)
@@ -353,6 +417,29 @@ void vtkMRMLVirtualRealityViewNode::SetControllerTransformsUpdate(bool enable)
     {
       transformNode->SetAttribute("VirtualReality.ControllerActive", "0");
       transformNode->SetAttribute("VirtualReality.ControllerConnected", "0");
+    }
+  }
+
+  this->Modified();
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLVirtualRealityViewNode::SetHMDTransformUpdate(bool enable)
+{
+  if (enable == this->HMDTransformUpdate)
+  {
+    // no change
+    return;
+  }
+
+  this->HMDTransformUpdate = enable;
+
+  if (!enable)
+  {
+    vtkMRMLLinearTransformNode* transformNode = this->GetHMDTransformNode();
+    if (transformNode)
+    {
+      transformNode->SetAttribute("VirtualReality.HMDActive", "0");
     }
   }
 

@@ -87,10 +87,11 @@ void qSlicerVirtualRealityModuleWidget::setup()
   connect(d->MagnificationSlider, SIGNAL(valueChanged(double)), this, SLOT(onMagnificationChanged(double)));
   connect(d->MotionSpeedSlider, SIGNAL(valueChanged(double)), this, SLOT(onMotionSpeedChanged(double)));
   connect(d->ControllerTransformsUpdateCheckBox, SIGNAL(toggled(bool)), this, SLOT(setControllerTransformsUpdate(bool)));
+  connect(d->HMDTransformCheckBox, SIGNAL(toggled(bool)), this, SLOT(setHMDTransformUpdate(bool)));
 
   // Make magnification label same width as motion sensitivity spinbox
   ctkDoubleSpinBox* motionSpeedSpinBox = d->MotionSpeedSlider->findChild<ctkDoubleSpinBox*>("SpinBox");
-  d->MagnificationLabel->setMinimumWidth(motionSpeedSpinBox->sizeHint().width());
+  d->MagnificationValueLabel->setMinimumWidth(motionSpeedSpinBox->sizeHint().width());
 
   this->updateWidgetFromMRML();
 
@@ -171,6 +172,11 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   d->ControllerTransformsUpdateCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetControllerTransformsUpdate());
   d->ControllerTransformsUpdateCheckBox->setEnabled(vrViewNode != NULL);
   d->ControllerTransformsUpdateCheckBox->blockSignals(wasBlocked);
+
+  wasBlocked = d->HMDTransformCheckBox->blockSignals(true);
+  d->HMDTransformCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetHMDTransformUpdate());
+  d->HMDTransformCheckBox->setEnabled(vrViewNode != NULL);
+  d->HMDTransformCheckBox->blockSignals(wasBlocked);
 
   d->UpdateViewFromReferenceViewCameraButton->setEnabled(vrViewNode != NULL
     && vrViewNode->GetReferenceViewNode() != NULL);
@@ -320,7 +326,7 @@ void qSlicerVirtualRealityModuleWidget::onMagnificationChanged(double powerOfTen
     vrViewNode->SetMagnification(magnification);
   }
 
-  d->MagnificationLabel->setText(QString("%1x").arg(magnification, 3, 'f', 2));
+  d->MagnificationValueLabel->setText(QString("%1x").arg(magnification, 3, 'f', 2));
 }
 
 //----------------------------------------------------------------------------------
@@ -336,7 +342,7 @@ void qSlicerVirtualRealityModuleWidget::onPhysicalToWorldMatrixModified()
     bool wasBlocked = d->MagnificationSlider->blockSignals(true);
     d->MagnificationSlider->setValue(this->getPowerFromMagnification(magnification));
     d->MagnificationSlider->blockSignals(wasBlocked);
-    d->MagnificationLabel->setText(QString("%1x").arg(magnification, 3, 'f', 2));
+    d->MagnificationValueLabel->setText(QString("%1x").arg(magnification, 3, 'f', 2));
   }
 }
 
@@ -379,5 +385,17 @@ void qSlicerVirtualRealityModuleWidget::setControllerTransformsUpdate(bool activ
   if (vrViewNode)
   {
     vrViewNode->SetControllerTransformsUpdate(active);
+  }
+}
+
+//-----------------------------------------------------------------------------
+void qSlicerVirtualRealityModuleWidget::setHMDTransformUpdate(bool active)
+{
+  Q_D(qSlicerVirtualRealityModuleWidget);
+  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
+  if (vrViewNode)
+  {
+    vrViewNode->SetHMDTransformUpdate(active);
   }
 }

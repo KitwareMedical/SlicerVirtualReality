@@ -85,6 +85,7 @@ public slots:
 
 protected:
   void updateTransformNodeWithControllerPose(vtkEventDataDevice device);
+  void updateTransformNodeWithHMDPose();
   void createRenderWindow();
   void destroyRenderWindow();
 
