@@ -153,15 +153,15 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   // Set default 10x magnification (conversion: PhysicalScale = 1000 / Magnification)
   this->RenderWindow->SetPhysicalScale(100.0);
   // Observe VR render window event
-  qvtkReconnect( this->RenderWindow, vtkOpenVRRenderWindow::PhysicalToWorldMatrixModified,
-    q, SLOT(onPhysicalToWorldMatrixModified()) );
+  qvtkReconnect(this->RenderWindow, vtkOpenVRRenderWindow::PhysicalToWorldMatrixModified,
+                q, SLOT(onPhysicalToWorldMatrixModified()));
 
   vtkMRMLVirtualRealityViewDisplayableManagerFactory* factory
     = vtkMRMLVirtualRealityViewDisplayableManagerFactory::GetInstance();
 
   QStringList displayableManagers;
   displayableManagers //<< "vtkMRMLCameraDisplayableManager"
-      //<< "vtkMRMLViewDisplayableManager"
+  //<< "vtkMRMLViewDisplayableManager"
       << "vtkMRMLModelDisplayableManager"
       << "vtkMRMLThreeDReformatDisplayableManager"
       << "vtkMRMLCrosshairDisplayableManager3D"
@@ -336,7 +336,7 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
       vtkEventDataDevice deviceIdsToUpdate[] = { vtkEventDataDevice::RightController, vtkEventDataDevice::LeftController, vtkEventDataDevice::Unknown };
       for (int deviceIdIndex = 0; deviceIdsToUpdate[deviceIdIndex] != vtkEventDataDevice::Unknown; deviceIdIndex++)
       {
-        vtkOpenVRModel *model = this->RenderWindow->GetTrackedDeviceModel(deviceIdsToUpdate[deviceIdIndex]);
+        vtkOpenVRModel* model = this->RenderWindow->GetTrackedDeviceModel(deviceIdsToUpdate[deviceIdIndex]);
         if (!model)
         {
           continue;
@@ -349,7 +349,7 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
       {
         if (this->RenderWindow->GetHMD()->GetTrackedDeviceClass(deviceIdIndex) == vr::TrackedDeviceClass_TrackingReference)
         {
-          vtkOpenVRModel *model = this->RenderWindow->GetTrackedDeviceModel(deviceIdIndex);
+          vtkOpenVRModel* model = this->RenderWindow->GetTrackedDeviceModel(deviceIdIndex);
           if (!model)
           {
             continue;
@@ -454,6 +454,11 @@ void qMRMLVirtualRealityViewPrivate::doOpenVirtualReality()
         updateTransformNodeWithControllerPose(vtkEventDataDevice::LeftController);
         updateTransformNodeWithControllerPose(vtkEventDataDevice::RightController);
       }
+      if (this->MRMLVirtualRealityViewNode->GetHMDTransformUpdate())
+      {
+        this->MRMLVirtualRealityViewNode->CreateDefaultHMDTransformNode();
+        updateTransformNodeWithHMDPose();
+      }
 
       this->LastViewUpdateTime->StartTimer();
     }
@@ -499,10 +504,10 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodeWithControllerPose(vtkEv
     node->SetAttribute("VirtualReality.ControllerConnected", "1");
   }
 
-  double pos[3];
-  double ppos[3];
-  double wxyz[4];
-  double wdir[3];
+  double pos[3] = { 0. };
+  double ppos[3] = { 0. };
+  double wxyz[4] = { 1., 0., 0., 0. };
+  double wdir[3] = { 1., 0., 0. };
   this->Interactor->ConvertPoseToWorldCoordinates(pose, pos, wxyz, ppos, wdir);
   vtkNew<vtkTransform> transform;
   transform->Translate(pos);
@@ -514,6 +519,52 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodeWithControllerPose(vtkEv
 
   node->EndModify(disabledModify);
 }
+
+//----------------------------------------------------------------------------
+void qMRMLVirtualRealityViewPrivate::updateTransformNodeWithHMDPose()
+{
+  vtkMRMLLinearTransformNode* node = this->MRMLVirtualRealityViewNode->GetHMDTransformNode();
+
+  if (node == NULL)
+  {
+    qCritical() << "Unable to retrieve linear transform node for HMD";
+    return;
+  }
+
+  int disabledModify = node->StartModify();
+  if (this->RenderWindow->GetTrackedDeviceIndexForDevice(vtkEventDataDevice::HeadMountedDisplay) == vr::k_unTrackedDeviceIndexInvalid)
+  {
+    node->SetAttribute("VirtualReality.HMDActive", "0");
+    node->EndModify(disabledModify);
+    return;
+  }
+
+  vr::TrackedDevicePose_t& pose = this->RenderWindow->GetTrackedDevicePose(this->RenderWindow->GetTrackedDeviceIndexForDevice(vtkEventDataDevice::HeadMountedDisplay));
+  if (pose.eTrackingResult != vr::TrackingResult_Running_OK)
+  {
+    node->SetAttribute("VirtualReality.HMDActive", "0");
+  }
+  else
+  {
+    node->SetAttribute("VirtualReality.HMDActive", "1");
+  }
+
+  double pos[3] = { 0. };
+  double ppos[3] = { 0. };
+  double wxyz[4] = { 1., 0., 0., 0. };
+  double wdir[3] = { 1., 0., 0. };
+  this->Interactor->ConvertPoseToWorldCoordinates(pose, pos, wxyz, ppos, wdir);
+  vtkNew<vtkTransform> transform;
+  transform->Translate(pos);
+  transform->RotateWXYZ(wxyz[0], wxyz[1], wxyz[2], wxyz[3]);
+  if (node != nullptr)
+  {
+    node->SetMatrixTransformToParent(transform->GetMatrix());
+  }
+
+  node->EndModify(disabledModify);
+}
+
 
 // --------------------------------------------------------------------------
 // qMRMLVirtualRealityView methods
@@ -661,7 +712,7 @@ void qMRMLVirtualRealityView::updateViewFromReferenceViewCamera()
     qWarning() << Q_FUNC_INFO << "The renderer's active camera must be set prior to calling InitializeViewFromCamera";
     return;
   }
-  
+
   double newPhysicalScale = 100.0; // Default 10x magnification
 
   double* sourceViewUp = sourceCamera->GetViewUp();
