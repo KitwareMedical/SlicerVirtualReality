@@ -36,7 +36,21 @@ public:
   vtkTypeMacro(vtkVirtualRealityViewInteractor,vtkOpenVRRenderWindowInteractor);
   void PrintSelf(ostream& os, vtkIndent indent);
 
+  virtual void SetInteractorStyle(vtkInteractorObserver*);
+
   virtual void RecognizeComplexGesture(vtkEventDataDevice3D* edata) override;
+
+  /// Set trigger button function
+  /// By default it is the same as grab (\sa GetButtonFunctionIdForGrabObjectsAndWorld)
+  /// Empty string disables button
+  void SetTriggerButtonFunction(std::string functionId);
+
+  /// Get string constant corresponding to button function "grab objects and world"
+  static std::string GetButtonFunctionIdForGrabObjectsAndWorld() { return "GrabObjectsAndWorld"; };
+
+protected:
+  /// List of buttons for which gesture recognition is enabled
+  std::vector<int> GestureEnabledButtons;
 
 private:
   vtkVirtualRealityViewInteractor();

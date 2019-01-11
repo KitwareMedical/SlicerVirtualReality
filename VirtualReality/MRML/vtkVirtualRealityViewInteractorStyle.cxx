@@ -68,7 +68,7 @@ public:
     vtkMatrix4x4* controller0Pose, vtkMatrix4x4* controller1Pose, vtkMatrix4x4* combinedPose);
 
 public:
-  // Store required controllers information when performing action
+  /// Store required controllers information when performing action
   int InteractionState[vtkEventDataNumberOfDevices];
 
   vtkWeakPointer<vtkMRMLDisplayableNode> PickedNode[vtkEventDataNumberOfDevices];
