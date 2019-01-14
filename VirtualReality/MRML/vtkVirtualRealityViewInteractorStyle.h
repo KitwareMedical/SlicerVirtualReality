@@ -46,24 +46,17 @@ public:
   vtkTypeMacro(vtkVirtualRealityViewInteractorStyle,vtkInteractorStyle3D);
   void PrintSelf(ostream& os, vtkIndent indent) override;
   
-  /**
-   * Set/Get the Interactor wrapper being controlled by this object.
-   * (Satisfy superclass API.)
-   */
+   /// Set the Interactor wrapper being controlled by this object. (Satisfy superclass API.)
   void SetInteractor(vtkRenderWindowInteractor *interactor) override;
 
-  /**
-   * Main process event method
-   */
+  /// Main process event method
   static void ProcessEvents(vtkObject* object, unsigned long event, void* clientdata, void* calldata);
 
   /// Get MRML scene from the displayable manager group (the first displayable manager's if any)
   vtkMRMLScene* GetMRMLScene();
 
   //@{
-  /**
-  * Override generic event bindings to call the corresponding action.
-  */
+  /// Override generic event bindings to call the corresponding action.
   void OnButton3D(vtkEventData *edata) override;
   void OnMove3D(vtkEventData *edata) override;
   //@}

@@ -24,11 +24,15 @@
 #include "vtkMatrix4x4.h"
 #include "vtkObjectFactory.h"
 
+// SlicerVR includes
+#include "vtkVirtualRealityViewInteractorStyle.h"
+
 vtkStandardNewMacro(vtkVirtualRealityViewInteractor);
 
 //----------------------------------------------------------------------------
 vtkVirtualRealityViewInteractor::vtkVirtualRealityViewInteractor()
 {
+  this->GestureEnabledButtons.push_back(static_cast<int>(vtkEventDataDeviceInput::Grip));
 }
 
 //----------------------------------------------------------------------------
@@ -52,8 +56,6 @@ void vtkVirtualRealityViewInteractor::RecognizeComplexGesture(vtkEventDataDevice
   {
     if (edata->GetAction() == vtkEventDataAction::Press)
     {
-      int iInput = static_cast<int>(vtkEventDataDeviceInput::Grip);
-
       this->StartingPhysicalEventPositions[this->PointerIndex][0] =
         this->PhysicalEventPositions[this->PointerIndex][0];
       this->StartingPhysicalEventPositions[this->PointerIndex][1] =
@@ -69,40 +71,47 @@ void vtkVirtualRealityViewInteractor::RecognizeComplexGesture(vtkEventDataDevice
       renWin->GetPhysicalToWorldMatrix(this->StartingPhysicalToWorldMatrix);
 
       // Both controllers have the grip down, start multitouch
-      if (this->DeviceInputDown[iInput][0] && this->DeviceInputDown[iInput][1])
+      for (std::vector<int>::iterator buttonIt=this->GestureEnabledButtons.begin(); buttonIt!=this->GestureEnabledButtons.end(); ++buttonIt)
       {
-        this->CurrentGesture = vtkCommand::PinchEvent;
-        this->StartPinchEvent();
+        if (this->DeviceInputDown[*buttonIt][0] && this->DeviceInputDown[*buttonIt][1])
+        {
+          this->CurrentGesture = vtkCommand::PinchEvent;
+          this->StartPinchEvent();
+          break;
+        }
       }
     }
 
     // End the gesture if needed
     if (edata->GetAction() == vtkEventDataAction::Release)
     {
-      if (edata->GetInput() == vtkEventDataDeviceInput::Grip)
+      for (std::vector<int>::iterator buttonIt=this->GestureEnabledButtons.begin(); buttonIt!=this->GestureEnabledButtons.end(); ++buttonIt)
       {
-        if (this->CurrentGesture == vtkCommand::PinchEvent)
+        if (edata->GetInput() == static_cast<vtkEventDataDeviceInput>(*buttonIt))
         {
-          this->EndPinchEvent();
+          if (this->CurrentGesture == vtkCommand::PinchEvent)
+          {
+            this->EndPinchEvent();
+          }
+          this->CurrentGesture = vtkCommand::NoEvent;
         }
-        this->CurrentGesture = vtkCommand::NoEvent;
       }
     }
   }
 
-   if (edata->GetType() == vtkCommand::Move3DEvent && this->CurrentGesture != vtkCommand::NoEvent)
-   {
-     // Reduce computation
-     if (!this->PointerIndex)
-     {
-       return;
-     }
+  if (edata->GetType() == vtkCommand::Move3DEvent && this->CurrentGesture != vtkCommand::NoEvent)
+  {
+    // Reduce computation
+    if (!this->PointerIndex)
+    {
+      return;
+    }
 
-     if (this->CurrentGesture == vtkCommand::PinchEvent)
-     {
-       this->PinchEvent();
-     }
-   }
+    if (this->CurrentGesture == vtkCommand::PinchEvent)
+    {
+      this->PinchEvent();
+    }
+  }
 }
 
 //----------------------------------------------------------------------------
@@ -110,4 +119,46 @@ void vtkVirtualRealityViewInteractor::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os,indent);
   os << indent << "StartedMessageLoop: " << this->StartedMessageLoop << endl;
+}
+
+//----------------------------------------------------------------------
+void vtkVirtualRealityViewInteractor::SetInteractorStyle(vtkInteractorObserver* style)
+{
+  Superclass::SetInteractorStyle(style);
+
+  // Set default trigger button function "grab objects and world"
+  this->SetTriggerButtonFunction(vtkVirtualRealityViewInteractor::GetButtonFunctionIdForGrabObjectsAndWorld());
+}
+
+//---------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractor::SetTriggerButtonFunction(std::string functionId)
+{
+  vtkVirtualRealityViewInteractorStyle* vrInteractorStyle = vtkVirtualRealityViewInteractorStyle::SafeDownCast(this->InteractorStyle);
+  if (!vrInteractorStyle)
+  {
+    vtkWarningMacro("SetTriggerButtonFunction: Current interactor style is not a VR interactor style");
+    return;
+  }
+
+  if (functionId.empty())
+  {
+    vrInteractorStyle->MapInputToAction(vtkEventDataDevice::RightController, vtkEventDataDeviceInput::Trigger, VTKIS_NONE);
+    vrInteractorStyle->MapInputToAction(vtkEventDataDevice::LeftController,  vtkEventDataDeviceInput::Trigger, VTKIS_NONE);
+
+    this->GestureEnabledButtons.clear();
+    this->GestureEnabledButtons.push_back(static_cast<int>(vtkEventDataDeviceInput::Grip));
+  }
+  else if (!functionId.compare(vtkVirtualRealityViewInteractor::GetButtonFunctionIdForGrabObjectsAndWorld()))
+  {
+    vrInteractorStyle->MapInputToAction(vtkEventDataDevice::RightController, vtkEventDataDeviceInput::Trigger, VTKIS_POSITION_PROP);
+    vrInteractorStyle->MapInputToAction(vtkEventDataDevice::LeftController,  vtkEventDataDeviceInput::Trigger, VTKIS_POSITION_PROP);
+
+    this->GestureEnabledButtons.clear();
+    this->GestureEnabledButtons.push_back(static_cast<int>(vtkEventDataDeviceInput::Grip));
+    this->GestureEnabledButtons.push_back(static_cast<int>(vtkEventDataDeviceInput::Trigger));
+  }
+  else
+  {
+    vtkErrorMacro("SetTriggerButtonFunction: Unknown function identifier '" << functionId << "'");
+  }
 }
