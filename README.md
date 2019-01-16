@@ -29,6 +29,8 @@ Usage
 
 Currently only Windows computers are supported, as until very recently there have been no virtual reality headsets officially supported on MacOS or Linux. If you already have virtual reality capable hardware, SteamVR works well on your computer, and you would like to use Slicer in virtual reality, too, then you add a comment in the issue tracker ([MacOS](https://github.com/KitwareMedical/SlicerVirtualReality/issues/3) / [Linux](https://github.com/KitwareMedical/SlicerVirtualReality/issues/57)).
 
+If both integrated display card and high-performance GPU available in a system (typically this is the case on laptops with NVidia GPUs), then configure the graphics card application settings to use high-performance GPU for SlicerApp-real.exe (it is not necessary to use high-performance GPU for the launcher, Slicer.exe).
+
 <a name="setup-htc-vive" ></a>
 
 ### How to set up my HTC Vive headset
