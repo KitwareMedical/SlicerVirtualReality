@@ -58,8 +58,6 @@ If both integrated display card and high-performance GPU available in a system (
   - Start Oculus app (put on the headset for a moment and it will be started)
   - Click the "Show scene in virtual reality" button <img src="https://github.com/KitwareMedical/SlicerVirtualReality/raw/master/VirtualReality/Resources/Icons/VirtualRealityHeadset.png" width="24"> on the toolbar in Slicer.
 
-Currently, a limitation is that [Oculus Rift controllers are not supported](https://github.com/KitwareMedical/SlicerVirtualReality/issues/28), so the user can see and explore the scene in 3D but can only change the viewpoint by physically moving (not by flying using the controllers) and cannot grab and reposition objects.
-
 <a name="controllers" ></a>
 
 ## How to use controllers
