@@ -29,8 +29,8 @@ if((NOT OPENVR_INCLUDE_DIR OR NOT OPENVR_LIBRARY)
     ${${proj}_EP_ARGS}
     URL "https://github.com/ValveSoftware/openvr/archive/v${_version}.tar.gz"
     URL_MD5 "e794de272919ad130300dc471652aeab"
-    DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}
-    SOURCE_DIR ${proj}
+    DOWNLOAD_DIR ${CMAKE_BINARY_DIR}
+    SOURCE_DIR ${CMAKE_BINARY_DIR}/${proj}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
