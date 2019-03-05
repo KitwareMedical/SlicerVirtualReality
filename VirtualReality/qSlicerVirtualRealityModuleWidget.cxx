@@ -18,22 +18,27 @@
 // Qt includes
 #include <QDebug>
 
-// SlicerQt includes
-#include "qSlicerVirtualRealityModuleWidget.h"
-#include "ui_qSlicerVirtualRealityModuleWidget.h"
+// Slicer includes
+#include <qSlicerApplication.h>
+#include <qSlicerModuleManager.h>
 
 // CTK includes
-#include "ctkDoubleSpinBox.h"
+#include <ctkDoubleSpinBox.h>
 
 // MRML includes
-#include "vtkMRMLScene.h"
+#include <vtkMRMLScene.h>
 
 // VirtualReality includes
-#include "qSlicerVirtualRealityModule.h"
 #include "qMRMLVirtualRealityView.h"
-#include "vtkMRMLVirtualRealityViewNode.h"
+#include "qSlicerVirtualRealityModule.h"
+#include "qSlicerVirtualRealityModuleWidget.h"
+#include "ui_qSlicerVirtualRealityModuleWidget.h"
 #include "vtkMRMLVirtualRealityViewDisplayableManagerFactory.h"
+#include "vtkMRMLVirtualRealityViewNode.h"
 #include "vtkSlicerVirtualRealityLogic.h"
+
+// OpenVR includes
+#include <vtkOpenVRRenderWindow.h>
 
 //-----------------------------------------------------------------------------
 /// \ingroup Slicer_QtModules_ExtensionTemplate
@@ -56,8 +61,8 @@ qSlicerVirtualRealityModuleWidgetPrivate::qSlicerVirtualRealityModuleWidgetPriva
 
 //-----------------------------------------------------------------------------
 qSlicerVirtualRealityModuleWidget::qSlicerVirtualRealityModuleWidget(QWidget* _parent)
-  : Superclass( _parent )
-  , d_ptr( new qSlicerVirtualRealityModuleWidgetPrivate )
+  : Superclass(_parent)
+  , d_ptr(new qSlicerVirtualRealityModuleWidgetPrivate)
 {
 }
 
@@ -86,8 +91,13 @@ void qSlicerVirtualRealityModuleWidget::setup()
   connect(d->MotionSensitivitySlider, SIGNAL(valueChanged(double)), this, SLOT(onMotionSensitivityChanged(double)));
   connect(d->MagnificationSlider, SIGNAL(valueChanged(double)), this, SLOT(onMagnificationChanged(double)));
   connect(d->MotionSpeedSlider, SIGNAL(valueChanged(double)), this, SLOT(onMotionSpeedChanged(double)));
+
   connect(d->ControllerTransformsUpdateCheckBox, SIGNAL(toggled(bool)), this, SLOT(setControllerTransformsUpdate(bool)));
   connect(d->HMDTransformCheckBox, SIGNAL(toggled(bool)), this, SLOT(setHMDTransformUpdate(bool)));
+  connect(d->AbsoluteRadioButton, SIGNAL(clicked(bool)), this, SLOT(setHMDAbsoluteRelativeClicked(bool)));
+  connect(d->RelativeRadioButton, SIGNAL(clicked(bool)), this, SLOT(setHMDAbsoluteRelativeClicked(bool)));
+  connect(d->HMDTransformComboBox, SIGNAL(currentNodeChanged(vtkMRMLNode*)), this, SLOT(onHMDParentTransformChanged(vtkMRMLNode*)));
+  connect(d->TrackHMDCheckBox, SIGNAL(clicked(bool)), this, SLOT(setTrackHMD(bool)));
 
   // Make magnification label same width as motion sensitivity spinbox
   ctkDoubleSpinBox* motionSpeedSpinBox = d->MotionSpeedSlider->findChild<ctkDoubleSpinBox*>("SpinBox");
@@ -127,9 +137,9 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   d->DesiredUpdateRateSlider->blockSignals(wasBlocked);
 
   wasBlocked = d ->MagnificationSlider->blockSignals(true);
-  d->MagnificationSlider->setValue( vrViewNode != nullptr ?
-    this->getPowerFromMagnification(vrViewNode->GetMagnification())
-    : 1.0 );
+  d->MagnificationSlider->setValue(vrViewNode != nullptr ?
+                                   this->getPowerFromMagnification(vrViewNode->GetMagnification())
+                                   : 1.0);
   d->MagnificationSlider->setEnabled(vrViewNode != nullptr);
   d->MagnificationSlider->blockSignals(wasBlocked);
 
@@ -167,7 +177,7 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   d->ReferenceViewNodeComboBox->setCurrentNode(vrViewNode != NULL ? vrViewNode->GetReferenceViewNode() : NULL);
   d->ReferenceViewNodeComboBox->blockSignals(wasBlocked);
   d->ReferenceViewNodeComboBox->setEnabled(vrViewNode != NULL);
-  
+
   wasBlocked = d->ControllerTransformsUpdateCheckBox->blockSignals(true);
   d->ControllerTransformsUpdateCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetControllerTransformsUpdate());
   d->ControllerTransformsUpdateCheckBox->setEnabled(vrViewNode != NULL);
@@ -178,8 +188,36 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   d->HMDTransformCheckBox->setEnabled(vrViewNode != NULL);
   d->HMDTransformCheckBox->blockSignals(wasBlocked);
 
+  wasBlocked = d->HMDTransformComboBox->blockSignals(true);
+  if (vrViewNode != NULL)
+  {
+    d->HMDTransformComboBox->setCurrentNodeID(vrViewNode->GetHMDParentTransformNodeID());
+    d->HMDGroupBox->setEnabled(true);
+  }
+  else
+  {
+    d->HMDTransformComboBox->setCurrentNode(nullptr);
+    d->HMDGroupBox->setEnabled(false);
+  }
+  d->HMDTransformComboBox->blockSignals(wasBlocked);
+
+  wasBlocked = d->AbsoluteRadioButton->blockSignals(true);
+  d->AbsoluteRadioButton->setChecked(vrViewNode != NULL && vrViewNode->GetAbsoluteParentHMDTransform());
+  d->AbsoluteRadioButton->setEnabled(vrViewNode != NULL && vrViewNode->GetHMDParentTransformNodeID() != nullptr);
+  d->AbsoluteRadioButton->blockSignals(wasBlocked);
+
+  wasBlocked = d->RelativeRadioButton->blockSignals(true);
+  d->RelativeRadioButton->setChecked(vrViewNode != NULL && !vrViewNode->GetAbsoluteParentHMDTransform());
+  d->RelativeRadioButton->setEnabled(vrViewNode != NULL && vrViewNode->GetHMDParentTransformNodeID() != nullptr);
+  d->RelativeRadioButton->blockSignals(wasBlocked);
+
+  wasBlocked = d->TrackHMDCheckBox->blockSignals(true);
+  d->TrackHMDCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetTrackHMD());
+  d->TrackHMDCheckBox->setEnabled(vrViewNode != NULL);
+  d->TrackHMDCheckBox->blockSignals(wasBlocked);
+
   d->UpdateViewFromReferenceViewCameraButton->setEnabled(vrViewNode != NULL
-    && vrViewNode->GetReferenceViewNode() != NULL);
+      && vrViewNode->GetReferenceViewNode() != NULL);
 }
 
 //-----------------------------------------------------------------------------
@@ -311,7 +349,7 @@ void qSlicerVirtualRealityModuleWidget::onMotionSpeedChanged(double speedMps)
     vrViewNode->SetMotionSpeed(speedMps);
   }
 }
- 
+
 //----------------------------------------------------------------------------------
 void qSlicerVirtualRealityModuleWidget::onMagnificationChanged(double powerOfTen)
 {
@@ -397,5 +435,52 @@ void qSlicerVirtualRealityModuleWidget::setHMDTransformUpdate(bool active)
   if (vrViewNode)
   {
     vrViewNode->SetHMDTransformUpdate(active);
+  }
+}
+
+//----------------------------------------------------------------------------
+void qSlicerVirtualRealityModuleWidget::onHMDParentTransformChanged(vtkMRMLNode* transformNode)
+{
+  Q_D(qSlicerVirtualRealityModuleWidget);
+  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
+  if (vrViewNode)
+  {
+    vrViewNode->SetAndObserveHMDParentTransformNodeID(transformNode->GetID());
+  }
+}
+
+//----------------------------------------------------------------------------
+void qSlicerVirtualRealityModuleWidget::setHMDAbsoluteRelativeClicked(bool absolute)
+{
+  Q_D(qSlicerVirtualRealityModuleWidget);
+  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
+  if (vrViewNode)
+  {
+    vrViewNode->SetAbsoluteParentHMDTransform(absolute);
+  }
+}
+
+//----------------------------------------------------------------------------
+void qSlicerVirtualRealityModuleWidget::setTrackHMD(bool track)
+{
+  Q_D(qSlicerVirtualRealityModuleWidget);
+  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
+  if (vrViewNode)
+  {
+    vrViewNode->SetTrackHMD(track);
+    if (!qSlicerApplication::application() || !qSlicerApplication::application()->moduleManager())
+    {
+      return;
+    }
+    qSlicerVirtualRealityModule* module = qobject_cast<qSlicerVirtualRealityModule*>(qSlicerApplication::application()->moduleManager()->module("VirtualReality"));
+    if (!module && module->viewWidget() != nullptr && module->viewWidget()->renderWindow() != nullptr)
+    {
+      qWarning() << "Unable to load VirtualReality module. Cannot modify track HMD setting.";
+      return;
+    }
+    module->viewWidget()->renderWindow()->SetTrackHMD(track);
   }
 }

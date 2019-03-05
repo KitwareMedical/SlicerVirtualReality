@@ -84,6 +84,9 @@ public slots:
   void doOpenVirtualReality();
 
 protected:
+  void doHMDParentTransformUpdate();
+  void selectUpdateRate();
+
   void updateTransformNodeWithControllerPose(vtkEventDataDevice device);
   void updateTransformNodeWithHMDPose();
   void createRenderWindow();

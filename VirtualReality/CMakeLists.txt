@@ -48,6 +48,7 @@ set(MODULE_TARGET_LIBRARIES
   vtkSlicer${MODULE_NAME}ModuleLogic
   qSlicer${MODULE_NAME}ModuleWidgets
   qSlicer${MODULE_NAME}SubjectHierarchyPlugins
+  vtkRenderingOpenVR
   )
 
 set(MODULE_RESOURCES

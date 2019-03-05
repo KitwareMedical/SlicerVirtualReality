@@ -393,6 +393,60 @@ double qMRMLVirtualRealityViewPrivate::stillUpdateRate()
   return 0.0001;
 }
 
+//---------------------------------------------------------------------------
+void qMRMLVirtualRealityViewPrivate::selectUpdateRate()
+{
+  if (this->LastViewUpdateTime->GetElapsedTime() > 0.0)
+  {
+    bool quickViewMotion = true;
+
+    if (this->MRMLVirtualRealityViewNode->GetMotionSensitivity() > 0.999)
+    {
+      quickViewMotion = true;
+    }
+    else if (this->MRMLVirtualRealityViewNode->GetMotionSensitivity() <= 0.001)
+    {
+      quickViewMotion = false;
+    }
+    else if (this->LastViewUpdateTime->GetElapsedTime() < 3.0) // don't consider stale measurements
+    {
+      // limit scale:
+      // sensitivity = 0    -> limit = 10.0x
+      // sensitivity = 50%  -> limit =  1.0x
+      // sensitivity = 100% -> limit =  0.1x
+      double limitScale = pow(100, 0.5 - this->MRMLVirtualRealityViewNode->GetMotionSensitivity());
+
+      const double angularSpeedLimitRadiansPerSec = vtkMath::RadiansFromDegrees(5.0 * limitScale);
+      double viewDirectionChangeSpeed = vtkMath::AngleBetweenVectors(this->LastViewDirection,
+                                        this->Camera->GetViewPlaneNormal()) / this->LastViewUpdateTime->GetElapsedTime();
+      double viewUpDirectionChangeSpeed = vtkMath::AngleBetweenVectors(this->LastViewUp,
+                                          this->Camera->GetViewUp()) / this->LastViewUpdateTime->GetElapsedTime();
+
+      const double translationSpeedLimitMmPerSec = 100.0 * limitScale;
+      // Physical scale = 100 if virtual objects are real-world size; <100 if virtual objects are larger
+      double viewTranslationSpeedMmPerSec = this->RenderWindow->GetPhysicalScale() * 0.01 *
+                                            sqrt(vtkMath::Distance2BetweenPoints(this->LastViewPosition, this->Camera->GetPosition()))
+                                            / this->LastViewUpdateTime->GetElapsedTime();
+
+      if (viewDirectionChangeSpeed < angularSpeedLimitRadiansPerSec
+          && viewUpDirectionChangeSpeed < angularSpeedLimitRadiansPerSec
+          && viewTranslationSpeedMmPerSec < translationSpeedLimitMmPerSec)
+      {
+        quickViewMotion = false;
+      }
+    }
+
+    double updateRate = quickViewMotion ? this->desiredUpdateRate() : this->stillUpdateRate();
+    this->RenderWindow->SetDesiredUpdateRate(updateRate);
+  }
+}
+
+// --------------------------------------------------------------------------
+void qMRMLVirtualRealityViewPrivate::doHMDParentTransformUpdate()
+{
+
+}
+
 // --------------------------------------------------------------------------
 void qMRMLVirtualRealityViewPrivate::doOpenVirtualReality()
 {
@@ -401,67 +455,31 @@ void qMRMLVirtualRealityViewPrivate::doOpenVirtualReality()
     this->Interactor->DoOneEvent(this->RenderWindow, this->Renderer);
 
     this->LastViewUpdateTime->StopTimer();
-    if (this->LastViewUpdateTime->GetElapsedTime() > 0.0)
+
+    selectUpdateRate();
+
+    this->Camera->GetViewPlaneNormal(this->LastViewDirection);
+    this->Camera->GetViewUp(this->LastViewUp);
+    this->Camera->GetPosition(this->LastViewPosition);
+
+    if (this->MRMLVirtualRealityViewNode->GetHMDParentTransformNode() != nullptr)
     {
-      bool quickViewMotion = true;
-
-      if (this->MRMLVirtualRealityViewNode->GetMotionSensitivity() > 0.999)
-      {
-        quickViewMotion = true;
-      }
-      else if (this->MRMLVirtualRealityViewNode->GetMotionSensitivity() <= 0.001)
-      {
-        quickViewMotion = false;
-      }
-      else if (this->LastViewUpdateTime->GetElapsedTime() < 3.0) // don't consider stale measurements
-      {
-        // limit scale:
-        // sensitivity = 0    -> limit = 10.0x
-        // sensitivity = 50%  -> limit =  1.0x
-        // sensitivity = 100% -> limit =  0.1x
-        double limitScale = pow(100, 0.5 - this->MRMLVirtualRealityViewNode->GetMotionSensitivity());
-
-        const double angularSpeedLimitRadiansPerSec = vtkMath::RadiansFromDegrees(5.0 * limitScale);
-        double viewDirectionChangeSpeed = vtkMath::AngleBetweenVectors(this->LastViewDirection,
-                                          this->Camera->GetViewPlaneNormal()) / this->LastViewUpdateTime->GetElapsedTime();
-        double viewUpDirectionChangeSpeed = vtkMath::AngleBetweenVectors(this->LastViewUp,
-                                            this->Camera->GetViewUp()) / this->LastViewUpdateTime->GetElapsedTime();
-
-        const double translationSpeedLimitMmPerSec = 100.0 * limitScale;
-        // Physical scale = 100 if virtual objects are real-world size; <100 if virtual objects are larger
-        double viewTranslationSpeedMmPerSec = this->RenderWindow->GetPhysicalScale() * 0.01 *
-                                              sqrt(vtkMath::Distance2BetweenPoints(this->LastViewPosition, this->Camera->GetPosition()))
-                                              / this->LastViewUpdateTime->GetElapsedTime();
-
-        if (viewDirectionChangeSpeed < angularSpeedLimitRadiansPerSec
-            && viewUpDirectionChangeSpeed < angularSpeedLimitRadiansPerSec
-            && viewTranslationSpeedMmPerSec  < translationSpeedLimitMmPerSec)
-        {
-          quickViewMotion = false;
-        }
-      }
-
-      double updateRate = quickViewMotion ? this->desiredUpdateRate() : this->stillUpdateRate();
-      this->RenderWindow->SetDesiredUpdateRate(updateRate);
-
-      this->Camera->GetViewPlaneNormal(this->LastViewDirection);
-      this->Camera->GetViewUp(this->LastViewUp);
-      this->Camera->GetPosition(this->LastViewPosition);
-
-      if (this->MRMLVirtualRealityViewNode->GetControllerTransformsUpdate())
-      {
-        this->MRMLVirtualRealityViewNode->CreateDefaultControllerTransformNodes();
-        updateTransformNodeWithControllerPose(vtkEventDataDevice::LeftController);
-        updateTransformNodeWithControllerPose(vtkEventDataDevice::RightController);
-      }
-      if (this->MRMLVirtualRealityViewNode->GetHMDTransformUpdate())
-      {
-        this->MRMLVirtualRealityViewNode->CreateDefaultHMDTransformNode();
-        updateTransformNodeWithHMDPose();
-      }
-
-      this->LastViewUpdateTime->StartTimer();
+      doHMDParentTransformUpdate();
     }
+
+    if (this->MRMLVirtualRealityViewNode->GetControllerTransformsUpdate())
+    {
+      this->MRMLVirtualRealityViewNode->CreateDefaultControllerTransformNodes();
+      updateTransformNodeWithControllerPose(vtkEventDataDevice::LeftController);
+      updateTransformNodeWithControllerPose(vtkEventDataDevice::RightController);
+    }
+    if (this->MRMLVirtualRealityViewNode->GetHMDTransformUpdate())
+    {
+      this->MRMLVirtualRealityViewNode->CreateDefaultHMDTransformNode();
+      updateTransformNodeWithHMDPose();
+    }
+
+    this->LastViewUpdateTime->StartTimer();
   }
 }
 

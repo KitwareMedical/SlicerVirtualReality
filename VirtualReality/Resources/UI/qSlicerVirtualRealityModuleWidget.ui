@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>318</width>
-    <height>470</height>
+    <height>645</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -347,31 +347,147 @@
        </widget>
       </item>
       <item row="4" column="0">
-       <widget class="QLabel" name="ControllerTransformsLabel">
+       <widget class="QLabel" name="TrackHMDLabel">
+        <property name="toolTip">
+         <string>If enabled, the virtual camera is locked to the user's head movement.</string>
+        </property>
         <property name="text">
-         <string>Controller transforms:</string>
+         <string>Track HMD:</string>
         </property>
        </widget>
       </item>
       <item row="4" column="1">
-       <widget class="ctkCheckBox" name="ControllerTransformsUpdateCheckBox">
-        <property name="toolTip">
-         <string>If checked, then position and orientation of each controller will be exposed in the scene as a transform node</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="HMDTransformLabel">
-        <property name="text">
-         <string>HMD transform:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1">
-       <widget class="QCheckBox" name="HMDTransformCheckBox">
+       <widget class="QCheckBox" name="TrackHMDCheckBox">
         <property name="text">
          <string/>
         </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="ctkCollapsibleButton" name="TransformsCollapsibleButton">
+     <property name="text">
+      <string>Transforms</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QGroupBox" name="HMDGroupBox">
+        <property name="title">
+         <string>HMD</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="HMDTransformLabel">
+           <property name="toolTip">
+            <string>When enabled, a vtkMRMLLinearTransformNode is created and updated with the value of the HMD pose</string>
+           </property>
+           <property name="text">
+            <string>Update MRML Node:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QRadioButton" name="AbsoluteRadioButton">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="toolTip">
+            <string>Parent transform specifies the absolute pose of the HMD, will override user head movement</string>
+           </property>
+           <property name="text">
+            <string>Absolute</string>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">HMDTransformButtonGroup</string>
+           </attribute>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QCheckBox" name="HMDTransformCheckBox">
+           <property name="toolTip">
+            <string>When enabled, a vtkMRMLLinearTransformNode is created and updated with the value of the HMD pose</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="QRadioButton" name="RelativeRadioButton">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="toolTip">
+            <string>Parent transform specifies the relative pose of the HMD, will append to user head movement</string>
+           </property>
+           <property name="text">
+            <string>Relative</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">HMDTransformButtonGroup</string>
+           </attribute>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="qMRMLNodeComboBox" name="HMDTransformComboBox">
+           <property name="toolTip">
+            <string>If specified, will use the value of the indicated linear transform to transform the virtual camera</string>
+           </property>
+           <property name="nodeTypes">
+            <stringlist>
+             <string>vtkMRMLLinearTransformNode</string>
+            </stringlist>
+           </property>
+           <property name="noneEnabled">
+            <bool>true</bool>
+           </property>
+           <property name="renameEnabled">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="ParentHMDTransformLabel">
+           <property name="toolTip">
+            <string>If specified, will use the value of the indicated linear transform to transform the virtual camera</string>
+           </property>
+           <property name="text">
+            <string>Parent By:</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="ControllerGroupBox">
+        <property name="title">
+         <string>GroupBox</string>
+        </property>
+        <layout class="QFormLayout" name="formLayout_2">
+         <item row="0" column="0">
+          <widget class="QLabel" name="ControllerTransformsLabel">
+           <property name="text">
+            <string>Update MRML Node:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="ctkCheckBox" name="ControllerTransformsUpdateCheckBox">
+           <property name="toolTip">
+            <string>If checked, then position and orientation of each controller will be exposed in the scene as a transform node</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
      </layout>
@@ -434,10 +550,29 @@
      <y>145</y>
     </hint>
     <hint type="destinationlabel">
-     <x>322</x>
-     <y>198</y>
+     <x>299</x>
+     <y>300</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>qSlicerVirtualRealityModuleWidget</sender>
+   <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
+   <receiver>HMDTransformComboBox</receiver>
+   <slot>setMRMLScene(vtkMRMLScene*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>313</x>
+     <y>411</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>280</x>
+     <y>449</y>
     </hint>
    </hints>
   </connection>
  </connections>
+ <buttongroups>
+  <buttongroup name="HMDTransformButtonGroup"/>
+ </buttongroups>
 </ui>

@@ -31,10 +31,13 @@ class VTK_SLICER_VIRTUALREALITY_MODULE_MRML_EXPORT vtkMRMLVirtualRealityViewNode
   : public vtkMRMLViewNode
 {
 public:
-  static const char* GetVirtualRealityInteractionTransformAttributeName() { return "VirtualReality.InteractionTransform"; };
+  static const char* GetVirtualRealityInteractionTransformAttributeName()
+  {
+    return "VirtualReality.InteractionTransform";
+  };
 
-  static vtkMRMLVirtualRealityViewNode *New();
-  vtkTypeMacro(vtkMRMLVirtualRealityViewNode,vtkMRMLViewNode);
+  static vtkMRMLVirtualRealityViewNode* New();
+  vtkTypeMacro(vtkMRMLVirtualRealityViewNode, vtkMRMLViewNode);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //--------------------------------------------------------------------------
@@ -44,13 +47,13 @@ public:
   virtual vtkMRMLNode* CreateNodeInstance() override;
 
   /// Read node attributes from XML file
-  virtual void ReadXMLAttributes( const char** atts) override;
+  virtual void ReadXMLAttributes(const char** atts) override;
 
   /// Write this node's information to a MRML file in XML format.
   virtual void WriteXML(ostream& of, int indent) override;
 
   /// Copy the node's attributes to this object
-  virtual void Copy(vtkMRMLNode *node) override;
+  virtual void Copy(vtkMRMLNode* node) override;
 
   /// Get node XML tag name (like Volume, Model)
   virtual const char* GetNodeTagName() override;
@@ -68,7 +71,7 @@ public:
   vtkMRMLViewNode* GetReferenceViewNode();
   /// Set reference view node.
   /// \sa GetReferenceViewNode
-  void SetAndObserveReferenceViewNodeID(const char *layoutNodeId);
+  void SetAndObserveReferenceViewNodeID(const char* layoutNodeId);
   /// Set reference view node.
   /// \sa GetReferenceViewNode
   bool SetAndObserveReferenceViewNode(vtkMRMLViewNode* node);
@@ -88,7 +91,7 @@ public:
   const char* GetLeftControllerTransformNodeID();
   /// Set left controller transform node.
   /// \sa GetLeftControllerTransformNode
-  void SetAndObserveLeftControllerTransformNodeID(const char *nodeId);
+  void SetAndObserveLeftControllerTransformNodeID(const char* nodeId);
   /// Set left controller transform node.
   /// \sa GetLeftControllerTransformNode
   bool SetAndObserveLeftControllerTransformNode(vtkMRMLLinearTransformNode* node);
@@ -99,7 +102,7 @@ public:
   const char* GetRightControllerTransformNodeID();
   /// Set right controller transform node.
   /// \sa GetRightControllerTransformNode
-  void SetAndObserveRightControllerTransformNodeID(const char *nodeId);
+  void SetAndObserveRightControllerTransformNodeID(const char* nodeId);
   /// Set right controller transform node.
   /// \sa GetRightControllerTransformNode
   bool SetAndObserveRightControllerTransformNode(vtkMRMLLinearTransformNode* node);
@@ -109,7 +112,7 @@ public:
   const char* GetHMDTransformNodeID();
   /// Set HMD transform node.
   /// \sa GetHMDTransformNode
-  void SetAndObserveHMDTransformNodeID(const char *nodeId);
+  void SetAndObserveHMDTransformNodeID(const char* nodeId);
   /// Set HMD transform node.
   /// \sa GetHMDTransformNode
   bool SetAndObserveHMDTransformNode(vtkMRMLLinearTransformNode* node);
@@ -165,6 +168,27 @@ public:
   vtkSetMacro(TrackerReferenceModelsVisible, bool);
   vtkBooleanMacro(TrackerReferenceModelsVisible, bool);
 
+  /// If set, the virtual camera is either overwritten or appended by this transform node
+  /// \sa AbsoluteParentTransform
+  vtkMRMLLinearTransformNode* GetHMDParentTransformNode();
+  const char* GetHMDParentTransformNodeID();
+  /// Set HMD transform node.
+  /// \sa GetHMDTransformNode
+  void SetAndObserveHMDParentTransformNodeID(const char* nodeId);
+  /// Set HMD transform node.
+  /// \sa GetHMDTransformNode
+  bool SetAndObserveHMDParentTransformNode(vtkMRMLLinearTransformNode* node);
+
+  /// If set to true, then parent transform overrides virtual camera pose, if false, appends
+  vtkGetMacro(AbsoluteParentHMDTransform, bool);
+  vtkSetMacro(AbsoluteParentHMDTransform, bool);
+  vtkBooleanMacro(AbsoluteParentHMDTransform, bool);
+
+  /// If set to true, the virtual VR camera is updated with the user's head movement
+  vtkGetMacro(TrackHMD, bool);
+  vtkSetMacro(TrackHMD, bool);
+  vtkBooleanMacro(TrackHMD, bool);
+
   /// Return true if an error has occurred.
   /// "Connected" member requests connection but this method can tell if the
   /// hardware connection has been actually successfully established.
@@ -190,6 +214,8 @@ protected:
   bool HMDTransformUpdate;
   bool ControllerModelsVisible;
   bool TrackerReferenceModelsVisible;
+  bool AbsoluteParentHMDTransform;
+  bool TrackHMD;
 
   std::string LastErrorMessage;
 
@@ -202,6 +228,7 @@ protected:
   static const char* LeftControllerTransformRole;
   static const char* RightControllerTransformRole;
   static const char* HMDTransformRole;
+  static const char* ParentTransformRole;
 };
 
 #endif
