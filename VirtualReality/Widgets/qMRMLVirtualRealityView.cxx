@@ -444,19 +444,32 @@ void qMRMLVirtualRealityViewPrivate::selectUpdateRate()
 // --------------------------------------------------------------------------
 void qMRMLVirtualRealityViewPrivate::doHMDParentTransformUpdate()
 {
+  vtkNew<vtkMatrix4x4> newHeadPose;
   if (this->MRMLVirtualRealityViewNode->GetAbsoluteParentHMDTransform())
   {
     // First, must transform by inverse HMD pose to move back to world coordinate system (RAS)
     vtkMatrix4x4* vtkPose = this->getHMDPose_World();
     if (vtkPose == nullptr)
     {
-      qWarning() << "Unable to retrieve HMD pose. Cannot perform parent transform update.";
+      qCritical() << "Unable to retrieve HMD pose. Cannot apply absolute parent transform update.";
     }
-
-    assert("determinant of pose matrix is 0!" && vtkPose->Determinant() != 0.0);
-    vtkPose->Invert();
-    // TODO : finish implementation
+    else
+    {
+      assert("determinant of pose matrix is 0!" && vtkPose->Determinant() != 0.0);
+      vtkPose->Invert();
+      newHeadPose->DeepCopy(vtkPose);
+      vtkPose->Delete();
+    }
   }
+
+  vtkNew<vtkMatrix4x4> parentToWorld;
+  if (this->MRMLVirtualRealityViewNode->GetHMDParentTransformNode()->GetMatrixTransformToWorld(parentToWorld) == 0)
+  {
+    qCritical() << "Parent transform node isn't linear. Cannot be used.";
+    return;
+  }
+
+  vtkMatrix4x4::Multiply4x4(parentToWorld, newHeadPose, newHeadPose);
 }
 
 // --------------------------------------------------------------------------
