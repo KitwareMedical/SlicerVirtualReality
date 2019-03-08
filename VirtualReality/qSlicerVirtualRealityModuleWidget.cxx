@@ -15,6 +15,10 @@
 
 ==============================================================================*/
 
+// OpenVR includes
+#include <vtk_glew.h> /// Easiest if this stays at the top of the file as first include
+#include <vtkOpenVRRenderWindow.h>
+
 // Qt includes
 #include <QDebug>
 
@@ -36,9 +40,6 @@
 #include "vtkMRMLVirtualRealityViewDisplayableManagerFactory.h"
 #include "vtkMRMLVirtualRealityViewNode.h"
 #include "vtkSlicerVirtualRealityLogic.h"
-
-// OpenVR includes
-#include <vtkOpenVRRenderWindow.h>
 
 //-----------------------------------------------------------------------------
 /// \ingroup Slicer_QtModules_ExtensionTemplate

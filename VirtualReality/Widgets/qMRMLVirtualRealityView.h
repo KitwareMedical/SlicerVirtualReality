@@ -31,7 +31,7 @@
 #include "qSlicerVirtualRealityModuleWidgetsExport.h"
 
 // CTK includes
-#include <ctkVTKObject.h> 
+#include <ctkVTKObject.h>
 
 class qMRMLVirtualRealityViewPrivate;
 class vtkMRMLVirtualRealityViewNode;
@@ -74,7 +74,7 @@ public:
   /// vtkMRMLViewDisplayableManager and vtkMRMLModelDisplayableManager are
   /// already registered.
   void addDisplayableManager(const QString& displayableManager);
-  Q_INVOKABLE void getDisplayableManagers(vtkCollection *displayableManagers);
+  Q_INVOKABLE void getDisplayableManagers(vtkCollection* displayableManagers);
 
   /// Set Cameras module logic.
   /// Required for updating camera from reference view node.

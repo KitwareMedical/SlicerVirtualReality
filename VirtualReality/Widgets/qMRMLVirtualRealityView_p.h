@@ -52,12 +52,13 @@ class vtkLightCollection;
 class vtkMRMLCameraNode;
 class vtkMRMLDisplayableManagerGroup;
 class vtkMRMLVirtualRealityViewNode;
+class vtkMatrix4x4;
 class vtkObject;
-class vtkVirtualRealityViewInteractorStyle;
 class vtkOpenVRInteractorStyle;
-class vtkVirtualRealityViewInteractor;
 class vtkOpenVRRenderWindowInteractor;
 class vtkTimerLog;
+class vtkVirtualRealityViewInteractor;
+class vtkVirtualRealityViewInteractorStyle;
 
 //-----------------------------------------------------------------------------
 class qMRMLVirtualRealityViewPrivate: public QObject
@@ -84,6 +85,9 @@ public slots:
   void doOpenVirtualReality();
 
 protected:
+  vtkMatrix4x4* getHMDPose_World();
+  vtkMatrix4x4* getControllerPose_World(vtkEventDataDevice);
+
   void doHMDParentTransformUpdate();
   void selectUpdateRate();
 

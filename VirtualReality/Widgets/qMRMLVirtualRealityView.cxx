@@ -444,7 +444,19 @@ void qMRMLVirtualRealityViewPrivate::selectUpdateRate()
 // --------------------------------------------------------------------------
 void qMRMLVirtualRealityViewPrivate::doHMDParentTransformUpdate()
 {
+  if (this->MRMLVirtualRealityViewNode->GetAbsoluteParentHMDTransform())
+  {
+    // First, must transform by inverse HMD pose to move back to world coordinate system (RAS)
+    vtkMatrix4x4* vtkPose = this->getHMDPose_World();
+    if (vtkPose == nullptr)
+    {
+      qWarning() << "Unable to retrieve HMD pose. Cannot perform parent transform update.";
+    }
 
+    assert("determinant of pose matrix is 0!" && vtkPose->Determinant() != 0.0);
+    vtkPose->Invert();
+    // TODO : finish implementation
+  }
 }
 
 // --------------------------------------------------------------------------
@@ -495,6 +507,7 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodeWithControllerPose(vtkEv
   }
 
   int disabledModify = node->StartModify();
+  vtkMatrix4x4* vtkPose = this->getControllerPose_World(device);
   if (this->RenderWindow->GetTrackedDeviceIndexForDevice(device) == vr::k_unTrackedDeviceIndexInvalid)
   {
     node->SetAttribute("VirtualReality.ControllerActive", "0");
@@ -522,18 +535,12 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodeWithControllerPose(vtkEv
     node->SetAttribute("VirtualReality.ControllerConnected", "1");
   }
 
-  double pos[3] = { 0. };
-  double ppos[3] = { 0. };
-  double wxyz[4] = { 1., 0., 0., 0. };
-  double wdir[3] = { 1., 0., 0. };
-  this->Interactor->ConvertPoseToWorldCoordinates(pose, pos, wxyz, ppos, wdir);
-  vtkNew<vtkTransform> transform;
-  transform->Translate(pos);
-  transform->RotateWXYZ(wxyz[0], wxyz[1], wxyz[2], wxyz[3]);
   if (node != nullptr)
   {
-    node->SetMatrixTransformToParent(transform->GetMatrix());
+    node->SetMatrixTransformToParent(vtkPose);
   }
+
+  vtkPose->Delete();
 
   node->EndModify(disabledModify);
 }
@@ -550,6 +557,7 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodeWithHMDPose()
   }
 
   int disabledModify = node->StartModify();
+  vtkMatrix4x4* vtkPose = this->getHMDPose_World();
   if (this->RenderWindow->GetTrackedDeviceIndexForDevice(vtkEventDataDevice::HeadMountedDisplay) == vr::k_unTrackedDeviceIndexInvalid)
   {
     node->SetAttribute("VirtualReality.HMDActive", "0");
@@ -567,18 +575,12 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodeWithHMDPose()
     node->SetAttribute("VirtualReality.HMDActive", "1");
   }
 
-  double pos[3] = { 0. };
-  double ppos[3] = { 0. };
-  double wxyz[4] = { 1., 0., 0., 0. };
-  double wdir[3] = { 1., 0., 0. };
-  this->Interactor->ConvertPoseToWorldCoordinates(pose, pos, wxyz, ppos, wdir);
-  vtkNew<vtkTransform> transform;
-  transform->Translate(pos);
-  transform->RotateWXYZ(wxyz[0], wxyz[1], wxyz[2], wxyz[3]);
   if (node != nullptr)
   {
-    node->SetMatrixTransformToParent(transform->GetMatrix());
+    node->SetMatrixTransformToParent(vtkPose);
   }
+
+  vtkPose->Delete();
 
   node->EndModify(disabledModify);
 }
@@ -679,6 +681,64 @@ void qMRMLVirtualRealityView::onPhysicalToWorldMatrixModified()
   d->MRMLVirtualRealityViewNode->SetMagnification(d->InteractorStyle->GetMagnification());
 
   emit physicalToWorldMatrixModified();
+}
+
+//----------------------------------------------------------------------------
+vtkMatrix4x4* qMRMLVirtualRealityViewPrivate::getHMDPose_World()
+{
+  if (this->RenderWindow->GetTrackedDeviceIndexForDevice(vtkEventDataDevice::HeadMountedDisplay) == vr::k_unTrackedDeviceIndexInvalid)
+  {
+    return nullptr;
+  }
+
+  vr::TrackedDevicePose_t& pose = this->RenderWindow->GetTrackedDevicePose(this->RenderWindow->GetTrackedDeviceIndexForDevice(vtkEventDataDevice::HeadMountedDisplay));
+  if (pose.eTrackingResult != vr::TrackingResult_Running_OK)
+  {
+    return nullptr;
+  }
+
+  double pos[3] = { 0. };
+  double ppos[3] = { 0. };
+  double wxyz[4] = { 1., 0., 0., 0. };
+  double wdir[3] = { 1., 0., 0. };
+  this->Interactor->ConvertPoseToWorldCoordinates(pose, pos, wxyz, ppos, wdir);
+  vtkNew<vtkTransform> transform;
+  transform->Translate(pos);
+  transform->RotateWXYZ(wxyz[0], wxyz[1], wxyz[2], wxyz[3]);
+
+  vtkMatrix4x4* mat = vtkMatrix4x4::New();
+  mat->DeepCopy(transform->GetMatrix());
+
+  return mat;
+}
+
+//----------------------------------------------------------------------------
+vtkMatrix4x4* qMRMLVirtualRealityViewPrivate::getControllerPose_World(vtkEventDataDevice device)
+{
+  if (this->RenderWindow->GetTrackedDeviceIndexForDevice(device) == vr::k_unTrackedDeviceIndexInvalid)
+  {
+    return nullptr;
+  }
+
+  vr::TrackedDevicePose_t& pose = this->RenderWindow->GetTrackedDevicePose(this->RenderWindow->GetTrackedDeviceIndexForDevice(device));
+  if (pose.eTrackingResult != vr::TrackingResult_Running_OK)
+  {
+    return nullptr;
+  }
+
+  double pos[3] = { 0. };
+  double ppos[3] = { 0. };
+  double wxyz[4] = { 1., 0., 0., 0. };
+  double wdir[3] = { 1., 0., 0. };
+  this->Interactor->ConvertPoseToWorldCoordinates(pose, pos, wxyz, ppos, wdir);
+  vtkNew<vtkTransform> transform;
+  transform->Translate(pos);
+  transform->RotateWXYZ(wxyz[0], wxyz[1], wxyz[2], wxyz[3]);
+
+  vtkMatrix4x4* mat = vtkMatrix4x4::New();
+  mat->DeepCopy(transform->GetMatrix());
+
+  return mat;
 }
 
 //---------------------------------------------------------------------------
