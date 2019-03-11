@@ -14,9 +14,6 @@ add_subdirectory(Widgets)
 #-----------------------------------------------------------------------------
 set(MODULE_EXPORT_DIRECTIVE "Q_SLICER_QTMODULES_${MODULE_NAME_UPPER}_EXPORT")
 
-#-----------------------------------------------------------------------------
-find_package(VTK COMPONENTS vtkRenderingOpenVR REQUIRED)
-
 # Current_{source,binary} and Slicer_{Libs,Base} already included
 set(MODULE_INCLUDE_DIRECTORIES
   ${CMAKE_CURRENT_SOURCE_DIR}/Logic
@@ -28,7 +25,6 @@ set(MODULE_INCLUDE_DIRECTORIES
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets
   ${CMAKE_CURRENT_BINARY_DIR}/Widgets
   ${qSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS}
-  ${vtkRenderingOpenVR_INCLUDE_DIRS}
   )
 
 set(MODULE_SRCS
@@ -52,7 +48,6 @@ set(MODULE_TARGET_LIBRARIES
   vtkSlicer${MODULE_NAME}ModuleLogic
   qSlicer${MODULE_NAME}ModuleWidgets
   qSlicer${MODULE_NAME}SubjectHierarchyPlugins
-  vtkRenderingOpenVR
   )
 
 set(MODULE_RESOURCES

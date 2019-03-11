@@ -53,7 +53,6 @@ public slots:
   void setHMDTransformUpdate(bool);
   void onHMDParentTransformChanged(vtkMRMLNode*);
   void setHMDAbsoluteRelativeClicked(bool);
-  void setTrackHMD(bool);
 
 protected slots:
   void updateWidgetFromMRML();

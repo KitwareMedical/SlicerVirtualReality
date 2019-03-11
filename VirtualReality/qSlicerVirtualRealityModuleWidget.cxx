@@ -15,10 +15,6 @@
 
 ==============================================================================*/
 
-// OpenVR includes
-#include <vtk_glew.h> /// Easiest if this stays at the top of the file as first include
-#include <vtkOpenVRRenderWindow.h>
-
 // Qt includes
 #include <QDebug>
 
@@ -98,7 +94,6 @@ void qSlicerVirtualRealityModuleWidget::setup()
   connect(d->AbsoluteRadioButton, SIGNAL(clicked(bool)), this, SLOT(setHMDAbsoluteRelativeClicked(bool)));
   connect(d->RelativeRadioButton, SIGNAL(clicked(bool)), this, SLOT(setHMDAbsoluteRelativeClicked(bool)));
   connect(d->HMDTransformComboBox, SIGNAL(currentNodeChanged(vtkMRMLNode*)), this, SLOT(onHMDParentTransformChanged(vtkMRMLNode*)));
-  connect(d->TrackHMDCheckBox, SIGNAL(clicked(bool)), this, SLOT(setTrackHMD(bool)));
 
   // Make magnification label same width as motion sensitivity spinbox
   ctkDoubleSpinBox* motionSpeedSpinBox = d->MotionSpeedSlider->findChild<ctkDoubleSpinBox*>("SpinBox");
@@ -211,11 +206,6 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   d->RelativeRadioButton->setChecked(vrViewNode != NULL && !vrViewNode->GetAbsoluteParentHMDTransform());
   d->RelativeRadioButton->setEnabled(vrViewNode != NULL && vrViewNode->GetHMDParentTransformNodeID() != nullptr);
   d->RelativeRadioButton->blockSignals(wasBlocked);
-
-  wasBlocked = d->TrackHMDCheckBox->blockSignals(true);
-  d->TrackHMDCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetTrackHMD());
-  d->TrackHMDCheckBox->setEnabled(vrViewNode != NULL);
-  d->TrackHMDCheckBox->blockSignals(wasBlocked);
 
   d->UpdateViewFromReferenceViewCameraButton->setEnabled(vrViewNode != NULL
       && vrViewNode->GetReferenceViewNode() != NULL);
@@ -460,28 +450,5 @@ void qSlicerVirtualRealityModuleWidget::setHMDAbsoluteRelativeClicked(bool absol
   if (vrViewNode)
   {
     vrViewNode->SetAbsoluteParentHMDTransform(absolute);
-  }
-}
-
-//----------------------------------------------------------------------------
-void qSlicerVirtualRealityModuleWidget::setTrackHMD(bool track)
-{
-  Q_D(qSlicerVirtualRealityModuleWidget);
-  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
-  vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
-  if (vrViewNode)
-  {
-    vrViewNode->SetTrackHMD(track);
-    if (!qSlicerApplication::application() || !qSlicerApplication::application()->moduleManager())
-    {
-      return;
-    }
-    qSlicerVirtualRealityModule* module = qobject_cast<qSlicerVirtualRealityModule*>(qSlicerApplication::application()->moduleManager()->module("VirtualReality"));
-    if (!module && module->viewWidget() != nullptr && module->viewWidget()->renderWindow() != nullptr)
-    {
-      qWarning() << "Unable to load VirtualReality module. Cannot modify track HMD setting.";
-      return;
-    }
-    module->viewWidget()->renderWindow()->SetTrackHMD(track);
   }
 }

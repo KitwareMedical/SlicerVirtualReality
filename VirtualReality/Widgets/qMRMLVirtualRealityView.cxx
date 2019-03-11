@@ -74,6 +74,7 @@
 #include <vtkCullerCollection.h>
 #include <vtkLight.h>
 #include <vtkLightCollection.h>
+#include <vtkMatrixToLinearTransform.h>
 #include <vtkNew.h>
 #include <vtkOpenGLFramebufferObject.h>
 #include <vtkPolyDataMapper.h>
@@ -447,19 +448,21 @@ void qMRMLVirtualRealityViewPrivate::doHMDParentTransformUpdate()
   vtkNew<vtkMatrix4x4> newHeadPose;
   if (this->MRMLVirtualRealityViewNode->GetAbsoluteParentHMDTransform())
   {
-    // First, must transform by inverse HMD pose to move back to world coordinate system (RAS)
-    vtkMatrix4x4* vtkPose = this->getHMDPose_World();
-    if (vtkPose == nullptr)
-    {
-      qCritical() << "Unable to retrieve HMD pose. Cannot apply absolute parent transform update.";
-    }
-    else
-    {
-      assert("determinant of pose matrix is 0!" && vtkPose->Determinant() != 0.0);
-      vtkPose->Invert();
-      newHeadPose->DeepCopy(vtkPose);
-      vtkPose->Delete();
-    }
+    // Disable head tracking
+    this->RenderWindow->SetTrackHMD(false);
+
+    // Set camera pose
+    // TODO : must reset view matrix to identity (with scaling)
+    vtkNew<vtkMatrixToLinearTransform> trans;
+    vtkNew<vtkMatrix4x4> parentHmd;
+    this->MRMLVirtualRealityViewNode->GetHMDParentTransformNode()->GetMatrixTransformToWorld(parentHmd);
+    trans->SetInput(parentHmd);
+    this->Camera->SetUserViewTransform(vtkLinearTransform::SafeDownCast(trans->MakeTransform()));
+  }
+  else
+  {
+    this->RenderWindow->SetTrackHMD(true);
+    this->Camera->SetUserViewTransform(nullptr);
   }
 
   vtkNew<vtkMatrix4x4> parentToWorld;
@@ -470,6 +473,9 @@ void qMRMLVirtualRealityViewPrivate::doHMDParentTransformUpdate()
   }
 
   vtkMatrix4x4::Multiply4x4(parentToWorld, newHeadPose, newHeadPose);
+
+  vtkNew<vtkMatrix4x4> physicalToWorld;
+  this->RenderWindow->GetPhysicalToWorldMatrix(physicalToWorld);
 }
 
 // --------------------------------------------------------------------------

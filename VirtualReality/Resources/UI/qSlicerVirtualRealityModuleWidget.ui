@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>318</width>
-    <height>645</height>
+    <height>626</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -346,26 +346,6 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="TrackHMDLabel">
-        <property name="toolTip">
-         <string>If enabled, the virtual camera is locked to the user's head movement.</string>
-        </property>
-        <property name="text">
-         <string>Track HMD:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QCheckBox" name="TrackHMDCheckBox">
-        <property name="text">
-         <string/>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
      </layout>
     </widget>
    </item>
@@ -470,7 +450,7 @@
       <item>
        <widget class="QGroupBox" name="ControllerGroupBox">
         <property name="title">
-         <string>GroupBox</string>
+         <string>Controllers</string>
         </property>
         <layout class="QFormLayout" name="formLayout_2">
          <item row="0" column="0">
