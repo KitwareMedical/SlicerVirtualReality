@@ -27,7 +27,9 @@ Usage
 
 ## Setup
 
-Currently only Windows computers are supported, as until very recently there have been no virtual reality headsets officially supported on MacOS or Linux. If you already have virtual reality capable hardware, SteamVR works well on your computer, and you would like to use Slicer in virtual reality, too, then you add a comment in the issue tracker ([MacOS](https://github.com/KitwareMedical/SlicerVirtualReality/issues/3) / [Linux](https://github.com/KitwareMedical/SlicerVirtualReality/issues/57)).
+Currently only Windows computers are supported, as until very recently there have been no virtual reality headsets officially supported on MacOS or Linux. If you already have virtual reality capable hardware, Steam
+
+works well on your computer, and you would like to use Slicer in virtual reality, too, then you add a comment in the issue tracker ([MacOS](https://github.com/KitwareMedical/SlicerVirtualReality/issues/3) / [Linux](https://github.com/KitwareMedical/SlicerVirtualReality/issues/57)).
 
 If both integrated display card and high-performance GPU available in a system (typically this is the case on laptops with NVidia GPUs), then configure the graphics card application settings to use high-performance GPU for SlicerApp-real.exe (it is not necessary to use high-performance GPU for the launcher, Slicer.exe).
 
@@ -123,15 +125,16 @@ Please do not use "VR" acronym (you can spell out "virtual reality" instead), be
 
 ### Rendering is slow
 
-There are several settings that help in increasing the performance of VR rendering:
+There are several settings that help in increasing the performance of virtual reality rendering:
 
 - Optimize scene for virtual reality button (magic wand icon on toolbar): this switches volume rendering to use GPU, turns off backface culling for all existing models (to see surfaces even when going inside an object), turns off slice intersection visibility for all existing models and segmentations (to make slice view updates faster)
-- Settings in VR module panel related to performance (click on wrench icon in toolbar):
+- Settings in virtual reality module panel related to performance (click on wrench icon in toolbar):
   - Update rate: Volume rendering quality is set to produce the highest possible quality while keeping the desired frame per second
   - Motion sensitivity: It is very important to keep rendering smooth when moving. This setting detects head movement and significantly lowers volume rendering quality while it is happening. At value of 0 motion is never detected, at high values a little motion triggers the quality change
-- Switch layout of desktop Slicer: Any additional 3D view to render decreases VR performance. By switching to a layout that contains no 3D view (e.g. Red slice only), this can be prevented
+- Settings in Volume rendering module: open "Advanced" section / "Techniques" tab, try "Adaptive" setting with different "Interactive speed" values. Also try and "Normal" setting: it disables the automatic mechanism that tries to dynamically adjust rendering quality based on predicted rendering time; in some cases the prediction does not work well and results in sub-optimal image quality.
+- Switch layout of desktop Slicer: Any additional 3D view to render decreases virtual reality rendering performance. By switching to a layout that contains no 3D view (e.g. Red slice only), this can be prevented
 
-Some scenes are too complex to render fluently by mid-range graphics cards. If the scene includes volume rendering of high-resolution CT for example, then it may be time to upgrade to a high-end GPU.
+Some scenes are too complex to render fluently by mid-range graphics cards. If the scene includes volume rendering of high-resolution CT for example, then it may be necessary to upgrade to a high-end GPU.
 
 ### How to record virtual reality videos?
 
