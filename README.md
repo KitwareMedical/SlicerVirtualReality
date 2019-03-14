@@ -125,7 +125,7 @@ Please do not use "VR" acronym (you can spell out "virtual reality" instead), be
 
 There are several settings that help in increasing the performance of VR rendering:
 
-- Optimize scene for virtual reality button (magic wand icon on toolbar)
+- Optimize scene for virtual reality button (magic wand icon on toolbar): this switches volume rendering to use GPU, turns off backface culling for all existing models (to see surfaces even when going inside an object), turns off slice intersection visibility for all existing models and segmentations (to make slice view updates faster)
 - Settings in VR module panel related to performance (click on wrench icon in toolbar):
   - Update rate: Volume rendering quality is set to produce the highest possible quality while keeping the desired frame per second
   - Motion sensitivity: It is very important to keep rendering smooth when moving. This setting detects head movement and significantly lowers volume rendering quality while it is happening. At value of 0 motion is never detected, at high values a little motion triggers the quality change
