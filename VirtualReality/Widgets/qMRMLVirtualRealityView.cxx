@@ -63,7 +63,7 @@
 #include <vtkMRMLAbstractDisplayableManager.h>
 #include <vtkMRMLDisplayableManagerGroup.h>
 #include <vtkMRMLVirtualRealityViewDisplayableManagerFactory.h>
-#include <vtkThreeDViewInteractorStyle.h>
+#include <vtkMRMLThreeDViewInteractorStyle.h>
 
 // MRML includes
 #include <vtkMRMLLinearTransformNode.h>
