@@ -184,11 +184,6 @@ public:
   vtkSetMacro(AbsoluteParentHMDTransform, bool);
   vtkBooleanMacro(AbsoluteParentHMDTransform, bool);
 
-  /// If set to true, the virtual VR camera is updated with the user's head movement
-  vtkGetMacro(TrackHMD, bool);
-  vtkSetMacro(TrackHMD, bool);
-  vtkBooleanMacro(TrackHMD, bool);
-
   /// Return true if an error has occurred.
   /// "Connected" member requests connection but this method can tell if the
   /// hardware connection has been actually successfully established.
@@ -215,7 +210,6 @@ protected:
   bool ControllerModelsVisible;
   bool TrackerReferenceModelsVisible;
   bool AbsoluteParentHMDTransform;
-  bool TrackHMD;
 
   std::string LastErrorMessage;
 

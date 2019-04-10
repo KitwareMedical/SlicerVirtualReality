@@ -437,7 +437,7 @@ void qSlicerVirtualRealityModuleWidget::onHMDParentTransformChanged(vtkMRMLNode*
   vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
   if (vrViewNode)
   {
-    vrViewNode->SetAndObserveHMDParentTransformNodeID(transformNode->GetID());
+    vrViewNode->SetAndObserveHMDParentTransformNodeID(transformNode != nullptr ? transformNode->GetID() : nullptr);
   }
 }
 
@@ -449,6 +449,6 @@ void qSlicerVirtualRealityModuleWidget::setHMDAbsoluteRelativeClicked(bool absol
   vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
   if (vrViewNode)
   {
-    vrViewNode->SetAbsoluteParentHMDTransform(absolute);
+    vrViewNode->SetAbsoluteParentHMDTransform(d->AbsoluteRadioButton->isChecked());
   }
 }

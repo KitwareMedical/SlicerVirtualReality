@@ -445,6 +445,8 @@ void qMRMLVirtualRealityViewPrivate::selectUpdateRate()
 // --------------------------------------------------------------------------
 void qMRMLVirtualRealityViewPrivate::doHMDParentTransformUpdate()
 {
+  Q_Q(qMRMLVirtualRealityView);
+
   vtkNew<vtkMatrix4x4> newHeadPose;
   if (this->MRMLVirtualRealityViewNode->GetAbsoluteParentHMDTransform())
   {
@@ -452,30 +454,40 @@ void qMRMLVirtualRealityViewPrivate::doHMDParentTransformUpdate()
     this->RenderWindow->SetTrackHMD(false);
 
     // Set camera pose
-    // TODO : must reset view matrix to identity (with scaling)
-    vtkNew<vtkMatrixToLinearTransform> trans;
-    vtkNew<vtkMatrix4x4> parentHmd;
-    this->MRMLVirtualRealityViewNode->GetHMDParentTransformNode()->GetMatrixTransformToWorld(parentHmd);
-    trans->SetInput(parentHmd);
-    this->Camera->SetUserViewTransform(vtkLinearTransform::SafeDownCast(trans->MakeTransform()));
+    this->Renderer->UpdateLightsGeometryToFollowCamera();
   }
   else
   {
     this->RenderWindow->SetTrackHMD(true);
-    this->Camera->SetUserViewTransform(nullptr);
+    // adjust physical to world to compensate for additional movement, relative to tracked hmd
   }
 
-  vtkNew<vtkMatrix4x4> parentToWorld;
-  if (this->MRMLVirtualRealityViewNode->GetHMDParentTransformNode()->GetMatrixTransformToWorld(parentToWorld) == 0)
+  vtkNew<vtkMatrixToLinearTransform> trans;
+  vtkNew<vtkMatrix4x4> parentHmd;
+  if (this->MRMLVirtualRealityViewNode->GetHMDParentTransformNode()->GetMatrixTransformToWorld(parentHmd) == 0)
+  {
+    qCritical() << "Cannot retrieve transform from node.";
+    return;
+  }
+  trans->SetInput(parentHmd);
+  if (vtkLinearTransform::SafeDownCast(trans->MakeTransform()) == nullptr)
   {
     qCritical() << "Parent transform node isn't linear. Cannot be used.";
     return;
   }
 
-  vtkMatrix4x4::Multiply4x4(parentToWorld, newHeadPose, newHeadPose);
-
-  vtkNew<vtkMatrix4x4> physicalToWorld;
-  this->RenderWindow->GetPhysicalToWorldMatrix(physicalToWorld);
+  vtkLinearTransform* transform = vtkLinearTransform::SafeDownCast(trans->MakeTransform());
+  this->Camera->SetPosition(transform->GetMatrix()->GetElement(0, 3),
+                            transform->GetMatrix()->GetElement(1, 3),
+                            transform->GetMatrix()->GetElement(2, 3));
+  // TODO : adjust scaling factor according to magnification
+  vtkVector3d p(transform->GetMatrix()->GetElement(0, 3) + 1 * transform->GetMatrix()->GetElement(0, 2),
+                transform->GetMatrix()->GetElement(1, 3) + 1 * transform->GetMatrix()->GetElement(1, 2),
+                transform->GetMatrix()->GetElement(2, 3) + 1 * transform->GetMatrix()->GetElement(2, 2));
+  this->Camera->SetFocalPoint(p.GetX(), p.GetY(), p.GetZ());
+  this->Camera->SetViewUp(transform->GetMatrix()->GetElement(0, 1),
+                          transform->GetMatrix()->GetElement(1, 1),
+                          transform->GetMatrix()->GetElement(2, 1));
 }
 
 // --------------------------------------------------------------------------
@@ -496,6 +508,12 @@ void qMRMLVirtualRealityViewPrivate::doOpenVirtualReality()
     if (this->MRMLVirtualRealityViewNode->GetHMDParentTransformNode() != nullptr)
     {
       doHMDParentTransformUpdate();
+    }
+    else
+    {
+      // Clear user view transform
+      this->RenderWindow->SetTrackHMD(true);
+      this->Camera->SetUserViewTransform(nullptr);
     }
 
     if (this->MRMLVirtualRealityViewNode->GetControllerTransformsUpdate())
@@ -690,6 +708,12 @@ bool qMRMLVirtualRealityView::isHardwareConnected()const
   }
   // connected successfully
   return true;
+}
+
+//----------------------------------------------------------------------------
+Q_INVOKABLE bool qMRMLVirtualRealityView::GetTrackHMD()
+{
+  return this->renderWindow()->GetTrackHMD();
 }
 
 //------------------------------------------------------------------------------

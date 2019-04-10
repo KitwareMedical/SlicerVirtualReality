@@ -100,6 +100,9 @@ public:
   /// Get underlying RenderWindow
   Q_INVOKABLE bool isHardwareConnected()const;
 
+  // Python wrapped accessors of render window
+  Q_INVOKABLE bool GetTrackHMD();
+
 signals:
   void physicalToWorldMatrixModified();
 

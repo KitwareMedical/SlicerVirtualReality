@@ -44,7 +44,6 @@ vtkMRMLVirtualRealityViewNode::vtkMRMLVirtualRealityViewNode()
   , ControllerModelsVisible(true)
   , TrackerReferenceModelsVisible(true)
   , AbsoluteParentHMDTransform(false)
-  , TrackHMD(true)
 {
   this->Visibility = 0; // hidden by default to not connect to the headset until it is needed
   this->BackgroundColor[0] = this->defaultBackgroundColor()[0];
@@ -83,7 +82,6 @@ void vtkMRMLVirtualRealityViewNode::WriteXML(ostream& of, int nIndent)
   vtkMRMLWriteXMLBooleanMacro(controllerModelsVisible, ControllerModelsVisible);
   vtkMRMLWriteXMLBooleanMacro(trackerReferenceModelsVisible, TrackerReferenceModelsVisible);
   vtkMRMLWriteXMLBooleanMacro(absoluteParentHMDTransform, AbsoluteParentHMDTransform);
-  vtkMRMLWriteXMLBooleanMacro(trackHMD, TrackHMD);
   vtkMRMLWriteXMLEndMacro();
 }
 
@@ -106,7 +104,6 @@ void vtkMRMLVirtualRealityViewNode::ReadXMLAttributes(const char** atts)
   vtkMRMLReadXMLBooleanMacro(controllerModelsVisible, ControllerModelsVisible);
   vtkMRMLReadXMLBooleanMacro(trackerReferenceModelsVisible, TrackerReferenceModelsVisible);
   vtkMRMLReadXMLBooleanMacro(absoluteParentHMDTransform, AbsoluteParentHMDTransform);
-  vtkMRMLReadXMLBooleanMacro(trackHMD, TrackHMD);
   vtkMRMLReadXMLEndMacro();
 
   this->EndModify(disabledModify);
@@ -133,7 +130,6 @@ void vtkMRMLVirtualRealityViewNode::Copy(vtkMRMLNode* anode)
   vtkMRMLCopyBooleanMacro(ControllerModelsVisible);
   vtkMRMLCopyBooleanMacro(TrackerReferenceModelsVisible);
   vtkMRMLCopyBooleanMacro(AbsoluteParentHMDTransform);
-  vtkMRMLCopyBooleanMacro(TrackHMD);
   vtkMRMLCopyEndMacro();
 
   this->EndModify(disabledModify);
@@ -156,7 +152,6 @@ void vtkMRMLVirtualRealityViewNode::PrintSelf(ostream& os, vtkIndent indent)
   vtkMRMLPrintBooleanMacro(ControllerModelsVisible);
   vtkMRMLPrintBooleanMacro(TrackerReferenceModelsVisible);
   vtkMRMLPrintBooleanMacro(AbsoluteParentHMDTransform);
-  vtkMRMLPrintBooleanMacro(TrackHMD);
   vtkMRMLPrintEndMacro();
 }
 
