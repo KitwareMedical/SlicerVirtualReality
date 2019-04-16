@@ -66,8 +66,9 @@
 #include <vtkMRMLThreeDViewInteractorStyle.h>
 
 // MRML includes
-#include <vtkMRMLLinearTransformNode.h>
 #include <vtkMRMLCameraNode.h>
+#include <vtkMRMLLinearTransformNode.h>
+#include <vtkMRMLScene.h>
 
 // VTK includes
 #include <vtkCollection.h>
@@ -354,7 +355,7 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
           {
             continue;
           }
-          model->SetVisibility(this->MRMLVirtualRealityViewNode->GetTrackerReferenceModelsVisible());
+          model->SetVisibility(this->MRMLVirtualRealityViewNode->GetLighthouseModelsVisible());
         }
       }
     }
@@ -459,6 +460,10 @@ void qMRMLVirtualRealityViewPrivate::doOpenVirtualReality()
         this->MRMLVirtualRealityViewNode->CreateDefaultHMDTransformNode();
         updateTransformNodeWithHMDPose();
       }
+      if (this->MRMLVirtualRealityViewNode->GetTrackerTransformUpdate())
+      {
+        updateTransformNodesWithTrackerPoses();
+      }
 
       this->LastViewUpdateTime->StartTimer();
     }
@@ -504,18 +509,7 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodeWithControllerPose(vtkEv
     node->SetAttribute("VirtualReality.ControllerConnected", "1");
   }
 
-  double pos[3] = { 0. };
-  double ppos[3] = { 0. };
-  double wxyz[4] = { 1., 0., 0., 0. };
-  double wdir[3] = { 1., 0., 0. };
-  this->Interactor->ConvertPoseToWorldCoordinates(pose, pos, wxyz, ppos, wdir);
-  vtkNew<vtkTransform> transform;
-  transform->Translate(pos);
-  transform->RotateWXYZ(wxyz[0], wxyz[1], wxyz[2], wxyz[3]);
-  if (node != nullptr)
-  {
-    node->SetMatrixTransformToParent(transform->GetMatrix());
-  }
+  updateTransformNodeWithPose(node, pose);
 
   node->EndModify(disabledModify);
 }
@@ -549,6 +543,59 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodeWithHMDPose()
     node->SetAttribute("VirtualReality.HMDActive", "1");
   }
 
+  updateTransformNodeWithPose(node, pose);
+
+  node->EndModify(disabledModify);
+}
+
+//----------------------------------------------------------------------------
+void qMRMLVirtualRealityViewPrivate::updateTransformNodesWithTrackerPoses()
+{
+  Q_Q(qMRMLVirtualRealityView);
+
+  for (uint32_t i = 0; i < this->RenderWindow->GetNumberOfTrackedDevicesForDevice(vtkEventDataDevice::GenericTracker); ++i)
+  {
+    vr::TrackedDeviceIndex_t dev = this->RenderWindow->GetTrackedDeviceIndexForDevice(vtkEventDataDevice::GenericTracker, i);
+    std::stringstream ss;
+    ss << dev;
+
+    vtkMRMLTransformNode* node = vtkMRMLTransformNode::SafeDownCast(this->MRMLVirtualRealityViewNode->GetTrackerTransformNode(ss.str().c_str()));
+    if (node == nullptr)
+    {
+      // Node wasn't found for this device, let's create one
+      node = vtkMRMLLinearTransformNode::SafeDownCast(this->MRMLVirtualRealityViewNode->GetScene()->AddNode(vtkMRMLLinearTransformNode::New()));
+      if (node == nullptr)
+      {
+        qCritical() << "Unable to add transform node to scene. Can't update VR tracker with ID: " << dev;
+        continue;
+      }
+      node->SetAttribute("VirtualReality.VRDeviceID", ss.str().c_str());
+      node->SetName("VirtualReality.GenericTracker");
+      this->MRMLVirtualRealityViewNode->SetAndObserveTrackerTransformNode(node, ss.str().c_str());
+    }
+
+    int disabledModify = node->StartModify();
+
+    // Now, we have our generic tracker node, let's update it!
+    vr::TrackedDevicePose_t& pose = this->RenderWindow->GetTrackedDevicePose(dev);
+    if (pose.eTrackingResult != vr::TrackingResult_Running_OK)
+    {
+      node->SetAttribute("VirtualReality.TrackerActive", "0");
+    }
+    else
+    {
+      node->SetAttribute("VirtualReality.TrackerActive", "1");
+    }
+    updateTransformNodeWithPose(node, pose);
+
+    node->EndModify(disabledModify);
+  }
+}
+
+
+//----------------------------------------------------------------------------
+void qMRMLVirtualRealityViewPrivate::updateTransformNodeWithPose(vtkMRMLTransformNode* node, vr::TrackedDevicePose_t& pose)
+{
   double pos[3] = { 0. };
   double ppos[3] = { 0. };
   double wxyz[4] = { 1., 0., 0., 0. };
@@ -561,8 +608,6 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodeWithHMDPose()
   {
     node->SetMatrixTransformToParent(transform->GetMatrix());
   }
-
-  node->EndModify(disabledModify);
 }
 
 

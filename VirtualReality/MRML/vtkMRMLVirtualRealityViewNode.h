@@ -33,8 +33,8 @@ class VTK_SLICER_VIRTUALREALITY_MODULE_MRML_EXPORT vtkMRMLVirtualRealityViewNode
 public:
   static const char* GetVirtualRealityInteractionTransformAttributeName() { return "VirtualReality.InteractionTransform"; };
 
-  static vtkMRMLVirtualRealityViewNode *New();
-  vtkTypeMacro(vtkMRMLVirtualRealityViewNode,vtkMRMLViewNode);
+  static vtkMRMLVirtualRealityViewNode* New();
+  vtkTypeMacro(vtkMRMLVirtualRealityViewNode, vtkMRMLViewNode);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //--------------------------------------------------------------------------
@@ -44,13 +44,13 @@ public:
   virtual vtkMRMLNode* CreateNodeInstance() override;
 
   /// Read node attributes from XML file
-  virtual void ReadXMLAttributes( const char** atts) override;
+  virtual void ReadXMLAttributes(const char** atts) override;
 
   /// Write this node's information to a MRML file in XML format.
   virtual void WriteXML(ostream& of, int indent) override;
 
   /// Copy the node's attributes to this object
-  virtual void Copy(vtkMRMLNode *node) override;
+  virtual void Copy(vtkMRMLNode* node) override;
 
   /// Get node XML tag name (like Volume, Model)
   virtual const char* GetNodeTagName() override;
@@ -68,7 +68,7 @@ public:
   vtkMRMLViewNode* GetReferenceViewNode();
   /// Set reference view node.
   /// \sa GetReferenceViewNode
-  void SetAndObserveReferenceViewNodeID(const char *layoutNodeId);
+  void SetAndObserveReferenceViewNodeID(const char* layoutNodeId);
   /// Set reference view node.
   /// \sa GetReferenceViewNode
   bool SetAndObserveReferenceViewNode(vtkMRMLViewNode* node);
@@ -88,7 +88,7 @@ public:
   const char* GetLeftControllerTransformNodeID();
   /// Set left controller transform node.
   /// \sa GetLeftControllerTransformNode
-  void SetAndObserveLeftControllerTransformNodeID(const char *nodeId);
+  void SetAndObserveLeftControllerTransformNodeID(const char* nodeId);
   /// Set left controller transform node.
   /// \sa GetLeftControllerTransformNode
   bool SetAndObserveLeftControllerTransformNode(vtkMRMLLinearTransformNode* node);
@@ -99,7 +99,7 @@ public:
   const char* GetRightControllerTransformNodeID();
   /// Set right controller transform node.
   /// \sa GetRightControllerTransformNode
-  void SetAndObserveRightControllerTransformNodeID(const char *nodeId);
+  void SetAndObserveRightControllerTransformNodeID(const char* nodeId);
   /// Set right controller transform node.
   /// \sa GetRightControllerTransformNode
   bool SetAndObserveRightControllerTransformNode(vtkMRMLLinearTransformNode* node);
@@ -109,10 +109,26 @@ public:
   const char* GetHMDTransformNodeID();
   /// Set HMD transform node.
   /// \sa GetHMDTransformNode
-  void SetAndObserveHMDTransformNodeID(const char *nodeId);
+  void SetAndObserveHMDTransformNodeID(const char* nodeId);
   /// Set HMD transform node.
   /// \sa GetHMDTransformNode
   bool SetAndObserveHMDTransformNode(vtkMRMLLinearTransformNode* node);
+
+  /// Get generic tracker transform node
+  vtkMRMLTransformNode* GetTrackerTransformNode(const char* openVrDeviceId);
+  const char* GetTrackerTransformNodeID(const char* openVrDeviceId);
+  /// Set tracker transform node.
+  /// \sa GetTrackerTransformNode
+  vtkMRMLTransformNode* SetAndObserveTrackerTransformNodeID(const char* nodeId, const char* openVrDeviceId);
+  /// Set tracker transform node.
+  /// \sa GetTrackerTransformNode
+  vtkMRMLTransformNode* SetAndObserveTrackerTransformNode(vtkMRMLTransformNode* node, const char* openVrDeviceId);
+  /// Remove a tracker transform node.
+  /// \sa SetAndObserveTrackerTransformNode
+  void RemoveTrackerTransformNode(const char* openVrDeviceId);
+  /// Remove all tracker transform node.
+  /// \sa SetAndObserveTrackerTransformNode
+  void RemoveAllTrackerTransformNodes();
 
   /// Controls two-sided lighting property of the renderer
   vtkGetMacro(TwoSidedLighting, bool);
@@ -155,15 +171,19 @@ public:
   void SetHMDTransformUpdate(bool enable);
   vtkBooleanMacro(HMDTransformUpdate, bool);
 
+  vtkGetMacro(TrackerTransformUpdate, bool);
+  void SetTrackerTransformUpdate(bool enable);
+  vtkBooleanMacro(TrackerTransformUpdate, bool);
+
   /// If set to true then controllers are visible in virtual reality view.
   vtkGetMacro(ControllerModelsVisible, bool);
   vtkSetMacro(ControllerModelsVisible, bool);
   vtkBooleanMacro(ControllerModelsVisible, bool);
 
   /// If set to true then tracking references (Lighthouses) are visible in virtual reality view.
-  vtkGetMacro(TrackerReferenceModelsVisible, bool);
-  vtkSetMacro(TrackerReferenceModelsVisible, bool);
-  vtkBooleanMacro(TrackerReferenceModelsVisible, bool);
+  vtkGetMacro(LighthouseModelsVisible, bool);
+  vtkSetMacro(LighthouseModelsVisible, bool);
+  vtkBooleanMacro(LighthouseModelsVisible, bool);
 
   /// Return true if an error has occurred.
   /// "Connected" member requests connection but this method can tell if the
@@ -189,7 +209,8 @@ protected:
   bool ControllerTransformsUpdate;
   bool HMDTransformUpdate;
   bool ControllerModelsVisible;
-  bool TrackerReferenceModelsVisible;
+  bool LighthouseModelsVisible;
+  bool TrackerTransformUpdate;
 
   std::string LastErrorMessage;
 
@@ -202,6 +223,7 @@ protected:
   static const char* LeftControllerTransformRole;
   static const char* RightControllerTransformRole;
   static const char* HMDTransformRole;
+  static const char* TrackerTransformRole;
 };
 
 #endif

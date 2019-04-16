@@ -56,8 +56,8 @@ qSlicerVirtualRealityModuleWidgetPrivate::qSlicerVirtualRealityModuleWidgetPriva
 
 //-----------------------------------------------------------------------------
 qSlicerVirtualRealityModuleWidget::qSlicerVirtualRealityModuleWidget(QWidget* _parent)
-  : Superclass( _parent )
-  , d_ptr( new qSlicerVirtualRealityModuleWidgetPrivate )
+  : Superclass(_parent)
+  , d_ptr(new qSlicerVirtualRealityModuleWidgetPrivate)
 {
 }
 
@@ -78,7 +78,7 @@ void qSlicerVirtualRealityModuleWidget::setup()
   connect(d->TwoSidedLightingCheckBox, SIGNAL(toggled(bool)), this, SLOT(setTwoSidedLighting(bool)));
   connect(d->BackLightsCheckBox, SIGNAL(toggled(bool)), this, SLOT(setBackLights(bool)));
   connect(d->ControllerModelsVisibleCheckBox, SIGNAL(toggled(bool)), this, SLOT(setControllerModelsVisible(bool)));
-  connect(d->TrackersVisibleCheckBox, SIGNAL(toggled(bool)), this, SLOT(setTrackingReferenceModelsVisible(bool)));
+  connect(d->LighthousesVisibleCheckBox, SIGNAL(toggled(bool)), this, SLOT(setTrackingReferenceModelsVisible(bool)));
   connect(d->ReferenceViewNodeComboBox, SIGNAL(currentNodeChanged(vtkMRMLNode*)), this, SLOT(setReferenceViewNode(vtkMRMLNode*)));
   connect(d->UpdateViewFromReferenceViewCameraButton, SIGNAL(clicked()), this, SLOT(updateViewFromReferenceViewCamera()));
 
@@ -88,6 +88,8 @@ void qSlicerVirtualRealityModuleWidget::setup()
   connect(d->MotionSpeedSlider, SIGNAL(valueChanged(double)), this, SLOT(onMotionSpeedChanged(double)));
   connect(d->ControllerTransformsUpdateCheckBox, SIGNAL(toggled(bool)), this, SLOT(setControllerTransformsUpdate(bool)));
   connect(d->HMDTransformCheckBox, SIGNAL(toggled(bool)), this, SLOT(setHMDTransformUpdate(bool)));
+  connect(d->TrackerTransformsCheckBox, SIGNAL(toggled(bool)), this, SLOT(setTrackerTransformsUpdate(bool)));
+
 
   // Make magnification label same width as motion sensitivity spinbox
   ctkDoubleSpinBox* motionSpeedSpinBox = d->MotionSpeedSlider->findChild<ctkDoubleSpinBox*>("SpinBox");
@@ -127,9 +129,9 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   d->DesiredUpdateRateSlider->blockSignals(wasBlocked);
 
   wasBlocked = d ->MagnificationSlider->blockSignals(true);
-  d->MagnificationSlider->setValue( vrViewNode != nullptr ?
-    this->getPowerFromMagnification(vrViewNode->GetMagnification())
-    : 1.0 );
+  d->MagnificationSlider->setValue(vrViewNode != nullptr ?
+                                   this->getPowerFromMagnification(vrViewNode->GetMagnification())
+                                   : 1.0);
   d->MagnificationSlider->setEnabled(vrViewNode != nullptr);
   d->MagnificationSlider->blockSignals(wasBlocked);
 
@@ -158,16 +160,16 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   d->ControllerModelsVisibleCheckBox->setEnabled(vrViewNode != NULL);
   d->ControllerModelsVisibleCheckBox->blockSignals(wasBlocked);
 
-  wasBlocked = d->TrackersVisibleCheckBox->blockSignals(true);
-  d->TrackersVisibleCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetTrackerReferenceModelsVisible());
-  d->TrackersVisibleCheckBox->setEnabled(vrViewNode != NULL);
-  d->TrackersVisibleCheckBox->blockSignals(wasBlocked);
+  wasBlocked = d->LighthousesVisibleCheckBox->blockSignals(true);
+  d->LighthousesVisibleCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetLighthouseModelsVisible());
+  d->LighthousesVisibleCheckBox->setEnabled(vrViewNode != NULL);
+  d->LighthousesVisibleCheckBox->blockSignals(wasBlocked);
 
   wasBlocked = d->ReferenceViewNodeComboBox->blockSignals(true);
   d->ReferenceViewNodeComboBox->setCurrentNode(vrViewNode != NULL ? vrViewNode->GetReferenceViewNode() : NULL);
   d->ReferenceViewNodeComboBox->blockSignals(wasBlocked);
   d->ReferenceViewNodeComboBox->setEnabled(vrViewNode != NULL);
-  
+
   wasBlocked = d->ControllerTransformsUpdateCheckBox->blockSignals(true);
   d->ControllerTransformsUpdateCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetControllerTransformsUpdate());
   d->ControllerTransformsUpdateCheckBox->setEnabled(vrViewNode != NULL);
@@ -178,8 +180,13 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   d->HMDTransformCheckBox->setEnabled(vrViewNode != NULL);
   d->HMDTransformCheckBox->blockSignals(wasBlocked);
 
+  wasBlocked = d->TrackerTransformsCheckBox->blockSignals(true);
+  d->TrackerTransformsCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetTrackerTransformUpdate());
+  d->TrackerTransformsCheckBox->setEnabled(vrViewNode != NULL);
+  d->TrackerTransformsCheckBox->blockSignals(wasBlocked);
+
   d->UpdateViewFromReferenceViewCameraButton->setEnabled(vrViewNode != NULL
-    && vrViewNode->GetReferenceViewNode() != NULL);
+      && vrViewNode->GetReferenceViewNode() != NULL);
 }
 
 //-----------------------------------------------------------------------------
@@ -242,7 +249,7 @@ void qSlicerVirtualRealityModuleWidget::setTrackingReferenceModelsVisible(bool v
   vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
   if (vrViewNode)
   {
-    vrViewNode->SetTrackerReferenceModelsVisible(visible);
+    vrViewNode->SetLighthouseModelsVisible(visible);
   }
 }
 
@@ -311,7 +318,7 @@ void qSlicerVirtualRealityModuleWidget::onMotionSpeedChanged(double speedMps)
     vrViewNode->SetMotionSpeed(speedMps);
   }
 }
- 
+
 //----------------------------------------------------------------------------------
 void qSlicerVirtualRealityModuleWidget::onMagnificationChanged(double powerOfTen)
 {
@@ -397,5 +404,17 @@ void qSlicerVirtualRealityModuleWidget::setHMDTransformUpdate(bool active)
   if (vrViewNode)
   {
     vrViewNode->SetHMDTransformUpdate(active);
+  }
+}
+
+//----------------------------------------------------------------------------
+void qSlicerVirtualRealityModuleWidget::setTrackerTransformsUpdate(bool active)
+{
+  Q_D(qSlicerVirtualRealityModuleWidget);
+  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
+  if (vrViewNode)
+  {
+    vrViewNode->SetTrackerTransformUpdate(active);
   }
 }
