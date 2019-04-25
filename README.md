@@ -102,10 +102,10 @@ Controls: press grip button when a controller is inside a selectable object
 - Move controller
 
 Notes:
-- Object position is modified by changing parent transform of the object. If the object has no parent transform then a new transform is added automatically.
+- When you grab and move object, a parent transform is automatically created for it (if it has not been under a transform already) and that transform is modified.
+- To move a group of objects together, assign the same parent transform to them. You can do that in _Data_ module's _Transform hierarchy_ tab by drag-and-dropping objects under the same transform (or by double-clicking in the _Applied Transform_ column in  _Data_ module's _Transform hierarchy_ tab and selecting a transform; or by selecting a transform in _Transforms_ module and applying it to all the nodes that must move together).
 - Either left or right controller can be used to grab an object. Each controller can be used to grab an object and move independently.
 - By default all objects are selectable. An object can be made non-selectable (thus non-movable) in Data module / Subject hierarchy tab, right-clicking on the node and unchecking "Toggle Selectable".
-- When you grab and move object, a parent transform is automatically created for it (if no parent transform was created already) and modified. To move a group of objects together, assign the same parent transform to them. You can do that in _Data_ module's _Transform hierarchy_ tab by drag-and-dropping nodes under the same transform.
 
 ## Other features
 
