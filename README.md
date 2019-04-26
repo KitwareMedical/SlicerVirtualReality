@@ -106,6 +106,7 @@ Notes:
 - To move a group of objects together, assign the same parent transform to them. You can do that in _Data_ module's _Transform hierarchy_ tab by drag-and-dropping objects under the same transform (or by double-clicking in the _Applied Transform_ column in  _Data_ module's _Transform hierarchy_ tab and selecting a transform; or by selecting a transform in _Transforms_ module and applying it to all the nodes that must move together).
 - Either left or right controller can be used to grab an object. Each controller can be used to grab an object and move independently.
 - By default all objects are selectable. An object can be made non-selectable (thus non-movable) in Data module / Subject hierarchy tab, right-clicking on the node and unchecking "Toggle Selectable".
+- Moving of segmentation nodes is slow. If you want to move segmentations using controllers then export them to model nodes (in _Data_ module, right-click on the segmentation node and choose _Export visible segments to models_) and transform the model nodes.
 
 ## Other features
 
