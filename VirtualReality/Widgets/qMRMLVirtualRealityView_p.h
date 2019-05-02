@@ -33,7 +33,6 @@
 //
 
 // VTK includes
-//#include <vtkOpenGLFramebufferObject.h>
 #include <vtkEventData.h>
 #include <vtkWeakPointer.h>
 
@@ -51,13 +50,19 @@ class QLabel;
 class vtkLightCollection;
 class vtkMRMLCameraNode;
 class vtkMRMLDisplayableManagerGroup;
+class vtkMRMLTransformNode;
 class vtkMRMLVirtualRealityViewNode;
 class vtkObject;
-class vtkVirtualRealityViewInteractorStyle;
 class vtkOpenVRInteractorStyle;
-class vtkVirtualRealityViewInteractor;
 class vtkOpenVRRenderWindowInteractor;
 class vtkTimerLog;
+class vtkVirtualRealityViewInteractor;
+class vtkVirtualRealityViewInteractorStyle;
+
+namespace vr
+{
+  struct TrackedDevicePose_t;
+}
 
 //-----------------------------------------------------------------------------
 class qMRMLVirtualRealityViewPrivate: public QObject
@@ -86,6 +91,8 @@ public slots:
 protected:
   void updateTransformNodeWithControllerPose(vtkEventDataDevice device);
   void updateTransformNodeWithHMDPose();
+  void updateTransformNodesWithTrackerPoses();
+  void updateTransformNodeWithPose(vtkMRMLTransformNode* node, vr::TrackedDevicePose_t& pose);
   void createRenderWindow();
   void destroyRenderWindow();
 

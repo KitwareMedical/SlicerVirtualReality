@@ -51,6 +51,7 @@ public slots:
   void onMagnificationChanged(double); 
   void setControllerTransformsUpdate(bool);
   void setHMDTransformUpdate(bool);
+  void setTrackerTransformsUpdate(bool);
 
 protected slots:
   void updateWidgetFromMRML();
