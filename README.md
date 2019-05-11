@@ -128,6 +128,7 @@ Please do not use "VR" acronym (you can spell out "virtual reality" instead), be
 
 There are several settings that help in increasing the performance of virtual reality rendering:
 
+- If you are using a computer that has two graphics cards (for example, laptops often have an integrated Intel and a high-performance NVidia graphics card), make sure that Slicer is forced to use the high-performance card that the headset is connected to. Most laptops assign applications to the integrated card by default. When you need to select the application executable, choose `SlicerApp-real.exe` (and not the Slicer launcher application `Slicer.exe`).
 - Optimize scene for virtual reality button (magic wand icon on toolbar): this switches volume rendering to use GPU, turns off backface culling for all existing models (to see surfaces even when going inside an object), turns off slice intersection visibility for all existing models and segmentations (to make slice view updates faster)
 - Settings in virtual reality module panel related to performance (click on wrench icon in toolbar):
   - Update rate: Volume rendering quality is set to produce the highest possible quality while keeping the desired frame per second
