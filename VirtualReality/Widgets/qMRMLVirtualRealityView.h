@@ -100,14 +100,51 @@ public:
   /// Get underlying RenderWindow
   Q_INVOKABLE bool isHardwareConnected()const;
 
+  //--------------------------------------------------
+  // Hacks to limit interaction
+
+  // enable disable grabbing and moving objects in the scene
+  Q_INVOKABLE void EnableGrabObjects(bool enable);
+  Q_INVOKABLE bool IsGrabObjectsEnabled();
+
+  // enable/disable dolly (flying in the scene with the TrackPad)
+  Q_INVOKABLE void EnableDolly3D(bool enable);
+  Q_INVOKABLE bool IsDolly3DEnabled();
+
+  // Choose which set of buttons is associated with gestures (zoom,pan,rotate and grab)
+  Q_INVOKABLE void SetGestureButtonToTrigger();
+  Q_INVOKABLE void SetGestureButtonToGrip();
+  Q_INVOKABLE void SetGestureButtonToTriggerAndGrip();
+  Q_INVOKABLE void SetGestureButtonToNone();
+
 signals:
+
   void physicalToWorldMatrixModified();
+
+  // Controllers trigger
+  void LeftControllerTriggerPressed();
+  void LeftControllerTriggerReleased();
+  void RightControllerTriggerPressed();
+  void RightControllerTriggerReleased();
+
+  // Controllers Grip
+  void LeftControllerGripPressed();
+  void LeftControllerGripReleased();
+  void RightControllerGripPressed();
+  void RightControllerGripReleased();
+
+  // Controllers trackpad
+  void LeftControllerTrackpadPressed(double xPos, double yPos);
+  void LeftControllerTrackpadReleased(double xPos, double yPos);
+  void RightControllerTrackpadPressed(double xPos, double yPos);
+  void RightControllerTrackpadReleased(double xPos, double yPos);
 
 public slots:
   /// Set the current \a viewNode to observe
   void setMRMLVirtualRealityViewNode(vtkMRMLVirtualRealityViewNode* newViewNode);
 
   void onPhysicalToWorldMatrixModified();
+  void onButton3DEvent(vtkObject* caller, void* call_data, unsigned long vtk_event, void* client_data);
 
 protected:
 

@@ -107,6 +107,7 @@ public:
   */
   void MapInputToAction(vtkEventDataDevice device,
     vtkEventDataDeviceInput input, int state);
+  int GetMappedAction(vtkEventDataDevice device, vtkEventDataDeviceInput input);
   //@}
 
   ////@{
@@ -120,6 +121,10 @@ public:
   //vtkSetClampMacro(HoverPick, int, 0, 1);
   //vtkGetMacro(HoverPick, int);
   //vtkBooleanMacro(HoverPick, int);
+
+  vtkSetClampMacro(GrabEnabled, int, 0, 1);
+  vtkGetMacro(GrabEnabled, int);
+  vtkBooleanMacro(GrabEnabled, int);
 
   //int GetInteractionState(vtkEventDataDevice device) {
   //  return this->InteractionState[static_cast<int>(device)]; }
@@ -192,6 +197,8 @@ protected:
   //vtkNew<vtkOpenVRHardwarePicker> HardwarePicker;
 
   vtkMRMLDisplayableManagerGroup* DisplayableManagerGroup;
+
+  int GrabEnabled;
 
 protected:
   vtkVirtualRealityViewInteractorStyle();
