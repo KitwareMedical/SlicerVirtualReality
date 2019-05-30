@@ -48,6 +48,12 @@ public:
   /// Get string constant corresponding to button function "grab objects and world"
   static std::string GetButtonFunctionIdForGrabObjectsAndWorld() { return "GrabObjectsAndWorld"; };
 
+  // Hack to easily associate grab and world functions to one or more buttons
+  void SetGestureButtonToTrigger();
+  void SetGestureButtonToGrip();
+  void SetGestureButtonToTriggerAndGrip();
+  void SetGestureButtonToNone();
+
 protected:
   /// List of buttons for which gesture recognition is enabled
   std::vector<int> GestureEnabledButtons;

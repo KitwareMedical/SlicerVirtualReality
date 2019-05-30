@@ -185,6 +185,9 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   qvtkReconnect(this->RenderWindow, vtkOpenVRRenderWindow::PhysicalToWorldMatrixModified,
                 q, SLOT(onPhysicalToWorldMatrixModified()));
 
+  // Observe button press event
+  qvtkReconnect(this->Interactor, vtkCommand::Button3DEvent, q, SLOT(onButton3DEvent(vtkObject*,void*,unsigned long,void*)));
+
   vtkMRMLVirtualRealityViewDisplayableManagerFactory* factory
     = vtkMRMLVirtualRealityViewDisplayableManagerFactory::GetInstance();
 
@@ -730,6 +733,73 @@ bool qMRMLVirtualRealityView::isHardwareConnected()const
 }
 
 //------------------------------------------------------------------------------
+void qMRMLVirtualRealityView::EnableGrabObjects(bool enable)
+{
+  Q_D(qMRMLVirtualRealityView);
+  if (enable)
+    d->InteractorStyle->GrabEnabledOn();
+  else
+    d->InteractorStyle->GrabEnabledOff();
+}
+
+//------------------------------------------------------------------------------
+bool qMRMLVirtualRealityView::IsGrabObjectsEnabled()
+{
+  Q_D(qMRMLVirtualRealityView);
+  return d->InteractorStyle->GetGrabEnabled() != 0;
+}
+
+//------------------------------------------------------------------------------
+void qMRMLVirtualRealityView::EnableDolly3D(bool enable)
+{
+  Q_D(qMRMLVirtualRealityView);
+  if (enable)
+  {
+    d->InteractorStyle->MapInputToAction(vtkEventDataDevice::RightController, vtkEventDataDeviceInput::TrackPad, VTKIS_DOLLY);
+  }
+  else
+  {
+    d->InteractorStyle->MapInputToAction(vtkEventDataDevice::RightController, vtkEventDataDeviceInput::TrackPad, VTKIS_NONE);
+  }
+}
+
+//------------------------------------------------------------------------------
+bool qMRMLVirtualRealityView::IsDolly3DEnabled()
+{
+  Q_D(qMRMLVirtualRealityView);
+
+  return d->InteractorStyle->GetMappedAction(vtkEventDataDevice::RightController, vtkEventDataDeviceInput::TrackPad) == VTKIS_DOLLY;
+}
+
+//------------------------------------------------------------------------------
+void qMRMLVirtualRealityView::SetGestureButtonToTrigger()
+{
+  Q_D(qMRMLVirtualRealityView);
+  d->Interactor->SetGestureButtonToTrigger();
+}
+
+//------------------------------------------------------------------------------
+void qMRMLVirtualRealityView::SetGestureButtonToGrip()
+{
+  Q_D(qMRMLVirtualRealityView);
+  d->Interactor->SetGestureButtonToGrip();
+}
+
+//------------------------------------------------------------------------------
+void qMRMLVirtualRealityView::SetGestureButtonToTriggerAndGrip()
+{
+  Q_D(qMRMLVirtualRealityView);
+  d->Interactor->SetGestureButtonToTriggerAndGrip();
+}
+
+//------------------------------------------------------------------------------
+void qMRMLVirtualRealityView::SetGestureButtonToNone()
+{
+  Q_D(qMRMLVirtualRealityView);
+  d->Interactor->SetGestureButtonToNone();
+}
+
+//------------------------------------------------------------------------------
 void qMRMLVirtualRealityView::onPhysicalToWorldMatrixModified()
 {
   Q_D(qMRMLVirtualRealityView);
@@ -737,6 +807,90 @@ void qMRMLVirtualRealityView::onPhysicalToWorldMatrixModified()
   d->MRMLVirtualRealityViewNode->SetMagnification(d->InteractorStyle->GetMagnification());
 
   emit physicalToWorldMatrixModified();
+}
+
+//------------------------------------------------------------------------------
+void qMRMLVirtualRealityView::onButton3DEvent(vtkObject* caller, void* call_data, unsigned long vtk_event, void* client_data)
+{
+  Q_D(qMRMLVirtualRealityView);
+
+  vtkEventDataButton3D * ed = reinterpret_cast<vtkEventDataButton3D*>(call_data);
+
+  if(ed->GetInput() == vtkEventDataDeviceInput::Trigger)
+  {
+    if(ed->GetDevice() == vtkEventDataDevice::LeftController)
+    {
+      if (ed->GetAction() == vtkEventDataAction::Press)
+      {
+        emit LeftControllerTriggerPressed();
+      }
+      else if (ed->GetAction() == vtkEventDataAction::Release)
+      {
+        emit LeftControllerTriggerReleased();
+      }
+    }
+    else if (ed->GetDevice() == vtkEventDataDevice::RightController)
+    {
+      if (ed->GetAction() == vtkEventDataAction::Press)
+      {
+        emit RightControllerTriggerPressed();
+      }
+      else if (ed->GetAction() == vtkEventDataAction::Release)
+      {
+        emit RightControllerTriggerReleased();
+      }
+    }
+  }
+  else if (ed->GetInput() == vtkEventDataDeviceInput::Grip)
+  {
+    if (ed->GetDevice() == vtkEventDataDevice::LeftController)
+    {
+      if (ed->GetAction() == vtkEventDataAction::Press)
+      {
+        emit LeftControllerGripPressed();
+      }
+      else if (ed->GetAction() == vtkEventDataAction::Release)
+      {
+        emit LeftControllerGripReleased();
+      }
+    }
+    else if (ed->GetDevice() == vtkEventDataDevice::RightController)
+    {
+      if (ed->GetAction() == vtkEventDataAction::Press)
+      {
+        emit RightControllerGripPressed();
+      }
+      else if (ed->GetAction() == vtkEventDataAction::Release)
+      {
+        emit RightControllerGripReleased();
+      }
+    }
+  }
+  else if (ed->GetInput() == vtkEventDataDeviceInput::TrackPad)
+  {
+    if (ed->GetDevice() == vtkEventDataDevice::LeftController)
+    {
+      if (ed->GetAction() == vtkEventDataAction::Press)
+      {
+        emit LeftControllerTrackpadPressed(ed->GetTrackPadPosition()[0],ed->GetTrackPadPosition()[1]);
+      }
+      else if (ed->GetAction() == vtkEventDataAction::Release)
+      {
+        emit LeftControllerTrackpadReleased(ed->GetTrackPadPosition()[0], ed->GetTrackPadPosition()[1]);
+      }
+    }
+    else if (ed->GetDevice() == vtkEventDataDevice::RightController)
+    {
+      if (ed->GetAction() == vtkEventDataAction::Press)
+      {
+        emit RightControllerTrackpadPressed(ed->GetTrackPadPosition()[0], ed->GetTrackPadPosition()[1]);
+      }
+      else if (ed->GetAction() == vtkEventDataAction::Release)
+      {
+        emit RightControllerTrackpadReleased(ed->GetTrackPadPosition()[0], ed->GetTrackPadPosition()[1]);
+      }
+    }
+  }
 }
 
 //---------------------------------------------------------------------------

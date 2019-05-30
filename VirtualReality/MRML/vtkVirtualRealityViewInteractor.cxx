@@ -162,3 +162,78 @@ void vtkVirtualRealityViewInteractor::SetTriggerButtonFunction(std::string funct
     vtkErrorMacro("SetTriggerButtonFunction: Unknown function identifier '" << functionId << "'");
   }
 }
+
+//----------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractor::SetGestureButtonToTrigger()
+{
+  vtkVirtualRealityViewInteractorStyle* vrInteractorStyle = vtkVirtualRealityViewInteractorStyle::SafeDownCast(this->InteractorStyle);
+  if (!vrInteractorStyle)
+  {
+    vtkWarningMacro("SetTriggerButtonFunction: Current interactor style is not a VR interactor style");
+    return;
+  }
+  vrInteractorStyle->MapInputToAction(vtkEventDataDevice::RightController, vtkEventDataDeviceInput::Trigger, VTKIS_POSITION_PROP);
+  vrInteractorStyle->MapInputToAction(vtkEventDataDevice::LeftController, vtkEventDataDeviceInput::Trigger, VTKIS_POSITION_PROP);
+  vrInteractorStyle->MapInputToAction(vtkEventDataDevice::RightController, vtkEventDataDeviceInput::Grip, VTKIS_NONE);
+  vrInteractorStyle->MapInputToAction(vtkEventDataDevice::LeftController, vtkEventDataDeviceInput::Grip, VTKIS_NONE);
+
+  this->GestureEnabledButtons.clear();
+  this->GestureEnabledButtons.push_back(static_cast<int>(vtkEventDataDeviceInput::Trigger));
+}
+
+//----------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractor::SetGestureButtonToGrip()
+{
+  vtkVirtualRealityViewInteractorStyle* vrInteractorStyle = vtkVirtualRealityViewInteractorStyle::SafeDownCast(this->InteractorStyle);
+  if (!vrInteractorStyle)
+  {
+    vtkWarningMacro("SetTriggerButtonFunction: Current interactor style is not a VR interactor style");
+    return;
+  }
+
+  vrInteractorStyle->MapInputToAction(vtkEventDataDevice::RightController, vtkEventDataDeviceInput::Trigger, VTKIS_NONE);
+  vrInteractorStyle->MapInputToAction(vtkEventDataDevice::LeftController, vtkEventDataDeviceInput::Trigger, VTKIS_NONE);
+  vrInteractorStyle->MapInputToAction(vtkEventDataDevice::RightController, vtkEventDataDeviceInput::Grip, VTKIS_POSITION_PROP);
+  vrInteractorStyle->MapInputToAction(vtkEventDataDevice::LeftController, vtkEventDataDeviceInput::Grip, VTKIS_POSITION_PROP);
+
+  this->GestureEnabledButtons.clear();
+  this->GestureEnabledButtons.push_back(static_cast<int>(vtkEventDataDeviceInput::Grip));
+}
+
+//----------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractor::SetGestureButtonToTriggerAndGrip()
+{
+  vtkVirtualRealityViewInteractorStyle* vrInteractorStyle = vtkVirtualRealityViewInteractorStyle::SafeDownCast(this->InteractorStyle);
+  if (!vrInteractorStyle)
+  {
+    vtkWarningMacro("SetTriggerButtonFunction: Current interactor style is not a VR interactor style");
+    return;
+  }
+
+  vrInteractorStyle->MapInputToAction(vtkEventDataDevice::RightController, vtkEventDataDeviceInput::Trigger, VTKIS_POSITION_PROP);
+  vrInteractorStyle->MapInputToAction(vtkEventDataDevice::LeftController, vtkEventDataDeviceInput::Trigger, VTKIS_POSITION_PROP);
+  vrInteractorStyle->MapInputToAction(vtkEventDataDevice::RightController, vtkEventDataDeviceInput::Grip, VTKIS_POSITION_PROP);
+  vrInteractorStyle->MapInputToAction(vtkEventDataDevice::LeftController, vtkEventDataDeviceInput::Grip, VTKIS_POSITION_PROP);
+
+  this->GestureEnabledButtons.clear();
+  this->GestureEnabledButtons.push_back(static_cast<int>(vtkEventDataDeviceInput::Grip));
+  this->GestureEnabledButtons.push_back(static_cast<int>(vtkEventDataDeviceInput::Trigger));
+}
+
+//----------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractor::SetGestureButtonToNone()
+{
+  vtkVirtualRealityViewInteractorStyle* vrInteractorStyle = vtkVirtualRealityViewInteractorStyle::SafeDownCast(this->InteractorStyle);
+  if (!vrInteractorStyle)
+  {
+    vtkWarningMacro("SetTriggerButtonFunction: Current interactor style is not a VR interactor style");
+    return;
+  }
+
+  vrInteractorStyle->MapInputToAction(vtkEventDataDevice::RightController, vtkEventDataDeviceInput::Trigger, VTKIS_NONE);
+  vrInteractorStyle->MapInputToAction(vtkEventDataDevice::LeftController, vtkEventDataDeviceInput::Trigger, VTKIS_NONE);
+  vrInteractorStyle->MapInputToAction(vtkEventDataDevice::RightController, vtkEventDataDeviceInput::Grip, VTKIS_NONE);
+  vrInteractorStyle->MapInputToAction(vtkEventDataDevice::LeftController, vtkEventDataDeviceInput::Grip, VTKIS_NONE);
+
+  this->GestureEnabledButtons.clear();
+}
