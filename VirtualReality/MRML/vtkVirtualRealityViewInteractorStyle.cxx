@@ -24,6 +24,7 @@
 #include "vtkMRMLVirtualRealityViewNode.h"
 
 // MRML includes
+#include "vtkMRMLApplicationLogic.h"
 #include "vtkMRMLScene.h"
 #include "vtkMRMLModelNode.h"
 #include "vtkMRMLModelDisplayNode.h"
@@ -41,6 +42,7 @@
 #include <vtkCallbackCommand.h>
 #include <vtkMath.h>
 #include <vtkObjectFactory.h>
+#include <vtkOpenVRModel.h>
 #include <vtkPoints.h>
 #include <vtkRenderer.h>
 #include <vtkQuaternion.h>
@@ -192,7 +194,8 @@ vtkVirtualRealityViewInteractorStyle::vtkVirtualRealityViewInteractorStyle()
     vtkEventDataDeviceInput::Grip, VTKIS_POSITION_PROP);
   this->MapInputToAction(vtkEventDataDevice::RightController,
     vtkEventDataDeviceInput::TrackPad, VTKIS_DOLLY);
-
+  this->MapInputToAction(vtkEventDataDevice::LeftController,
+    vtkEventDataDeviceInput::TrackPad, VTKIS_PICK);
   this->MapInputToAction(vtkEventDataDevice::LeftController,
     vtkEventDataDeviceInput::Grip, VTKIS_POSITION_PROP);
 
@@ -203,6 +206,7 @@ vtkVirtualRealityViewInteractorStyle::vtkVirtualRealityViewInteractorStyle()
 vtkVirtualRealityViewInteractorStyle::~vtkVirtualRealityViewInteractorStyle()
 {
   this->SetDisplayableManagerGroup(nullptr);
+  this->FocusedDisplayableManager = nullptr;
   delete this->Internal;
 }
 
@@ -348,6 +352,32 @@ void vtkVirtualRealityViewInteractorStyle::OnButton3D(vtkEventData* edata)
     this->EndAction(state, bd);
   }
 }
+
+//----------------------------------------------------------------------------
+// Interaction entry points
+//----------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractorStyle::StartPick(vtkEventDataDevice3D *ed)
+{
+  // turn on ray and update length
+  this->ShowRay(ed->GetDevice());
+  this->UpdateRay(ed->GetDevice());
+
+  vtkEventDataDevice dev = ed->GetDevice();
+  this->Internal->InteractionState[static_cast<int>(dev)] = VTKIS_PICK;
+}
+//----------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractorStyle::EndPick(vtkEventDataDevice3D *ed)
+{
+  // turn off ray
+  this->HideRay(ed->GetDevice());
+
+  // perform probe
+  this->ProbeData(ed->GetDevice());
+
+  vtkEventDataDevice dev = ed->GetDevice();
+  this->Internal->InteractionState[static_cast<int>(dev)] = VTKIS_NONE;
+}
+
 
 //----------------------------------------------------------------------------
 // Interaction methods
@@ -558,6 +588,59 @@ void vtkVirtualRealityViewInteractorStyle::EndDolly3D(vtkEventDataDevice3D* ed)
 }
 
 //----------------------------------------------------------------------------
+// Interaction methods
+//----------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractorStyle::ProbeData(vtkEventDataDevice controller)
+{
+  vtkRenderer *ren = this->CurrentRenderer;
+  vtkOpenVRRenderWindow* renWin = vtkOpenVRRenderWindow::SafeDownCast(this->Interactor->GetRenderWindow());
+  vtkOpenVRRenderWindowInteractor *iren =
+    static_cast<vtkOpenVRRenderWindowInteractor *>(this->Interactor);
+
+  if (!ren || !renWin || !iren)
+  {
+    return;
+  }
+
+  vtkOpenVRModel *cmodel =
+    renWin->GetTrackedDeviceModel(controller);
+  if (!cmodel)
+  {
+    return;
+  }
+
+  // Invoke start pick method if defined
+  this->InvokeEvent(vtkCommand::StartPickEvent, nullptr);
+
+  cmodel->SetVisibility(false);
+
+  // Compute controller position and world orientation
+  double p0[3]; //Ray start point
+  double wxyz[4];// Controller orientation
+  double dummy_ppos[3];
+  double wdir[3];
+  vr::TrackedDevicePose_t &tdPose = renWin->GetTrackedDevicePose(cmodel->TrackedDevice);
+  iren->ConvertPoseToWorldCoordinates(tdPose, p0, wxyz, dummy_ppos, wdir);
+
+  // TO DO
+  //this->HardwarePicker->PickProp(p0, wxyz, ren, ren->GetViewProps());
+
+  cmodel->SetVisibility(true);
+
+  // // Invoke end pick method if defined
+  // if (this->HandleObservers &&
+  //     this->HasObserver(vtkCommand::EndPickEvent))
+  // {
+  //   // TO DO
+  //   // this->InvokeEvent(vtkCommand::EndPickEvent, this->HardwarePicker->GetSelection());
+  // }
+  // else
+  // {
+  //   this->EndPickCallback(this->HardwarePicker->GetSelection());
+  // }
+}
+
+//----------------------------------------------------------------------------
 // Multitouch interaction methods
 //----------------------------------------------------------------------------
 
@@ -730,9 +813,9 @@ void vtkVirtualRealityViewInteractorStyle::StartAction(int state, vtkEventDataDe
     //case VTKIS_CLIP:
     //  this->StartClip(edata);
     //  break;
-    //case VTKIS_PICK:
-    //  this->StartPick(edata);
-    //  break;
+    case VTKIS_PICK:
+      this->StartPick(edata);
+      break;
     //case VTKIS_LOAD_CAMERA_POSE:
     //  this->StartLoadCamPose(edata);
     //  break;
@@ -753,9 +836,9 @@ void vtkVirtualRealityViewInteractorStyle::EndAction(int state, vtkEventDataDevi
     //case VTKIS_CLIP:
     //  this->EndClip(edata);
     //  break;
-    //case VTKIS_PICK:
-    //  this->EndPick(edata);
-    //  break;
+    case VTKIS_PICK:
+     this->EndPick(edata);
+     break;
     //case VTKIS_MENU:
     //  this->Menu->SetInteractor(this->Interactor);
     //  this->Menu->Show(edata);
@@ -787,6 +870,118 @@ void vtkVirtualRealityViewInteractorStyle::EndAction(int state, vtkEventDataDevi
   //  }
   //}
 }
+
+//----------------------------------------------------------------------------
+// Handle Ray drawing and update
+//----------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractorStyle::ShowRay(vtkEventDataDevice controller)
+{
+  vtkOpenVRRenderWindow* renWin = vtkOpenVRRenderWindow::SafeDownCast(this->Interactor->GetRenderWindow());
+  if (!renWin || (controller != vtkEventDataDevice::LeftController &&
+    controller != vtkEventDataDevice::RightController))
+  {
+    return;
+  }
+  vtkOpenVRModel *cmodel =
+    renWin->GetTrackedDeviceModel(controller);
+  if (cmodel)
+  {
+    cmodel->SetShowRay(true);
+  }
+}
+
+//----------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractorStyle::HideRay(vtkEventDataDevice controller)
+{
+  vtkOpenVRRenderWindow* renWin = vtkOpenVRRenderWindow::SafeDownCast(this->Interactor->GetRenderWindow());
+  if (!renWin || (controller != vtkEventDataDevice::LeftController &&
+    controller != vtkEventDataDevice::RightController))
+  {
+    return;
+  }
+  vtkOpenVRModel *cmodel =
+    renWin->GetTrackedDeviceModel(controller);
+  if (cmodel)
+  {
+    cmodel->SetShowRay(false);
+  }
+}
+
+//----------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractorStyle::UpdateRay(vtkEventDataDevice controller)
+{
+  if (!this->Interactor)
+  {
+    return;
+  }
+
+  vtkRenderer *ren = this->CurrentRenderer;
+  vtkOpenVRRenderWindow* renWin = vtkOpenVRRenderWindow::SafeDownCast(this->Interactor->GetRenderWindow());
+  vtkOpenVRRenderWindowInteractor *iren =
+    static_cast<vtkOpenVRRenderWindowInteractor *>(this->Interactor);
+
+  if (!ren || !renWin || !iren)
+  {
+    return;
+  }
+
+  vr::TrackedDeviceIndex_t idx = renWin->GetTrackedDeviceIndexForDevice(controller);
+  if (idx == vr::k_unTrackedDeviceIndexInvalid)
+  {
+    return;
+  }
+  vtkOpenVRModel* mod = renWin->GetTrackedDeviceModel(idx);
+  if (!mod)
+  {
+    return;
+  }
+
+  //Set length to its max if interactive picking is off
+  // if (!this->HoverPick)
+  // {
+  // mod->SetRayLength(ren->GetActiveCamera()->GetClippingRange()[1]);
+  //   return;
+  // }
+
+  // Compute controller position and world orientation
+  double p0[3]; //Ray start point
+  double wxyz[4];// Controller orientation
+  double dummy_ppos[3];
+  double wdir[3];
+  vr::TrackedDevicePose_t &tdPose = renWin->GetTrackedDevicePose(mod->TrackedDevice);
+  iren->ConvertPoseToWorldCoordinates(tdPose, p0, wxyz, dummy_ppos, wdir);
+
+  int idev = static_cast<int>(controller);
+
+  //Keep the same length if a controller is interacting with a prop
+  // if (this->InteractionProps[idev] != nullptr)
+  // {
+  //   double* p = this->InteractionProps[idev]->GetPosition();
+  //   mod->SetRayLength(sqrt(vtkMath::Distance2BetweenPoints(p0, p)));
+  //   return;
+  // }
+
+  //Compute ray length.
+  // double p1[3];
+  // vtkOpenVRPropPicker* picker =
+  //   static_cast< vtkOpenVRPropPicker* >(this->InteractionPicker);
+  // picker->PickProp3DRay(p0, wxyz, ren, ren->GetViewProps());
+
+  //If something is picked, set the length accordingly
+  // if (this->InteractionPicker->GetProp3D())
+  // {
+  //   this->InteractionPicker->GetPickPosition(p1);
+  //   mod->SetRayLength(sqrt(vtkMath::Distance2BetweenPoints(p0, p1)));
+  // }
+  // //Otherwise set the length to its max
+  // else
+  // {
+    mod->SetRayLength(ren->GetActiveCamera()->GetClippingRange()[1]);
+  // }
+
+  return;
+}
+
 
 //---------------------------------------------------------------------------
 vtkMRMLScene* vtkVirtualRealityViewInteractorStyle::GetMRMLScene()
