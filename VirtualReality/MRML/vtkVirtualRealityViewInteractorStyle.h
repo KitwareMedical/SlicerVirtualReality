@@ -177,6 +177,8 @@ protected:
   void StartAction(int VTKIS_STATE, vtkEventDataDevice3D *edata);
   void EndAction(int VTKIS_STATE, vtkEventDataDevice3D *edata);
 
+  void CreateLaser(vtkEventDataDevice controller);
+
   ///**
   //* Controls helpers drawing
   //*/
@@ -194,6 +196,7 @@ protected:
 
   vtkMRMLDisplayableManagerGroup* DisplayableManagerGroup;
   vtkMRMLAbstractDisplayableManager* FocusedDisplayableManager;
+  vtkPoints* LaserPoints;
 
 protected:
   vtkVirtualRealityViewInteractorStyle();

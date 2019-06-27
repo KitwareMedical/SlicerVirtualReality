@@ -39,11 +39,13 @@
 // VTK includes
 #include <vtkCamera.h>
 #include <vtkCellPicker.h>
+#include <vtkCellArray.h>
 #include <vtkCallbackCommand.h>
 #include <vtkMath.h>
 #include <vtkObjectFactory.h>
 #include <vtkOpenVRModel.h>
 #include <vtkPoints.h>
+#include <vtkPolyData.h>
 #include <vtkRenderer.h>
 #include <vtkQuaternion.h>
 #include <vtkTimerLog.h>
@@ -359,6 +361,10 @@ void vtkVirtualRealityViewInteractorStyle::OnButton3D(vtkEventData* edata)
 void vtkVirtualRealityViewInteractorStyle::StartPick(vtkEventDataDevice3D *ed)
 {
   // turn on ray and update length
+  if (!this->LaserPoints)
+  {
+    this->CreateLaser(ed->GetDevice());
+  }
   this->ShowRay(ed->GetDevice());
   this->UpdateRay(ed->GetDevice());
 
@@ -1077,4 +1083,38 @@ double vtkVirtualRealityViewInteractorStyle::GetMagnification()
   vtkOpenVRRenderWindow* rw = static_cast<vtkOpenVRRenderWindow*>(rwi->GetRenderWindow());
 
   return 1000.0 / rw->GetPhysicalScale();
+}
+
+void vtkVirtualRealityViewInteractorStyle::CreateLaser(vtkEventDataDevice controller)
+{
+  vtkRenderer *ren = this->CurrentRenderer;
+
+  vtkNew<vtkPoints> laserPoints;
+  laserPoints->SetNumberOfPoints(2);
+  laserPoints->SetPoint(0, 0.0, 0.0, 0.0);
+  laserPoints->SetPoint(1, 0.0, 0.0, -ren->GetActiveCamera()->GetClippingRange()[1]);
+
+  vtkNew<vtkCellArray> lines;
+  lines->InsertNextCell(2);
+  lines->InsertCellPoint(0);
+  lines->InsertCellPoint(1);
+
+  vtkNew<vtkPolyData> path;
+  path->SetPoints(laserPoints);
+  path->SetLines(lines);
+
+  vtkNew<vtkMRMLModelNode> pathModel;
+  pathModel->SetSelectable(false);
+  pathModel->SetScene(this->GetMRMLScene());
+  pathModel->SetName("Laser");
+  pathModel->SetAndObservePolyData(path);
+
+  vtkNew<vtkMRMLModelDisplayNode> laserModelDisplay;
+  laserModelDisplay->SetColor(1,1,0);
+  laserModelDisplay->SetScene(this->GetMRMLScene());
+  this->GetMRMLScene()->AddNode(laserModelDisplay);
+  pathModel->SetAndObserveDisplayNodeID(laserModelDisplay->GetID());
+
+  this->GetMRMLScene()->AddNode(pathModel);
+  this->LaserPoints = laserPoints;
 }
