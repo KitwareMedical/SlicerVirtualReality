@@ -24,6 +24,7 @@
 // MRML includes
 #include "vtkMRMLDisplayableManagerGroup.h"
 #include "vtkMRMLInteractionEventData.h"
+#include "vtkMRMLModelDisplayNode.h"
 
 // VTK includes
 #include "vtkObject.h"
@@ -125,8 +126,8 @@ public:
   //int GetInteractionState(vtkEventDataDevice device) {
   //  return this->InteractionState[static_cast<int>(device)]; }
 
-  void ShowRay(vtkEventDataDevice controller);
-  void HideRay(vtkEventDataDevice controller);
+  void ShowLaser(vtkEventDataDevice controller);
+  void HideLaser(vtkEventDataDevice controller);
 
   //void ShowBillboard(const std::string &text);
   //void HideBillboard();
@@ -154,8 +155,9 @@ public:
 protected:
   //void EndPickCallback(vtkSelection *sel);
 
-  ////Ray drawing
-  void UpdateRay(vtkEventDataDevice controller);
+  ////Laser drawing
+  void CreateLaser();
+  void UpdateLaser(vtkEventDataDevice controller);
 
   //vtkNew<vtkOpenVRMenuWidget> Menu;
   //vtkNew<vtkOpenVRMenuRepresentation> MenuRepresentation;
@@ -177,8 +179,6 @@ protected:
   void StartAction(int VTKIS_STATE, vtkEventDataDevice3D *edata);
   void EndAction(int VTKIS_STATE, vtkEventDataDevice3D *edata);
 
-  void CreateLaser(vtkEventDataDevice controller);
-
   ///**
   //* Controls helpers drawing
   //*/
@@ -196,7 +196,8 @@ protected:
 
   vtkMRMLDisplayableManagerGroup* DisplayableManagerGroup;
   vtkMRMLAbstractDisplayableManager* FocusedDisplayableManager;
-  vtkPoints* LaserPoints;
+  vtkSmartPointer<vtkPoints> LaserPoints;
+  vtkSmartPointer<vtkMRMLModelDisplayNode> LaserModelDisplay;
 
 protected:
   vtkVirtualRealityViewInteractorStyle();
