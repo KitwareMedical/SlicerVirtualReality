@@ -66,9 +66,9 @@
 #include <vtkMRMLVirtualRealityViewDisplayableManagerFactory.h>
 
 #if Slicer_VERSION_MAJOR >= 5 || Slicer_VERSION_MAJOR == 4 && Slicer_VERSION_MINOR >= 11
-#include <vtkMRMLThreeDViewInteractorStyle.h>
+  #include <vtkMRMLThreeDViewInteractorStyle.h>
 #else
-#include <vtkThreeDViewInteractorStyle.h>
+  #include <vtkThreeDViewInteractorStyle.h>
 #endif
 
 // MRML includes
@@ -88,6 +88,28 @@
 #include <vtkRendererCollection.h>
 #include <vtkSmartPointer.h>
 #include <vtkTimerLog.h>
+
+namespace
+{
+  //--------------------------------------------------------------------------
+  std::string PoseStatusToString(vr::ETrackingResult result)
+  {
+    switch (result)
+    {
+      case vr::TrackingResult_Calibrating_InProgress:
+        return "CalibratingInProgress";
+      case vr::TrackingResult_Calibrating_OutOfRange:
+        return "CalibratingOutOfRange";
+      case vr::TrackingResult_Running_OK:
+        return "RunningOk";
+      case vr::TrackingResult_Running_OutOfRange:
+        return "RunningOutOfRange";
+      case vr::TrackingResult_Uninitialized:
+      default:
+        return "Uninitialized";
+    }
+  }
+}
 
 //--------------------------------------------------------------------------
 // qMRMLVirtualRealityViewPrivate methods
@@ -615,6 +637,8 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodeWithPose(vtkMRMLTransfor
   {
     node->SetMatrixTransformToParent(transform->GetMatrix());
   }
+  node->SetAttribute("VirtualReality.PoseValid", pose.bPoseIsValid ? "True" : "False");
+  node->SetAttribute("VirtualReality.PoseStatus", PoseStatusToString(pose.eTrackingResult).c_str());
 }
 
 
