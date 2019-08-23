@@ -115,6 +115,7 @@ public:
   bool SetAndObserveHMDTransformNode(vtkMRMLLinearTransformNode* node);
 
   /// Get generic tracker transform node
+  std::vector<vtkMRMLTransformNode*> GetTrackerTransformNodes();
   vtkMRMLTransformNode* GetTrackerTransformNode(const char* openVrDeviceId);
   const char* GetTrackerTransformNodeID(const char* openVrDeviceId);
   /// Set tracker transform node.

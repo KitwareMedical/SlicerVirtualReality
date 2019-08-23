@@ -14,20 +14,25 @@ set(${KIT}_INCLUDE_DIRECTORIES
   )
 
 set(${KIT}_SRCS
-  qMRMLVirtualRealityView.cxx
-  qMRMLVirtualRealityView_p.h
-  qMRMLVirtualRealityView.h
+  qMRML${MODULE_NAME}View.cxx
+  qMRML${MODULE_NAME}View_p.h
+  qMRML${MODULE_NAME}View.h
+  qMRML${MODULE_NAME}TransformWidget.cxx
+  qMRML${MODULE_NAME}TransformWidget.h
   )
 
 set(${KIT}_MOC_SRCS
-  qMRMLVirtualRealityView.h
-  qMRMLVirtualRealityView_p.h
+  qMRML${MODULE_NAME}View.h
+  qMRML${MODULE_NAME}TransformWidget.h
+  qMRML${MODULE_NAME}View_p.h
   )
 
 set(${KIT}_UI_SRCS
+  Resources/UI/qMRML${MODULE_NAME}TransformWidget.ui
   )
 
 set(${KIT}_RESOURCES
+  Resources/qMRML${MODULE_NAME}TransformWidget.qrc
   )
 
 set(${KIT}_TARGET_LIBRARIES
