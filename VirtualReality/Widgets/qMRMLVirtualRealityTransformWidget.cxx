@@ -117,11 +117,13 @@ void qMRMLVirtualRealityTransformWidgetPrivate::init()
 // qMRMLVirtualRealityTransformWidget methods
 
 //-----------------------------------------------------------------------------
-qMRMLVirtualRealityTransformWidget::qMRMLVirtualRealityTransformWidget(QWidget* newParent)
+qMRMLVirtualRealityTransformWidget::qMRMLVirtualRealityTransformWidget(vtkMRMLVirtualRealityViewNode* viewNode, QWidget* newParent)
   : Superclass(newParent)
   , d_ptr(new qMRMLVirtualRealityTransformWidgetPrivate(*this))
 {
   Q_D(qMRMLVirtualRealityTransformWidget);
+
+  d->VRViewNode = viewNode;
 
   Q_INIT_RESOURCE(qMRMLVirtualRealityTransformWidget);
 
@@ -145,7 +147,6 @@ void qMRMLVirtualRealityTransformWidget::setMRMLLinearTransformNode(vtkMRMLLinea
   Q_D(qMRMLVirtualRealityTransformWidget);
 
   d->TransformNode = node;
-  d->VRViewNode = findViewNode();
   if (d->TransformNode == nullptr)
   {
     return;
@@ -191,8 +192,6 @@ void qMRMLVirtualRealityTransformWidget::onButtonClicked()
 {
   // Enable/disable Slicer node updates for transform node
   Q_D(qMRMLVirtualRealityTransformWidget);
-
-  d->VRViewNode = this->findViewNode();
 
   if (d->TransformNode == nullptr || d->VRViewNode == nullptr)
   {
@@ -342,28 +341,4 @@ void qMRMLVirtualRealityTransformWidget::updateWidgetFromMRML()
       }
       break;
   }
-}
-
-//-----------------------------------------------------------------------------
-vtkMRMLVirtualRealityViewNode* qMRMLVirtualRealityTransformWidget::findViewNode()
-{
-  Q_D(qMRMLVirtualRealityTransformWidget);
-
-  if (d->VRViewNode == nullptr)
-  {
-    // Get access to the VR subsystem
-    for (QWidget* widget : qSlicerApplication::application()->topLevelWidgets())
-    {
-      if (widget->objectName().compare("VirtualRealityWidget") == 0)
-      {
-        qMRMLVirtualRealityView* vrView = qobject_cast<qMRMLVirtualRealityView*>(widget);
-        if (vrView)
-        {
-          return vrView->mrmlVirtualRealityViewNode();
-        }
-      }
-    }
-  }
-
-  return nullptr;
 }

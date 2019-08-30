@@ -44,7 +44,7 @@ class Q_SLICER_QTMODULES_VIRTUALREALITY_WIDGETS_EXPORT qMRMLVirtualRealityTransf
 
 public:
   typedef qMRMLWidget Superclass;
-  qMRMLVirtualRealityTransformWidget(QWidget* newParent = 0);
+  qMRMLVirtualRealityTransformWidget(vtkMRMLVirtualRealityViewNode* viewNode, QWidget* newParent = 0);
   virtual ~qMRMLVirtualRealityTransformWidget();
 
 public slots:
@@ -54,9 +54,6 @@ public slots:
 
 protected slots:
   void updateWidgetFromMRML();
-
-protected:
-  vtkMRMLVirtualRealityViewNode* findViewNode();
 
 protected:
   QScopedPointer<qMRMLVirtualRealityTransformWidgetPrivate> d_ptr;
