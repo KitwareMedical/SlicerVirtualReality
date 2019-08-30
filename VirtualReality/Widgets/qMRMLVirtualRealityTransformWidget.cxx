@@ -145,12 +145,11 @@ void qMRMLVirtualRealityTransformWidget::setMRMLLinearTransformNode(vtkMRMLLinea
   Q_D(qMRMLVirtualRealityTransformWidget);
 
   d->TransformNode = node;
-  if (node == nullptr)
+  d->VRViewNode = findViewNode();
+  if (d->TransformNode == nullptr)
   {
     return;
   }
-
-  findViewNode();
 
   qvtkReconnect(d->TransformNode, node, vtkCommand::ModifiedEvent,
                 this, SLOT(updateWidgetFromMRML()));
@@ -193,7 +192,7 @@ void qMRMLVirtualRealityTransformWidget::onButtonClicked()
   // Enable/disable Slicer node updates for transform node
   Q_D(qMRMLVirtualRealityTransformWidget);
 
-  this->findViewNode();
+  d->VRViewNode = this->findViewNode();
 
   if (d->TransformNode == nullptr || d->VRViewNode == nullptr)
   {
@@ -240,6 +239,11 @@ void qMRMLVirtualRealityTransformWidget::updateWidgetFromMRML()
   if (d->PreviousStatus == status)
   {
     // No change
+    return;
+  }
+
+  if (d->VRViewNode == nullptr)
+  {
     return;
   }
 
@@ -341,7 +345,7 @@ void qMRMLVirtualRealityTransformWidget::updateWidgetFromMRML()
 }
 
 //-----------------------------------------------------------------------------
-void qMRMLVirtualRealityTransformWidget::findViewNode()
+vtkMRMLVirtualRealityViewNode* qMRMLVirtualRealityTransformWidget::findViewNode()
 {
   Q_D(qMRMLVirtualRealityTransformWidget);
 
@@ -355,10 +359,11 @@ void qMRMLVirtualRealityTransformWidget::findViewNode()
         qMRMLVirtualRealityView* vrView = qobject_cast<qMRMLVirtualRealityView*>(widget);
         if (vrView)
         {
-          d->VRViewNode = vrView->mrmlVirtualRealityViewNode();
-          break;
+          return vrView->mrmlVirtualRealityViewNode();
         }
       }
     }
   }
+
+  return nullptr;
 }

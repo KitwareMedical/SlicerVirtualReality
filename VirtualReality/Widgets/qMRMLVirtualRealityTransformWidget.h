@@ -31,8 +31,9 @@
 #include "qSlicerVirtualRealityModuleWidgetsExport.h"
 
 class qMRMLVirtualRealityTransformWidgetPrivate;
-class vtkMRMLNode;
 class vtkMRMLLinearTransformNode;
+class vtkMRMLNode;
+class vtkMRMLVirtualRealityViewNode;
 
 /// \ingroup Slicer_QtModules_Markups
 class Q_SLICER_QTMODULES_VIRTUALREALITY_WIDGETS_EXPORT qMRMLVirtualRealityTransformWidget
@@ -55,7 +56,7 @@ protected slots:
   void updateWidgetFromMRML();
 
 protected:
-  void findViewNode();
+  vtkMRMLVirtualRealityViewNode* findViewNode();
 
 protected:
   QScopedPointer<qMRMLVirtualRealityTransformWidgetPrivate> d_ptr;
