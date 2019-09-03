@@ -271,25 +271,25 @@ void qSlicerVirtualRealityModulePrivate::updateToolBar()
   {
     if (vrViewNode->GetHMDTransformNode() != nullptr)
     {
-      qMRMLVirtualRealityTransformWidget* widget = new qMRMLVirtualRealityTransformWidget();
+      qMRMLVirtualRealityTransformWidget* widget = new qMRMLVirtualRealityTransformWidget(vrViewNode);
       this->TransformWidgets.push_back(this->ToolBar->addWidget(widget));
       widget->setMRMLLinearTransformNode(vrViewNode->GetHMDTransformNode());
     }
     if (vrViewNode->GetLeftControllerTransformNode() != nullptr)
     {
-      qMRMLVirtualRealityTransformWidget* widget = new qMRMLVirtualRealityTransformWidget();
+      qMRMLVirtualRealityTransformWidget* widget = new qMRMLVirtualRealityTransformWidget(vrViewNode);
       this->TransformWidgets.push_back(this->ToolBar->addWidget(widget));
       widget->setMRMLLinearTransformNode(vrViewNode->GetLeftControllerTransformNode());
     }
     if (vrViewNode->GetRightControllerTransformNode() != nullptr)
     {
-      qMRMLVirtualRealityTransformWidget* widget = new qMRMLVirtualRealityTransformWidget();
+      qMRMLVirtualRealityTransformWidget* widget = new qMRMLVirtualRealityTransformWidget(vrViewNode);
       this->TransformWidgets.push_back(this->ToolBar->addWidget(widget));
       widget->setMRMLLinearTransformNode(vrViewNode->GetRightControllerTransformNode());
     }
     for (auto node : vrViewNode->GetTrackerTransformNodes())
     {
-      qMRMLVirtualRealityTransformWidget* widget = new qMRMLVirtualRealityTransformWidget();
+      qMRMLVirtualRealityTransformWidget* widget = new qMRMLVirtualRealityTransformWidget(vrViewNode);
       this->TransformWidgets.push_back(this->ToolBar->addWidget(widget));
       widget->setMRMLLinearTransformNode(node);
     }
