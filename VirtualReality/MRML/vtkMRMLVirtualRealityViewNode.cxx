@@ -335,6 +335,24 @@ bool vtkMRMLVirtualRealityViewNode::SetAndObserveHMDTransformNode(vtkMRMLLinearT
 }
 
 //----------------------------------------------------------------------------
+std::vector<vtkMRMLTransformNode*> vtkMRMLVirtualRealityViewNode::GetTrackerTransformNodes()
+{
+  std::vector<vtkMRMLTransformNode*> nodes;
+
+  std::vector<std::string> roles;
+  this->GetNodeReferenceRoles(roles);
+  for (std::string role : roles)
+  {
+    if (role.find(this->TrackerTransformRole) != std::string::npos)
+    {
+      nodes.push_back(vtkMRMLLinearTransformNode::SafeDownCast(this->GetNthNodeReference(role.c_str(), 0)));
+    }
+  }
+
+  return nodes;
+}
+
+//----------------------------------------------------------------------------
 vtkMRMLTransformNode* vtkMRMLVirtualRealityViewNode::GetTrackerTransformNode(const char* openVrDeviceId)
 {
   if (openVrDeviceId == nullptr)

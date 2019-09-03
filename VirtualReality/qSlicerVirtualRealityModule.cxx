@@ -23,10 +23,14 @@
 #include <QSettings>
 #include <QToolBar>
 #include <QtPlugin>
+#include <QSpacerItem>
 
 // SubjectHierarchy Plugins includes
 #include "qSlicerSubjectHierarchyPluginHandler.h"
-#include "qSlicerSubjectHierarchyVirtualRealityPlugin.h" 
+#include "qSlicerSubjectHierarchyVirtualRealityPlugin.h"
+
+// VirtualReality Widget includes
+#include <qMRMLVirtualRealityTransformWidget.h>
 
 // VirtualReality Logic includes
 #include <vtkSlicerVirtualRealityLogic.h>
@@ -51,8 +55,8 @@
 
 //-----------------------------------------------------------------------------
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-#include <QtPlugin>
-Q_EXPORT_PLUGIN2(qSlicerVirtualRealityModule, qSlicerVirtualRealityModule);
+  #include <QtPlugin>
+  Q_EXPORT_PLUGIN2(qSlicerVirtualRealityModule, qSlicerVirtualRealityModule);
 #endif
 
 //-----------------------------------------------------------------------------
@@ -83,6 +87,8 @@ public:
   QAction* ConfigureAction;
   QAction* OptimizeSceneAction;
   qMRMLVirtualRealityView* VirtualRealityViewWidget;
+  std::vector<QAction*> TransformWidgets;
+  QAction* Spacer;
 };
 
 //-----------------------------------------------------------------------------
@@ -97,6 +103,7 @@ qSlicerVirtualRealityModulePrivate::qSlicerVirtualRealityModulePrivate(qSlicerVi
   , ConfigureAction(NULL)
   , OptimizeSceneAction(NULL)
   , VirtualRealityViewWidget(NULL)
+  , Spacer(NULL)
 {
 }
 
@@ -144,7 +151,7 @@ void qSlicerVirtualRealityModulePrivate::addViewWidget()
   if (moduleWidget)
   {
     QObject::connect(this->VirtualRealityViewWidget, SIGNAL(physicalToWorldMatrixModified()),
-      moduleWidget, SLOT(onPhysicalToWorldMatrixModified()));
+                     moduleWidget, SLOT(onPhysicalToWorldMatrixModified()));
   }
 }
 
@@ -170,30 +177,32 @@ void qSlicerVirtualRealityModulePrivate::addToolBar()
     this->VirtualRealityToggleAction->setIcon(QIcon(":/Icons/VirtualRealityHeadset.png"));
     this->VirtualRealityToggleAction->setCheckable(true);
     QObject::connect(this->VirtualRealityToggleAction, SIGNAL(toggled(bool)),
-      q, SLOT(enableVirtualReality(bool)));
+                     q, SLOT(enableVirtualReality(bool)));
 
     this->UpdateViewFromReferenceViewCameraAction = this->ToolBar->addAction(QObject::tr("Set virtual reality view to match reference view."));
     this->UpdateViewFromReferenceViewCameraAction->setIcon(QIcon(":/Icons/ViewCenter.png"));
     QObject::connect(this->UpdateViewFromReferenceViewCameraAction, SIGNAL(triggered()),
-      q, SLOT(updateViewFromReferenceViewCamera()));
+                     q, SLOT(updateViewFromReferenceViewCamera()));
 
     this->ToolBar->addSeparator();
 
     this->OptimizeSceneAction = this->ToolBar->addAction(QObject::tr("Optimize scene for virtual reality."));
     this->OptimizeSceneAction->setIcon(QIcon(":/Icons/MagicWand.png"));
     QObject::connect(this->OptimizeSceneAction, SIGNAL(triggered()),
-      q, SLOT(optimizeSceneForVirtualReality()));
+                     q, SLOT(optimizeSceneForVirtualReality()));
 
     this->ConfigureAction = this->ToolBar->addAction(QObject::tr("Configure virtual reality settings."));
     this->ConfigureAction->setIcon(QIcon(":/Icons/Small/SlicerConfigure.png"));
     QObject::connect(this->ConfigureAction, SIGNAL(triggered()),
-      q, SLOT(switchToVirtualRealityModule()));
+                     q, SLOT(switchToVirtualRealityModule()));
+
+    this->ToolBar->addSeparator();
 
     mainWindow->addToolBar(this->ToolBar);
   }
 
   // Add toolbar show/hide option to menu
-  foreach(QMenu* toolBarMenu, mainWindow->findChildren<QMenu*>())
+  foreach (QMenu* toolBarMenu, mainWindow->findChildren<QMenu*>())
   {
     if (toolBarMenu->objectName() == QString("WindowToolBarsMenu"))
     {
@@ -249,6 +258,45 @@ void qSlicerVirtualRealityModulePrivate::updateToolBar()
   this->VirtualRealityToggleAction->blockSignals(wasBlocked);
 
   this->UpdateViewFromReferenceViewCameraAction->setEnabled(this->VirtualRealityToggleAction->isChecked());
+
+  // Remove all transform nodes, add widgets for each enabled transform node
+  for (QAction* action : this->TransformWidgets)
+  {
+    this->ToolBar->removeAction(action);
+  }
+  this->TransformWidgets.clear();
+  this->ToolBar->removeAction(this->Spacer);
+
+  if (vrViewNode != nullptr)
+  {
+    if (vrViewNode->GetHMDTransformNode() != nullptr)
+    {
+      qMRMLVirtualRealityTransformWidget* widget = new qMRMLVirtualRealityTransformWidget(vrViewNode);
+      this->TransformWidgets.push_back(this->ToolBar->addWidget(widget));
+      widget->setMRMLLinearTransformNode(vrViewNode->GetHMDTransformNode());
+    }
+    if (vrViewNode->GetLeftControllerTransformNode() != nullptr)
+    {
+      qMRMLVirtualRealityTransformWidget* widget = new qMRMLVirtualRealityTransformWidget(vrViewNode);
+      this->TransformWidgets.push_back(this->ToolBar->addWidget(widget));
+      widget->setMRMLLinearTransformNode(vrViewNode->GetLeftControllerTransformNode());
+    }
+    if (vrViewNode->GetRightControllerTransformNode() != nullptr)
+    {
+      qMRMLVirtualRealityTransformWidget* widget = new qMRMLVirtualRealityTransformWidget(vrViewNode);
+      this->TransformWidgets.push_back(this->ToolBar->addWidget(widget));
+      widget->setMRMLLinearTransformNode(vrViewNode->GetRightControllerTransformNode());
+    }
+    for (auto node : vrViewNode->GetTrackerTransformNodes())
+    {
+      qMRMLVirtualRealityTransformWidget* widget = new qMRMLVirtualRealityTransformWidget(vrViewNode);
+      this->TransformWidgets.push_back(this->ToolBar->addWidget(widget));
+      widget->setMRMLLinearTransformNode(node);
+    }
+  }
+  QWidget* widget = new QWidget();
+  widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+  this->Spacer = this->ToolBar->addWidget(widget);
 }
 
 //-----------------------------------------------------------------------------
@@ -270,10 +318,10 @@ qSlicerVirtualRealityModule::~qSlicerVirtualRealityModule()
 QString qSlicerVirtualRealityModule::helpText() const
 {
   return "This module shows 3D scene in virtual reality. It works with all"
-    " OpenVR-compatible headsets, such as HTC Vive, all Windows Mixed Reality"
-    " headsets (by Acer, Lenovo, HP, etc.), and Oculus Rift."
-    "<a href=\"https://github.com/KitwareMedical/SlicerVirtualReality#frequently-asked-questions\">"
-    "See setup instructions on the extension's website.</a>";
+         " OpenVR-compatible headsets, such as HTC Vive, all Windows Mixed Reality"
+         " headsets (by Acer, Lenovo, HP, etc.), and Oculus Rift."
+         "<a href=\"https://github.com/KitwareMedical/SlicerVirtualReality#frequently-asked-questions\">"
+         "See setup instructions on the extension's website.</a>";
 }
 
 //-----------------------------------------------------------------------------
@@ -287,10 +335,10 @@ QStringList qSlicerVirtualRealityModule::contributors() const
 {
   QStringList moduleContributors;
   moduleContributors << QString("Jean-Christophe Fillion-Robin (Kitware)")
-    << QString("Csaba Pinter (PerkLab)")
-    << QString("Andras Lasso (PerkLab)")
-    << QString("Jean-Baptiste Vimort (Kitware)")
-    << QString("Adam Rankin (Robarts)");
+                     << QString("Csaba Pinter (PerkLab)")
+                     << QString("Andras Lasso (PerkLab)")
+                     << QString("Jean-Baptiste Vimort (Kitware)")
+                     << QString("Adam Rankin (Robarts)");
   return moduleContributors;
 }
 
@@ -340,7 +388,7 @@ void qSlicerVirtualRealityModule::setup()
 
   // Register Subject Hierarchy plugins
   qSlicerSubjectHierarchyVirtualRealityPlugin* shPlugin = new qSlicerSubjectHierarchyVirtualRealityPlugin();
-  qSlicerSubjectHierarchyPluginHandler::instance()->registerPlugin(shPlugin); 
+  qSlicerSubjectHierarchyPluginHandler::instance()->registerPlugin(shPlugin);
 }
 
 //-----------------------------------------------------------------------------
@@ -422,7 +470,7 @@ void qSlicerVirtualRealityModule::switchToVirtualRealityModule()
 {
   Q_D(qSlicerVirtualRealityModule);
   if (!qSlicerApplication::application()
-    || !qSlicerApplication::application()->moduleManager())
+      || !qSlicerApplication::application()->moduleManager())
   {
     return;
   }

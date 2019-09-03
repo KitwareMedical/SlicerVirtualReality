@@ -110,9 +110,9 @@ Notes:
 
 ## Other features
 
-### Using controller transforms
+### Accessing VR transforms (controller, headset, generic trackers) in Slicer
 
-Go to _Virtual Reality_ module and check _Controller transforms_ checkbox to expose pose of controllers as transform nodes in the scene.
+Go to _Virtual Reality_ module and check the desired checkbox to update linear transform nodes with the various devices' positions. *Note:* The magnification factor in advanced settings affects these transforms.
 
 ## Frequently asked questions
 
