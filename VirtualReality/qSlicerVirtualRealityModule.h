@@ -63,7 +63,7 @@ public:
   Q_INVOKABLE bool isToolBarVisible();
   Q_INVOKABLE QToolBar* toolBar();
   
-  Q_INVOKABLE qMRMLVirtualRealityView* viewWidget();
+  Q_INVOKABLE virtual qMRMLVirtualRealityView* viewWidget();
 
 public slots:
   void setToolBarVisible(bool visible);
