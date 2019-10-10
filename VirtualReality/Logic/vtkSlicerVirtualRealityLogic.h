@@ -41,7 +41,7 @@ class VTK_SLICER_VIRTUALREALITY_MODULE_LOGIC_EXPORT vtkSlicerVirtualRealityLogic
   public vtkSlicerModuleLogic
 {
 public:
-  static vtkSlicerVirtualRealityLogic *New();
+  static vtkSlicerVirtualRealityLogic* New();
   vtkTypeMacro(vtkSlicerVirtualRealityLogic, vtkSlicerModuleLogic);
   void PrintSelf(ostream& os, vtkIndent indent);
 
@@ -96,6 +96,7 @@ protected:
   virtual void UpdateFromMRMLScene();
   virtual void OnMRMLSceneNodeAdded(vtkMRMLNode* node);
   virtual void OnMRMLSceneNodeRemoved(vtkMRMLNode* node);
+  virtual void OnMRMLSceneEndImport();
   virtual void ProcessMRMLNodesEvents(vtkObject* caller, unsigned long event, void* callData);
 
 protected:

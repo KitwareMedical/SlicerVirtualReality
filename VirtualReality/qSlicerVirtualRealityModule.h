@@ -31,7 +31,7 @@ class qMRMLVirtualRealityView;
 class QToolBar;
 
 class Q_SLICER_QTMODULES_VIRTUALREALITY_EXPORT
-qSlicerVirtualRealityModule : public qSlicerLoadableModule
+  qSlicerVirtualRealityModule : public qSlicerLoadableModule
 {
   Q_OBJECT;
   QVTK_OBJECT;
@@ -46,7 +46,7 @@ qSlicerVirtualRealityModule : public qSlicerLoadableModule
 public:
 
   typedef qSlicerLoadableModule Superclass;
-  explicit qSlicerVirtualRealityModule(QObject *parent=0);
+  explicit qSlicerVirtualRealityModule(QObject* parent = 0);
   virtual ~qSlicerVirtualRealityModule();
 
   qSlicerGetTitleMacro(QTMODULE_TITLE);
@@ -62,7 +62,7 @@ public:
 
   Q_INVOKABLE bool isToolBarVisible();
   Q_INVOKABLE QToolBar* toolBar();
-  
+
   Q_INVOKABLE virtual qMRMLVirtualRealityView* viewWidget();
 
 public slots:
@@ -81,11 +81,11 @@ protected slots:
 
 protected:
 
-  /// Initialize the module. Register the volumes reader/writer
+  /// Initialize the module
   virtual void setup();
 
   /// Create and return the widget representation associated to this module
-  virtual qSlicerAbstractModuleRepresentation * createWidgetRepresentation();
+  virtual qSlicerAbstractModuleRepresentation* createWidgetRepresentation();
 
   /// Create and return the logic associated to this module
   virtual vtkMRMLAbstractLogic* createLogic();

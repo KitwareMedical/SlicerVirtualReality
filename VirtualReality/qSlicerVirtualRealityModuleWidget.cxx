@@ -120,73 +120,76 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   d->ConnectionStatusLabel->setText(errorText);
 
   wasBlocked = d->RenderingEnabledCheckBox->blockSignals(true);
-  d->RenderingEnabledCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetActive());
+  d->RenderingEnabledCheckBox->setChecked(vrViewNode != nullptr && vrViewNode->GetActive());
   d->RenderingEnabledCheckBox->blockSignals(wasBlocked);
 
   wasBlocked = d->DesiredUpdateRateSlider->blockSignals(true);
-  d->DesiredUpdateRateSlider->setValue(vrViewNode != NULL ? vrViewNode->GetDesiredUpdateRate() : 0);
-  d->DesiredUpdateRateSlider->setEnabled(vrViewNode != NULL);
+  d->DesiredUpdateRateSlider->setValue(vrViewNode != nullptr ? vrViewNode->GetDesiredUpdateRate() : 0);
+  d->DesiredUpdateRateSlider->setEnabled(vrViewNode != nullptr);
   d->DesiredUpdateRateSlider->blockSignals(wasBlocked);
 
-  wasBlocked = d ->MagnificationSlider->blockSignals(true);
-  d->MagnificationSlider->setValue(vrViewNode != nullptr ?
-                                   this->getPowerFromMagnification(vrViewNode->GetMagnification())
+  wasBlocked = d->MagnificationSlider->blockSignals(true);
+  d->MagnificationSlider->setValue(vrViewNode != nullptr
+                                   ? this->getPowerFromMagnification(vrViewNode->GetMagnification())
                                    : 1.0);
+  d->MagnificationValueLabel->setText(vrViewNode != nullptr
+                                      ? QString("%1x").arg(vrViewNode->GetMagnification(), 3, 'f', 2)
+                                      : "10.0");
   d->MagnificationSlider->setEnabled(vrViewNode != nullptr);
   d->MagnificationSlider->blockSignals(wasBlocked);
 
   wasBlocked = d->MotionSensitivitySlider->blockSignals(true);
-  d->MotionSensitivitySlider->setValue(vrViewNode != NULL ? vrViewNode->GetMotionSensitivity() * 100.0 : 0);
-  d->MotionSensitivitySlider->setEnabled(vrViewNode != NULL);
+  d->MotionSensitivitySlider->setValue(vrViewNode != nullptr ? vrViewNode->GetMotionSensitivity() * 100.0 : 0);
+  d->MotionSensitivitySlider->setEnabled(vrViewNode != nullptr);
   d->MotionSensitivitySlider->blockSignals(wasBlocked);
 
   wasBlocked = d->MotionSpeedSlider->blockSignals(true);
-  d->MotionSpeedSlider->setValue(vrViewNode != NULL ? vrViewNode->GetMotionSpeed() : 1.6666);
-  d->MotionSpeedSlider->setEnabled(vrViewNode != NULL);
+  d->MotionSpeedSlider->setValue(vrViewNode != nullptr ? vrViewNode->GetMotionSpeed() : 1.6666);
+  d->MotionSpeedSlider->setEnabled(vrViewNode != nullptr);
   d->MotionSpeedSlider->blockSignals(wasBlocked);
 
   wasBlocked = d->TwoSidedLightingCheckBox->blockSignals(true);
-  d->TwoSidedLightingCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetTwoSidedLighting());
-  d->TwoSidedLightingCheckBox->setEnabled(vrViewNode != NULL);
+  d->TwoSidedLightingCheckBox->setChecked(vrViewNode != nullptr && vrViewNode->GetTwoSidedLighting());
+  d->TwoSidedLightingCheckBox->setEnabled(vrViewNode != nullptr);
   d->TwoSidedLightingCheckBox->blockSignals(wasBlocked);
 
   wasBlocked = d->BackLightsCheckBox->blockSignals(true);
-  d->BackLightsCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetBackLights());
-  d->BackLightsCheckBox->setEnabled(vrViewNode != NULL);
+  d->BackLightsCheckBox->setChecked(vrViewNode != nullptr && vrViewNode->GetBackLights());
+  d->BackLightsCheckBox->setEnabled(vrViewNode != nullptr);
   d->BackLightsCheckBox->blockSignals(wasBlocked);
 
   wasBlocked = d->ControllerModelsVisibleCheckBox->blockSignals(true);
-  d->ControllerModelsVisibleCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetControllerModelsVisible());
-  d->ControllerModelsVisibleCheckBox->setEnabled(vrViewNode != NULL);
+  d->ControllerModelsVisibleCheckBox->setChecked(vrViewNode != nullptr && vrViewNode->GetControllerModelsVisible());
+  d->ControllerModelsVisibleCheckBox->setEnabled(vrViewNode != nullptr);
   d->ControllerModelsVisibleCheckBox->blockSignals(wasBlocked);
 
   wasBlocked = d->LighthousesVisibleCheckBox->blockSignals(true);
-  d->LighthousesVisibleCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetLighthouseModelsVisible());
-  d->LighthousesVisibleCheckBox->setEnabled(vrViewNode != NULL);
+  d->LighthousesVisibleCheckBox->setChecked(vrViewNode != nullptr && vrViewNode->GetLighthouseModelsVisible());
+  d->LighthousesVisibleCheckBox->setEnabled(vrViewNode != nullptr);
   d->LighthousesVisibleCheckBox->blockSignals(wasBlocked);
 
   wasBlocked = d->ReferenceViewNodeComboBox->blockSignals(true);
-  d->ReferenceViewNodeComboBox->setCurrentNode(vrViewNode != NULL ? vrViewNode->GetReferenceViewNode() : NULL);
+  d->ReferenceViewNodeComboBox->setCurrentNode(vrViewNode != nullptr ? vrViewNode->GetReferenceViewNode() : NULL);
   d->ReferenceViewNodeComboBox->blockSignals(wasBlocked);
-  d->ReferenceViewNodeComboBox->setEnabled(vrViewNode != NULL);
+  d->ReferenceViewNodeComboBox->setEnabled(vrViewNode != nullptr);
 
   wasBlocked = d->ControllerTransformsUpdateCheckBox->blockSignals(true);
-  d->ControllerTransformsUpdateCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetControllerTransformsUpdate());
-  d->ControllerTransformsUpdateCheckBox->setEnabled(vrViewNode != NULL);
+  d->ControllerTransformsUpdateCheckBox->setChecked(vrViewNode != nullptr && vrViewNode->GetControllerTransformsUpdate());
+  d->ControllerTransformsUpdateCheckBox->setEnabled(vrViewNode != nullptr);
   d->ControllerTransformsUpdateCheckBox->blockSignals(wasBlocked);
 
   wasBlocked = d->HMDTransformCheckBox->blockSignals(true);
-  d->HMDTransformCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetHMDTransformUpdate());
-  d->HMDTransformCheckBox->setEnabled(vrViewNode != NULL);
+  d->HMDTransformCheckBox->setChecked(vrViewNode != nullptr && vrViewNode->GetHMDTransformUpdate());
+  d->HMDTransformCheckBox->setEnabled(vrViewNode != nullptr);
   d->HMDTransformCheckBox->blockSignals(wasBlocked);
 
   wasBlocked = d->TrackerTransformsCheckBox->blockSignals(true);
-  d->TrackerTransformsCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetTrackerTransformUpdate());
-  d->TrackerTransformsCheckBox->setEnabled(vrViewNode != NULL);
+  d->TrackerTransformsCheckBox->setChecked(vrViewNode != nullptr && vrViewNode->GetTrackerTransformUpdate());
+  d->TrackerTransformsCheckBox->setEnabled(vrViewNode != nullptr);
   d->TrackerTransformsCheckBox->blockSignals(wasBlocked);
 
-  d->UpdateViewFromReferenceViewCameraButton->setEnabled(vrViewNode != NULL
-      && vrViewNode->GetReferenceViewNode() != NULL);
+  d->UpdateViewFromReferenceViewCameraButton->setEnabled(vrViewNode != nullptr
+      && vrViewNode->GetReferenceViewNode() != nullptr);
 }
 
 //-----------------------------------------------------------------------------

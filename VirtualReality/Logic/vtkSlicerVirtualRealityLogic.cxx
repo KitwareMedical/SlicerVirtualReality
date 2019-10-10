@@ -50,7 +50,8 @@ vtkSlicerVirtualRealityLogic::vtkSlicerVirtualRealityLogic()
 //----------------------------------------------------------------------------
 vtkSlicerVirtualRealityLogic::~vtkSlicerVirtualRealityLogic()
 {
-  this->SetVolumeRenderingLogic(NULL);
+  this->SetActiveViewNode(nullptr);
+  this->SetVolumeRenderingLogic(nullptr);
 }
 
 //----------------------------------------------------------------------------
@@ -60,12 +61,13 @@ void vtkSlicerVirtualRealityLogic::PrintSelf(ostream& os, vtkIndent indent)
 }
 
 //---------------------------------------------------------------------------
-void vtkSlicerVirtualRealityLogic::SetMRMLSceneInternal(vtkMRMLScene * newScene)
+void vtkSlicerVirtualRealityLogic::SetMRMLSceneInternal(vtkMRMLScene* newScene)
 {
   vtkNew<vtkIntArray> events;
   events->InsertNextValue(vtkMRMLScene::NodeAddedEvent);
   events->InsertNextValue(vtkMRMLScene::NodeRemovedEvent);
   events->InsertNextValue(vtkMRMLScene::EndBatchProcessEvent);
+  events->InsertNextValue(vtkMRMLScene::EndImportEvent);
   this->SetAndObserveMRMLSceneEventsInternal(newScene, events.GetPointer());
 }
 
@@ -84,7 +86,7 @@ void vtkSlicerVirtualRealityLogic::UpdateFromMRMLScene()
   if (this->GetMRMLScene())
   {
     vrViewNode = vtkMRMLVirtualRealityViewNode::SafeDownCast(
-      this->GetMRMLScene()->GetSingletonNode("vtkMRMLVirtualRealityViewNode", "Active"));
+                   this->GetMRMLScene()->GetSingletonNode("Active", "vtkMRMLVirtualRealityViewNode"));
   }
   this->SetActiveViewNode(vrViewNode);
 }
@@ -98,8 +100,8 @@ void vtkSlicerVirtualRealityLogic::OnMRMLSceneNodeAdded(vtkMRMLNode* node)
     return;
   }
   // If a new active VR view node added then use it automatically.
-  if (vrViewNode->GetSingletonTag() && 
-    strcmp(vrViewNode->GetSingletonTag(), "Active") == 0)
+  if (vrViewNode->GetSingletonTag() &&
+      strcmp(vrViewNode->GetSingletonTag(), "Active") == 0)
   {
     this->SetActiveViewNode(vrViewNode);
   }
@@ -117,6 +119,19 @@ void vtkSlicerVirtualRealityLogic::OnMRMLSceneNodeRemoved(vtkMRMLNode* node)
   {
     this->SetActiveViewNode(NULL);
   }
+}
+
+//----------------------------------------------------------------------------
+void vtkSlicerVirtualRealityLogic::OnMRMLSceneEndImport()
+{
+  if (this->ActiveViewNode != nullptr && this->ActiveViewNode->GetActive())
+  {
+    // Override the active flag and visibility flags, as VR connection is not restored on scene load
+    this->ActiveViewNode->SetActive(0);
+    this->ActiveViewNode->SetVisibility(0);
+  }
+
+  this->Modified();
 }
 
 //----------------------------------------------------------------------------
@@ -140,11 +155,11 @@ vtkMRMLVirtualRealityViewNode* vtkSlicerVirtualRealityLogic::AddVirtualRealityVi
     // There is already a usable VR node, return that
     return this->ActiveViewNode;
   }
-  
+
   // Create VirtualReality view node. Use CreateNodeByClass so that node properties
   // can be overridden with default node properties defined in the scene.
   vtkSmartPointer<vtkMRMLVirtualRealityViewNode> vrViewNode = vtkSmartPointer<vtkMRMLVirtualRealityViewNode>::Take(
-    vtkMRMLVirtualRealityViewNode::SafeDownCast(scene->CreateNodeByClass("vtkMRMLVirtualRealityViewNode")) );
+        vtkMRMLVirtualRealityViewNode::SafeDownCast(scene->CreateNodeByClass("vtkMRMLVirtualRealityViewNode")));
   // We create the node as a singleton to make sure there is only one VR view node in the scene.
   vrViewNode->SetSingletonTag("Active");
   // If a singleton node by that name exists already then it is overwritten
@@ -169,15 +184,11 @@ void vtkSlicerVirtualRealityLogic::SetActiveViewNode(vtkMRMLVirtualRealityViewNo
 
   this->GetMRMLNodesObserverManager()->SetAndObserveObject(vtkObjectPointer(&this->ActiveViewNode), vrViewNode);
 
-  if (this->ActiveViewNode == NULL)
-  {
-    this->Modified();
-    return;
-  }
+  this->Modified();
 }
 
 //-----------------------------------------------------------------------------
-void vtkSlicerVirtualRealityLogic::ProcessMRMLNodesEvents(vtkObject *caller, unsigned long event, void *vtkNotUsed(callData))
+void vtkSlicerVirtualRealityLogic::ProcessMRMLNodesEvents(vtkObject* caller, unsigned long event, void* vtkNotUsed(callData))
 {
   if (caller == this->ActiveViewNode && event == vtkCommand::ModifiedEvent)
   {
@@ -246,9 +257,9 @@ void vtkSlicerVirtualRealityLogic::SetVirtualRealityActive(bool activate)
 {
   if (activate)
   {
-    if ( this->GetVirtualRealityConnected()
-      && this->GetVirtualRealityViewNode()
-      && this->GetVirtualRealityViewNode()->HasError())
+    if (this->GetVirtualRealityConnected()
+        && this->GetVirtualRealityViewNode()
+        && this->GetVirtualRealityViewNode()->HasError())
     {
       // If it is connected already but there is an error then disconnect first then reconnect
       // as the error may be resolved by reconnecting.
@@ -300,11 +311,11 @@ void vtkSlicerVirtualRealityLogic::SetDefaultReferenceView()
     return;
   }
   vtkSmartPointer<vtkCollection> nodes = vtkSmartPointer<vtkCollection>::Take(
-    this->GetMRMLScene()->GetNodesByClass("vtkMRMLViewNode"));
+      this->GetMRMLScene()->GetNodesByClass("vtkMRMLViewNode"));
   vtkMRMLViewNode* viewNode = 0;
   vtkCollectionSimpleIterator it;
   for (nodes->InitTraversal(it); (viewNode = vtkMRMLViewNode::SafeDownCast(
-    nodes->GetNextItemAsObject(it)));)
+                                    nodes->GetNextItemAsObject(it)));)
   {
     if (viewNode->GetVisibility() && viewNode->IsMappedInLayout())
     {
@@ -319,7 +330,7 @@ void vtkSlicerVirtualRealityLogic::SetDefaultReferenceView()
 //-----------------------------------------------------------------------------
 vtkMRMLVirtualRealityViewNode* vtkSlicerVirtualRealityLogic::GetDefaultVirtualRealityViewNode()
 {
-  vtkMRMLScene *scene = this->GetMRMLScene();
+  vtkMRMLScene* scene = this->GetMRMLScene();
   if (!scene)
   {
     vtkErrorMacro("GetDefaultVirtualRealityViewNode failed: invalid scene");
@@ -338,7 +349,7 @@ vtkMRMLVirtualRealityViewNode* vtkSlicerVirtualRealityLogic::GetDefaultVirtualRe
 //---------------------------------------------------------------------------
 void vtkSlicerVirtualRealityLogic::OptimizeSceneForVirtualReality()
 {
-  vtkMRMLScene *scene = this->GetMRMLScene();
+  vtkMRMLScene* scene = this->GetMRMLScene();
   if (!scene)
   {
     vtkErrorMacro("OptimizeSceneForVirtualReality failed: Invalid scene");
@@ -364,8 +375,8 @@ void vtkSlicerVirtualRealityLogic::OptimizeSceneForVirtualReality()
   // Set properties to existing model and segmentation display nodes
   std::vector<vtkMRMLNode*> modelDisplayNodes;
   scene->GetNodesByClass("vtkMRMLModelDisplayNode", modelDisplayNodes);
-  for ( std::vector<vtkMRMLNode*>::iterator mdIt=modelDisplayNodes.begin();
-    mdIt!=modelDisplayNodes.end(); ++mdIt )
+  for (std::vector<vtkMRMLNode*>::iterator mdIt = modelDisplayNodes.begin();
+       mdIt != modelDisplayNodes.end(); ++mdIt)
   {
     vtkMRMLModelDisplayNode* modelDisplayNode = vtkMRMLModelDisplayNode::SafeDownCast(*mdIt);
     modelDisplayNode->SetBackfaceCulling(0);
@@ -374,8 +385,8 @@ void vtkSlicerVirtualRealityLogic::OptimizeSceneForVirtualReality()
 
   std::vector<vtkMRMLNode*> segmentationDisplayNodes;
   scene->GetNodesByClass("vtkMRMLSegmentationDisplayNode", segmentationDisplayNodes);
-  for ( std::vector<vtkMRMLNode*>::iterator sdIt=segmentationDisplayNodes.begin();
-    sdIt!=segmentationDisplayNodes.end(); ++sdIt )
+  for (std::vector<vtkMRMLNode*>::iterator sdIt = segmentationDisplayNodes.begin();
+       sdIt != segmentationDisplayNodes.end(); ++sdIt)
   {
     vtkMRMLSegmentationDisplayNode* segmentationDisplayNode = vtkMRMLSegmentationDisplayNode::SafeDownCast(*sdIt);
     segmentationDisplayNode->SetVisibility2DFill(0);
