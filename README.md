@@ -157,6 +157,11 @@ Contributors include:
 - PerkLab (Queen's University): Csaba Pinter, Andras Lasso
 - VASST Lab (Robarts Research Insitute): Adam Rankin
 
+How to cite
+-----------
+
+Pinter, C., Lasso, A., Choueib, S., Asselin, M., Fillion-Robin, J. C., Vimort, J. B., Martin, K., Jolley, M. A. & Fichtinger, G. (2020). SlicerVR for Medical Intervention Training and Planning in Immersive Virtual Reality. IEEE Transactions on Medical Robotics and Bionics, vol. 2, no. 2, pp. 108-117, May 2020, doi: 10.1109/TMRB.2020.2983199
+
 License
 -------
 
