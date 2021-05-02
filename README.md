@@ -116,13 +116,30 @@ Go to _Virtual Reality_ module and check the desired checkbox to update linear t
 
 ## Frequently asked questions
 
-### How to ask questions, report problems, or suggest new features
+### How to clip models
 
-Visit [Slicer forum](https://discourse.slicer.org) and search for similar discussions. If you do not find related topics then createa a new one. Add _virtual-reality_ tag to make sure people who monitor virtual reality related questions get a notification about your question.
+3D Slicer can clip models using slice planes. This feature can be used in virtual reality by moving the slice plane using a transform, with the help of _Volume reslice driver_ module.
 
-If you are certain that you have found a software bug and no similar issue has been reported in the [issue tracker](https://github.com/KitwareMedical/SlicerVirtualReality/issues)) then please submit a new issue.
+The models, transforms, etc. only need to be set up once, because the scene can then be saved to file and next time it can be readily used.
 
-Please do not use "VR" acronym (you can spell out "virtual reality" instead), because "VR" may mean "volume rendering" just as well as "virtual reality" - you can even do volume rendering in virtual reality in Slicer - and so it becomes confusing very quickly.
+#### Simple clipping
+
+Move clipping planes continuously, as the controllers are moved.
+
+- Go to _Models_ module, select the model to clip, and in _Clipping_ section enable _Clip selected model_. By default the _Red_ slice will be chosen for clipping.
+- Go to _Virtual Reality_ module and enable making controller transform appear as transforms in the scene.
+- Go to _Volume reslice driver_ module (in _SlicerIGT_ extension) to make the controller transform move the _Red_ slice.
+- Moved the controller inside the model to clip it
+
+#### Clipping with handles
+
+Grab and move clipping planes using controllers (clipping plane remains in place).
+
+- Go to _Models_ module, select the model to clip, and in _Clipping_ section enable _Clip selected model_. By default the _Red_ slice will be chosen for clipping.
+- Add a small model, for example a box to the scene. It can be loaded from STL or created using _Create models_ module (in _SlicerIGT_ extension).
+- Move the model using a controller. This creates a parent transform for this model.
+- Go to _Volume reslice driver_ module (in _SlicerIGT_ extension) to make the model's parent transform move the _Red_ slice.
+- Grab and move the model using the controller to move the clipping plane.
 
 ### Rendering is slow
 
@@ -143,6 +160,14 @@ Some scenes are too complex to render fluently by mid-range graphics cards. If t
 Enable screen mirroring in SteamVR and use the free of [OBS Studio](https://obsproject.com/) software to capture VR headset content, application window, webcam, etc.
 
 Note that [OBS Studio](https://obsproject.com/) may crash if NVidia hardware-based compression is used. If this happens, choose CPU-based video compression option for recording.
+
+### How to ask questions, report problems, or suggest new features?
+
+Visit [Slicer forum](https://discourse.slicer.org) and search for similar discussions. If you do not find related topics then createa a new one. Add _virtual-reality_ tag to make sure people who monitor virtual reality related questions get a notification about your question.
+
+If you are certain that you have found a software bug and no similar issue has been reported in the [issue tracker](https://github.com/KitwareMedical/SlicerVirtualReality/issues)) then please submit a new issue.
+
+Please do not use "VR" acronym (you can spell out "virtual reality" instead), because "VR" may mean "volume rendering" just as well as "virtual reality" - you can even do volume rendering in virtual reality in Slicer - and so it becomes confusing very quickly.
 
 For developers
 --------------
