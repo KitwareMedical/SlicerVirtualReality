@@ -1,5 +1,20 @@
 
+#------------------------------------------------------------------------------
+# Include remote modules
+#------------------------------------------------------------------------------
+include(FetchContent)
 
+# Download VTKExternalModule
+set(proj VTKExternalModule)
+set(EP_SOURCE_DIR ${CMAKE_BINARY_DIR}/${proj})
+FetchContent_Populate(${proj}
+  QUIET
+  GIT_REPOSITORY ${EP_GIT_PROTOCOL}://github.com/KitwareMedical/VTKExternalModule
+  GIT_TAG        3bae71e5eba073e589810a8bef947d65c90a2174
+  SOURCE_DIR ${EP_SOURCE_DIR}
+  )
+message(STATUS "Remote - ${proj} [OK]")
+set(VTKExternalModule_SOURCE_DIR ${EP_SOURCE_DIR})
 
 #-----------------------------------------------------------------------------
 # External project common settings
@@ -66,4 +81,3 @@ ExternalProject_Add(${proj}
   )
 
 ExternalProject_AlwaysConfigure(${proj})
-
