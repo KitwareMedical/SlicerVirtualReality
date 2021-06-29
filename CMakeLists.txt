@@ -40,7 +40,10 @@ add_subdirectory(VirtualReality)
 
 #-----------------------------------------------------------------------------
 set(SlicerVirtualReality_CUSTOM_CONFIG "####### Expanded from \@SlicerVirtualReality_CUSTOM_CONFIG\@ #######
-find_package(VTK COMPONENTS vtkRenderingOpenVR REQUIRED)
+set(vtkRenderingOpenVR_DIR \"${vtkRenderingOpenVR_DIR}\")
+find_package(vtkRenderingOpenVR REQUIRED)
+list(INSERT CMAKE_MODULE_PATH 0 \${vtkRenderingOpenVR_CMAKE_MODULE_PATH})
+find_package(OpenVR REQUIRED)
 ##################################################
 ")
 include(${Slicer_EXTENSION_GENERATE_CONFIG})
@@ -49,14 +52,14 @@ include(${Slicer_EXTENSION_GENERATE_CONFIG})
 # Install OpenVR
 set(_platform)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  # ${OPENVR_LIBRARY} contains import library which does not have to be installed.
+  # ${OpenVR_LIBRARY} contains import library which does not have to be installed.
   # Instead, the dll must be added to the package.
   install(FILES ${OpenVR_LIBRARY_PATHS_LAUNCHER_BUILD}/openvr_api.dll
     DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
     COMPONENT RuntimeLibraries
     )
 else()
-  install(FILES ${OPENVR_LIBRARY}
+  install(FILES ${OpenVR_LIBRARY}
     DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
     COMPONENT RuntimeLibraries
     )
@@ -64,7 +67,10 @@ endif()
 
 #-----------------------------------------------------------------------------
 set(EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS)
-list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${VTKRenderingOpenVR_DIR};VTKRenderingOpenVR;RuntimeLibraries;/")
+list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${vtkRenderingOpenVR_DIR};vtkRenderingOpenVR;runtime;/")
+if(Slicer_USE_PYTHONQT)
+  list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${vtkRenderingOpenVR_DIR};vtkRenderingOpenVR;python;/")
+endif()
 set(${EXTENSION_NAME}_CPACK_INSTALL_CMAKE_PROJECTS "${EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS}" CACHE STRING "List of external projects to install" FORCE)
 
 #-----------------------------------------------------------------------------

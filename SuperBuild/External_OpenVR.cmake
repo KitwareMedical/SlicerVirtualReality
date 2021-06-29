@@ -4,23 +4,23 @@ set(proj OpenVR)
 set(${proj}_DEPENDENCIES "")
 
 # Sanity checks
-if(DEFINED OPENVR_INCLUDE_DIR AND NOT EXISTS ${OPENVR_INCLUDE_DIR})
-  message(FATAL_ERROR "OPENVR_INCLUDE_DIR variable is defined but corresponds to nonexistent directory")
+if(DEFINED OpenVR_INCLUDE_DIR AND NOT EXISTS ${OpenVR_INCLUDE_DIR})
+  message(FATAL_ERROR "OpenVR_INCLUDE_DIR variable is defined but corresponds to nonexistent directory")
 endif()
-if(DEFINED OPENVR_LIBRARY AND NOT EXISTS ${OPENVR_LIBRARY})
-  message(FATAL_ERROR "OPENVR_LIBRARY variable is defined but corresponds to nonexistent path")
+if(DEFINED OpenVR_LIBRARY AND NOT EXISTS ${OpenVR_LIBRARY})
+  message(FATAL_ERROR "OpenVR_LIBRARY variable is defined but corresponds to nonexistent path")
 endif()
 
 if(${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
-  unset(OPENVR_INCLUDE_DIR CACHE)
-  unset(OPENVR_LIBRARY CACHE)
+  unset(OpenVR_INCLUDE_DIR CACHE)
+  unset(OpenVR_LIBRARY CACHE)
   find_package(OpenVR REQUIRED MODULE)
 endif()
 
 # Include dependent projects if any
 ExternalProject_Include_Dependencies(${proj} PROJECT_VAR proj DEPENDS_VAR ${proj}_DEPENDENCIES)
 
-if((NOT OPENVR_INCLUDE_DIR OR NOT OPENVR_LIBRARY)
+if((NOT OpenVR_INCLUDE_DIR OR NOT OpenVR_LIBRARY)
    AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
 
   set(_version "1.12.5")
@@ -45,16 +45,16 @@ if((NOT OPENVR_INCLUDE_DIR OR NOT OPENVR_LIBRARY)
 
   set(OpenVR_DIR ${CMAKE_BINARY_DIR}/${proj})
 
-  set(OPENVR_INCLUDE_DIR "${OpenVR_DIR}/headers")
+  set(OpenVR_INCLUDE_DIR "${OpenVR_DIR}/headers")
 
   if(WIN32)
-    set(OPENVR_LIBRARY "${OpenVR_DIR}/lib/win64/openvr_api.lib")
+    set(OpenVR_LIBRARY "${OpenVR_DIR}/lib/win64/openvr_api.lib")
   elseif(APPLE)
-    set(OPENVR_LIBRARY "${OpenVR_DIR}/bin/osx64/OpenVR.framework")
+    set(OpenVR_LIBRARY "${OpenVR_DIR}/bin/osx64/OpenVR.framework")
   elseif(UNIX)
-    set(OPENVR_LIBRARY "${OpenVR_DIR}/bin/linux64/libopenvr_api.so")
+    set(OpenVR_LIBRARY "${OpenVR_DIR}/bin/linux64/libopenvr_api.so")
   endif()
-  mark_as_superbuild(OPENVR_LIBRARY:FILEPATH)
+  mark_as_superbuild(OpenVR_LIBRARY:FILEPATH)
 
   #-----------------------------------------------------------------------------
   # Launcher setting specific to build tree
@@ -76,5 +76,11 @@ else()
   ExternalProject_Add_Empty(${proj} DEPENDS ${${proj}_DEPENDENCIES})
 endif()
 
-ExternalProject_Message(${proj} "OPENVR_INCLUDE_DIR:${OPENVR_INCLUDE_DIR}")
-ExternalProject_Message(${proj} "OPENVR_LIBRARY:${OPENVR_LIBRARY}")
+ExternalProject_Message(${proj} "OpenVR_INCLUDE_DIR:${OpenVR_INCLUDE_DIR}")
+ExternalProject_Message(${proj} "OpenVR_LIBRARY:${OpenVR_LIBRARY}")
+
+mark_as_superbuild(
+  VARS
+    ${proj}_INCLUDE_DIR:PATH
+    ${proj}_LIBRARY:FILEPATH
+  )

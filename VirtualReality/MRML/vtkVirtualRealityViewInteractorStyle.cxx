@@ -502,7 +502,7 @@ void vtkVirtualRealityViewInteractorStyle::StartPositionProp(vtkEventDataDevice3
       continue;
     }
     //TODO: Only the first selectable picked node in the last displayable manager will be picked
-    vtkMRMLNode* pickedNode = displayNode->GetDisplayableNode();
+    vtkMRMLDisplayableNode* pickedNode = displayNode->GetDisplayableNode();
     if (pickedNode && pickedNode->GetSelectable())
     {
       this->Internal->PickedNode[deviceIndex] = pickedNode;
