@@ -2,7 +2,7 @@
 # Build VTK Rendering OpenVR module, pointing it to Slicer's VTK and the OpenVR
 # libraries also downloaded by this extension.
 
-set(proj VTKRenderingOpenVR)
+set(proj vtkRenderingOpenVR)
 
 # Dependencies
 set(${proj}_DEPENDENCIES OpenVR)
@@ -45,7 +45,7 @@ ExternalProject_Add(${proj}
     -DVTK_MODULE_NAME:STRING=RenderingOpenVR
     -DVTK_MODULE_SOURCE_DIR:PATH=${${proj}_SOURCE_DIR}
     -DVTK_MODULE_CMAKE_MODULE_PATH:PATH=${VTK_SOURCE_DIR}/CMake
-    # VTKRenderingOpenVR
+    # vtkRenderingOpenVR
     -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
     -DCMAKE_CXX_FLAGS:STRING=${ep_common_cxx_flags}
     -DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}
@@ -65,10 +65,9 @@ ExternalProject_Add(${proj}
     ${EXTERNAL_PROJECT_OPTIONAL_CMAKE_CACHE_ARGS}
   DEPENDS
     ${${proj}_DEPENDENCIES}
-)
+  )
 
-set(vtkRenderingOpenVR_DIR ${${proj}_BINARY_DIR})
-mark_as_superbuild(VARS vtkRenderingOpenVR_DIR:PATH)
+set(${proj}_DIR ${${proj}_BINARY_DIR})
 
 #-----------------------------------------------------------------------------
 # Launcher setting specific to build tree
@@ -87,5 +86,6 @@ mark_as_superbuild(
 
 # NA
 
-ExternalProject_Message(${proj} "vtkRenderingOpenVR_DIR:${vtkRenderingOpenVR_DIR}")
+mark_as_superbuild(VARS ${proj}_DIR:PATH)
+ExternalProject_Message(${proj} "${proj}_DIR:${${proj}_DIR}")
 
