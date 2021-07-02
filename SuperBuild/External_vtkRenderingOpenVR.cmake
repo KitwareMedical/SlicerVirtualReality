@@ -4,12 +4,18 @@
 
 set(proj vtkRenderingOpenVR)
 
-# Dependencies
-set(${proj}_DEPENDENCIES OpenVR)
+# Set dependency list
+set(${proj}_DEPENDS
+  OpenVR
+)
 if(DEFINED Slicer_SOURCE_DIR)
-  list(APPEND ${proj}_DEPENDENCIES VTK)
+  list(APPEND ${proj}_DEPENDS
+    VTK
+  )
 endif()
-ExternalProject_Include_Dependencies(${proj} PROJECT_VAR proj DEPENDS_VAR ${proj}_DEPENDENCIES)
+
+# Include dependent projects if any
+ExternalProject_Include_Dependencies(${proj} PROJECT_VAR proj)
 
 set(VTK_SOURCE_DIR ${VTK_DIR}/../VTK)
 set(${proj}_SOURCE_DIR ${VTK_SOURCE_DIR}/Rendering/OpenVR)
@@ -64,7 +70,7 @@ ExternalProject_Add(${proj}
     -DOpenVR_LIBRARY:PATH=${OpenVR_LIBRARY}
     ${EXTERNAL_PROJECT_OPTIONAL_CMAKE_CACHE_ARGS}
   DEPENDS
-    ${${proj}_DEPENDENCIES}
+    ${${proj}_DEPENDS}
   )
 
 set(${proj}_DIR ${${proj}_BINARY_DIR})
