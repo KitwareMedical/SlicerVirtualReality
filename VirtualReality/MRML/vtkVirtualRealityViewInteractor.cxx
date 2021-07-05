@@ -169,7 +169,7 @@ void vtkVirtualRealityViewInteractor::SetGestureButtonToTrigger()
   vtkVirtualRealityViewInteractorStyle* vrInteractorStyle = vtkVirtualRealityViewInteractorStyle::SafeDownCast(this->InteractorStyle);
   if (!vrInteractorStyle)
   {
-    vtkWarningMacro("SetTriggerButtonFunction: Current interactor style is not a VR interactor style");
+    vtkWarningMacro("SetGestureButtonToTrigger: Current interactor style is not a VR interactor style");
     return;
   }
   vrInteractorStyle->MapInputToAction(vtkEventDataDevice::RightController, vtkEventDataDeviceInput::Trigger, VTKIS_POSITION_PROP);
@@ -187,7 +187,7 @@ void vtkVirtualRealityViewInteractor::SetGestureButtonToGrip()
   vtkVirtualRealityViewInteractorStyle* vrInteractorStyle = vtkVirtualRealityViewInteractorStyle::SafeDownCast(this->InteractorStyle);
   if (!vrInteractorStyle)
   {
-    vtkWarningMacro("SetTriggerButtonFunction: Current interactor style is not a VR interactor style");
+    vtkWarningMacro("SetGestureButtonToGrip: Current interactor style is not a VR interactor style");
     return;
   }
 
@@ -206,7 +206,7 @@ void vtkVirtualRealityViewInteractor::SetGestureButtonToTriggerAndGrip()
   vtkVirtualRealityViewInteractorStyle* vrInteractorStyle = vtkVirtualRealityViewInteractorStyle::SafeDownCast(this->InteractorStyle);
   if (!vrInteractorStyle)
   {
-    vtkWarningMacro("SetTriggerButtonFunction: Current interactor style is not a VR interactor style");
+    vtkWarningMacro("SetGestureButtonToTriggerAndGrip: Current interactor style is not a VR interactor style");
     return;
   }
 
@@ -226,7 +226,7 @@ void vtkVirtualRealityViewInteractor::SetGestureButtonToNone()
   vtkVirtualRealityViewInteractorStyle* vrInteractorStyle = vtkVirtualRealityViewInteractorStyle::SafeDownCast(this->InteractorStyle);
   if (!vrInteractorStyle)
   {
-    vtkWarningMacro("SetTriggerButtonFunction: Current interactor style is not a VR interactor style");
+    vtkWarningMacro("SetGestureButtonToNone: Current interactor style is not a VR interactor style");
     return;
   }
 
