@@ -44,6 +44,10 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
       )
   endif()
 
+  if(NOT EXISTS ${VTKExternalModule_SOURCE_DIR})
+    message(FATAL_ERROR "VTKExternalModule_SOURCE_DIR [${VTKExternalModule_SOURCE_DIR}] variable is set to a nonexistent directory")
+  endif()
+
   set(VTK_SOURCE_DIR ${VTK_DIR}/../VTK)
   ExternalProject_Message(${proj} "VTK_SOURCE_DIR:${VTK_SOURCE_DIR}")
 
