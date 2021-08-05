@@ -100,44 +100,48 @@ public:
   /// Get underlying RenderWindow
   Q_INVOKABLE bool isHardwareConnected()const;
 
-  //--------------------------------------------------
-  // Hacks to limit interaction
+  /// Enable/disable grabbing and moving objects in the scene
+  Q_INVOKABLE void setGrabObjectsEnabled(bool enable);
+  /// Get whether grabbing and moving objects in the scene is enabled
+  Q_INVOKABLE bool isGrabObjectsEnabled();
 
-  // enable disable grabbing and moving objects in the scene
-  Q_INVOKABLE void EnableGrabObjects(bool enable);
-  Q_INVOKABLE bool IsGrabObjectsEnabled();
+  /// Enable/disable dolly (flying in the scene with the TrackPad)
+  Q_INVOKABLE void setDolly3DEnabled(bool enable);
+  // Get whether dolly (flying in the scene with the TrackPad) is enabled
+  Q_INVOKABLE bool isDolly3DEnabled();
 
-  // enable/disable dolly (flying in the scene with the TrackPad)
-  Q_INVOKABLE void EnableDolly3D(bool enable);
-  Q_INVOKABLE bool IsDolly3DEnabled();
-
-  // Choose which set of buttons is associated with gestures (zoom,pan,rotate and grab)
-  Q_INVOKABLE void SetGestureButtonToTrigger();
-  Q_INVOKABLE void SetGestureButtonToGrip();
-  Q_INVOKABLE void SetGestureButtonToTriggerAndGrip();
-  Q_INVOKABLE void SetGestureButtonToNone();
+  ///@{
+  /// Convenience functions to easily associate grab and world functions to one or more buttons.
+  /// When interaction with markups and other VTK MRML widgets will be implemented then we probably
+  /// will not need these low-level event mappings anymore, but in the short term it is an effective
+  /// workaround that enables prototyping of ideas.
+  Q_INVOKABLE void setGestureButtonToTrigger();
+  Q_INVOKABLE void setGestureButtonToGrip();
+  Q_INVOKABLE void setGestureButtonToTriggerAndGrip();
+  Q_INVOKABLE void setGestureButtonToNone();
+  ///@}
 
 signals:
 
   void physicalToWorldMatrixModified();
 
   // Controllers trigger
-  void LeftControllerTriggerPressed();
-  void LeftControllerTriggerReleased();
-  void RightControllerTriggerPressed();
-  void RightControllerTriggerReleased();
+  void leftControllerTriggerPressed();
+  void leftControllerTriggerReleased();
+  void rightControllerTriggerPressed();
+  void rightControllerTriggerReleased();
 
   // Controllers Grip
-  void LeftControllerGripPressed();
-  void LeftControllerGripReleased();
-  void RightControllerGripPressed();
-  void RightControllerGripReleased();
+  void leftControllerGripPressed();
+  void leftControllerGripReleased();
+  void rightControllerGripPressed();
+  void rightControllerGripReleased();
 
   // Controllers trackpad
-  void LeftControllerTrackpadPressed(double xPos, double yPos);
-  void LeftControllerTrackpadReleased(double xPos, double yPos);
-  void RightControllerTrackpadPressed(double xPos, double yPos);
-  void RightControllerTrackpadReleased(double xPos, double yPos);
+  void leftControllerTrackpadPressed(double xPos, double yPos);
+  void leftControllerTrackpadReleased(double xPos, double yPos);
+  void rightControllerTrackpadPressed(double xPos, double yPos);
+  void rightControllerTrackpadReleased(double xPos, double yPos);
 
 public slots:
   /// Set the current \a viewNode to observe
