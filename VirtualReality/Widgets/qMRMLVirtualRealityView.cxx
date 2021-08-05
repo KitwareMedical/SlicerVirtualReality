@@ -733,24 +733,28 @@ bool qMRMLVirtualRealityView::isHardwareConnected()const
 }
 
 //------------------------------------------------------------------------------
-void qMRMLVirtualRealityView::EnableGrabObjects(bool enable)
+void qMRMLVirtualRealityView::setGrabObjectsEnabled(bool enable)
 {
   Q_D(qMRMLVirtualRealityView);
   if (enable)
+  {
     d->InteractorStyle->GrabEnabledOn();
+  }
   else
+  {
     d->InteractorStyle->GrabEnabledOff();
+  }
 }
 
 //------------------------------------------------------------------------------
-bool qMRMLVirtualRealityView::IsGrabObjectsEnabled()
+bool qMRMLVirtualRealityView::isGrabObjectsEnabled()
 {
   Q_D(qMRMLVirtualRealityView);
   return d->InteractorStyle->GetGrabEnabled() != 0;
 }
 
 //------------------------------------------------------------------------------
-void qMRMLVirtualRealityView::EnableDolly3D(bool enable)
+void qMRMLVirtualRealityView::setDolly3DEnabled(bool enable)
 {
   Q_D(qMRMLVirtualRealityView);
   if (enable)
@@ -764,7 +768,7 @@ void qMRMLVirtualRealityView::EnableDolly3D(bool enable)
 }
 
 //------------------------------------------------------------------------------
-bool qMRMLVirtualRealityView::IsDolly3DEnabled()
+bool qMRMLVirtualRealityView::isDolly3DEnabled()
 {
   Q_D(qMRMLVirtualRealityView);
 
@@ -772,28 +776,28 @@ bool qMRMLVirtualRealityView::IsDolly3DEnabled()
 }
 
 //------------------------------------------------------------------------------
-void qMRMLVirtualRealityView::SetGestureButtonToTrigger()
+void qMRMLVirtualRealityView::setGestureButtonToTrigger()
 {
   Q_D(qMRMLVirtualRealityView);
   d->Interactor->SetGestureButtonToTrigger();
 }
 
 //------------------------------------------------------------------------------
-void qMRMLVirtualRealityView::SetGestureButtonToGrip()
+void qMRMLVirtualRealityView::setGestureButtonToGrip()
 {
   Q_D(qMRMLVirtualRealityView);
   d->Interactor->SetGestureButtonToGrip();
 }
 
 //------------------------------------------------------------------------------
-void qMRMLVirtualRealityView::SetGestureButtonToTriggerAndGrip()
+void qMRMLVirtualRealityView::setGestureButtonToTriggerAndGrip()
 {
   Q_D(qMRMLVirtualRealityView);
   d->Interactor->SetGestureButtonToTriggerAndGrip();
 }
 
 //------------------------------------------------------------------------------
-void qMRMLVirtualRealityView::SetGestureButtonToNone()
+void qMRMLVirtualRealityView::setGestureButtonToNone()
 {
   Q_D(qMRMLVirtualRealityView);
   d->Interactor->SetGestureButtonToNone();
@@ -822,22 +826,22 @@ void qMRMLVirtualRealityView::onButton3DEvent(vtkObject* caller, void* call_data
     {
       if (ed->GetAction() == vtkEventDataAction::Press)
       {
-        emit LeftControllerTriggerPressed();
+        emit leftControllerTriggerPressed();
       }
       else if (ed->GetAction() == vtkEventDataAction::Release)
       {
-        emit LeftControllerTriggerReleased();
+        emit leftControllerTriggerReleased();
       }
     }
     else if (ed->GetDevice() == vtkEventDataDevice::RightController)
     {
       if (ed->GetAction() == vtkEventDataAction::Press)
       {
-        emit RightControllerTriggerPressed();
+        emit rightControllerTriggerPressed();
       }
       else if (ed->GetAction() == vtkEventDataAction::Release)
       {
-        emit RightControllerTriggerReleased();
+        emit rightControllerTriggerReleased();
       }
     }
   }
@@ -847,22 +851,22 @@ void qMRMLVirtualRealityView::onButton3DEvent(vtkObject* caller, void* call_data
     {
       if (ed->GetAction() == vtkEventDataAction::Press)
       {
-        emit LeftControllerGripPressed();
+        emit leftControllerGripPressed();
       }
       else if (ed->GetAction() == vtkEventDataAction::Release)
       {
-        emit LeftControllerGripReleased();
+        emit leftControllerGripReleased();
       }
     }
     else if (ed->GetDevice() == vtkEventDataDevice::RightController)
     {
       if (ed->GetAction() == vtkEventDataAction::Press)
       {
-        emit RightControllerGripPressed();
+        emit rightControllerGripPressed();
       }
       else if (ed->GetAction() == vtkEventDataAction::Release)
       {
-        emit RightControllerGripReleased();
+        emit rightControllerGripReleased();
       }
     }
   }
@@ -872,22 +876,22 @@ void qMRMLVirtualRealityView::onButton3DEvent(vtkObject* caller, void* call_data
     {
       if (ed->GetAction() == vtkEventDataAction::Press)
       {
-        emit LeftControllerTrackpadPressed(ed->GetTrackPadPosition()[0],ed->GetTrackPadPosition()[1]);
+        emit leftControllerTrackpadPressed(ed->GetTrackPadPosition()[0],ed->GetTrackPadPosition()[1]);
       }
       else if (ed->GetAction() == vtkEventDataAction::Release)
       {
-        emit LeftControllerTrackpadReleased(ed->GetTrackPadPosition()[0], ed->GetTrackPadPosition()[1]);
+        emit leftControllerTrackpadReleased(ed->GetTrackPadPosition()[0], ed->GetTrackPadPosition()[1]);
       }
     }
     else if (ed->GetDevice() == vtkEventDataDevice::RightController)
     {
       if (ed->GetAction() == vtkEventDataAction::Press)
       {
-        emit RightControllerTrackpadPressed(ed->GetTrackPadPosition()[0], ed->GetTrackPadPosition()[1]);
+        emit rightControllerTrackpadPressed(ed->GetTrackPadPosition()[0], ed->GetTrackPadPosition()[1]);
       }
       else if (ed->GetAction() == vtkEventDataAction::Release)
       {
-        emit RightControllerTrackpadReleased(ed->GetTrackPadPosition()[0], ed->GetTrackPadPosition()[1]);
+        emit rightControllerTrackpadReleased(ed->GetTrackPadPosition()[0], ed->GetTrackPadPosition()[1]);
       }
     }
   }

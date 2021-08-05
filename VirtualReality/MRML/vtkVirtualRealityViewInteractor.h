@@ -48,11 +48,16 @@ public:
   /// Get string constant corresponding to button function "grab objects and world"
   static std::string GetButtonFunctionIdForGrabObjectsAndWorld() { return "GrabObjectsAndWorld"; };
 
-  // Hack to easily associate grab and world functions to one or more buttons
+  ///@{
+  /// Convenience functions to easily associate grab and world functions to one or more buttons.
+  /// When interaction with markups and other VTK MRML widgets will be implemented then we probably
+  /// will not need these low-level event mappings anymore, but in the short term it is an effective
+  /// workaround that enables prototyping of ideas.
   void SetGestureButtonToTrigger();
   void SetGestureButtonToGrip();
   void SetGestureButtonToTriggerAndGrip();
   void SetGestureButtonToNone();
+  ///@}
 
 protected:
   /// List of buttons for which gesture recognition is enabled
