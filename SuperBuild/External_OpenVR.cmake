@@ -23,12 +23,12 @@ ExternalProject_Include_Dependencies(${proj} PROJECT_VAR proj DEPENDS_VAR ${proj
 if((NOT OpenVR_INCLUDE_DIR OR NOT OpenVR_LIBRARY)
    AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
 
-  set(_version "1.12.5")
+  set(_version "1.16.8")
 
   ExternalProject_Add(${proj}
     ${${proj}_EP_ARGS}
     URL "https://github.com/ValveSoftware/openvr/archive/v${_version}.tar.gz"
-    URL_MD5 "fabbc1ad83d7c382080ca00b878e6209"
+    URL_MD5 "6464fd7812093fb989252b455757895b"
     DOWNLOAD_DIR ${CMAKE_BINARY_DIR}
     SOURCE_DIR ${CMAKE_BINARY_DIR}/${proj}
     BUILD_IN_SOURCE 1
