@@ -23,6 +23,8 @@
 
 // MRML includes
 #include "vtkMRMLDisplayableManagerGroup.h"
+#include "vtkMRMLInteractionEventData.h"
+#include "vtkMRMLModelDisplayNode.h"
 
 // VTK includes
 #include "vtkObject.h"
@@ -65,8 +67,8 @@ public:
   /**
   * Interaction mode entry points.
   */
-  //virtual void StartPick(vtkEventDataDevice3D *);
-  //virtual void EndPick(vtkEventDataDevice3D *);
+  virtual void StartPick(vtkEventDataDevice3D *);
+  virtual void EndPick(vtkEventDataDevice3D *);
   //virtual void StartLoadCamPose(vtkEventDataDevice3D *);
   //virtual void EndLoadCamPose(vtkEventDataDevice3D *);
   virtual void StartPositionProp(vtkEventDataDevice3D *);
@@ -93,7 +95,7 @@ public:
   /**
   * Methods for interaction.
   */
-  //void ProbeData(vtkEventDataDevice controller);
+  void ProbeData(vtkEventDataDevice controller);
   //void LoadNextCameraPose();
   virtual void PositionProp(vtkEventData *);
   //virtual void Clip(vtkEventDataDevice3D *);
@@ -129,8 +131,8 @@ public:
   //int GetInteractionState(vtkEventDataDevice device) {
   //  return this->InteractionState[static_cast<int>(device)]; }
 
-  //void ShowRay(vtkEventDataDevice controller);
-  //void HideRay(vtkEventDataDevice controller);
+  void ShowLaser(vtkEventDataDevice controller);
+  void HideLaser(vtkEventDataDevice controller);
 
   //void ShowBillboard(const std::string &text);
   //void HideBillboard();
@@ -158,8 +160,9 @@ public:
 protected:
   //void EndPickCallback(vtkSelection *sel);
 
-  ////Ray drawing
-  //void UpdateRay(vtkEventDataDevice controller);
+  ////Laser drawing
+  void CreateLaser();
+  void UpdateLaser(vtkEventDataDevice controller);
 
   //vtkNew<vtkOpenVRMenuWidget> Menu;
   //vtkNew<vtkOpenVRMenuRepresentation> MenuRepresentation;
@@ -197,6 +200,9 @@ protected:
   //vtkNew<vtkOpenVRHardwarePicker> HardwarePicker;
 
   vtkMRMLDisplayableManagerGroup* DisplayableManagerGroup;
+  vtkMRMLAbstractDisplayableManager* FocusedDisplayableManager;
+  vtkSmartPointer<vtkPoints> LaserPoints;
+  vtkSmartPointer<vtkMRMLModelDisplayNode> LaserModelDisplay;
 
   int GrabEnabled;
 

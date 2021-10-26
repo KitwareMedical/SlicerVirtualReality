@@ -24,6 +24,7 @@
 #include "vtkMRMLVirtualRealityViewNode.h"
 
 // MRML includes
+#include "vtkMRMLApplicationLogic.h"
 #include "vtkMRMLScene.h"
 #include "vtkMRMLModelNode.h"
 #include "vtkMRMLModelDisplayNode.h"
@@ -38,10 +39,13 @@
 // VTK includes
 #include <vtkCamera.h>
 #include <vtkCellPicker.h>
+#include <vtkCellArray.h>
 #include <vtkCallbackCommand.h>
 #include <vtkMath.h>
 #include <vtkObjectFactory.h>
+#include <vtkOpenVRModel.h>
 #include <vtkPoints.h>
+#include <vtkPolyData.h>
 #include <vtkRenderer.h>
 #include <vtkQuaternion.h>
 #include <vtkTimerLog.h>
@@ -194,7 +198,8 @@ vtkVirtualRealityViewInteractorStyle::vtkVirtualRealityViewInteractorStyle()
     vtkEventDataDeviceInput::Grip, VTKIS_POSITION_PROP);
   this->MapInputToAction(vtkEventDataDevice::RightController,
     vtkEventDataDeviceInput::TrackPad, VTKIS_DOLLY);
-
+  this->MapInputToAction(vtkEventDataDevice::LeftController,
+    vtkEventDataDeviceInput::TrackPad, VTKIS_PICK);
   this->MapInputToAction(vtkEventDataDevice::LeftController,
     vtkEventDataDeviceInput::Grip, VTKIS_POSITION_PROP);
 
@@ -205,6 +210,7 @@ vtkVirtualRealityViewInteractorStyle::vtkVirtualRealityViewInteractorStyle()
 vtkVirtualRealityViewInteractorStyle::~vtkVirtualRealityViewInteractorStyle()
 {
   this->SetDisplayableManagerGroup(nullptr);
+  this->FocusedDisplayableManager = nullptr;
   delete this->Internal;
 }
 
@@ -313,6 +319,7 @@ void vtkVirtualRealityViewInteractorStyle::OnMove3D(vtkEventData* edata)
     //  this->InvokeEvent(vtkCommand::InteractionEvent, nullptr);
     //  break;
   }
+  this->UpdateLaser(edd->GetDevice());
 
   //// Update rays
   //if (this->HoverPick)
@@ -350,6 +357,32 @@ void vtkVirtualRealityViewInteractorStyle::OnButton3D(vtkEventData* edata)
     this->EndAction(state, bd);
   }
 }
+
+//----------------------------------------------------------------------------
+// Interaction entry points
+//----------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractorStyle::StartPick(vtkEventDataDevice3D *ed)
+{
+  // turn on laser and update length
+  this->ShowLaser(ed->GetDevice());
+  this->UpdateLaser(ed->GetDevice());
+
+  vtkEventDataDevice dev = ed->GetDevice();
+  this->Internal->InteractionState[static_cast<int>(dev)] = VTKIS_PICK;
+}
+//----------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractorStyle::EndPick(vtkEventDataDevice3D *ed)
+{
+  // turn off ray
+  this->HideLaser(ed->GetDevice());
+
+  // perform probe
+  this->ProbeData(ed->GetDevice());
+
+  vtkEventDataDevice dev = ed->GetDevice();
+  this->Internal->InteractionState[static_cast<int>(dev)] = VTKIS_NONE;
+}
+
 
 //----------------------------------------------------------------------------
 // Interaction methods
@@ -560,6 +593,59 @@ void vtkVirtualRealityViewInteractorStyle::EndDolly3D(vtkEventDataDevice3D* ed)
 }
 
 //----------------------------------------------------------------------------
+// Interaction methods
+//----------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractorStyle::ProbeData(vtkEventDataDevice controller)
+{
+  vtkRenderer *ren = this->CurrentRenderer;
+  vtkOpenVRRenderWindow* renWin = vtkOpenVRRenderWindow::SafeDownCast(this->Interactor->GetRenderWindow());
+  vtkOpenVRRenderWindowInteractor *iren =
+    static_cast<vtkOpenVRRenderWindowInteractor *>(this->Interactor);
+
+  if (!ren || !renWin || !iren)
+  {
+    return;
+  }
+
+  vtkOpenVRModel *cmodel =
+    renWin->GetTrackedDeviceModel(controller);
+  if (!cmodel)
+  {
+    return;
+  }
+
+  // Invoke start pick method if defined
+  this->InvokeEvent(vtkCommand::StartPickEvent, nullptr);
+
+  cmodel->SetVisibility(false);
+
+  // Compute controller position and world orientation
+  double p0[3]; //Ray start point
+  double wxyz[4];// Controller orientation
+  double dummy_ppos[3];
+  double wdir[3];
+  vr::TrackedDevicePose_t &tdPose = renWin->GetTrackedDevicePose(cmodel->TrackedDevice);
+  iren->ConvertPoseToWorldCoordinates(tdPose, p0, wxyz, dummy_ppos, wdir);
+
+  // TO DO
+  //this->HardwarePicker->PickProp(p0, wxyz, ren, ren->GetViewProps());
+
+  cmodel->SetVisibility(true);
+
+  // // Invoke end pick method if defined
+  // if (this->HandleObservers &&
+  //     this->HasObserver(vtkCommand::EndPickEvent))
+  // {
+  //   // TO DO
+  //   // this->InvokeEvent(vtkCommand::EndPickEvent, this->HardwarePicker->GetSelection());
+  // }
+  // else
+  // {
+  //   this->EndPickCallback(this->HardwarePicker->GetSelection());
+  // }
+}
+
+//----------------------------------------------------------------------------
 // Multitouch interaction methods
 //----------------------------------------------------------------------------
 
@@ -742,9 +828,9 @@ void vtkVirtualRealityViewInteractorStyle::StartAction(int state, vtkEventDataDe
     //case VTKIS_CLIP:
     //  this->StartClip(edata);
     //  break;
-    //case VTKIS_PICK:
-    //  this->StartPick(edata);
-    //  break;
+    case VTKIS_PICK:
+      this->StartPick(edata);
+      break;
     //case VTKIS_LOAD_CAMERA_POSE:
     //  this->StartLoadCamPose(edata);
     //  break;
@@ -765,9 +851,9 @@ void vtkVirtualRealityViewInteractorStyle::EndAction(int state, vtkEventDataDevi
     //case VTKIS_CLIP:
     //  this->EndClip(edata);
     //  break;
-    //case VTKIS_PICK:
-    //  this->EndPick(edata);
-    //  break;
+    case VTKIS_PICK:
+     this->EndPick(edata);
+     break;
     //case VTKIS_MENU:
     //  this->Menu->SetInteractor(this->Interactor);
     //  this->Menu->Show(edata);
@@ -798,6 +884,24 @@ void vtkVirtualRealityViewInteractorStyle::EndAction(int state, vtkEventDataDevi
   //      break;
   //  }
   //}
+}
+
+//----------------------------------------------------------------------------
+// Handle Laser drawing and update
+//----------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractorStyle::ShowLaser(vtkEventDataDevice controller)
+{
+    if (!this->LaserPoints)
+    {
+        this->CreateLaser();
+    }
+    this->LaserModelDisplay->VisibilityOn();
+}
+
+//----------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractorStyle::HideLaser(vtkEventDataDevice controller)
+{
+    this->LaserModelDisplay->VisibilityOff();
 }
 
 //---------------------------------------------------------------------------
@@ -894,4 +998,92 @@ double vtkVirtualRealityViewInteractorStyle::GetMagnification()
   vtkOpenVRRenderWindow* rw = static_cast<vtkOpenVRRenderWindow*>(rwi->GetRenderWindow());
 
   return 1000.0 / rw->GetPhysicalScale();
+}
+
+void vtkVirtualRealityViewInteractorStyle::CreateLaser()
+{
+  vtkRenderer *ren = this->CurrentRenderer;
+  if (!ren)
+  {
+      return;
+  }
+
+  this->LaserPoints = vtkSmartPointer<vtkPoints>::New();
+  this->LaserPoints->SetNumberOfPoints(2);
+  this->LaserPoints->SetPoint(0, 0.0, 0.0, 0.0);
+  this->LaserPoints->SetPoint(1, 0.0, 0.0, -ren->GetActiveCamera()->GetClippingRange()[1]);
+
+  vtkNew<vtkCellArray> lines;
+  lines->InsertNextCell(2);
+  lines->InsertCellPoint(0);
+  lines->InsertCellPoint(1);
+
+  vtkNew<vtkPolyData> path;
+  path->SetPoints(this->LaserPoints);
+  path->SetLines(lines);
+
+  vtkNew<vtkMRMLModelNode> pathModel;
+  pathModel->SetSelectable(false);
+  pathModel->HideFromEditorsOn();
+  pathModel->SetScene(this->GetMRMLScene());
+  pathModel->SetName("Laser");
+  pathModel->SetAndObservePolyData(path);
+
+  this->LaserModelDisplay = vtkSmartPointer<vtkMRMLModelDisplayNode>::New();
+  this->LaserModelDisplay->SetColor(1,0,0);
+  this->LaserModelDisplay->SetScene(this->GetMRMLScene());
+  this->GetMRMLScene()->AddNode(this->LaserModelDisplay);
+  pathModel->SetAndObserveDisplayNodeID(this->LaserModelDisplay->GetID());
+
+  this->GetMRMLScene()->AddNode(pathModel);
+
+  this->LaserModelDisplay->AddViewNodeID("vtkMRMLVirtualRealityViewNodeActive");
+}
+
+void vtkVirtualRealityViewInteractorStyle::UpdateLaser(vtkEventDataDevice controller)
+{
+  if (!this->LaserPoints)
+  {
+    return;
+  }
+
+  if (!this->LaserModelDisplay->GetVisibility())
+  {
+      return;
+  }
+
+  vtkRenderer *ren = this->CurrentRenderer;
+  vtkOpenVRRenderWindow* renWin = vtkOpenVRRenderWindow::SafeDownCast(this->Interactor->GetRenderWindow());
+  vtkOpenVRRenderWindowInteractor *iren =
+    static_cast<vtkOpenVRRenderWindowInteractor *>(this->Interactor);  
+  if (!ren || !renWin || !iren)
+  {
+    return;
+  }
+
+  vr::TrackedDeviceIndex_t idx = renWin->GetTrackedDeviceIndexForDevice(controller);
+  if (idx == vr::k_unTrackedDeviceIndexInvalid)
+  {
+      return;
+  }
+  vtkOpenVRModel* mod = renWin->GetTrackedDeviceModel(idx);
+  if (!mod)
+  {
+      return;
+  }
+
+  // Compute controller position and world orientation
+  vr::TrackedDevicePose_t &tdPose = renWin->GetTrackedDevicePose(mod->TrackedDevice);
+  vtkNew<vtkMatrix4x4> leftControllerWorldPose;
+  iren->ConvertOpenVRPoseToMatrices(tdPose, leftControllerWorldPose);
+
+  double p0[4] = { 0.0, 0.0, 0.0, 1.0 };
+  double* LaserClose = leftControllerWorldPose->MultiplyDoublePoint(p0);
+  this->LaserPoints->SetPoint(0, LaserClose[0], LaserClose[1], LaserClose[2]);
+
+  double p1[4] = { 0.0, 0.0, -ren->GetActiveCamera()->GetClippingRange()[1], 1.0 };
+  double* LaserFar = leftControllerWorldPose->MultiplyDoublePoint(p1);
+  this->LaserPoints->SetPoint(1, LaserFar[0], LaserFar[1], LaserFar[2]);
+  
+  this->LaserPoints->Modified();
 }
