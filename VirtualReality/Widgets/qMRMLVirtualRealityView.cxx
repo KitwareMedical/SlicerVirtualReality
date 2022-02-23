@@ -522,7 +522,7 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodeWithControllerPose(vtkEv
     return;
   }
 
-  vr::TrackedDevicePose_t& pose = this->RenderWindow->GetTrackedDevicePose(this->RenderWindow->GetDeviceHandleForDevice(device));
+  vr::TrackedDevicePose_t& pose = this->RenderWindow->GetDeviceToPhysicalMatrixForDevice(this->RenderWindow->GetDeviceHandleForDevice(device));
   if (pose.eTrackingResult != vr::TrackingResult_Running_OK)
   {
     node->SetAttribute("VirtualReality.ControllerActive", "0");
@@ -565,7 +565,7 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodeWithHMDPose()
     return;
   }
 
-  vr::TrackedDevicePose_t& pose = this->RenderWindow->GetTrackedDevicePose(this->RenderWindow->GetDeviceHandleForDevice(vtkEventDataDevice::HeadMountedDisplay));
+  vr::TrackedDevicePose_t& pose = this->RenderWindow->GetDeviceToPhysicalMatrixForDevice(this->RenderWindow->GetDeviceHandleForDevice(vtkEventDataDevice::HeadMountedDisplay));
   if (pose.eTrackingResult != vr::TrackingResult_Running_OK)
   {
     node->SetAttribute("VirtualReality.HMDActive", "0");
@@ -609,7 +609,7 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodesWithTrackerPoses()
     int disabledModify = node->StartModify();
 
     // Now, we have our generic tracker node, let's update it!
-    vr::TrackedDevicePose_t& pose = this->RenderWindow->GetTrackedDevicePose(dev);
+    vr::TrackedDevicePose_t& pose = this->RenderWindow->GetDeviceToPhysicalMatrixForDevice(dev);
     if (pose.eTrackingResult != vr::TrackingResult_Running_OK)
     {
       node->SetAttribute("VirtualReality.TrackerActive", "0");
