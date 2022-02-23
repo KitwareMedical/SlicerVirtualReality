@@ -25,6 +25,8 @@
 
 #include "vtkOpenVRRenderWindowInteractor.h"
 
+#include <vector>
+
 // vtkRenderingOpenVR is not python wrapped, so wrapping New causes linking error //TODO:
 #ifndef __VTK_WRAP__
 

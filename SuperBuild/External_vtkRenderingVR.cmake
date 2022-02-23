@@ -1,13 +1,11 @@
 #-----------------------------------------------------------------------------
-# Build VTK Rendering OpenVR module, pointing it to Slicer's VTK and the OpenVR
+# Build VTK Rendering VR module, pointing it to Slicer's VTK and the VR
 # libraries also downloaded by this extension.
 
-set(proj vtkRenderingOpenVR)
+set(proj vtkRenderingVR)
 
 # Set dependency list
 set(${proj}_DEPENDS
-  OpenVR
-  vtkRenderingVR
   )
 
 # Include dependent projects if any
@@ -47,7 +45,7 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
   set(VTK_SOURCE_DIR ${VTK_DIR}/../VTK)
   ExternalProject_Message(${proj} "VTK_SOURCE_DIR:${VTK_SOURCE_DIR}")
 
-  set(EP_SOURCE_DIR ${VTK_SOURCE_DIR}/Rendering/OpenVR)
+  set(EP_SOURCE_DIR ${VTK_SOURCE_DIR}/Rendering/VR)
   set(EP_BINARY_DIR ${CMAKE_BINARY_DIR}/${proj}-build)
 
   ExternalProject_Add(${proj}
@@ -58,11 +56,10 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
     INSTALL_COMMAND ""
     CMAKE_CACHE_ARGS
       # VTKExternalModule
-      -DVTK_MODULE_NAME:STRING=RenderingOpenVR
+      -DVTK_MODULE_NAME:STRING=RenderingVR
       -DVTK_MODULE_SOURCE_DIR:PATH=${EP_SOURCE_DIR}
       -DVTK_MODULE_CMAKE_MODULE_PATH:PATH=${VTK_SOURCE_DIR}/CMake
-      -DOpenVR_FIND_PACKAGE_VARS:STRING=OpenVR_INCLUDE_DIR;OpenVR_LIBRARY
-      # vtkRenderingOpenVR
+      # vtkRenderingVR
       -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
       -DCMAKE_CXX_FLAGS:STRING=${ep_common_cxx_flags}
       -DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}
@@ -75,12 +72,10 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
       -DCMAKE_MACOSX_RPATH:BOOL=0
       # Required to find VTK
       -DVTK_DIR:PATH=${VTK_DIR}
-      # Required to find vtkRenderingVR
-      -DvtkRenderingVR_DIR:PATH=${vtkRenderingVR_DIR}
-      # Required to find OpenVR
-      -DVTK_OPENVR_OBJECT_FACTORY:BOOL=OFF
-      -DOpenVR_INCLUDE_DIR:PATH=${OpenVR_INCLUDE_DIR}
-      -DOpenVR_LIBRARY:PATH=${OpenVR_LIBRARY}
+      # Required to find VR
+      -DVTK_VR_OBJECT_FACTORY:BOOL=OFF
+      -DVR_INCLUDE_DIR:PATH=${VR_INCLUDE_DIR}
+      -DVR_LIBRARY:PATH=${VR_LIBRARY}
       ${EXTERNAL_PROJECT_OPTIONAL_CMAKE_CACHE_ARGS}
     DEPENDS
       ${${proj}_DEPENDS}
