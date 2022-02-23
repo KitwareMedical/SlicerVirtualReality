@@ -87,6 +87,7 @@
 #include <vtkRenderer.h>
 #include <vtkRendererCollection.h>
 #include <vtkSmartPointer.h>
+#include <vtkTransform.h>
 #include <vtkTimerLog.h>
 
 namespace
@@ -818,7 +819,7 @@ void qMRMLVirtualRealityView::onButton3DEvent(vtkObject* caller, void* call_data
 {
   Q_D(qMRMLVirtualRealityView);
 
-  vtkEventDataButton3D * ed = reinterpret_cast<vtkEventDataButton3D*>(call_data);
+  vtkEventDataDevice3D * ed = reinterpret_cast<vtkEventDataDevice3D*>(call_data);
 
   if(ed->GetInput() == vtkEventDataDeviceInput::Trigger)
   {
