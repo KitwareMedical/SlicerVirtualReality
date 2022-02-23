@@ -7,8 +7,6 @@ string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
 
 #-----------------------------------------------------------------------------
 find_package(vtkRenderingOpenVR REQUIRED)
-list(INSERT CMAKE_MODULE_PATH 0 ${vtkRenderingOpenVR_CMAKE_MODULE_PATH})
-find_package(OpenVR REQUIRED)
 
 #-----------------------------------------------------------------------------
 add_subdirectory(MRML)
