@@ -55,7 +55,6 @@
 #include "qSlicerLayoutManager.h"
 #include "vtkSlicerConfigure.h" // For Slicer_USE_OpenVR
 #include "vtkSlicerCamerasModuleLogic.h"
-#include <vtkSlicerVersionConfigure.h> // For Slicer_VERSION_MAJOR, Slicer_VERSION_MINOR 
 
 // VirtualReality includes
 #include "vtkMRMLVirtualRealityViewNode.h"
@@ -65,11 +64,7 @@
 #include <vtkMRMLDisplayableManagerGroup.h>
 #include <vtkMRMLVirtualRealityViewDisplayableManagerFactory.h>
 
-#if Slicer_VERSION_MAJOR >= 5 || Slicer_VERSION_MAJOR == 4 && Slicer_VERSION_MINOR >= 11
-  #include <vtkMRMLThreeDViewInteractorStyle.h>
-#else
-  #include <vtkThreeDViewInteractorStyle.h>
-#endif
+#include <vtkMRMLThreeDViewInteractorStyle.h>
 
 // MRML includes
 #include <vtkMRMLCameraNode.h>
@@ -583,7 +578,6 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodeWithHMDPose()
 void qMRMLVirtualRealityViewPrivate::updateTransformNodesWithTrackerPoses()
 {
   Q_Q(qMRMLVirtualRealityView);
-#if Slicer_VERSION_MAJOR >= 5 || Slicer_VERSION_MAJOR == 4 && Slicer_VERSION_MINOR >= 11
   for (uint32_t i = 0; i < this->RenderWindow->GetNumberOfTrackedDevicesForDevice(vtkEventDataDevice::GenericTracker); ++i)
   {
     vr::TrackedDeviceIndex_t dev = this->RenderWindow->GetTrackedDeviceIndexForDevice(vtkEventDataDevice::GenericTracker, i);
@@ -621,7 +615,6 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodesWithTrackerPoses()
 
     node->EndModify(disabledModify);
   }
-#endif
 }
 
 
