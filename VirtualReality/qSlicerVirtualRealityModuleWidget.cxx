@@ -109,7 +109,7 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
 
   bool wasBlocked = d->ConnectCheckBox->blockSignals(true);
-  d->ConnectCheckBox->setChecked(vrViewNode != NULL && vrViewNode->GetVisibility());
+  d->ConnectCheckBox->setChecked(vrViewNode != nullptr && vrViewNode->GetVisibility());
   d->ConnectCheckBox->blockSignals(wasBlocked);
 
   QString errorText;
@@ -169,7 +169,7 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   d->LighthousesVisibleCheckBox->blockSignals(wasBlocked);
 
   wasBlocked = d->ReferenceViewNodeComboBox->blockSignals(true);
-  d->ReferenceViewNodeComboBox->setCurrentNode(vrViewNode != nullptr ? vrViewNode->GetReferenceViewNode() : NULL);
+  d->ReferenceViewNodeComboBox->setCurrentNode(vrViewNode != nullptr ? vrViewNode->GetReferenceViewNode() : nullptr);
   d->ReferenceViewNodeComboBox->blockSignals(wasBlocked);
   d->ReferenceViewNodeComboBox->setEnabled(vrViewNode != nullptr);
 

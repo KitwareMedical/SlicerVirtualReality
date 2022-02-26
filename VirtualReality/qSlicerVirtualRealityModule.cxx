@@ -97,13 +97,13 @@ public:
 //-----------------------------------------------------------------------------
 qSlicerVirtualRealityModulePrivate::qSlicerVirtualRealityModulePrivate(qSlicerVirtualRealityModule& object)
   : q_ptr(&object)
-  , ToolBar(NULL)
-  , VirtualRealityToggleAction(NULL)
-  , UpdateViewFromReferenceViewCameraAction(NULL)
-  , ConfigureAction(NULL)
-  , OptimizeSceneAction(NULL)
-  , VirtualRealityViewWidget(NULL)
-  , Spacer(NULL)
+  , ToolBar(nullptr)
+  , VirtualRealityToggleAction(nullptr)
+  , UpdateViewFromReferenceViewCameraAction(nullptr)
+  , ConfigureAction(nullptr)
+  , OptimizeSceneAction(nullptr)
+  , VirtualRealityViewWidget(nullptr)
+  , Spacer(nullptr)
 {
 }
 
@@ -111,7 +111,7 @@ qSlicerVirtualRealityModulePrivate::qSlicerVirtualRealityModulePrivate(qSlicerVi
 qSlicerVirtualRealityModulePrivate::~qSlicerVirtualRealityModulePrivate()
 {
   delete this->VirtualRealityViewWidget;
-  this->VirtualRealityViewWidget = NULL;
+  this->VirtualRealityViewWidget = nullptr;
 }
 
 //-----------------------------------------------------------------------------
@@ -126,7 +126,7 @@ void qSlicerVirtualRealityModulePrivate::addViewWidget()
 {
   Q_Q(qSlicerVirtualRealityModule);
 
-  if (this->VirtualRealityViewWidget != NULL)
+  if (this->VirtualRealityViewWidget != nullptr)
   {
     return;
   }
@@ -161,7 +161,7 @@ void qSlicerVirtualRealityModulePrivate::addToolBar()
   Q_Q(qSlicerVirtualRealityModule);
 
   QMainWindow* mainWindow = qSlicerApplication::application()->mainWindow();
-  if (mainWindow == NULL)
+  if (mainWindow == nullptr)
   {
     qDebug("qSlicerVirtualRealityModulePrivate::addToolBar: no main window is available, toolbar is not added");
     return;
@@ -431,7 +431,7 @@ void qSlicerVirtualRealityModule::onViewNodeModified()
   vtkMRMLVirtualRealityViewNode* vrViewNode = d->logic()->GetVirtualRealityViewNode();
 
   // Update view node in view widget
-  if (d->VirtualRealityViewWidget != NULL)
+  if (d->VirtualRealityViewWidget != nullptr)
   {
     vtkMRMLVirtualRealityViewNode* oldVrViewNode = d->VirtualRealityViewWidget->mrmlVirtualRealityViewNode();
     if (oldVrViewNode != vrViewNode)
@@ -458,7 +458,7 @@ void qSlicerVirtualRealityModule::enableVirtualReality(bool enable)
 void qSlicerVirtualRealityModule::updateViewFromReferenceViewCamera()
 {
   Q_D(qSlicerVirtualRealityModule);
-  if (d->VirtualRealityViewWidget == NULL)
+  if (d->VirtualRealityViewWidget == nullptr)
   {
     return;
   }

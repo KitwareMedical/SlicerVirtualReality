@@ -42,7 +42,7 @@ namespace
 {
   vr::ETrackingResult StringToPoseStatus(const char* cpose)
   {
-    if (cpose == NULL)
+    if (cpose == nullptr)
     {
       return vr::TrackingResult_Uninitialized;
     }

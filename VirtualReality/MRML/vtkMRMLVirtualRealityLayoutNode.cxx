@@ -36,7 +36,7 @@ vtkMRMLVirtualRealityLayoutNode::vtkMRMLVirtualRealityLayoutNode()
 {
   this->SetSingletonTag("vtkMRMLVirtualRealityLayoutNode");
 
-  this->CurrentLayoutDescription = NULL;
+  this->CurrentLayoutDescription = nullptr;
 
   // Synchronize the view description with the layout
   //TODO:
@@ -46,7 +46,7 @@ vtkMRMLVirtualRealityLayoutNode::vtkMRMLVirtualRealityLayoutNode()
 //----------------------------------------------------------------------------
 vtkMRMLVirtualRealityLayoutNode::~vtkMRMLVirtualRealityLayoutNode()
 {
-  this->SetCurrentLayoutDescription(0);
+  this->SetCurrentLayoutDescription(nullptr);
 }
 
 //----------------------------------------------------------------------------
@@ -70,7 +70,7 @@ void vtkMRMLVirtualRealityLayoutNode::ReadXMLAttributes(const char** atts)
   const char* attName;
   const char* attValue;
 
-  while (*atts != NULL)
+  while (*atts != nullptr)
     {
     attName = *(atts++);
     attValue = *(atts++);
@@ -161,7 +161,7 @@ void vtkMRMLVirtualRealityLayoutNode::SetAndParseCurrentLayoutDescription(const 
   //  this->LayoutRootElement->Delete();
   //  }
   //this->LayoutRootElement = this->ParseLayout(description);
-  //if (this->LayoutRootElement == NULL)
+  //if (this->LayoutRootElement == nullptr)
   //  {
   //  // ParseLayout has already logged an error, if there was any
   //  this->SetCurrentLayoutDescription("");

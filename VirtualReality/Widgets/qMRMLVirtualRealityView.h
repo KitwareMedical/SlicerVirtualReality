@@ -61,7 +61,7 @@ public:
   typedef QWidget Superclass;
 
   /// Constructors
-  explicit qMRMLVirtualRealityView(QWidget* parent = 0);
+  explicit qMRMLVirtualRealityView(QWidget* parent = nullptr);
   virtual ~qMRMLVirtualRealityView();
 
   /// Add a displayable manager to the view,

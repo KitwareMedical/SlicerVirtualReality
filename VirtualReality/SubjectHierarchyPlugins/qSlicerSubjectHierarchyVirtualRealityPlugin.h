@@ -36,7 +36,7 @@ public:
 
 public:
   typedef qSlicerSubjectHierarchyAbstractPlugin Superclass;
-  qSlicerSubjectHierarchyVirtualRealityPlugin(QObject* parent = NULL);
+  qSlicerSubjectHierarchyVirtualRealityPlugin(QObject* parent = nullptr);
   virtual ~qSlicerSubjectHierarchyVirtualRealityPlugin();
 
 public:

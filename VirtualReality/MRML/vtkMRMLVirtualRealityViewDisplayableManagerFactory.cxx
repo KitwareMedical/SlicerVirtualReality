@@ -32,7 +32,7 @@
 vtkMRMLVirtualRealityViewDisplayableManagerFactory* vtkMRMLVirtualRealityViewDisplayableManagerFactory::New()
 {
   vtkMRMLVirtualRealityViewDisplayableManagerFactory* instance = Self::GetInstance();
-  instance->Register(0);
+  instance->Register(nullptr);
   return instance;
 }
 

@@ -414,7 +414,7 @@ void vtkVirtualRealityViewInteractorStyle::PositionProp(vtkEventData* ed)
   {
     topTransformNode = topTransformNode->GetParentTransformNode();
   }
-  vtkMRMLTransformNode* vrTransformNode = NULL;
+  vtkMRMLTransformNode* vrTransformNode = nullptr;
   if (!topTransformNode)
   {
     // Create interaction transform if no transform found
