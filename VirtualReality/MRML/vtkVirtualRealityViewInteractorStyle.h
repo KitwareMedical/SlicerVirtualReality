@@ -23,30 +23,37 @@
 
 // MRML includes
 #include "vtkMRMLDisplayableManagerGroup.h"
+#include "vtkMRMLViewInteractorStyle.h"
 
 // VTK includes
 #include "vtkObject.h"
-#include "vtkInteractorStyle3D.h"
 #include "vtkOpenVRRenderWindow.h" // for enums
 #include "vtkEventData.h"
 
 #include "vtkSlicerVirtualRealityModuleMRMLExport.h"
 
 class vtkMRMLScene;
+class vtkCellPicker;
+class vtkWorldPointPicker;
 
 /// \brief Virtual reality interactions
 ///
 /// TODO:
 ///
 class VTK_SLICER_VIRTUALREALITY_MODULE_MRML_EXPORT vtkVirtualRealityViewInteractorStyle :
-    public vtkInteractorStyle3D
+    public vtkMRMLViewInteractorStyle
 {
 public:
   static vtkVirtualRealityViewInteractorStyle *New();
-  vtkTypeMacro(vtkVirtualRealityViewInteractorStyle,vtkInteractorStyle3D);
+  vtkTypeMacro(vtkVirtualRealityViewInteractorStyle,vtkMRMLViewInteractorStyle);
   void PrintSelf(ostream& os, vtkIndent indent) override;
   
-   /// Set the Interactor wrapper being controlled by this object. (Satisfy superclass API.)
+  /// Give a chance to displayable managers to process the event.
+  /// Return true if the event is processed.
+  using vtkMRMLViewInteractorStyle::DelegateInteractionEventToDisplayableManagers;
+  bool DelegateInteractionEventToDisplayableManagers(vtkEventData* inputEventData) override;
+
+  /// Set the Interactor wrapper being controlled by this object. (Satisfy superclass API.)
   void SetInteractor(vtkRenderWindowInteractor *interactor) override;
 
   /// Main process event method
@@ -145,11 +152,6 @@ public:
   //vtkOpenVRMenuWidget *GetMenu() {
   //  return this->Menu.Get(); }
   
-  /// Get the displayable managers
-  vtkGetObjectMacro(DisplayableManagerGroup, vtkMRMLDisplayableManagerGroup);
-  /// Set the displayable managers
-  vtkSetObjectMacro(DisplayableManagerGroup, vtkMRMLDisplayableManagerGroup);
-
   /// Set physical to world magnification. Valid value range is [0.01, 100].
   /// Note: Conversion is physicalScale = 1000 / magnification
   void SetMagnification(double magnification);
@@ -186,6 +188,8 @@ protected:
   //*/
   //void AddTooltipForInput(vtkEventDataDevice device, vtkEventDataDeviceInput input);
 
+  bool QuickPick(int x, int y, double pickPoint[3]);
+
 protected:
   ///**
   //* Indicates if picking should be updated every frame. If so, the interaction
@@ -196,7 +200,9 @@ protected:
 
   //vtkNew<vtkOpenVRHardwarePicker> HardwarePicker;
 
-  vtkMRMLDisplayableManagerGroup* DisplayableManagerGroup;
+  /// For jump to slice feature (when mouse is moved while shift key is pressed)
+  vtkSmartPointer<vtkCellPicker> AccuratePicker;
+  vtkSmartPointer<vtkWorldPointPicker> QuickPicker;
 
   int GrabEnabled;
 
