@@ -35,12 +35,28 @@ class VTK_SLICER_VIRTUALREALITY_MODULE_MRML_EXPORT vtkVirtualRealityViewInteract
 public:
   static vtkVirtualRealityViewInteractor *New();
 
+  typedef vtkVirtualRealityViewInteractor Self;
+
   vtkTypeMacro(vtkVirtualRealityViewInteractor,vtkOpenVRRenderWindowInteractor);
   void PrintSelf(ostream& os, vtkIndent indent);
 
   virtual void SetInteractorStyle(vtkInteractorObserver*);
 
-  virtual void RecognizeComplexGesture(vtkEventDataDevice3D* edata) override;
+  // TODO: Assess with this function should still be overriden with VTK 9.1
+  //
+  // Background: The function became non virtual in:
+  // * Kitware/VTK@af0fab486 (Clean up VR and OpenVR classes )
+  //
+  //virtual void RecognizeComplexGesture(vtkEventDataDevice3D* edata) override;
+
+  ///@{
+  /// Get the most recent pose corresponding to the tracked device
+  void GetTrackedDevicePose(vtkEventDataDevice dev, vr::TrackedDevicePose_t** pose)
+  {
+    return this->GetTrackedDevicePose(dev, 0, pose);
+  }
+  void GetTrackedDevicePose(vtkEventDataDevice dev, uint32_t index, vr::TrackedDevicePose_t** pose);
+  ///@}
 
   /// Set trigger button function
   /// By default it is the same as grab (\sa GetButtonFunctionIdForGrabObjectsAndWorld)
@@ -62,6 +78,12 @@ public:
   ///@}
 
 protected:
+  ///@{
+  /// Convenience function to map device with tracker identifier for retrieving the last tracker action.
+  static TrackerEnum GetTrackerForDevice(vtkEventDataDevice dev);
+  static bool IsTrackerValid(TrackerEnum tracker);
+  ///@}
+
   /// List of buttons for which gesture recognition is enabled
   std::vector<int> GestureEnabledButtons;
 

@@ -41,6 +41,7 @@ vtkVirtualRealityViewInteractor::~vtkVirtualRealityViewInteractor()
 }
 
 //----------------------------------------------------------------------------
+/*
 void vtkVirtualRealityViewInteractor::RecognizeComplexGesture(vtkEventDataDevice3D* edata)
 {
   // Recognize gesture only if one button is pressed per controller
@@ -113,6 +114,7 @@ void vtkVirtualRealityViewInteractor::RecognizeComplexGesture(vtkEventDataDevice
     }
   }
 }
+*/
 
 //----------------------------------------------------------------------------
 void vtkVirtualRealityViewInteractor::PrintSelf(ostream& os, vtkIndent indent)
@@ -128,6 +130,60 @@ void vtkVirtualRealityViewInteractor::SetInteractorStyle(vtkInteractorObserver* 
 
   // Set default trigger button function "grab objects and world"
   this->SetTriggerButtonFunction(vtkVirtualRealityViewInteractor::GetButtonFunctionIdForGrabObjectsAndWorld());
+}
+
+//---------------------------------------------------------------------------
+vtkOpenVRRenderWindowInteractor::TrackerEnum vtkVirtualRealityViewInteractor::GetTrackerForDevice(vtkEventDataDevice dev)
+{
+  if (dev == vtkEventDataDevice::LeftController)
+  {
+    return vtkOpenVRRenderWindowInteractor::LEFT_HAND;
+  }
+  else if (dev == vtkEventDataDevice::RightController)
+  {
+    return vtkOpenVRRenderWindowInteractor::RIGHT_HAND;
+  }
+  else if (dev == vtkEventDataDevice::HeadMountedDisplay)
+  {
+    return vtkOpenVRRenderWindowInteractor::HEAD;
+  }
+  else
+  {
+    return vtkOpenVRRenderWindowInteractor::NUMBER_OF_TRACKERS;
+  }
+}
+
+//---------------------------------------------------------------------------
+bool vtkVirtualRealityViewInteractor::IsTrackerValid(TrackerEnum tracker)
+{
+  return tracker < vtkOpenVRRenderWindowInteractor::NUMBER_OF_TRACKERS;
+}
+
+//---------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractor::GetTrackedDevicePose(vtkEventDataDevice dev, uint32_t index, vr::TrackedDevicePose_t** pose)
+{
+  TrackerEnum tracker = Self::GetTrackerForDevice(dev);
+  // TODO:
+  //
+  // Handle retrieval of tracker position associated with generic tracker associated with index.
+  //
+  // Background:
+  //
+  // Add support for generic tracker originally contributed in these commits:
+  // * kitware/VTK@6083532cf8 (ENH: Exposing the generic tracker openvr device type to downstream projects)
+  // * KitwareMedical/SlicerVirtualReality@59b7d1bf3 (Adding interface and logic to maintain MRML transforms for each generic VR tracker)
+  // but removed following the refactoring done in these commits:
+  // * kitware/VTK@1aac3fe5f (Create VRInteractorStyle and VRRenderWindowInteractor)
+  // * kitware/VTK@af0fab486 (Clean up VR and OpenVR classes)
+  // * kitware/VTK@9bd64d666 (Cleanup and rework of the VRInteractorStyle and subclasses)
+  // * kitware/VTK@09a478a22 (Cleanup VR camera code and subclasses)
+  //
+  if (!Self::IsTrackerValid(tracker))
+  {
+    *pose = nullptr;
+    return;
+  }
+  *pose = &this->Trackers[tracker].LastPose;
 }
 
 //---------------------------------------------------------------------------

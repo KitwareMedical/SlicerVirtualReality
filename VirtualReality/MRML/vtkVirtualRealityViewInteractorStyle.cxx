@@ -419,7 +419,7 @@ void vtkVirtualRealityViewInteractorStyle::OnButton3D(vtkEventData* edata)
 //----------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------
-void vtkVirtualRealityViewInteractorStyle::PositionProp(vtkEventData* ed)
+void vtkVirtualRealityViewInteractorStyle::PositionProp(vtkEventData* ed, double* vtkNotUsed(lwpos), double* vtkNotUsed(lwori))
 {
   vtkEventDataDevice3D *edd = ed->GetAsEventDataDevice3D();
   if (!edd)
