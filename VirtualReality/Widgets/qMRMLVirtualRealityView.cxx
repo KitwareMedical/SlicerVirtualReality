@@ -83,6 +83,7 @@
 #include <vtkRendererCollection.h>
 #include <vtkSmartPointer.h>
 #include <vtkTimerLog.h>
+#include <vtkTransform.h>
 
 namespace
 {
@@ -186,6 +187,14 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   vtkMRMLVirtualRealityViewDisplayableManagerFactory* factory
     = vtkMRMLVirtualRealityViewDisplayableManagerFactory::GetInstance();
 
+  vtkSlicerApplicationLogic* appLogic = qSlicerApplication::application()->applicationLogic();
+  if (!appLogic)
+  {
+    qCritical() << Q_FUNC_INFO << ": Failed to access application logic";
+    return;
+  }
+  factory->SetMRMLApplicationLogic(appLogic);
+
   QStringList displayableManagers;
   displayableManagers //<< "vtkMRMLCameraDisplayableManager"
   //<< "vtkMRMLViewDisplayableManager"
@@ -212,7 +221,7 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   this->DisplayableManagerGroup = vtkSmartPointer<vtkMRMLDisplayableManagerGroup>::Take(
                                     factory->InstantiateDisplayableManagers(q->renderer()));
   this->DisplayableManagerGroup->SetMRMLDisplayableNode(this->MRMLVirtualRealityViewNode);
-  this->InteractorStyle->SetDisplayableManagerGroup(this->DisplayableManagerGroup);
+  this->InteractorStyle->SetDisplayableManagers(this->DisplayableManagerGroup);
 
   qDebug() << Q_FUNC_INFO << ": Number of registered displayable manager:" << this->DisplayableManagerGroup->GetDisplayableManagerCount();
 

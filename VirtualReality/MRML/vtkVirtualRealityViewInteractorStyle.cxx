@@ -24,16 +24,17 @@
 #include "vtkMRMLVirtualRealityViewNode.h"
 
 // MRML includes
-#include "vtkMRMLScene.h"
-#include "vtkMRMLModelNode.h"
+#include "vtkMRMLAbstractThreeDViewDisplayableManager.h"
+#include "vtkMRMLInteractionEventData.h"
+#include "vtkMRMLLinearTransformNode.h"
+#include "vtkMRMLModelDisplayableManager.h"
 #include "vtkMRMLModelDisplayNode.h"
-#include "vtkMRMLVolumeNode.h"
-#include "vtkMRMLVolumeRenderingDisplayNode.h"
+#include "vtkMRMLModelNode.h"
+#include "vtkMRMLScene.h"
 #include "vtkMRMLSegmentationNode.h"
 #include "vtkMRMLSegmentationDisplayNode.h"
-#include "vtkMRMLLinearTransformNode.h"
-#include "vtkMRMLAbstractThreeDViewDisplayableManager.h"
-#include "vtkMRMLModelDisplayableManager.h"
+#include "vtkMRMLVolumeNode.h"
+#include "vtkMRMLVolumeRenderingDisplayNode.h"
 
 // VTK includes
 #include <vtkCamera.h>
@@ -47,6 +48,7 @@
 #include <vtkTimerLog.h>
 #include <vtkTransform.h>
 #include <vtkWeakPointer.h>
+#include <vtkWorldPointPicker.h>
 
 #include "vtkOpenVRRenderWindow.h"
 #include "vtkOpenVRRenderWindowInteractor.h"
@@ -173,7 +175,6 @@ bool vtkVirtualRealityViewInteractorStyle::vtkInternal::CalculateCombinedControl
 
 //----------------------------------------------------------------------------
 vtkVirtualRealityViewInteractorStyle::vtkVirtualRealityViewInteractorStyle()
-  : DisplayableManagerGroup(nullptr)
 {
   this->GrabEnabled = 1;
 
@@ -188,6 +189,10 @@ vtkVirtualRealityViewInteractorStyle::vtkVirtualRealityViewInteractorStyle()
       this->InputMap[d][i] = -1;
     }
   }
+
+  this->AccuratePicker = vtkSmartPointer<vtkCellPicker>::New();
+  this->AccuratePicker->SetTolerance( .005 );
+  this->QuickPicker = vtkSmartPointer<vtkWorldPointPicker>::New();
 
   // Create default inputs mapping
   this->MapInputToAction(vtkEventDataDevice::RightController,
@@ -204,7 +209,6 @@ vtkVirtualRealityViewInteractorStyle::vtkVirtualRealityViewInteractorStyle()
 //----------------------------------------------------------------------------
 vtkVirtualRealityViewInteractorStyle::~vtkVirtualRealityViewInteractorStyle()
 {
-  this->SetDisplayableManagerGroup(nullptr);
   delete this->Internal;
 }
 
@@ -212,7 +216,7 @@ vtkVirtualRealityViewInteractorStyle::~vtkVirtualRealityViewInteractorStyle()
 void vtkVirtualRealityViewInteractorStyle::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os,indent);
-} 
+}
 
 //----------------------------------------------------------------------------
 void vtkVirtualRealityViewInteractorStyle::SetInteractor(vtkRenderWindowInteractor *i)
@@ -282,8 +286,62 @@ void vtkVirtualRealityViewInteractorStyle::ProcessEvents(
 //----------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------
+bool vtkVirtualRealityViewInteractorStyle::DelegateInteractionEventToDisplayableManagers(vtkEventData* inputEventData)
+{
+  // Get display and world position
+  int* displayPositionInt = this->GetInteractor()->GetEventPosition();
+  vtkRenderer* pokedRenderer = this->GetInteractor()->FindPokedRenderer(displayPositionInt[0], displayPositionInt[1]);
+  if (!pokedRenderer || !inputEventData)
+  {
+    // can happen during application shutdown
+    return false;
+  }
+
+  vtkNew<vtkMRMLInteractionEventData> ed;
+  ed->SetType(inputEventData->GetType());
+  int displayPositionCorrected[2] = { displayPositionInt[0] - pokedRenderer->GetOrigin()[0], displayPositionInt[1] - pokedRenderer->GetOrigin()[1] };
+  ed->SetDisplayPosition(displayPositionCorrected);
+  double worldPosition[3] = { 0.0, 0.0, 0.0 };
+  vtkEventDataDevice3D* inputEventDataDevice3D = inputEventData->GetAsEventDataDevice3D();
+  if (!inputEventDataDevice3D)
+  {
+    vtkErrorMacro("DelegateInteractionEventToDisplayableManagers: Invalid event data type");
+    return false;
+  }
+  inputEventDataDevice3D->GetWorldPosition(worldPosition);
+  ed->SetDevice(inputEventDataDevice3D->GetDevice());
+  ed->SetWorldPosition(worldPosition, true);
+  ed->SetWorldToPhysicalScale(this->GetMagnification());
+  ed->SetAccuratePicker(this->AccuratePicker);
+  ed->SetRenderer(this->CurrentRenderer);
+  std::string interactionContextName;
+  if (ed->GetDevice() == vtkEventDataDevice::LeftController)
+  {
+    interactionContextName = "LeftController"; //TODO: Store these elsewhere
+  }
+  else if (ed->GetDevice() == vtkEventDataDevice::RightController)
+  {
+    interactionContextName = "RightController"; //TODO: Store these elsewhere
+  }
+  else
+  {
+    vtkErrorMacro("DelegateInteractionEventToDisplayableManagers: Unrecognized device");
+  }
+  ed->SetInteractionContextName(interactionContextName);
+
+  ed->SetAttributesFromInteractor(this->GetInteractor());
+
+  return this->DelegateInteractionEventDataToDisplayableManagers(ed);
+}
+
+//----------------------------------------------------------------------------
 void vtkVirtualRealityViewInteractorStyle::OnMove3D(vtkEventData* edata)
 {
+  if (this->DelegateInteractionEventToDisplayableManagers(edata))
+  {
+    return;
+  }
+
   vtkEventDataDevice3D *edd = edata->GetAsEventDataDevice3D();
   if (!edd)
   {
@@ -324,6 +382,11 @@ void vtkVirtualRealityViewInteractorStyle::OnMove3D(vtkEventData* edata)
 //----------------------------------------------------------------------------
 void vtkVirtualRealityViewInteractorStyle::OnButton3D(vtkEventData* edata)
 {
+  if (this->DelegateInteractionEventToDisplayableManagers(edata))
+  {
+    return;
+  }
+
   vtkEventDataDevice3D *bd = edata->GetAsEventDataDevice3D();
   if (!bd)
   {
@@ -367,7 +430,7 @@ void vtkVirtualRealityViewInteractorStyle::PositionProp(vtkEventData* ed)
   vtkMRMLDisplayableNode* pickedNode = this->Internal->PickedNode[deviceIndex];
 
   if ( pickedNode == nullptr || !pickedNode->GetSelectable()
-    || !this->CurrentRenderer || !this->DisplayableManagerGroup )
+    || !this->CurrentRenderer || !this->DisplayableManagers )
   {
     return;
   }
@@ -488,10 +551,10 @@ void vtkVirtualRealityViewInteractorStyle::StartPositionProp(vtkEventDataDevice3
   edata->GetWorldPosition(pos);
 
   // Get MRML node to move
-  for (int i=0; i<this->DisplayableManagerGroup->GetDisplayableManagerCount(); ++i)
+  for (int i=0; i<this->DisplayableManagers->GetDisplayableManagerCount(); ++i)
   {
     vtkMRMLAbstractThreeDViewDisplayableManager* currentDisplayableManager =
-      vtkMRMLAbstractThreeDViewDisplayableManager::SafeDownCast(this->DisplayableManagerGroup->GetNthDisplayableManager(i));
+      vtkMRMLAbstractThreeDViewDisplayableManager::SafeDownCast(this->DisplayableManagers->GetNthDisplayableManager(i));
     if (!currentDisplayableManager)
     {
       continue;
@@ -803,13 +866,13 @@ void vtkVirtualRealityViewInteractorStyle::EndAction(int state, vtkEventDataDevi
 //---------------------------------------------------------------------------
 vtkMRMLScene* vtkVirtualRealityViewInteractorStyle::GetMRMLScene()
 {
-  if (!this->DisplayableManagerGroup
-    || this->DisplayableManagerGroup->GetDisplayableManagerCount() == 0)
+  if (!this->DisplayableManagers
+    || this->DisplayableManagers->GetDisplayableManagerCount() == 0)
   {
     return nullptr;
   }
 
-  return this->DisplayableManagerGroup->GetNthDisplayableManager(0)->GetMRMLScene();
+  return this->DisplayableManagers->GetNthDisplayableManager(0)->GetMRMLScene();
 }
 
 //---------------------------------------------------------------------------
@@ -894,4 +957,21 @@ double vtkVirtualRealityViewInteractorStyle::GetMagnification()
   vtkOpenVRRenderWindow* rw = static_cast<vtkOpenVRRenderWindow*>(rwi->GetRenderWindow());
 
   return 1000.0 / rw->GetPhysicalScale();
+}
+
+//---------------------------------------------------------------------------
+bool vtkVirtualRealityViewInteractorStyle::QuickPick(int x, int y, double pickPoint[3])
+{
+  this->FindPokedRenderer(x, y);
+  if (this->CurrentRenderer == nullptr)
+  {
+    vtkDebugMacro("Pick: couldn't find the poked renderer at event position " << x << ", " << y);
+    return false;
+  }
+
+  this->QuickPicker->Pick(x, y, 0, this->CurrentRenderer);
+
+  this->QuickPicker->GetPickPosition(pickPoint);
+
+  return true;
 }
