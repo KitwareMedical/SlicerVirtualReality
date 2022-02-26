@@ -816,6 +816,9 @@ void qMRMLVirtualRealityView::onPhysicalToWorldMatrixModified()
 //------------------------------------------------------------------------------
 void qMRMLVirtualRealityView::onButton3DEvent(vtkObject* caller, void* call_data, unsigned long vtk_event, void* client_data)
 {
+  Q_UNUSED(caller);
+  Q_UNUSED(vtk_event);
+  Q_UNUSED(client_data);
   Q_D(qMRMLVirtualRealityView);
 
   vtkEventDataButton3D * ed = reinterpret_cast<vtkEventDataButton3D*>(call_data);
