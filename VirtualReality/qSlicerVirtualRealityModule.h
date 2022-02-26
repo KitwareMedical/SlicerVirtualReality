@@ -46,7 +46,7 @@ class Q_SLICER_QTMODULES_VIRTUALREALITY_EXPORT
 public:
 
   typedef qSlicerLoadableModule Superclass;
-  explicit qSlicerVirtualRealityModule(QObject* parent = 0);
+  explicit qSlicerVirtualRealityModule(QObject* parent = nullptr);
   virtual ~qSlicerVirtualRealityModule();
 
   qSlicerGetTitleMacro(QTMODULE_TITLE);

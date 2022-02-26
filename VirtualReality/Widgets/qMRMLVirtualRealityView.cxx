@@ -117,9 +117,9 @@ namespace
 //---------------------------------------------------------------------------
 qMRMLVirtualRealityViewPrivate::qMRMLVirtualRealityViewPrivate(qMRMLVirtualRealityView& object)
   : q_ptr(&object)
-  , CamerasLogic(NULL)
+  , CamerasLogic(nullptr)
 {
-  this->MRMLVirtualRealityViewNode = 0;
+  this->MRMLVirtualRealityViewNode = nullptr;
 }
 
 //---------------------------------------------------------------------------
@@ -277,14 +277,14 @@ void qMRMLVirtualRealityViewPrivate::destroyRenderWindow()
   // Must break the connection between interactor and render window,
   // otherwise they would circularly refer to each other and would not
   // be deleted.
-  this->Interactor->SetRenderWindow(NULL);
-  this->Interactor = NULL;
-  this->InteractorStyle = NULL;
-  this->DisplayableManagerGroup = NULL;
-  this->Renderer = NULL;
-  this->Camera = NULL;
-  this->Lights = NULL;
-  this->RenderWindow = NULL;
+  this->Interactor->SetRenderWindow(nullptr);
+  this->Interactor = nullptr;
+  this->InteractorStyle = nullptr;
+  this->DisplayableManagerGroup = nullptr;
+  this->Renderer = nullptr;
+  this->Camera = nullptr;
+  this->Lights = nullptr;
+  this->RenderWindow = nullptr;
 }
 
 // --------------------------------------------------------------------------
@@ -293,7 +293,7 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
   Q_Q(qMRMLVirtualRealityView);
   if (!this->MRMLVirtualRealityViewNode || !this->MRMLVirtualRealityViewNode->GetVisibility())
   {
-    if (this->RenderWindow != NULL)
+    if (this->RenderWindow != nullptr)
     {
       this->destroyRenderWindow();
     }
@@ -506,7 +506,7 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodeWithControllerPose(vtkEv
 {
   vtkMRMLLinearTransformNode* node = this->MRMLVirtualRealityViewNode->GetControllerTransformNode(device);
 
-  if (node == NULL)
+  if (node == nullptr)
   {
     qCritical() << Q_FUNC_INFO << ": Unable to retrieve linear transform node for device: " << (int)device;
     return;
@@ -550,7 +550,7 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodeWithHMDPose()
 {
   vtkMRMLLinearTransformNode* node = this->MRMLVirtualRealityViewNode->GetHMDTransformNode();
 
-  if (node == NULL)
+  if (node == nullptr)
   {
     qCritical() << Q_FUNC_INFO << ": Unable to retrieve linear transform node for HMD";
     return;
@@ -690,7 +690,7 @@ void qMRMLVirtualRealityView::setMRMLVirtualRealityViewNode(vtkMRMLVirtualRealit
   d->updateWidgetFromMRML();
 
   // Enable/disable widget
-  this->setEnabled(newViewNode != 0);
+  this->setEnabled(newViewNode != nullptr);
 }
 
 //---------------------------------------------------------------------------

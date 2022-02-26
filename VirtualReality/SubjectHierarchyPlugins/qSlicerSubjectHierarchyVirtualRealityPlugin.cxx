@@ -60,7 +60,7 @@ public:
 //-----------------------------------------------------------------------------
 qSlicerSubjectHierarchyVirtualRealityPluginPrivate::qSlicerSubjectHierarchyVirtualRealityPluginPrivate(qSlicerSubjectHierarchyVirtualRealityPlugin& object)
 : q_ptr(&object)
-, ToggleSelectableAction(NULL)
+, ToggleSelectableAction(nullptr)
 {
 }
 

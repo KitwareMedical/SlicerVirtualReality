@@ -42,8 +42,8 @@ vtkCxxSetObjectMacro(vtkSlicerVirtualRealityLogic, VolumeRenderingLogic, vtkSlic
 
 //----------------------------------------------------------------------------
 vtkSlicerVirtualRealityLogic::vtkSlicerVirtualRealityLogic()
-  : ActiveViewNode(NULL)
-  , VolumeRenderingLogic(NULL)
+  : ActiveViewNode(nullptr)
+  , VolumeRenderingLogic(nullptr)
 {
 }
 
@@ -82,7 +82,7 @@ void vtkSlicerVirtualRealityLogic::RegisterNodes()
 //---------------------------------------------------------------------------
 void vtkSlicerVirtualRealityLogic::UpdateFromMRMLScene()
 {
-  vtkMRMLVirtualRealityViewNode* vrViewNode = NULL;
+  vtkMRMLVirtualRealityViewNode* vrViewNode = nullptr;
   if (this->GetMRMLScene())
   {
     vrViewNode = vtkMRMLVirtualRealityViewNode::SafeDownCast(
@@ -117,7 +117,7 @@ void vtkSlicerVirtualRealityLogic::OnMRMLSceneNodeRemoved(vtkMRMLNode* node)
   }
   if (deletedVrViewNode == this->ActiveViewNode)
   {
-    this->SetActiveViewNode(NULL);
+    this->SetActiveViewNode(nullptr);
   }
 }
 
@@ -147,7 +147,7 @@ vtkMRMLVirtualRealityViewNode* vtkSlicerVirtualRealityLogic::AddVirtualRealityVi
   if (!scene)
   {
     vtkErrorMacro("AddVirtualRealityViewNode: Invalid MRML scene");
-    return NULL;
+    return nullptr;
   }
 
   if (this->ActiveViewNode)
@@ -277,7 +277,7 @@ void vtkSlicerVirtualRealityLogic::SetVirtualRealityActive(bool activate)
   }
   else
   {
-    if (this->ActiveViewNode != NULL)
+    if (this->ActiveViewNode != nullptr)
     {
       this->ActiveViewNode->SetActive(0);
     }
@@ -301,7 +301,7 @@ void vtkSlicerVirtualRealityLogic::SetDefaultReferenceView()
   {
     return;
   }
-  if (this->ActiveViewNode->GetReferenceViewNode() != NULL)
+  if (this->ActiveViewNode->GetReferenceViewNode() != nullptr)
   {
     // Reference view is already set, there is nothing to do
     return;
@@ -312,7 +312,7 @@ void vtkSlicerVirtualRealityLogic::SetDefaultReferenceView()
   }
   vtkSmartPointer<vtkCollection> nodes = vtkSmartPointer<vtkCollection>::Take(
       this->GetMRMLScene()->GetNodesByClass("vtkMRMLViewNode"));
-  vtkMRMLViewNode* viewNode = 0;
+  vtkMRMLViewNode* viewNode = nullptr;
   vtkCollectionSimpleIterator it;
   for (nodes->InitTraversal(it); (viewNode = vtkMRMLViewNode::SafeDownCast(
                                     nodes->GetNextItemAsObject(it)));)
@@ -334,7 +334,7 @@ vtkMRMLVirtualRealityViewNode* vtkSlicerVirtualRealityLogic::GetDefaultVirtualRe
   if (!scene)
   {
     vtkErrorMacro("GetDefaultVirtualRealityViewNode failed: invalid scene");
-    return NULL;
+    return nullptr;
   }
   vtkMRMLNode* defaultNode = scene->GetDefaultNodeByClass("vtkMRMLVirtualRealityViewNode");
   if (!defaultNode)

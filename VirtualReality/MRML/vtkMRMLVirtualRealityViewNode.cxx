@@ -198,12 +198,12 @@ void vtkMRMLVirtualRealityViewNode::SetAndObserveReferenceViewNodeID(const char*
 //----------------------------------------------------------------------------
 bool vtkMRMLVirtualRealityViewNode::SetAndObserveReferenceViewNode(vtkMRMLViewNode* node)
 {
-  if (node == NULL)
+  if (node == nullptr)
   {
-    this->SetAndObserveReferenceViewNodeID(NULL);
+    this->SetAndObserveReferenceViewNodeID(nullptr);
     return true;
   }
-  if (this->Scene != node->GetScene() || node->GetID() == NULL)
+  if (this->Scene != node->GetScene() || node->GetID() == nullptr)
   {
     vtkErrorMacro("SetAndObserveReferenceViewNode: The referenced and referencing node are not in the same scene");
     return false;
@@ -225,7 +225,7 @@ vtkMRMLLinearTransformNode* vtkMRMLVirtualRealityViewNode::GetControllerTransfor
   }
   else
   {
-    return NULL;
+    return nullptr;
   }
 }
 
@@ -250,12 +250,12 @@ void vtkMRMLVirtualRealityViewNode::SetAndObserveLeftControllerTransformNodeID(c
 //----------------------------------------------------------------------------
 bool vtkMRMLVirtualRealityViewNode::SetAndObserveLeftControllerTransformNode(vtkMRMLLinearTransformNode* node)
 {
-  if (node == NULL)
+  if (node == nullptr)
   {
-    this->SetAndObserveLeftControllerTransformNodeID(NULL);
+    this->SetAndObserveLeftControllerTransformNodeID(nullptr);
     return true;
   }
-  if (this->Scene != node->GetScene() || node->GetID() == NULL)
+  if (this->Scene != node->GetScene() || node->GetID() == nullptr)
   {
     vtkErrorMacro("SetAndObserveLeftControllerTransformNode: The referenced and referencing node are not in the same scene");
     return false;
@@ -285,12 +285,12 @@ void vtkMRMLVirtualRealityViewNode::SetAndObserveRightControllerTransformNodeID(
 //----------------------------------------------------------------------------
 bool vtkMRMLVirtualRealityViewNode::SetAndObserveRightControllerTransformNode(vtkMRMLLinearTransformNode* node)
 {
-  if (node == NULL)
+  if (node == nullptr)
   {
-    this->SetAndObserveRightControllerTransformNodeID(NULL);
+    this->SetAndObserveRightControllerTransformNodeID(nullptr);
     return true;
   }
-  if (this->Scene != node->GetScene() || node->GetID() == NULL)
+  if (this->Scene != node->GetScene() || node->GetID() == nullptr)
   {
     vtkErrorMacro("SetAndObserveRightControllerTransformNode: The referenced and referencing node are not in the same scene");
     return false;
@@ -320,12 +320,12 @@ void vtkMRMLVirtualRealityViewNode::SetAndObserveHMDTransformNodeID(const char* 
 //----------------------------------------------------------------------------
 bool vtkMRMLVirtualRealityViewNode::SetAndObserveHMDTransformNode(vtkMRMLLinearTransformNode* node)
 {
-  if (node == NULL)
+  if (node == nullptr)
   {
-    this->SetAndObserveHMDTransformNodeID(NULL);
+    this->SetAndObserveHMDTransformNodeID(nullptr);
     return true;
   }
-  if (this->Scene != node->GetScene() || node->GetID() == NULL)
+  if (this->Scene != node->GetScene() || node->GetID() == nullptr)
   {
     vtkErrorMacro("SetAndObserveHMDTransformNode: The referenced and referencing node are not in the same scene");
     return false;
@@ -443,7 +443,7 @@ void vtkMRMLVirtualRealityViewNode::CreateDefaultControllerTransformNodes()
   {
     // We create or get and update the linear transform nodes that correspond to left and right controllers
     vtkSmartPointer<vtkMRMLLinearTransformNode> linearTransformNode = vtkMRMLLinearTransformNode::SafeDownCast(this->GetScene()->GetSingletonNode("VirtualReality.LeftController", "vtkMRMLLinearTransformNode"));
-    if (linearTransformNode == NULL)
+    if (linearTransformNode == nullptr)
     {
       linearTransformNode = vtkSmartPointer<vtkMRMLLinearTransformNode>::Take(
                               vtkMRMLLinearTransformNode::SafeDownCast(this->GetScene()->CreateNodeByClass("vtkMRMLLinearTransformNode")));
@@ -457,7 +457,7 @@ void vtkMRMLVirtualRealityViewNode::CreateDefaultControllerTransformNodes()
   if (!this->GetRightControllerTransformNodeID())
   {
     vtkSmartPointer<vtkMRMLLinearTransformNode> linearTransformNode = vtkMRMLLinearTransformNode::SafeDownCast(this->GetScene()->GetSingletonNode("VirtualReality.RightController", "vtkMRMLLinearTransformNode"));
-    if (linearTransformNode == NULL)
+    if (linearTransformNode == nullptr)
     {
       linearTransformNode = vtkSmartPointer<vtkMRMLLinearTransformNode>::Take(
                               vtkMRMLLinearTransformNode::SafeDownCast(this->GetScene()->CreateNodeByClass("vtkMRMLLinearTransformNode")));
@@ -481,7 +481,7 @@ void vtkMRMLVirtualRealityViewNode::CreateDefaultHMDTransformNode()
   {
     // We create or get and update the linear transform nodes that correspond to left and right controllers
     vtkSmartPointer<vtkMRMLLinearTransformNode> linearTransformNode = vtkMRMLLinearTransformNode::SafeDownCast(this->GetScene()->GetSingletonNode("VirtualReality.HMD", "vtkMRMLLinearTransformNode"));
-    if (linearTransformNode == NULL)
+    if (linearTransformNode == nullptr)
     {
       linearTransformNode = vtkSmartPointer<vtkMRMLLinearTransformNode>::Take(
                               vtkMRMLLinearTransformNode::SafeDownCast(this->GetScene()->CreateNodeByClass("vtkMRMLLinearTransformNode")));
