@@ -148,6 +148,7 @@ public:
   vtkSetMacro(DesiredUpdateRate, double);
 
   /// Magnification of world [0.01, 100].
+  /// Value greater than 1 means that objects appear larger in VR than their real world size.
   /// Translated to physical scale of the VR render window
   vtkGetMacro(Magnification, double);
   vtkSetMacro(Magnification, double);
