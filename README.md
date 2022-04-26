@@ -27,11 +27,9 @@ Usage
 
 ## Setup
 
-Currently only Windows computers are supported, as until very recently there have been no virtual reality headsets officially supported on MacOS or Linux. If you already have virtual reality capable hardware, Steam
+**Platform support:** Currently the extension only works on Windows computers. Linux support is experimental: [Steam VR has limited support on linux](https://github.com/ValveSoftware/SteamVR-for-Linux/blob/master/README.md) and the Slicer extension is built for Linux but not tested. The extension is not available on macOS, as currently there are no virtual reality headsets available for macOS. If you wish to use Virtual Reality extension on Linux or macOS and you have virtual reality capable hardware and Steam VR works well on your computer then add a comment in the issue tracker ([MacOS](https://github.com/KitwareMedical/SlicerVirtualReality/issues/3) / [Linux](https://github.com/KitwareMedical/SlicerVirtualReality/issues/57)).
 
-works well on your computer, and you would like to use Slicer in virtual reality, too, then you add a comment in the issue tracker ([MacOS](https://github.com/KitwareMedical/SlicerVirtualReality/issues/3) / [Linux](https://github.com/KitwareMedical/SlicerVirtualReality/issues/57)).
-
-If both integrated display card and high-performance GPU available in a system (typically this is the case on laptops with NVidia GPUs), then configure the graphics card application settings to use high-performance GPU for SlicerApp-real.exe (it is not necessary to use high-performance GPU for the launcher, Slicer.exe).
+**Configuring graphics:** If both integrated display card and high-performance GPU available in a system (typically this is the case on laptops with NVidia GPUs), then configure the graphics card application settings to use high-performance GPU for `SlicerApp-real.exe` (it is not necessary to use high-performance GPU for the launcher, `Slicer.exe`).
 
 <a name="setup-htc-vive" ></a>
 
