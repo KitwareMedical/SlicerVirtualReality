@@ -11,6 +11,21 @@ set(EXTENSION_DESCRIPTION "Allows user to interact with a Slicer scene using vir
 set(EXTENSION_ICONURL "https://raw.githubusercontent.com/KitwareMedical/SlicerVirtualReality/master/SlicerVirtualReality.png")
 set(EXTENSION_SCREENSHOTURLS "https://www.slicer.org/w/images/4/49/SlicerVirtualReality_Screenshot1.png https://www.slicer.org/w/images/0/04/SlicerVirtualReality_Screenshot2.png")
 set(EXTENSION_DEPENDS "NA") # Specified as a space separated string, a list or 'NA' if any
+
+#-----------------------------------------------------------------------------
+if(APPLE)
+  # Virtual Reality is not supported on macOS, create an extension that contains a stub module
+  # that just displays the message that Virtual Reality is not supported. This avoids having
+  # a build error on the extension build dashboard.
+  find_package(Slicer REQUIRED)
+  include(${Slicer_USE_FILE})
+  add_subdirectory(VirtualRealityStub)
+  include(${Slicer_EXTENSION_GENERATE_CONFIG})
+  include(${Slicer_EXTENSION_CPACK}) 
+  return()
+endif()
+#-----------------------------------------------------------------------------
+
 set(EXTENSION_BUILD_SUBDIRECTORY inner-build)
 
 set(SUPERBUILD_TOPLEVEL_PROJECT inner)
