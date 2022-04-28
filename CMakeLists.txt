@@ -13,19 +13,6 @@ set(EXTENSION_SCREENSHOTURLS "https://www.slicer.org/w/images/4/49/SlicerVirtual
 set(EXTENSION_DEPENDS "NA") # Specified as a space separated string, a list or 'NA' if any
 
 #-----------------------------------------------------------------------------
-if(APPLE)
-  # Virtual Reality is not supported on macOS, create an extension that contains a stub module
-  # that just displays the message that Virtual Reality is not supported. This avoids having
-  # a build error on the extension build dashboard.
-  find_package(Slicer REQUIRED)
-  include(${Slicer_USE_FILE})
-  add_subdirectory(VirtualRealityStub)
-  include(${Slicer_EXTENSION_GENERATE_CONFIG})
-  include(${Slicer_EXTENSION_CPACK}) 
-  return()
-endif()
-#-----------------------------------------------------------------------------
-
 set(EXTENSION_BUILD_SUBDIRECTORY inner-build)
 
 set(SUPERBUILD_TOPLEVEL_PROJECT inner)
@@ -46,6 +33,24 @@ mark_as_advanced(${EXTENSION_NAME}_SUPERBUILD)
 if(${EXTENSION_NAME}_SUPERBUILD)
   include("${CMAKE_CURRENT_SOURCE_DIR}/SuperBuildPrerequisites.cmake")
   include("${CMAKE_CURRENT_SOURCE_DIR}/SuperBuild.cmake")
+  return()
+endif()
+
+#-----------------------------------------------------------------------------
+# Virtual Reality is not supported on macOS, create an extension that contains a stub module
+# that just displays the message that Virtual Reality is not supported.
+# This avoids having a build error on the extension build dashboard.
+if(APPLE)
+  add_subdirectory(VirtualRealityStub)
+
+  include(${Slicer_EXTENSION_GENERATE_CONFIG})
+
+  set(EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS)
+  set(${EXTENSION_NAME}_CPACK_INSTALL_CMAKE_PROJECTS "${EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS}" CACHE STRING "List of external projects to install" FORCE)
+
+  list(APPEND CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR};${EXTENSION_NAME};ALL;/")
+  list(APPEND CPACK_INSTALL_CMAKE_PROJECTS "${${EXTENSION_NAME}_CPACK_INSTALL_CMAKE_PROJECTS}")
+  include(${Slicer_EXTENSION_CPACK})
   return()
 endif()
 

@@ -9,6 +9,12 @@ if(DEFINED slicersources_SOURCE_DIR AND NOT DEFINED Slicer_SOURCE_DIR)
   set(Slicer_SOURCE_DIR ${slicersources_SOURCE_DIR})
 endif()
 
+if(APPLE)
+  set(SlicerVirtualReality_EXTERNAL_PROJECT_DEPENDENCIES "")
+  message(STATUS "SlicerVirtualReality_EXTERNAL_PROJECT_DEPENDENCIES:${SlicerVirtualReality_EXTERNAL_PROJECT_DEPENDENCIES}")
+  return()
+endif()
+
 # Set list of dependencies to ensure the custom application bundling this
 # extension does NOT automatically collect the project list and attempt to
 # build external projects associated with VTK modules enabled below.
