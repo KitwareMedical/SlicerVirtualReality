@@ -45,7 +45,10 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
   set(VTK_SOURCE_DIR ${VTK_DIR}/../VTK)
   ExternalProject_Message(${proj} "VTK_SOURCE_DIR:${VTK_SOURCE_DIR}")
 
-  set(EP_SOURCE_DIR ${VTK_SOURCE_DIR}/Rendering/VR)
+  set(_module_subdir Rendering/VR)
+  set(_module_name RenderingVR)
+
+  set(EP_SOURCE_DIR ${VTK_SOURCE_DIR}/${_module_subdir})
   set(EP_BINARY_DIR ${CMAKE_BINARY_DIR}/${proj}-build)
 
   ExternalProject_Add(${proj}
@@ -56,7 +59,7 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
     INSTALL_COMMAND ""
     CMAKE_CACHE_ARGS
       # VTKExternalModule
-      -DVTK_MODULE_NAME:STRING=RenderingVR
+      -DVTK_MODULE_NAME:STRING=${_module_name}
       -DVTK_MODULE_SOURCE_DIR:PATH=${EP_SOURCE_DIR}
       -DVTK_MODULE_CMAKE_MODULE_PATH:PATH=${VTK_SOURCE_DIR}/CMake
       # vtkRenderingVR
@@ -72,10 +75,6 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
       -DCMAKE_MACOSX_RPATH:BOOL=0
       # Required to find VTK
       -DVTK_DIR:PATH=${VTK_DIR}
-      # Required to find VR
-      -DVTK_VR_OBJECT_FACTORY:BOOL=OFF
-      -DVR_INCLUDE_DIR:PATH=${VR_INCLUDE_DIR}
-      -DVR_LIBRARY:PATH=${VR_LIBRARY}
       ${EXTERNAL_PROJECT_OPTIONAL_CMAKE_CACHE_ARGS}
     DEPENDS
       ${${proj}_DEPENDS}
