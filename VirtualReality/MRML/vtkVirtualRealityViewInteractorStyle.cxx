@@ -323,6 +323,10 @@ bool vtkVirtualRealityViewInteractorStyle::DelegateInteractionEventToDisplayable
   {
     interactionContextName = "RightController"; //TODO: Store these elsewhere
   }
+  else if (ed->GetDevice() == vtkEventDataDevice::HeadMountedDisplay)
+  {
+      interactionContextName = "HeadMountedDisplay";
+  }
   else
   {
     vtkErrorMacro("DelegateInteractionEventToDisplayableManagers: Unrecognized device");
