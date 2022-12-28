@@ -54,7 +54,6 @@ if((NOT OpenVR_INCLUDE_DIR OR NOT OpenVR_LIBRARY)
   elseif(UNIX)
     set(OpenVR_LIBRARY "${OpenVR_DIR}/bin/linux64/libopenvr_api.so")
   endif()
-  mark_as_superbuild(OpenVR_LIBRARY:FILEPATH)
 
   #-----------------------------------------------------------------------------
   # Launcher setting specific to build tree
