@@ -528,7 +528,7 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodeWithControllerPose(vtkEv
   }
 
   vr::TrackedDevicePose_t* tdPose;
-  this->Interactor->GetTrackedDevicePose(device, &tdPose);
+  this->RenderWindow->GetTrackedDevicePose(device, &tdPose);
 
   if (tdPose == nullptr)
   {
@@ -576,7 +576,7 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodeWithHMDPose()
   }
 
   vr::TrackedDevicePose_t* tdPose;
-  this->Interactor->GetTrackedDevicePose(vtkEventDataDevice::HeadMountedDisplay, &tdPose);
+  this->RenderWindow->GetTrackedDevicePose(vtkEventDataDevice::HeadMountedDisplay, &tdPose);
 
   if (tdPose == nullptr)
   {
@@ -625,7 +625,7 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodesWithTrackerPoses()
 
     // Now, we have our generic tracker node, let's update it!
     vr::TrackedDevicePose_t* tdPose;
-    this->Interactor->GetTrackedDevicePose(vtkEventDataDevice::GenericTracker, dev, &tdPose);
+    this->RenderWindow->GetTrackedDevicePose(vtkEventDataDevice::GenericTracker, dev, &tdPose);
 
     if (tdPose == nullptr)
     {

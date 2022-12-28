@@ -49,15 +49,6 @@ public:
   //
   //virtual void RecognizeComplexGesture(vtkEventDataDevice3D* edata) override;
 
-  ///@{
-  /// Get the most recent pose corresponding to the tracked device
-  void GetTrackedDevicePose(vtkEventDataDevice dev, vr::TrackedDevicePose_t** pose)
-  {
-    return this->GetTrackedDevicePose(dev, 0, pose);
-  }
-  void GetTrackedDevicePose(vtkEventDataDevice dev, uint32_t index, vr::TrackedDevicePose_t** pose);
-  ///@}
-
   /// Set trigger button function
   /// By default it is the same as grab (\sa GetButtonFunctionIdForGrabObjectsAndWorld)
   /// Empty string disables button
@@ -78,11 +69,6 @@ public:
   ///@}
 
 protected:
-  ///@{
-  /// Convenience function to map device with tracker identifier for retrieving the last tracker action.
-  static TrackerEnum GetTrackerForDevice(vtkEventDataDevice dev);
-  static bool IsTrackerValid(TrackerEnum tracker);
-  ///@}
 
   /// List of buttons for which gesture recognition is enabled
   std::vector<int> GestureEnabledButtons;
