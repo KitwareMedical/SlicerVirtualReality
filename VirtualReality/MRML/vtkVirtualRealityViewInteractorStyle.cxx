@@ -228,6 +228,11 @@ void vtkVirtualRealityViewInteractorStyle::SetInteractor(vtkRenderWindowInteract
 
   this->Superclass::SetInteractor(i);
 
+  if (i)
+  {
+    this->SetupActions(i);
+  }
+
   // add observers for each of the events handled in ProcessEvents
   if (i)
   {
@@ -278,6 +283,26 @@ void vtkVirtualRealityViewInteractorStyle::ProcessEvents(
     case vtkCommand::EndPanEvent:
       self->OnEndGesture();
       break;
+  }
+}
+
+//----------------------------------------------------------------------------
+// Copied from vtkOpenVRInteractorStyle::SetupActions
+//------------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractorStyle::SetupActions(vtkRenderWindowInteractor* iren)
+{
+  vtkOpenVRRenderWindowInteractor* oiren = vtkOpenVRRenderWindowInteractor::SafeDownCast(iren);
+
+  if (oiren)
+  {
+    oiren->AddAction("/actions/vtk/in/Elevation", vtkCommand::Elevation3DEvent, true);
+    oiren->AddAction("/actions/vtk/in/Movement", vtkCommand::ViewerMovement3DEvent, true);
+    oiren->AddAction("/actions/vtk/in/NextCameraPose", vtkCommand::NextPose3DEvent, false);
+    oiren->AddAction("/actions/vtk/in/PositionProp", vtkCommand::PositionProp3DEvent, false);
+    oiren->AddAction("/actions/vtk/in/ShowMenu", vtkCommand::Menu3DEvent, false);
+    oiren->AddAction("/actions/vtk/in/StartElevation", vtkCommand::Elevation3DEvent, false);
+    oiren->AddAction("/actions/vtk/in/StartMovement", vtkCommand::ViewerMovement3DEvent, false);
+    oiren->AddAction("/actions/vtk/in/TriggerAction", vtkCommand::Select3DEvent, false);
   }
 }
 
