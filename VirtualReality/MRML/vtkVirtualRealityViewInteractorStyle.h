@@ -59,6 +59,11 @@ public:
   /// Main process event method
   static void ProcessEvents(vtkObject* object, unsigned long event, void* clientdata, void* calldata);
 
+  /**
+   * Setup default actions defined with an action path and a corresponding command.
+   */
+  void SetupActions(vtkRenderWindowInteractor* iren);
+
   /// Get MRML scene from the displayable manager group (the first displayable manager's if any)
   vtkMRMLScene* GetMRMLScene();
 
