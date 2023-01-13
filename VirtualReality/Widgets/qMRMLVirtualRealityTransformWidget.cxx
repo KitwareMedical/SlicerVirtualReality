@@ -210,6 +210,10 @@ void qMRMLVirtualRealityTransformWidget::onButtonClicked()
     case vr::TrackedDeviceClass_Controller:
       d->VRViewNode->SetControllerTransformsUpdate(!d->VRViewNode->GetControllerTransformsUpdate());
       break;
+    default:
+      qCritical() << Q_FUNC_INFO << ": Unable to handle controller button click due to unknown transform type:"
+        << d->TransformType;
+      return;
   }
 
   updateWidgetFromMRML();
@@ -339,6 +343,10 @@ void qMRMLVirtualRealityTransformWidget::updateWidgetFromMRML()
 
         }
       }
+      break;
+    default:
+      qCritical() << Q_FUNC_INFO << ": Unable to update transform widget due to unknown transform type:"
+        << d->TransformType;
       break;
   }
 }
