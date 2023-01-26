@@ -69,8 +69,9 @@ public:
 
   //@{
   /// Override generic event bindings to call the corresponding action.
-  void OnButton3D(vtkEventData *edata) override;
+  void OnSelect3D(vtkEventData *edata) override;
   void OnMove3D(vtkEventData *edata) override;
+  void OnViewerMovement3D(vtkEventData* edata) override;
   //@}
 
   //@{
@@ -214,6 +215,11 @@ protected:
 protected:
   vtkVirtualRealityViewInteractorStyle();
   ~vtkVirtualRealityViewInteractorStyle() override;
+
+  /**
+   * Update the 3D movement according to the given interaction state.
+   */
+  void Movement3D(int interactionState, vtkEventData* edata);
 
 private:
   vtkVirtualRealityViewInteractorStyle(const vtkVirtualRealityViewInteractorStyle&);  /// Not implemented.

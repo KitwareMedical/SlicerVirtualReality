@@ -394,6 +394,9 @@ void vtkVirtualRealityViewInteractorStyle::OnMove3D(vtkEventData* edata)
       this->Dolly3D(edata);
       this->InvokeEvent(vtkCommand::InteractionEvent, nullptr);
       break;
+    // TODO: Add support for Pick3DEvent, Clip3DEvent, NextPose3DEvent, Menu3DEvent
+    //       added in VTK@b7f02e6
+    //
     //case VTKIS_CLIP:
     //  this->FindPokedRenderer(x, y);
     //  this->Clip(edd);
@@ -409,7 +412,7 @@ void vtkVirtualRealityViewInteractorStyle::OnMove3D(vtkEventData* edata)
 }
 
 //----------------------------------------------------------------------------
-void vtkVirtualRealityViewInteractorStyle::OnButton3D(vtkEventData* edata)
+void vtkVirtualRealityViewInteractorStyle::OnSelect3D(vtkEventData* edata)
 {
   if (this->DelegateInteractionEventToDisplayableManagers(edata))
   {
@@ -442,6 +445,92 @@ void vtkVirtualRealityViewInteractorStyle::OnButton3D(vtkEventData* edata)
     this->EndAction(state, bd);
   }
 }
+
+//------------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractorStyle::OnViewerMovement3D(vtkEventData* edata)
+{
+    this->Movement3D(VTKIS_DOLLY, edata);
+    // TODO: Add support for FLY_STYLE, GROUNDED_STYLE, and ElevationEvent that
+    // were added in VTK@7a2c71e and VTK@ca4441c
+}
+
+
+//------------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractorStyle::Movement3D(int interactionState, vtkEventData* edata)
+{
+  vtkEventDataDevice3D* edd = edata->GetAsEventDataDevice3D();
+  if (!edd)
+  {
+    return;
+  }
+
+  // Retrieve device type
+  int idev = static_cast<int>(edd->GetDevice());
+
+  // Update current state
+  int x = this->Interactor->GetEventPosition()[0];
+  int y = this->Interactor->GetEventPosition()[1];
+  this->FindPokedRenderer(x, y);
+
+  // Set current state and interaction prop
+  //this->InteractionProp = this->InteractionProps[idev];
+
+  double const* pos = edd->GetTrackPadPosition();
+
+  if (edd->GetAction() == vtkEventDataAction::Press)
+  {
+    this->StartAction(interactionState, edd);
+    this->LastTrackPadPosition[0] = 0.0;
+    this->LastTrackPadPosition[1] = 0.0;
+    return;
+  }
+
+  if (edd->GetAction() == vtkEventDataAction::Release)
+  {
+    this->EndAction(interactionState, edd);
+    return;
+  }
+
+  // If the input event is from a joystick and is away from the center then
+  // call start. When the joystick returns to the center, call end.
+  if ((edd->GetInput() == vtkEventDataDeviceInput::Joystick ||
+    edd->GetInput() == vtkEventDataDeviceInput::TrackPad) &&
+    this->Internal->InteractionState[idev] != interactionState && fabs(pos[1]) > 0.1)
+  {
+    this->StartAction(interactionState, edd);
+    this->LastTrackPadPosition[0] = 0.0;
+    this->LastTrackPadPosition[1] = 0.0;
+    return;
+  }
+
+  if (this->Internal->InteractionState[idev] == interactionState)
+  {
+    // Stop when returning to the center on the joystick
+    if ((edd->GetInput() == vtkEventDataDeviceInput::Joystick ||
+      edd->GetInput() == vtkEventDataDeviceInput::TrackPad) &&
+      fabs(pos[1]) < 0.1)
+    {
+      this->EndAction(interactionState, edd);
+      return;
+    }
+
+    // Do the 3D movement corresponding to the interaction state
+    switch (interactionState)
+    {
+    case VTKIS_DOLLY:
+      this->Dolly3D(edd);
+      break;
+      // TODO: Add support for FLY_STYLE, GROUNDED_STYLE, and ElevationEvent that
+      // were added in VTK@7a2c71e and VTK@ca4441c
+    default:
+      break;
+    }
+
+    this->InvokeEvent(vtkCommand::InteractionEvent, nullptr);
+    return;
+  }
+}
+
 
 //----------------------------------------------------------------------------
 // Interaction methods
