@@ -42,12 +42,13 @@ public:
 
   virtual void SetInteractorStyle(vtkInteractorObserver*);
 
-  // TODO: Assess with this function should still be overriden with VTK 9.1
-  //
-  // Background: The function became non virtual in:
-  // * Kitware/VTK@af0fab486 (Clean up VR and OpenVR classes )
-  //
-  //virtual void RecognizeComplexGesture(vtkEventDataDevice3D* edata) override;
+  ///@{
+  /// Define Slicer specific heuristic for handling complex gestures.
+  ///
+  /// See https://gitlab.kitware.com/vtk/vtk/-/merge_requests/9892
+  virtual void HandleGripEvents(vtkEventData* ed) override;
+  virtual void RecognizeComplexGesture(vtkEventDataDevice3D* edata) override;
+  ///@}
 
   /// Set trigger button function
   /// By default it is the same as grab (\sa GetButtonFunctionIdForGrabObjectsAndWorld)
