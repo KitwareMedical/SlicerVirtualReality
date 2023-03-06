@@ -380,7 +380,7 @@ void vtkSlicerVirtualRealityLogic::OptimizeSceneForVirtualReality()
   {
     vtkMRMLModelDisplayNode* modelDisplayNode = vtkMRMLModelDisplayNode::SafeDownCast(*mdIt);
     modelDisplayNode->SetBackfaceCulling(0);
-    modelDisplayNode->SetSliceIntersectionVisibility(0);
+    modelDisplayNode->SetVisibility2D(0);
   }
 
   std::vector<vtkMRMLNode*> segmentationDisplayNodes;
@@ -402,7 +402,7 @@ void vtkSlicerVirtualRealityLogic::OptimizeSceneForVirtualReality()
     defaultModelDisplayNode->Delete(); // scene owns it now
   }
   vtkMRMLModelDisplayNode::SafeDownCast(defaultModelDisplayNode)->SetBackfaceCulling(0);
-  vtkMRMLModelDisplayNode::SafeDownCast(defaultModelDisplayNode)->SetSliceIntersectionVisibility(0);
+  vtkMRMLModelDisplayNode::SafeDownCast(defaultModelDisplayNode)->SetVisibility2D(0);
 
   vtkMRMLNode* defaultSegmentationDisplayNode = scene->GetDefaultNodeByClass("vtkMRMLSegmentationDisplayNode");
   if (!defaultSegmentationDisplayNode)
