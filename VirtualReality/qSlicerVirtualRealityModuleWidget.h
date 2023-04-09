@@ -61,7 +61,7 @@ protected slots:
 protected:
   QScopedPointer<qSlicerVirtualRealityModuleWidgetPrivate> d_ptr;
 
-  virtual void setup();
+  void setup() override;
 
   double getMagnificationFromPower(double powerOfTen);
   double getPowerFromMagnification(double magnification);

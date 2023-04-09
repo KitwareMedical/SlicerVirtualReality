@@ -38,9 +38,9 @@ public:
   typedef vtkVirtualRealityViewInteractor Self;
 
   vtkTypeMacro(vtkVirtualRealityViewInteractor,vtkOpenVRRenderWindowInteractor);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  virtual void SetInteractorStyle(vtkInteractorObserver*);
+  virtual void SetInteractorStyle(vtkInteractorObserver*) override;
 
   ///@{
   /// Define Slicer specific heuristic for handling complex gestures.
