@@ -57,6 +57,8 @@ endif()
 #-----------------------------------------------------------------------------
 # Extension modules
 add_subdirectory(VirtualReality)
+add_subdirectory(GUIWidgets)
+add_subdirectory(PointerSimulator)
 ## NEXT_MODULE
 
 #-----------------------------------------------------------------------------
