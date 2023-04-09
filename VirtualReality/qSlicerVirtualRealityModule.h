@@ -51,14 +51,14 @@ public:
 
   qSlicerGetTitleMacro(QTMODULE_TITLE);
 
-  virtual QString helpText()const;
-  virtual QString acknowledgementText()const;
-  virtual QStringList contributors()const;
+  QString helpText()const override;
+  QString acknowledgementText()const override;
+  QStringList contributors()const override;
 
-  virtual QIcon icon()const;
+  QIcon icon()const override;
 
-  virtual QStringList categories()const;
-  virtual QStringList dependencies() const;
+  QStringList categories()const override;
+  QStringList dependencies() const override;
 
   Q_INVOKABLE bool isToolBarVisible();
   Q_INVOKABLE QToolBar* toolBar();
@@ -74,7 +74,7 @@ public slots:
 
   /// Set MRML scene for the module. Updates the default view settings based on
   /// the application settings.
-  virtual void setMRMLScene(vtkMRMLScene* scene);
+  void setMRMLScene(vtkMRMLScene* scene) override;
 
 protected slots:
   void onViewNodeModified();
@@ -82,13 +82,13 @@ protected slots:
 protected:
 
   /// Initialize the module
-  virtual void setup();
+  void setup() override;
 
   /// Create and return the widget representation associated to this module
-  virtual qSlicerAbstractModuleRepresentation* createWidgetRepresentation();
+  qSlicerAbstractModuleRepresentation* createWidgetRepresentation() override;
 
   /// Create and return the logic associated to this module
-  virtual vtkMRMLAbstractLogic* createLogic();
+  vtkMRMLAbstractLogic* createLogic() override;
 
 protected:
   QScopedPointer<qSlicerVirtualRealityModulePrivate> d_ptr;
