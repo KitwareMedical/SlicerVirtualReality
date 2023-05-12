@@ -114,6 +114,8 @@ protected:
   double LastViewUp[3];
   double LastViewPosition[3];
 
+  QString ActionManifestPath;
+
   QTimer VirtualRealityLoopTimer;
 };
 

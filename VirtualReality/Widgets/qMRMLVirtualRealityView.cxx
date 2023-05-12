@@ -156,6 +156,7 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   this->RenderWindow = vtkSmartPointer<vtkOpenVRRenderWindow>::New();
   this->Renderer = vtkSmartPointer<vtkOpenVRRenderer>::New();
   this->Interactor = vtkSmartPointer<vtkVirtualRealityViewInteractor>::New();
+  this->Interactor->SetActionManifestDirectory(q->actionManifestPath().toStdString());
   //this->Interactor = vtkSmartPointer<vtkOpenVRRenderWindowInteractor>::New(); //TODO: For debugging the original interactor
   this->InteractorStyle = vtkSmartPointer<vtkVirtualRealityViewInteractorStyle>::New();
   //this->InteractorStyle = vtkSmartPointer<vtkOpenVRInteractorStyle>::New(); //TODO: For debugging the original interactor
@@ -821,6 +822,10 @@ void qMRMLVirtualRealityView::setGestureButtonToNone()
   Q_D(qMRMLVirtualRealityView);
   d->Interactor->SetGestureButtonToNone();
 }
+
+//------------------------------------------------------------------------------
+CTK_SET_CPP(qMRMLVirtualRealityView, const QString&, setActionManifestPath, ActionManifestPath);
+CTK_GET_CPP(qMRMLVirtualRealityView, QString, actionManifestPath, ActionManifestPath);
 
 //------------------------------------------------------------------------------
 void qMRMLVirtualRealityView::onPhysicalToWorldMatrixModified()
