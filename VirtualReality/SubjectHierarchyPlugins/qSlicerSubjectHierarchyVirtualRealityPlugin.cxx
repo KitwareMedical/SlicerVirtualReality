@@ -145,7 +145,6 @@ void qSlicerSubjectHierarchyVirtualRealityPlugin::showContextMenuActionsForItem(
 bool qSlicerSubjectHierarchyVirtualRealityPlugin::getItemSelectable(vtkIdType itemID)
 {
   Q_UNUSED(itemID);
-  Q_D(qSlicerSubjectHierarchyVirtualRealityPlugin);
 
   vtkMRMLSubjectHierarchyNode* shNode = qSlicerSubjectHierarchyPluginHandler::instance()->subjectHierarchyNode();
   if (!shNode)
@@ -183,8 +182,6 @@ bool qSlicerSubjectHierarchyVirtualRealityPlugin::getItemSelectable(vtkIdType it
 //---------------------------------------------------------------------------
 void qSlicerSubjectHierarchyVirtualRealityPlugin::setCurrentItemSelectable(bool selectable)
 {
-  Q_D(qSlicerSubjectHierarchyVirtualRealityPlugin);
-
   vtkMRMLSubjectHierarchyNode* shNode = qSlicerSubjectHierarchyPluginHandler::instance()->subjectHierarchyNode();
   if (!shNode)
     {

@@ -228,8 +228,6 @@ void qSlicerVirtualRealityModulePrivate::addToolBar()
 //-----------------------------------------------------------------------------
 void qSlicerVirtualRealityModulePrivate::updateToolBar()
 {
-  Q_Q(qSlicerVirtualRealityModule);
-
   if (!this->VirtualRealityToggleAction)
   {
     return;
@@ -468,7 +466,6 @@ void qSlicerVirtualRealityModule::updateViewFromReferenceViewCamera()
 // --------------------------------------------------------------------------
 void qSlicerVirtualRealityModule::switchToVirtualRealityModule()
 {
-  Q_D(qSlicerVirtualRealityModule);
   if (!qSlicerApplication::application()
       || !qSlicerApplication::application()->moduleManager())
   {
