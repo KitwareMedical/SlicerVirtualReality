@@ -269,7 +269,6 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
 //---------------------------------------------------------------------------
 void qMRMLVirtualRealityViewPrivate::destroyRenderWindow()
 {
-  Q_Q(qMRMLVirtualRealityView);
   this->VirtualRealityLoopTimer.stop();
   // Must break the connection between interactor and render window,
   // otherwise they would circularly refer to each other and would not
@@ -403,7 +402,6 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
 //---------------------------------------------------------------------------
 double qMRMLVirtualRealityViewPrivate::desiredUpdateRate()
 {
-  Q_Q(qMRMLVirtualRealityView);
   double rate = this->MRMLVirtualRealityViewNode->GetDesiredUpdateRate();
 
   // enforce non-zero frame rate to avoid division by zero errors
@@ -419,7 +417,6 @@ double qMRMLVirtualRealityViewPrivate::desiredUpdateRate()
 //---------------------------------------------------------------------------
 double qMRMLVirtualRealityViewPrivate::stillUpdateRate()
 {
-  Q_Q(qMRMLVirtualRealityView);
   return 0.0001;
 }
 
@@ -592,7 +589,6 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodeWithHMDPose()
 //----------------------------------------------------------------------------
 void qMRMLVirtualRealityViewPrivate::updateTransformNodesWithTrackerPoses()
 {
-  Q_Q(qMRMLVirtualRealityView);
   for (uint32_t i = 0; i < this->RenderWindow->GetNumberOfDeviceHandlesForDevice(vtkEventDataDevice::GenericTracker); ++i)
   {
     vr::TrackedDeviceIndex_t dev = this->RenderWindow->GetDeviceHandleForDevice(vtkEventDataDevice::GenericTracker, i);
@@ -842,7 +838,6 @@ void qMRMLVirtualRealityView::onButton3DEvent(vtkObject* caller, void* call_data
   Q_UNUSED(caller);
   Q_UNUSED(vtk_event);
   Q_UNUSED(client_data);
-  Q_D(qMRMLVirtualRealityView);
 
   vtkEventDataDevice3D * ed = reinterpret_cast<vtkEventDataDevice3D*>(call_data);
 
