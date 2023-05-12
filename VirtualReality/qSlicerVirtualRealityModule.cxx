@@ -50,6 +50,7 @@
 #include "vtkMRMLScene.h"
 
 // Slicer includes
+#include "vtkSlicerApplicationLogic.h"
 #include "vtkSlicerCamerasModuleLogic.h"
 #include "vtkSlicerVolumeRenderingLogic.h"
 
@@ -133,6 +134,38 @@ void qSlicerVirtualRealityModulePrivate::addViewWidget()
 
   this->VirtualRealityViewWidget = new qMRMLVirtualRealityView();
   this->VirtualRealityViewWidget->setObjectName(QString("VirtualRealityWidget"));
+
+  if(q->isInstalled())
+  {
+    QString actionManifestPath = qSlicerCoreApplication::application()->extensionsInstallPath()  + "/bin";
+    this->VirtualRealityViewWidget->setActionManifestPath(actionManifestPath);
+  }
+  else
+  {
+    // Since the output of qSlicerAbstractCoreModule::path() is
+    //
+    //   <module-lib-dir>/qt-loadable-modules[/(Release|Debug|...)]
+    //
+    // where
+    //
+    //   <module-lib-dir> is equivalent to <extension-build-dir>/inner-build/lib/Slicer-X.Y
+    //
+    // and the action manifest files are in this directory
+    //
+    //   <extension-build-dir>/vtkRenderingOpenVR-build/
+    //
+    // we compose the path as such:
+
+    // First, we retrieve <module-lib-dir>
+    std::string moduleLibDirectory = vtkSlicerApplicationLogic::GetModuleSlicerXYLibDirectory(q->path().toStdString());
+
+    // ... then we change the directory to vtkRenderingOpenVR-build
+    QString actionManifestPath = QString::fromStdString(moduleLibDirectory + "/../../../vtkRenderingOpenVR-build");
+
+    this->VirtualRealityViewWidget->setActionManifestPath(actionManifestPath);
+  }
+
+  qDebug() << "actionManifestPath:" << this->VirtualRealityViewWidget->actionManifestPath();
 
   qSlicerAbstractCoreModule* camerasModule =
     qSlicerCoreApplication::application()->moduleManager()->module("Cameras");

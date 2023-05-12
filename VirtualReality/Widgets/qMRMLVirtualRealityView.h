@@ -121,6 +121,12 @@ public:
   Q_INVOKABLE void setGestureButtonToNone();
   ///@}
 
+  ///@{
+  /// Path where the action manifest .json files are located.
+  void setActionManifestPath(const QString& path);
+  QString actionManifestPath() const;
+  ///@}
+
 signals:
 
   void physicalToWorldMatrixModified();
