@@ -25,14 +25,10 @@
 // CTK includes
 #include "ctkDoubleSpinBox.h"
 
-// MRML includes
-#include "vtkMRMLScene.h"
-
 // VirtualReality includes
 #include "qSlicerVirtualRealityModule.h"
 #include "qMRMLVirtualRealityView.h"
 #include "vtkMRMLVirtualRealityViewNode.h"
-#include "vtkMRMLVirtualRealityViewDisplayableManagerFactory.h"
 #include "vtkSlicerVirtualRealityLogic.h"
 
 //-----------------------------------------------------------------------------

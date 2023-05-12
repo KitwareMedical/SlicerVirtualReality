@@ -27,7 +27,6 @@
 
 // VTK includes
 #include "vtkObject.h"
-#include "vtkOpenVRRenderWindow.h" // for enums
 #include "vtkEventData.h"
 
 #include "vtkSlicerVirtualRealityModuleMRMLExport.h"

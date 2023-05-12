@@ -25,16 +25,11 @@
 
 // MRML includes
 #include "vtkMRMLAbstractThreeDViewDisplayableManager.h"
+#include "vtkMRMLDisplayableNode.h"
+#include "vtkMRMLDisplayNode.h"
 #include "vtkMRMLInteractionEventData.h"
 #include "vtkMRMLLinearTransformNode.h"
-#include "vtkMRMLModelDisplayableManager.h"
-#include "vtkMRMLModelDisplayNode.h"
-#include "vtkMRMLModelNode.h"
 #include "vtkMRMLScene.h"
-#include "vtkMRMLSegmentationNode.h"
-#include "vtkMRMLSegmentationDisplayNode.h"
-#include "vtkMRMLVolumeNode.h"
-#include "vtkMRMLVolumeRenderingDisplayNode.h"
 
 // VTK includes
 #include <vtkCamera.h>

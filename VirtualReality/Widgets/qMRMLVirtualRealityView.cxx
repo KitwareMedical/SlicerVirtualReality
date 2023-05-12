@@ -45,15 +45,8 @@
 #include <ctkAxesWidget.h>
 #include <ctkPimpl.h>
 
-// qMRML includes
-#include "qMRMLColors.h"
-#include "qMRMLThreeDView.h"
-#include "qMRMLThreeDWidget.h"
-
 // Slicer includes
 #include "qSlicerApplication.h"
-#include "qSlicerLayoutManager.h"
-#include "vtkSlicerConfigure.h" // For Slicer_USE_OpenVR
 #include "vtkSlicerCamerasModuleLogic.h"
 
 // VirtualReality includes
