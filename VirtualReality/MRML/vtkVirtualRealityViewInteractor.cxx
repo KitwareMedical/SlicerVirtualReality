@@ -23,6 +23,7 @@
 // VTK includes
 #include "vtkMatrix4x4.h"
 #include "vtkObjectFactory.h"
+#include "vtkVRRenderWindow.h"
 
 // SlicerVR includes
 #include "vtkVirtualRealityViewInteractorStyle.h"
