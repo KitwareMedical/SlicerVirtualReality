@@ -191,7 +191,6 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
 //-----------------------------------------------------------------------------
 void qSlicerVirtualRealityModuleWidget::setVirtualRealityConnected(bool connect)
 {
-  Q_D(qSlicerVirtualRealityModuleWidget);
   vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
   vrLogic->SetVirtualRealityConnected(connect);
 }
@@ -199,7 +198,6 @@ void qSlicerVirtualRealityModuleWidget::setVirtualRealityConnected(bool connect)
 //-----------------------------------------------------------------------------
 void qSlicerVirtualRealityModuleWidget::setVirtualRealityActive(bool activate)
 {
-  Q_D(qSlicerVirtualRealityModuleWidget);
   vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
   vrLogic->SetVirtualRealityActive(activate);
 }
@@ -207,7 +205,6 @@ void qSlicerVirtualRealityModuleWidget::setVirtualRealityActive(bool activate)
 //-----------------------------------------------------------------------------
 void qSlicerVirtualRealityModuleWidget::setTwoSidedLighting(bool active)
 {
-  Q_D(qSlicerVirtualRealityModuleWidget);
   vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
   vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
   if (vrViewNode)
@@ -219,7 +216,6 @@ void qSlicerVirtualRealityModuleWidget::setTwoSidedLighting(bool active)
 //-----------------------------------------------------------------------------
 void qSlicerVirtualRealityModuleWidget::setBackLights(bool active)
 {
-  Q_D(qSlicerVirtualRealityModuleWidget);
   vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
   vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
   if (vrViewNode)
@@ -231,7 +227,6 @@ void qSlicerVirtualRealityModuleWidget::setBackLights(bool active)
 //-----------------------------------------------------------------------------
 void qSlicerVirtualRealityModuleWidget::setControllerModelsVisible(bool visible)
 {
-  Q_D(qSlicerVirtualRealityModuleWidget);
   vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
   vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
   if (vrViewNode)
@@ -243,7 +238,6 @@ void qSlicerVirtualRealityModuleWidget::setControllerModelsVisible(bool visible)
 //-----------------------------------------------------------------------------
 void qSlicerVirtualRealityModuleWidget::setTrackingReferenceModelsVisible(bool visible)
 {
-  Q_D(qSlicerVirtualRealityModuleWidget);
   vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
   vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
   if (vrViewNode)
@@ -255,7 +249,6 @@ void qSlicerVirtualRealityModuleWidget::setTrackingReferenceModelsVisible(bool v
 //-----------------------------------------------------------------------------
 void qSlicerVirtualRealityModuleWidget::setReferenceViewNode(vtkMRMLNode* node)
 {
-  Q_D(qSlicerVirtualRealityModuleWidget);
   vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
   vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
   if (vrViewNode)
@@ -268,7 +261,6 @@ void qSlicerVirtualRealityModuleWidget::setReferenceViewNode(vtkMRMLNode* node)
 //-----------------------------------------------------------------------------
 void qSlicerVirtualRealityModuleWidget::updateViewFromReferenceViewCamera()
 {
-  Q_D(qSlicerVirtualRealityModuleWidget);
   qSlicerVirtualRealityModule* vrModule = dynamic_cast<qSlicerVirtualRealityModule*>(this->module());
   if (!vrModule)
   {
@@ -285,7 +277,6 @@ void qSlicerVirtualRealityModuleWidget::updateViewFromReferenceViewCamera()
 //-----------------------------------------------------------------------------
 void qSlicerVirtualRealityModuleWidget::onDesiredUpdateRateChanged(double fps)
 {
-  Q_D(qSlicerVirtualRealityModuleWidget);
   vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
   vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
   if (vrViewNode)
@@ -297,7 +288,6 @@ void qSlicerVirtualRealityModuleWidget::onDesiredUpdateRateChanged(double fps)
 //-----------------------------------------------------------------------------
 void qSlicerVirtualRealityModuleWidget::onMotionSensitivityChanged(double percent)
 {
-  Q_D(qSlicerVirtualRealityModuleWidget);
   vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
   vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
   if (vrViewNode)
@@ -309,7 +299,6 @@ void qSlicerVirtualRealityModuleWidget::onMotionSensitivityChanged(double percen
 //-----------------------------------------------------------------------------
 void qSlicerVirtualRealityModuleWidget::onMotionSpeedChanged(double speedMps)
 {
-  Q_D(qSlicerVirtualRealityModuleWidget);
   vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
   vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
   if (vrViewNode)
@@ -385,7 +374,6 @@ double qSlicerVirtualRealityModuleWidget::getPowerFromMagnification(double magni
 //-----------------------------------------------------------------------------
 void qSlicerVirtualRealityModuleWidget::setControllerTransformsUpdate(bool active)
 {
-  Q_D(qSlicerVirtualRealityModuleWidget);
   vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
   vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
   if (vrViewNode)
@@ -397,7 +385,6 @@ void qSlicerVirtualRealityModuleWidget::setControllerTransformsUpdate(bool activ
 //-----------------------------------------------------------------------------
 void qSlicerVirtualRealityModuleWidget::setHMDTransformUpdate(bool active)
 {
-  Q_D(qSlicerVirtualRealityModuleWidget);
   vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
   vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
   if (vrViewNode)
@@ -409,7 +396,6 @@ void qSlicerVirtualRealityModuleWidget::setHMDTransformUpdate(bool active)
 //----------------------------------------------------------------------------
 void qSlicerVirtualRealityModuleWidget::setTrackerTransformsUpdate(bool active)
 {
-  Q_D(qSlicerVirtualRealityModuleWidget);
   vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
   vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
   if (vrViewNode)
