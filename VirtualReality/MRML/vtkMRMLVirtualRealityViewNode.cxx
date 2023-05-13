@@ -341,7 +341,7 @@ std::vector<vtkMRMLTransformNode*> vtkMRMLVirtualRealityViewNode::GetTrackerTran
 
   std::vector<std::string> roles;
   this->GetNodeReferenceRoles(roles);
-  for (std::string role : roles)
+  for (const std::string& role : roles)
   {
     if (role.find(this->TrackerTransformRole) != std::string::npos)
     {
