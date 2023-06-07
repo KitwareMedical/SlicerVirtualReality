@@ -123,8 +123,8 @@ public:
 
   ///@{
   /// Path where the action manifest .json files are located.
-  void setActionManifestPath(const QString& path);
-  QString actionManifestPath() const;
+  Q_INVOKABLE void setActionManifestPath(const QString& path);
+  Q_INVOKABLE QString actionManifestPath() const;
   ///@}
 
 signals:
