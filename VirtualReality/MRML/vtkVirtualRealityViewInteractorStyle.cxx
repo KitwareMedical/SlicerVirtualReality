@@ -791,10 +791,15 @@ void vtkVirtualRealityViewInteractorStyle::OnPinch3D()
     this->Interactor->GetEventPositions(pointer)[0], this->Interactor->GetEventPositions(pointer)[1]);
 
   // Get current controller poses
+  vr::TrackedDevicePose_t* tdPose;
+
+  rw->GetOpenVRPose(vtkEventDataDevice::LeftController, &tdPose);
   vtkNew<vtkMatrix4x4> currentController0Pose_Physical;
-  rwi->GetPhysicalEventPose(currentController0Pose_Physical, 0);
+  rw->SetMatrixFromOpenVRPose(currentController0Pose_Physical, *tdPose);
+
+  rw->GetOpenVRPose(vtkEventDataDevice::RightController, &tdPose);
   vtkNew<vtkMatrix4x4> currentController1Pose_Physical;
-  rwi->GetPhysicalEventPose(currentController1Pose_Physical, 1);
+  rw->SetMatrixFromOpenVRPose(currentController1Pose_Physical, *tdPose);
 
   // Get combined current controller pose
   vtkNew<vtkMatrix4x4> combinedCurrentControllerPose;
@@ -850,10 +855,17 @@ void vtkVirtualRealityViewInteractorStyle::OnStartGesture()
 {
   // Store combined starting controller pose
   vtkOpenVRRenderWindowInteractor* rwi = static_cast<vtkOpenVRRenderWindowInteractor*>(this->Interactor);
+  vtkOpenVRRenderWindow* rw = static_cast<vtkOpenVRRenderWindow*>(rwi->GetRenderWindow());
+
+  vr::TrackedDevicePose_t* tdPose;
+
+  rw->GetOpenVRPose(vtkEventDataDevice::LeftController, &tdPose);
   vtkNew<vtkMatrix4x4> startingController0Pose_Physical;
-  rwi->GetStartingPhysicalEventPose(startingController0Pose_Physical, 0);
+  rw->SetMatrixFromOpenVRPose(startingController0Pose_Physical, *tdPose);
+
+  rw->GetOpenVRPose(vtkEventDataDevice::RightController, &tdPose);
   vtkNew<vtkMatrix4x4> startingController1Pose_Physical;
-  rwi->GetStartingPhysicalEventPose(startingController1Pose_Physical, 1);
+  rw->SetMatrixFromOpenVRPose(startingController1Pose_Physical, *tdPose);
 
   if ( this->Internal->CalculateCombinedControllerPose(
     startingController0Pose_Physical, startingController1Pose_Physical, this->Internal->CombinedStartingControllerPose) )
