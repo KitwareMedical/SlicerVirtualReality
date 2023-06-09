@@ -160,7 +160,7 @@ void qSlicerVirtualRealityModulePrivate::addViewWidget()
     std::string moduleLibDirectory = vtkSlicerApplicationLogic::GetModuleSlicerXYLibDirectory(q->path().toStdString());
 
     // ... then we change the directory to vtkRenderingOpenVR-build
-    QString actionManifestPath = QString::fromStdString(moduleLibDirectory + "/../../../vtkRenderingOpenVR-build");
+    QString actionManifestPath = QString::fromStdString(moduleLibDirectory + "/../../../vtkRenderingOpenVR-build/");
 
     this->VirtualRealityViewWidget->setActionManifestPath(actionManifestPath);
   }
