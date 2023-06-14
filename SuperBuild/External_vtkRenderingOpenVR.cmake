@@ -53,6 +53,10 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
   set(EP_SOURCE_DIR ${VTK_SOURCE_DIR}/${_module_subdir})
   set(EP_BINARY_DIR ${CMAKE_BINARY_DIR}/${proj}-build)
 
+  # The "vtk_openvr_actions.json" and "vtk_openvr_binding_*.json" files
+  # are then installed into "${_manifest_install_dir}/vr_actions/" directory.
+  set(_openvr_manifest_install_dir ${Slicer_INSTALL_THIRDPARTY_LIB_DIR})
+
   ExternalProject_Add(${proj}
     ${${proj}_EP_ARGS}
     DOWNLOAD_COMMAND ""
@@ -75,6 +79,7 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
       -DCMAKE_LIBRARY_OUTPUT_DIRECTORY:PATH=${CMAKE_BINARY_DIR}/${Slicer_THIRDPARTY_LIB_DIR}
       -DVTK_INSTALL_RUNTIME_DIR:STRING=${Slicer_INSTALL_THIRDPARTY_LIB_DIR}
       -DVTK_INSTALL_LIBRARY_DIR:STRING=${Slicer_INSTALL_THIRDPARTY_LIB_DIR}
+      -DCMAKE_INSTALL_DATAROOTDIR:STRING=${_openvr_manifest_install_dir}
       -DCMAKE_MACOSX_RPATH:BOOL=0
       # Required to find VTK
       -DVTK_DIR:PATH=${VTK_DIR}

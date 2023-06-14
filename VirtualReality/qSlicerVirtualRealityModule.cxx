@@ -137,7 +137,10 @@ void qSlicerVirtualRealityModulePrivate::addViewWidget()
 
   if(q->isInstalled())
   {
-    QString actionManifestPath = qSlicerCoreApplication::application()->extensionsInstallPath()  + "/bin";
+    // "vr_actions" sub-directory is hard-coded in "VTK/Rendering/OpenVR/CMakeLists.txt"
+    // "Slicer_THIRDPARTY_LIB_DIR" is set in "External_vtkRenderingOpenVR.cmake"
+    QString actionManifestPath = QString("%1/SlicerVirtualReality/%2/vr_actions/").arg(
+      qSlicerCoreApplication::application()->extensionsInstallPath(), Slicer_THIRDPARTY_LIB_DIR);
     this->VirtualRealityViewWidget->setActionManifestPath(actionManifestPath);
   }
   else
@@ -152,15 +155,15 @@ void qSlicerVirtualRealityModulePrivate::addViewWidget()
     //
     // and the action manifest files are in this directory
     //
-    //   <extension-build-dir>/vtkRenderingOpenVR-build/
+    //   <extension-build-dir>/vtkRenderingOpenVR-build/externals/vtkRenderingOpenVR/
     //
     // we compose the path as such:
 
     // First, we retrieve <module-lib-dir>
     std::string moduleLibDirectory = vtkSlicerApplicationLogic::GetModuleSlicerXYLibDirectory(q->path().toStdString());
 
-    // ... then we change the directory to vtkRenderingOpenVR-build
-    QString actionManifestPath = QString::fromStdString(moduleLibDirectory + "/../../../vtkRenderingOpenVR-build/");
+    // ... then we change the directory to vtkRenderingOpenVR-build/externals/vtkRenderingOpenVR/
+    QString actionManifestPath = QString::fromStdString(moduleLibDirectory + "/../../../vtkRenderingOpenVR-build/externals/vtkRenderingOpenVR/");
 
     this->VirtualRealityViewWidget->setActionManifestPath(actionManifestPath);
   }
