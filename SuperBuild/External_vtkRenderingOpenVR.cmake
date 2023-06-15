@@ -94,6 +94,8 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
       ${${proj}_DEPENDS}
     )
 
+  ExternalProject_AlwaysConfigure(${proj})
+
   set(${proj}_DIR ${EP_BINARY_DIR})
 
   #-----------------------------------------------------------------------------
