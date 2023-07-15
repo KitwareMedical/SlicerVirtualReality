@@ -46,7 +46,7 @@ public:
   /// Define Slicer specific heuristic for handling complex gestures.
   ///
   /// See https://gitlab.kitware.com/vtk/vtk/-/merge_requests/9892
-  virtual void HandleGripEvents(vtkEventData* ed) override;
+  virtual void HandleComplexGestureEvents(vtkEventData* ed) override;
   virtual void RecognizeComplexGesture(vtkEventDataDevice3D* edata) override;
   ///@}
 

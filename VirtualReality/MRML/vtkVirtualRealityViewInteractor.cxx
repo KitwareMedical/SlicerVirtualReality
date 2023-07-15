@@ -42,7 +42,7 @@ vtkVirtualRealityViewInteractor::~vtkVirtualRealityViewInteractor()
 }
 
 //------------------------------------------------------------------------------
-void vtkVirtualRealityViewInteractor::HandleGripEvents(vtkEventData* ed)
+void vtkVirtualRealityViewInteractor::HandleComplexGestureEvents(vtkEventData* ed)
 {
   // [SlicerVirtualReality]
   //
