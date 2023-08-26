@@ -155,15 +155,15 @@ void qSlicerVirtualRealityModulePrivate::addViewWidget()
     //
     // and the action manifest files are in this directory
     //
-    //   <extension-build-dir>/vtkRenderingOpenVR-build/externals/vtkRenderingOpenVR/
+    //   <extension-build-dir>/vtkRenderingOpenVR-build/vtkRenderingOpenVR/
     //
     // we compose the path as such:
 
     // First, we retrieve <module-lib-dir>
     std::string moduleLibDirectory = vtkSlicerApplicationLogic::GetModuleSlicerXYLibDirectory(q->path().toStdString());
 
-    // ... then we change the directory to vtkRenderingOpenVR-build/externals/vtkRenderingOpenVR/
-    QString actionManifestPath = QString::fromStdString(moduleLibDirectory + "/../../../vtkRenderingOpenVR-build/externals/vtkRenderingOpenVR/");
+    // ... then we change the directory to vtkRenderingOpenVR-build/vtkRenderingOpenVR/
+    QString actionManifestPath = QString::fromStdString(moduleLibDirectory + "/../../../vtkRenderingOpenVR-build/vtkRenderingOpenVR/");
 
     this->VirtualRealityViewWidget->setActionManifestPath(actionManifestPath);
   }
