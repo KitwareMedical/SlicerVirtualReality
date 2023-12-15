@@ -25,6 +25,7 @@
 
 // MRML includes
 #include "vtkMRMLAbstractThreeDViewDisplayableManager.h"
+#include "vtkMRMLDisplayableManagerGroup.h"
 #include "vtkMRMLDisplayableNode.h"
 #include "vtkMRMLDisplayNode.h"
 #include "vtkMRMLInteractionEventData.h"
@@ -35,6 +36,7 @@
 #include <vtkCamera.h>
 #include <vtkCellPicker.h>
 #include <vtkCallbackCommand.h>
+#include <vtkInteractorStyle.h>
 #include <vtkMath.h>
 #include <vtkObjectFactory.h>
 #include <vtkPoints.h>
@@ -45,10 +47,12 @@
 #include <vtkWeakPointer.h>
 #include <vtkWorldPointPicker.h>
 
+#include <vtkOpenVRInteractorStyle.h>
 #include "vtkOpenVRRenderWindow.h"
 #include "vtkOpenVRRenderWindowInteractor.h"
 
 
+//----------------------------------------------------------------------------
 vtkStandardNewMacro(vtkVirtualRealityViewInteractorStyle);
 
 //----------------------------------------------------------------------------
@@ -65,9 +69,6 @@ public:
     vtkMatrix4x4* controller0Pose, vtkMatrix4x4* controller1Pose, vtkMatrix4x4* combinedPose);
 
 public:
-  /// Store required controllers information when performing action
-  int InteractionState[vtkEventDataNumberOfDevices];
-
   vtkWeakPointer<vtkMRMLDisplayableNode> PickedNode[vtkEventDataNumberOfDevices];
 
   //vtkPlane* ClippingPlanes[vtkEventDataNumberOfDevices];
@@ -86,7 +87,6 @@ vtkVirtualRealityViewInteractorStyle::vtkInternal::vtkInternal()
 {
   for (int d = 0; d < vtkEventDataNumberOfDevices; ++d)
   {
-    this->InteractionState[d] = VTKIS_NONE;
     this->PickedNode[d] = nullptr;
     //this->ClippingPlanes[d] = nullptr;
   }
@@ -175,30 +175,67 @@ vtkVirtualRealityViewInteractorStyle::vtkVirtualRealityViewInteractorStyle()
 
   this->Internal = new vtkInternal();
 
-  for (int d = 0; d < vtkEventDataNumberOfDevices; ++d)
-  {
-    this->Internal->InteractionState[d] = VTKIS_NONE;
-
-    for (int i = 0; i < vtkEventDataNumberOfInputs; i++)
-    {
-      this->InputMap[d][i] = -1;
-    }
-  }
 
   this->AccuratePicker = vtkSmartPointer<vtkCellPicker>::New();
   this->AccuratePicker->SetTolerance( .005 );
   this->QuickPicker = vtkSmartPointer<vtkWorldPointPicker>::New();
 
   // Create default inputs mapping
+
+  // The "eventId to state" mapping (see call to `MapInputToAction` below) applies to right and left
+  // controller buttons because they are bound to the same eventId:
+  // - `vtk_openvr_binding_*.json` files define the "button to action" mapping
+  // - `vtkOpenVRInteractorStyle()` contructor defines the "action to eventId" mapping
+
+  this->MapInputToAction(vtkCommand::ViewerMovement3DEvent, VTKIS_DOLLY);
+  this->MapInputToAction(vtkCommand::Select3DEvent, VTKIS_POSITION_PROP);
+
+  /*
   this->MapInputToAction(vtkEventDataDevice::RightController,
     vtkEventDataDeviceInput::Grip, VTKIS_POSITION_PROP);
+
   this->MapInputToAction(vtkEventDataDevice::RightController,
     vtkEventDataDeviceInput::TrackPad, VTKIS_DOLLY);
 
   this->MapInputToAction(vtkEventDataDevice::LeftController,
     vtkEventDataDeviceInput::Grip, VTKIS_POSITION_PROP);
+  */
 
-  this->EventCallbackCommand->SetCallback(vtkVirtualRealityViewInteractorStyle::ProcessEvents);
+  // Before in Slicer:
+  //   vtkEventDataDevice::RightController, vtkEventDataDeviceInput::Grip -> VTKIS_POSITION_PROP
+  //
+  // After in Slicer:
+  //   See above
+  //
+  // Before OpenVR refactoring to "action based input model" introduced in kitware/VTK@b7f02e622:
+  //   vtkEventDataDevice::RightController vtkEventDataDeviceInput::Trigger -> VTKIS_POSITION_PROP
+  //
+  // After OpenVR refactoring:
+  //   vtkCommand::Select3DEvent -> VTKIS_POSITION_PROP
+
+  // Before in Slicer:
+  //   vtkEventDataDevice::RightController, vtkEventDataDeviceInput::TrackPad -> VTKIS_DOLLY
+  //
+  // After in Slicer:
+  //   See above
+  //
+  // Before OpenVR refactoring to "action based input model" introduced in kitware/VTK@b7f02e622:
+  //   same mapping
+  //
+  // After OpenVR refactoring:
+  //   Calling MapInputToAction with "vtkCommand::ViewerMovement3DEvent -> VTKIS_DOLLY"
+
+  // Before in Slicer:
+  //   vtkEventDataDevice::LeftController, vtkEventDataDeviceInput::Grip -> VTKIS_POSITION_PROP
+  //
+  // After in Slicer:
+  //   See above
+  //
+  // Before OpenVR refactoring to "action based input model" introduced in kitware/VTK@b7f02e622:
+  //   No mapping
+  //
+  // After OpenVR refactoring:
+  //   No mapping
 }
 
 //----------------------------------------------------------------------------
@@ -222,150 +259,17 @@ void vtkVirtualRealityViewInteractorStyle::SetInteractor(vtkRenderWindowInteract
   }
 
   this->Superclass::SetInteractor(i);
-
-  if (i)
-  {
-    this->SetupActions(i);
-  }
-
-  // add observers for each of the events handled in ProcessEvents
-  if (i)
-  {
-    i->AddObserver(vtkCommand::StartPinchEvent,
-                   this->EventCallbackCommand,
-                   this->Priority);
-
-    i->AddObserver(vtkCommand::StartRotateEvent,
-                   this->EventCallbackCommand,
-                   this->Priority);
-
-    i->AddObserver(vtkCommand::StartPanEvent,
-                   this->EventCallbackCommand,
-                   this->Priority);
-
-    i->AddObserver(vtkCommand::EndPinchEvent,
-                   this->EventCallbackCommand,
-                   this->Priority);
-
-    i->AddObserver(vtkCommand::EndRotateEvent,
-                   this->EventCallbackCommand,
-                   this->Priority);
-
-    i->AddObserver(vtkCommand::EndPanEvent,
-                   this->EventCallbackCommand,
-                   this->Priority);
-  }
 }
 
 //----------------------------------------------------------------------------
-void vtkVirtualRealityViewInteractorStyle::ProcessEvents(
-  vtkObject* object, unsigned long event, void* clientdata, void* calldata)
+void vtkVirtualRealityViewInteractorStyle::SetDisplayableManagers(vtkMRMLDisplayableManagerGroup* displayableManagers)
 {
-  Superclass::ProcessEvents(object, event, clientdata, calldata);
-
-  vtkVirtualRealityViewInteractorStyle* self =
-    reinterpret_cast<vtkVirtualRealityViewInteractorStyle*>(clientdata);
-
-  switch (event)
-  {
-    case vtkCommand::StartPinchEvent:
-    case vtkCommand::StartRotateEvent:
-    case vtkCommand::StartPanEvent:
-      self->OnStartGesture();
-      break;
-    case vtkCommand::EndPinchEvent:
-    case vtkCommand::EndRotateEvent:
-    case vtkCommand::EndPanEvent:
-      self->OnEndGesture();
-      break;
-  }
-}
-
-//----------------------------------------------------------------------------
-// Copied from vtkOpenVRInteractorStyle::SetupActions
-//------------------------------------------------------------------------------
-void vtkVirtualRealityViewInteractorStyle::SetupActions(vtkRenderWindowInteractor* iren)
-{
-  vtkOpenVRRenderWindowInteractor* oiren = vtkOpenVRRenderWindowInteractor::SafeDownCast(iren);
-
-  if (oiren)
-  {
-    oiren->AddAction("/actions/vtk/in/Elevation", vtkCommand::Elevation3DEvent, true);
-    oiren->AddAction("/actions/vtk/in/Movement", vtkCommand::ViewerMovement3DEvent, true);
-    oiren->AddAction("/actions/vtk/in/NextCameraPose", vtkCommand::NextPose3DEvent, false);
-    oiren->AddAction("/actions/vtk/in/PositionProp", vtkCommand::PositionProp3DEvent, false);
-    oiren->AddAction("/actions/vtk/in/ShowMenu", vtkCommand::Menu3DEvent, false);
-    oiren->AddAction("/actions/vtk/in/StartElevation", vtkCommand::Elevation3DEvent, false);
-    oiren->AddAction("/actions/vtk/in/StartMovement", vtkCommand::ViewerMovement3DEvent, false);
-    oiren->AddAction("/actions/vtk/in/TriggerAction", vtkCommand::Select3DEvent, false);
-  }
-}
-
-//----------------------------------------------------------------------------
-// Generic events binding
-//----------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------
-bool vtkVirtualRealityViewInteractorStyle::DelegateInteractionEventToDisplayableManagers(vtkEventData* inputEventData)
-{
-  // Get display and world position
-  int* displayPositionInt = this->GetInteractor()->GetEventPosition();
-  vtkRenderer* pokedRenderer = this->GetInteractor()->FindPokedRenderer(displayPositionInt[0], displayPositionInt[1]);
-  if (!pokedRenderer || !inputEventData)
-  {
-    // can happen during application shutdown
-    return false;
-  }
-
-  vtkNew<vtkMRMLInteractionEventData> ed;
-  ed->SetType(inputEventData->GetType());
-  int displayPositionCorrected[2] = { displayPositionInt[0] - pokedRenderer->GetOrigin()[0], displayPositionInt[1] - pokedRenderer->GetOrigin()[1] };
-  ed->SetDisplayPosition(displayPositionCorrected);
-  double worldPosition[3] = { 0.0, 0.0, 0.0 };
-  vtkEventDataDevice3D* inputEventDataDevice3D = inputEventData->GetAsEventDataDevice3D();
-  if (!inputEventDataDevice3D)
-  {
-    vtkErrorMacro("DelegateInteractionEventToDisplayableManagers: Invalid event data type");
-    return false;
-  }
-  inputEventDataDevice3D->GetWorldPosition(worldPosition);
-  ed->SetDevice(inputEventDataDevice3D->GetDevice());
-  ed->SetWorldPosition(worldPosition, true);
-  ed->SetWorldToPhysicalScale(this->GetMagnification());
-  ed->SetAccuratePicker(this->AccuratePicker);
-  ed->SetRenderer(this->CurrentRenderer);
-  std::string interactionContextName;
-  if (ed->GetDevice() == vtkEventDataDevice::LeftController)
-  {
-    interactionContextName = "LeftController"; //TODO: Store these elsewhere
-  }
-  else if (ed->GetDevice() == vtkEventDataDevice::RightController)
-  {
-    interactionContextName = "RightController"; //TODO: Store these elsewhere
-  }
-  else if (ed->GetDevice() == vtkEventDataDevice::HeadMountedDisplay)
-  {
-      interactionContextName = "HeadMountedDisplay";
-  }
-  else
-  {
-    vtkErrorMacro("DelegateInteractionEventToDisplayableManagers: Unrecognized device");
-  }
-  ed->SetInteractionContextName(interactionContextName);
-
-  ed->SetAttributesFromInteractor(this->GetInteractor());
-
-  return this->DelegateInteractionEventDataToDisplayableManagers(ed);
+  this->DisplayableManagers = displayableManagers;
 }
 
 //----------------------------------------------------------------------------
 void vtkVirtualRealityViewInteractorStyle::OnMove3D(vtkEventData* edata)
 {
-  if (this->DelegateInteractionEventToDisplayableManagers(edata))
-  {
-    return;
-  }
-
   vtkEventDataDevice3D *edd = edata->GetAsEventDataDevice3D();
   if (!edd)
   {
@@ -377,7 +281,7 @@ void vtkVirtualRealityViewInteractorStyle::OnMove3D(vtkEventData* edata)
   int x = this->Interactor->GetEventPosition()[0];
   int y = this->Interactor->GetEventPosition()[1];
 
-  switch (this->Internal->InteractionState[idev])
+  switch (this->InteractionState[idev])
   {
     case VTKIS_POSITION_PROP:
       this->FindPokedRenderer(x, y);
@@ -400,20 +304,12 @@ void vtkVirtualRealityViewInteractorStyle::OnMove3D(vtkEventData* edata)
   }
 
   //// Update rays
-  //if (this->HoverPick)
-  //{
-  //  this->UpdateRay(edd->GetDevice());
-  //}
+  this->UpdateRay(edd->GetDevice());
 }
 
 //----------------------------------------------------------------------------
 void vtkVirtualRealityViewInteractorStyle::OnSelect3D(vtkEventData* edata)
 {
-  if (this->DelegateInteractionEventToDisplayableManagers(edata))
-  {
-    return;
-  }
-
   vtkEventDataDevice3D *bd = edata->GetAsEventDataDevice3D();
   if (!bd)
   {
@@ -424,8 +320,9 @@ void vtkVirtualRealityViewInteractorStyle::OnSelect3D(vtkEventData* edata)
   int y = this->Interactor->GetEventPosition()[1];
   this->FindPokedRenderer(x, y);
 
-  int state = this->InputMap[static_cast<int>(bd->GetDevice())][static_cast<int>(bd->GetInput())];
-  if (state == -1)
+  int eid = bd->GetType();
+  int state = this->GetMappedAction(static_cast<vtkCommand::EventIds>(eid));
+  if (state == VTKIS_NONE)
   {
     return;
   }
@@ -448,7 +345,6 @@ void vtkVirtualRealityViewInteractorStyle::OnViewerMovement3D(vtkEventData* edat
     // TODO: Add support for FLY_STYLE, GROUNDED_STYLE, and ElevationEvent that
     // were added in VTK@7a2c71e and VTK@ca4441c
 }
-
 
 //------------------------------------------------------------------------------
 void vtkVirtualRealityViewInteractorStyle::Movement3D(int interactionState, vtkEventData* edata)
@@ -490,7 +386,7 @@ void vtkVirtualRealityViewInteractorStyle::Movement3D(int interactionState, vtkE
   // call start. When the joystick returns to the center, call end.
   if ((edd->GetInput() == vtkEventDataDeviceInput::Joystick ||
     edd->GetInput() == vtkEventDataDeviceInput::TrackPad) &&
-    this->Internal->InteractionState[idev] != interactionState && fabs(pos[1]) > 0.1)
+    this->InteractionState[idev] != interactionState && fabs(pos[1]) > 0.1)
   {
     this->StartAction(interactionState, edd);
     this->LastTrackPadPosition[0] = 0.0;
@@ -498,7 +394,7 @@ void vtkVirtualRealityViewInteractorStyle::Movement3D(int interactionState, vtkE
     return;
   }
 
-  if (this->Internal->InteractionState[idev] == interactionState)
+  if (this->InteractionState[idev] == interactionState)
   {
     // Stop when returning to the center on the joystick
     if ((edd->GetInput() == vtkEventDataDeviceInput::Joystick ||
@@ -687,7 +583,7 @@ void vtkVirtualRealityViewInteractorStyle::StartPositionProp(vtkEventDataDevice3
     }
   }
 
-  this->Internal->InteractionState[deviceIndex] = VTKIS_POSITION_PROP;
+  this->InteractionState[deviceIndex] = VTKIS_POSITION_PROP;
 
   // Don't start action if a controller is already positioning the prop
   int rc = static_cast<int>(vtkEventDataDevice::RightController);
@@ -708,7 +604,7 @@ void vtkVirtualRealityViewInteractorStyle::StartPositionProp(vtkEventDataDevice3
 void vtkVirtualRealityViewInteractorStyle::EndPositionProp(vtkEventDataDevice3D* edata)
 {
   int deviceIndex = static_cast<int>(edata->GetDevice());
-  this->Internal->InteractionState[deviceIndex] = VTKIS_NONE;
+  this->InteractionState[deviceIndex] = VTKIS_NONE;
   this->Internal->PickedNode[deviceIndex] = nullptr;
 }
 
@@ -720,7 +616,7 @@ void vtkVirtualRealityViewInteractorStyle::StartDolly3D(vtkEventDataDevice3D* ed
     return;
   }
   vtkEventDataDevice dev = ed->GetDevice();
-  this->Internal->InteractionState[static_cast<int>(dev)] = VTKIS_DOLLY;
+  this->InteractionState[static_cast<int>(dev)] = VTKIS_DOLLY;
   this->LastDolly3DEventTime->StartTimer();
 
   // this->GrabFocus(this->EventCallbackCommand);
@@ -730,7 +626,7 @@ void vtkVirtualRealityViewInteractorStyle::StartDolly3D(vtkEventDataDevice3D* ed
 void vtkVirtualRealityViewInteractorStyle::EndDolly3D(vtkEventDataDevice3D* ed)
 {
   vtkEventDataDevice dev = ed->GetDevice();
-  this->Internal->InteractionState[static_cast<int>(dev)] = VTKIS_NONE;
+  this->InteractionState[static_cast<int>(dev)] = VTKIS_NONE;
 
   this->LastDolly3DEventTime->StopTimer();
 }
@@ -769,8 +665,8 @@ void vtkVirtualRealityViewInteractorStyle::OnPinch3D()
     return;
   }
 
-  this->Internal->InteractionState[rc] = VTKIS_ZOOM;
-  this->Internal->InteractionState[lc] = VTKIS_ZOOM;
+  this->InteractionState[rc] = VTKIS_ZOOM;
+  this->InteractionState[lc] = VTKIS_ZOOM;
 
   if (this->CurrentRenderer == nullptr)
   {
@@ -886,34 +782,24 @@ void vtkVirtualRealityViewInteractorStyle::OnEndGesture()
 //----------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------
-void vtkVirtualRealityViewInteractorStyle::MapInputToAction(
-  vtkEventDataDevice device, vtkEventDataDeviceInput input, int state)
+int vtkVirtualRealityViewInteractorStyle::GetMappedAction(vtkCommand::EventIds eid)
 {
-  if (input >= vtkEventDataDeviceInput::NumberOfInputs || state < VTKIS_NONE)
+  // Since both `vtkEventDataAction::Press` and `vtkEventDataAction::Release` actions are
+  // added together to the map when using the 2-argument function
+  // `MapInputToAction(vtkCommand::EventIds eid, int state)`, and we are only using this
+  // version of the function, to get the state for the corresponding `(eventId, action)`,
+  // we simply lookup for `(eventId, vtkEventDataAction::Press)` to check if an event
+  // is already mapped.
+  vtkEventDataAction action = vtkEventDataAction::Press;
+
+  decltype(this->InputMap)::key_type key(eid, action);
+
+  auto it = this->InputMap.find(key);
+  if (it != this->InputMap.end())
   {
-    return;
+    return it->second;
   }
-
-  int oldstate = this->InputMap[static_cast<int>(device)][static_cast<int>(input)];
-  if (oldstate == state)
-  {
-    return;
-  }
-
-  this->InputMap[static_cast<int>(device)][static_cast<int>(input)] = state;
-  //this->AddTooltipForInput(device, input); //TODO:
-
-  this->Modified();
-}
-
-//----------------------------------------------------------------------------
-int vtkVirtualRealityViewInteractorStyle::GetMappedAction(vtkEventDataDevice device, vtkEventDataDeviceInput input)
-{
-  if (input >= vtkEventDataDeviceInput::NumberOfInputs || device >= vtkEventDataDevice::NumberOfDevices )
-  {
-    return VTKIS_NONE;
-  }
-  return this->InputMap[static_cast<int>(device)][static_cast<int>(input)];
+  return VTKIS_NONE;
 }
 
 //----------------------------------------------------------------------------
@@ -998,6 +884,12 @@ vtkMRMLScene* vtkVirtualRealityViewInteractorStyle::GetMRMLScene()
   }
 
   return this->DisplayableManagers->GetNthDisplayableManager(0)->GetMRMLScene();
+}
+
+//---------------------------------------------------------------------------
+vtkCellPicker* vtkVirtualRealityViewInteractorStyle::GetAccuratePicker()
+{
+  return this->AccuratePicker;
 }
 
 //---------------------------------------------------------------------------
