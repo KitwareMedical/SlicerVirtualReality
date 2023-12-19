@@ -2,7 +2,8 @@ set(KIT qSlicer${MODULE_NAME}Module)
 
 #-----------------------------------------------------------------------------
 set(KIT_TEST_SRCS
-  #qSlicer${MODULE_NAME}ModuleTest.cxx
+  vtkMRMLVirtualRealityLayoutNodeTest1.cxx
+  vtkMRMLVirtualRealityViewNodeTest1.cxx
   )
 
 #-----------------------------------------------------------------------------
@@ -14,4 +15,5 @@ slicerMacroConfigureModuleCxxTestDriver(
   )
 
 #-----------------------------------------------------------------------------
-#simple_test(qSlicer${MODULE_NAME}ModuleTest)
+simple_test(vtkMRMLVirtualRealityLayoutNodeTest1)
+simple_test(vtkMRMLVirtualRealityViewNodeTest1)
