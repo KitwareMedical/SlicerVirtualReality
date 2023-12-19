@@ -56,6 +56,10 @@ public:
   /// Process events not already delegated to displayable managers by CustomProcessEvents().
   static void ProcessEvents(vtkObject* object, unsigned long event, void* clientdata, void* calldata);
 
+  /// ComplexGesture bindings
+  virtual void OnStartGesture();
+  virtual void OnEndGesture();
+
   /// 3D event bindings
   // OnMove3D: Already implemented in vtkMRMLViewInteractorStyle
   // OnButton3D: Already implemented in vtkMRMLViewInteractorStyle

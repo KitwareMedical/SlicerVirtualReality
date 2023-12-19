@@ -140,13 +140,22 @@ void vtkVirtualRealityViewInteractorObserver::CustomProcessEvents(vtkObject* obj
 void vtkVirtualRealityViewInteractorObserver::ProcessEvents(
   vtkObject* object, unsigned long event, void* clientdata, void* calldata)
 {
-  Superclass::ProcessEvents(object, event, clientdata, calldata);
-
   vtkVirtualRealityViewInteractorObserver* self =
     reinterpret_cast<vtkVirtualRealityViewInteractorObserver*>(clientdata);
 
   switch (event)
     {
+
+    case vtkCommand::StartPinchEvent:
+    case vtkCommand::StartRotateEvent:
+    case vtkCommand::StartPanEvent:
+      self->OnStartGesture();
+      break;
+    case vtkCommand::EndPinchEvent:
+    case vtkCommand::EndRotateEvent:
+    case vtkCommand::EndPanEvent:
+      self->OnEndGesture();
+      break;
 
     /// 3D event bindings
     // Move3DEvent: Already observed in vtkMRMLViewInteractorStyle
@@ -177,6 +186,7 @@ void vtkVirtualRealityViewInteractorObserver::ProcessEvents(
       break;
 
     default:
+      Superclass::ProcessEvents(object, event, clientdata, calldata);
       break;
     }
 }
@@ -247,6 +257,22 @@ bool vtkVirtualRealityViewInteractorObserver::DelegateInteractionEventDataToDisp
   ed->SetInteractionContextName(interactionContextName);
 
   return this->Superclass::DelegateInteractionEventDataToDisplayableManagers(ed);
+}
+
+//----------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractorObserver::OnStartGesture()
+{
+  vtkVirtualRealityViewInteractorStyle* vrInteractorStyle =
+      vtkVirtualRealityViewInteractorStyle::SafeDownCast(this->GetInteractorStyle());
+  vrInteractorStyle->OnStartGesture();
+}
+
+//----------------------------------------------------------------------------
+void vtkVirtualRealityViewInteractorObserver::OnEndGesture()
+{
+  vtkVirtualRealityViewInteractorStyle* vrInteractorStyle =
+      vtkVirtualRealityViewInteractorStyle::SafeDownCast(this->GetInteractorStyle());
+  vrInteractorStyle->OnEndGesture();
 }
 
 //----------------------------------------------------------------------------
