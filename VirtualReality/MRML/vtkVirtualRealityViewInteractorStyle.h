@@ -59,8 +59,8 @@ public:
   /**
   * Interaction mode entry points.
   */
-  virtual void StartPositionProp(vtkEventDataDevice3D *);
-  virtual void EndPositionProp(vtkEventDataDevice3D *);
+  void StartPositionProp(vtkEventDataDevice3D *) override;
+  void EndPositionProp(vtkEventDataDevice3D *) override;
   //@}
 
   //@{

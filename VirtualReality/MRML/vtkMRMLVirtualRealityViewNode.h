@@ -41,19 +41,19 @@ public:
   /// MRMLNode methods
   //--------------------------------------------------------------------------
 
-  virtual vtkMRMLNode* CreateNodeInstance() override;
+  vtkMRMLNode* CreateNodeInstance() override;
 
   /// Read node attributes from XML file
-  virtual void ReadXMLAttributes(const char** atts) override;
+  void ReadXMLAttributes(const char** atts) override;
 
   /// Write this node's information to a MRML file in XML format.
-  virtual void WriteXML(ostream& of, int indent) override;
+  void WriteXML(ostream& of, int indent) override;
 
   /// Copy the node's attributes to this object
-  virtual void Copy(vtkMRMLNode* node) override;
+  void Copy(vtkMRMLNode* node) override;
 
   /// Get node XML tag name (like Volume, Model)
-  virtual const char* GetNodeTagName() override;
+  const char* GetNodeTagName() override;
 
   /// Update the references of the node to the scene.
   void SetSceneReferences() override;
@@ -217,7 +217,7 @@ protected:
   std::string LastErrorMessage;
 
   vtkMRMLVirtualRealityViewNode();
-  ~vtkMRMLVirtualRealityViewNode();
+  ~vtkMRMLVirtualRealityViewNode() override;
   vtkMRMLVirtualRealityViewNode(const vtkMRMLVirtualRealityViewNode&);
   void operator=(const vtkMRMLVirtualRealityViewNode&);
 

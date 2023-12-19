@@ -86,7 +86,7 @@ public:
 
 protected:
   vtkSlicerVirtualRealityLogic();
-  virtual ~vtkSlicerVirtualRealityLogic();
+  ~vtkSlicerVirtualRealityLogic() override;
 
   void SetActiveViewNode(vtkMRMLVirtualRealityViewNode* vrViewNode);
 

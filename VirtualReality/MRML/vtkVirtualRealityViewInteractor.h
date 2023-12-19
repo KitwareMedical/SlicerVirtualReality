@@ -82,7 +82,7 @@ protected:
 
 private:
   vtkVirtualRealityViewInteractor();
-  ~vtkVirtualRealityViewInteractor();
+  ~vtkVirtualRealityViewInteractor() override;
 
   vtkVirtualRealityViewInteractor(const vtkVirtualRealityViewInteractor&) = delete;
   void operator=(const vtkVirtualRealityViewInteractor&) = delete;

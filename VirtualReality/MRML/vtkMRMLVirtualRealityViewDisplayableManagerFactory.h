@@ -56,7 +56,7 @@ public:
 protected:
 
   vtkMRMLVirtualRealityViewDisplayableManagerFactory();
-  virtual ~vtkMRMLVirtualRealityViewDisplayableManagerFactory();
+  ~vtkMRMLVirtualRealityViewDisplayableManagerFactory() override;
 
   VTK_SINGLETON_DECLARE(vtkMRMLVirtualRealityViewDisplayableManagerFactory);
 
