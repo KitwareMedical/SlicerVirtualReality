@@ -63,7 +63,7 @@ public:
 
   /// Constructors
   explicit qMRMLVirtualRealityView(QWidget* parent = nullptr);
-  virtual ~qMRMLVirtualRealityView();
+  ~qMRMLVirtualRealityView() override;
 
   /// Returns the interactor observer of the view
   Q_INVOKABLE vtkVirtualRealityViewInteractorObserver* interactorObserver()const;

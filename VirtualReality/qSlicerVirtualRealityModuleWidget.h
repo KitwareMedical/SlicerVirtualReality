@@ -34,7 +34,7 @@ class Q_SLICER_QTMODULES_VIRTUALREALITY_EXPORT qSlicerVirtualRealityModuleWidget
 public:
   typedef qSlicerAbstractModuleWidget Superclass;
   qSlicerVirtualRealityModuleWidget(QWidget *parent=nullptr);
-  virtual ~qSlicerVirtualRealityModuleWidget();
+  ~qSlicerVirtualRealityModuleWidget() override;
 
 public slots:
   void setVirtualRealityConnected(bool connect);

@@ -45,7 +45,7 @@ class Q_SLICER_QTMODULES_VIRTUALREALITY_WIDGETS_EXPORT qMRMLVirtualRealityTransf
 public:
   typedef qMRMLWidget Superclass;
   qMRMLVirtualRealityTransformWidget(vtkMRMLVirtualRealityViewNode* viewNode, QWidget* newParent = nullptr);
-  virtual ~qMRMLVirtualRealityTransformWidget();
+  ~qMRMLVirtualRealityTransformWidget() override;
 
 public slots:
   void setMRMLLinearTransformNode(vtkMRMLLinearTransformNode* node);

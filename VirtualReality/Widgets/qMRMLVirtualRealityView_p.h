@@ -75,7 +75,7 @@ protected:
   qMRMLVirtualRealityView* const q_ptr;
 public:
   qMRMLVirtualRealityViewPrivate(qMRMLVirtualRealityView& object);
-  ~qMRMLVirtualRealityViewPrivate();
+  ~qMRMLVirtualRealityViewPrivate() override;
 
   virtual void init();
 

@@ -37,7 +37,7 @@ public:
 public:
   typedef qSlicerSubjectHierarchyAbstractPlugin Superclass;
   qSlicerSubjectHierarchyVirtualRealityPlugin(QObject* parent = nullptr);
-  virtual ~qSlicerSubjectHierarchyVirtualRealityPlugin();
+  ~qSlicerSubjectHierarchyVirtualRealityPlugin() override;
 
 public:
   /// Get item context menu item actions to add to tree view
