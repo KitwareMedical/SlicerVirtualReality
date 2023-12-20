@@ -23,6 +23,7 @@
 #include "vtkVirtualRealityViewInteractorStyle.h"
 
 // MRML includes
+#include <vtkMRML.h> // For MRML_APPLICATION_VERSION and MRML_VERSION_CHECK
 #include "vtkMRMLInteractionEventData.h"
 
 // VTK includes
@@ -152,7 +153,15 @@ void vtkVirtualRealityViewInteractorObserver::ProcessEvents(
 bool vtkVirtualRealityViewInteractorObserver::DelegateInteractionEventToDisplayableManagers(unsigned long event, void* calldata)
 {
   vtkSmartPointer<vtkEventData> ed;
+#if MRML_APPLICATION_VERSION >= MRML_VERSION_CHECK(5, 8, 0)
   if (vtkCommand::EventHasData(event))
+#else
+  // "Elevation3DEvent" is checked explicitly due to an issue fixed in MR-10771
+  // and integrated in Slicer 5.7.0-2023-12-21 revision 32659
+  // See https://gitlab.kitware.com/vtk/vtk/-/merge_requests/10771
+  // and https://github.com/Slicer/Slicer/pull/7503
+  if (vtkCommand::EventHasData(event) || event == vtkCommand::Elevation3DEvent)
+#endif
     {
     ed = vtkSmartPointer(static_cast<vtkEventData*>(calldata));
     }
