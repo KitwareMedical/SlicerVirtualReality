@@ -32,11 +32,20 @@ public:
   vtkTypeMacro(vtkVirtualRealityViewInteractorObserver,vtkMRMLViewInteractorStyle);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
+  using vtkMRMLViewInteractorStyle::DelegateInteractionEventToDisplayableManagers;
+
   /// Give a chance to displayable managers to process the event.
-  /// It just creates vtkMRMLInteractionEventData and calls
+  /// Based on the return of vtkCommand::EventHasData(event), it either casts the
+  /// calldata to a vtkEventData or just creates a one of type vtkMRMLInteractionEventData.
+  /// In both case, it calls DelegateInteractionEventDataToDisplayableManagers
+  /// passing a vtkEventData object.
+  /// Return true if the event is processed.
+  virtual bool DelegateInteractionEventToDisplayableManagers(unsigned long event, void* calldata);
+
+  /// Give a chance to displayable managers to process the event.
+  /// It creates vtkMRMLInteractionEventData and calls
   /// DelegateInteractionEventDataToDisplayableManagers.
   /// Return true if the event is processed.
-  using vtkMRMLViewInteractorStyle::DelegateInteractionEventToDisplayableManagers;
   bool DelegateInteractionEventToDisplayableManagers(vtkEventData* inputEventData) override;
 
   /// Give a chance to displayable managers to process the event.

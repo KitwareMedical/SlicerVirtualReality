@@ -129,7 +129,7 @@ void vtkVirtualRealityViewInteractorObserver::CustomProcessEvents(vtkObject* obj
   vtkVirtualRealityViewInteractorObserver* self
     = reinterpret_cast<vtkVirtualRealityViewInteractorObserver *>(clientdata);
 
-  if (!self->DelegateInteractionEventToDisplayableManagers(event) || self->GetInteractorStyle()->GetState() != VTKIS_NONE)
+  if (!self->DelegateInteractionEventToDisplayableManagers(event, calldata))
     {
     // Displayable managers did not process it
     vtkVirtualRealityViewInteractorObserver::ProcessEvents(object, event, clientdata, calldata);
@@ -195,6 +195,28 @@ void vtkVirtualRealityViewInteractorObserver::ProcessEvents(
 //----------------------------------------------------------------------------
 // Generic events binding
 //----------------------------------------------------------------------------
+
+//----------------------------------------------------------------------------
+bool vtkVirtualRealityViewInteractorObserver::DelegateInteractionEventToDisplayableManagers(unsigned long event, void* calldata)
+{
+  vtkSmartPointer<vtkEventData> ed;
+  if (vtkCommand::EventHasData(event))
+    {
+    ed = vtkSmartPointer(static_cast<vtkEventData*>(calldata));
+    }
+  else
+    {
+    ed = vtkSmartPointer<vtkMRMLInteractionEventData>::New();
+    ed->SetType(event);
+    }
+
+  bool delegated = this->DelegateInteractionEventToDisplayableManagers(ed);
+  if (delegated)
+    {
+    this->EventCallbackCommand->SetAbortFlag(1);
+    }
+  return delegated;
+}
 
 //----------------------------------------------------------------------------
 bool vtkVirtualRealityViewInteractorObserver::DelegateInteractionEventToDisplayableManagers(vtkEventData* inputEventData)
