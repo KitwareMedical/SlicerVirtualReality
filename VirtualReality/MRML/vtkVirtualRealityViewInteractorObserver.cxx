@@ -219,6 +219,9 @@ bool vtkVirtualRealityViewInteractorObserver::DelegateInteractionEventDataToDisp
     ed->SetAccuratePicker(vrViewInteractorStyle->GetAccuratePicker());
     }
 
+  // Assumes event are all 3D and invalidates display position
+  ed->SetDisplayPositionInvalid();
+
   vtkRenderer* currentRenderer = this->GetInteractorStyle()->GetCurrentRenderer();
   ed->SetRenderer(currentRenderer);
 
