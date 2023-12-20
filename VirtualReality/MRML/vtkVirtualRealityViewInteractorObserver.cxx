@@ -34,50 +34,18 @@
 //----------------------------------------------------------------------------
 vtkStandardNewMacro(vtkVirtualRealityViewInteractorObserver);
 
-//----------------------------------------------------------------------------
-class vtkVirtualRealityViewInteractorObserver::vtkInternal
-{
-public:
-  vtkInternal(vtkVirtualRealityViewInteractorObserver* external);
-  ~vtkInternal();
-
-public:
-  vtkVirtualRealityViewInteractorObserver* External{nullptr};
-  vtkCallbackCommand* EventCallbackCommand{nullptr};
-};
-
-
-//---------------------------------------------------------------------------
-// vtkInternal methods
-
-//---------------------------------------------------------------------------
-vtkVirtualRealityViewInteractorObserver::vtkInternal::vtkInternal(vtkVirtualRealityViewInteractorObserver* external)
-  : External(external)
-{
-  this->EventCallbackCommand = vtkCallbackCommand::New();
-  this->EventCallbackCommand->SetClientData(this->External);
-  this->EventCallbackCommand->SetCallback(vtkVirtualRealityViewInteractorObserver::CustomProcessEvents);
-}
-
-//---------------------------------------------------------------------------
-vtkVirtualRealityViewInteractorObserver::vtkInternal::~vtkInternal()
-{
-  this->EventCallbackCommand->Delete();
-}
-
 //---------------------------------------------------------------------------
 // vtkVirtualRealityViewInteractorObserver methods
 
 //----------------------------------------------------------------------------
 vtkVirtualRealityViewInteractorObserver::vtkVirtualRealityViewInteractorObserver()
 {
-  this->Internal = new vtkInternal(this);
+  this->EventCallbackCommand->SetCallback(vtkVirtualRealityViewInteractorObserver::CustomProcessEvents);
 }
 
 //----------------------------------------------------------------------------
 vtkVirtualRealityViewInteractorObserver::~vtkVirtualRealityViewInteractorObserver()
 {
-  delete this->Internal;
 }
 
 //----------------------------------------------------------------------------
@@ -93,11 +61,6 @@ void vtkVirtualRealityViewInteractorObserver::SetInteractor(vtkRenderWindowInter
     {
     return;
     }
-  // if we already have an Interactor then stop observing it
-  if (this->Interactor)
-    {
-    this->Interactor->RemoveObserver(this->Internal->EventCallbackCommand);
-    }
 
   this->Superclass::SetInteractor(interactor);
 
@@ -108,14 +71,14 @@ void vtkVirtualRealityViewInteractorObserver::SetInteractor(vtkRenderWindowInter
     /// 3D event bindings
     // Move3DEvent: Already observed in vtkMRMLViewInteractorStyle
     // Button3DEvent: Already observed in vtkMRMLViewInteractorStyle
-    interactor->AddObserver(vtkCommand::Menu3DEvent, this->Internal->EventCallbackCommand, priority);
-    interactor->AddObserver(vtkCommand::Select3DEvent, this->Internal->EventCallbackCommand, priority);
-    interactor->AddObserver(vtkCommand::NextPose3DEvent, this->Internal->EventCallbackCommand, priority);
-    interactor->AddObserver(vtkCommand::ViewerMovement3DEvent, this->Internal->EventCallbackCommand, priority);
-    interactor->AddObserver(vtkCommand::Pick3DEvent, this->Internal->EventCallbackCommand, priority);
-    interactor->AddObserver(vtkCommand::PositionProp3DEvent, this->Internal->EventCallbackCommand, priority);
-    interactor->AddObserver(vtkCommand::Clip3DEvent, this->Internal->EventCallbackCommand, priority);
-    interactor->AddObserver(vtkCommand::Elevation3DEvent, this->Internal->EventCallbackCommand, priority);
+    interactor->AddObserver(vtkCommand::Menu3DEvent, this->EventCallbackCommand, priority);
+    interactor->AddObserver(vtkCommand::Select3DEvent, this->EventCallbackCommand, priority);
+    interactor->AddObserver(vtkCommand::NextPose3DEvent, this->EventCallbackCommand, priority);
+    interactor->AddObserver(vtkCommand::ViewerMovement3DEvent, this->EventCallbackCommand, priority);
+    interactor->AddObserver(vtkCommand::Pick3DEvent, this->EventCallbackCommand, priority);
+    interactor->AddObserver(vtkCommand::PositionProp3DEvent, this->EventCallbackCommand, priority);
+    interactor->AddObserver(vtkCommand::Clip3DEvent, this->EventCallbackCommand, priority);
+    interactor->AddObserver(vtkCommand::Elevation3DEvent, this->EventCallbackCommand, priority);
 
     /// Touch gesture interaction events
     // Already observed in vtkMRMLViewInteractorStyle
