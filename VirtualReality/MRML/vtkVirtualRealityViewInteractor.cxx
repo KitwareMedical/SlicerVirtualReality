@@ -42,6 +42,12 @@ vtkVirtualRealityViewInteractor::~vtkVirtualRealityViewInteractor()
 }
 
 //------------------------------------------------------------------------------
+vtkCommand::EventIds vtkVirtualRealityViewInteractor::GetCurrentGesture() const
+{
+  return this->CurrentGesture;
+}
+
+//------------------------------------------------------------------------------
 void vtkVirtualRealityViewInteractor::HandleComplexGestureEvents(vtkEventData* ed)
 {
   // [SlicerVirtualReality]
