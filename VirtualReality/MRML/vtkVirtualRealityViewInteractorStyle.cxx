@@ -38,6 +38,7 @@
 #include <vtkCallbackCommand.h>
 #include <vtkInteractorStyle.h>
 #include <vtkMath.h>
+#include <vtkVRMenuWidget.h>
 #include <vtkObjectFactory.h>
 #include <vtkPoints.h>
 #include <vtkRenderer.h>
@@ -270,18 +271,29 @@ void vtkVirtualRealityViewInteractorStyle::SetDisplayableManagers(vtkMRMLDisplay
 //----------------------------------------------------------------------------
 void vtkVirtualRealityViewInteractorStyle::OnMove3D(vtkEventData* edata)
 {
-  vtkEventDataDevice3D *edd = edata->GetAsEventDataDevice3D();
+  vtkEventDataDevice3D* edd = edata->GetAsEventDataDevice3D();
   if (!edd)
   {
     return;
   }
+
+  // Retrieve device type
   int idev = static_cast<int>(edd->GetDevice());
+
+  if (edd->GetDevice() == vtkEventDataDevice::HeadMountedDisplay)
+  {
+    edd->GetWorldDirection(this->HeadsetDir);
+  }
 
   // Update current state
   int x = this->Interactor->GetEventPosition()[0];
   int y = this->Interactor->GetEventPosition()[1];
 
-  switch (this->InteractionState[idev])
+  // Set current state and interaction prop
+  this->InteractionProp = this->InteractionProps[idev];
+
+  auto interactionState = this->InteractionState[idev];
+  switch (interactionState)
   {
     case VTKIS_POSITION_PROP:
       this->FindPokedRenderer(x, y);
@@ -289,28 +301,36 @@ void vtkVirtualRealityViewInteractorStyle::OnMove3D(vtkEventData* edata)
       this->InvokeEvent(vtkCommand::InteractionEvent, nullptr);
       break;
     case VTKIS_DOLLY:
+    case VTKIS_GROUNDMOVEMENT:
+    case VTKIS_ELEVATION:
       this->FindPokedRenderer(x, y);
-      this->Dolly3D(edata);
+      this->Movement3D(interactionState, edd);
       this->InvokeEvent(vtkCommand::InteractionEvent, nullptr);
       break;
-    // TODO: Add support for Pick3DEvent, Clip3DEvent, NextPose3DEvent, Menu3DEvent
-    //       added in VTK@b7f02e6
-    //
-    //case VTKIS_CLIP:
-    //  this->FindPokedRenderer(x, y);
-    //  this->Clip(edd);
-    //  this->InvokeEvent(vtkCommand::InteractionEvent, nullptr);
-    //  break;
+    case VTKIS_CLIP:
+      this->FindPokedRenderer(x, y);
+      this->Clip(edd);
+      this->InvokeEvent(vtkCommand::InteractionEvent, nullptr);
+      break;
+    case VTKIS_USCALE:
+      this->FindPokedRenderer(x, y);
+      this->UniformScale();
+      this->InvokeEvent(vtkCommand::InteractionEvent, nullptr);
+      break;
+    default:
+      vtkDebugMacro(<< "OnMove3D: unknown interaction state " << idev << ": "
+                    << this->InteractionState[idev]);
+      break;
   }
 
-  //// Update rays
+  // Update rays
   this->UpdateRay(edd->GetDevice());
 }
 
 //----------------------------------------------------------------------------
 void vtkVirtualRealityViewInteractorStyle::OnSelect3D(vtkEventData* edata)
 {
-  vtkEventDataDevice3D *bd = edata->GetAsEventDataDevice3D();
+  vtkEventDataDevice3D* bd = edata->GetAsEventDataDevice3D();
   if (!bd)
   {
     return;
@@ -320,30 +340,42 @@ void vtkVirtualRealityViewInteractorStyle::OnSelect3D(vtkEventData* edata)
   int y = this->Interactor->GetEventPosition()[1];
   this->FindPokedRenderer(x, y);
 
-  int eid = bd->GetType();
-  int state = this->GetMappedAction(static_cast<vtkCommand::EventIds>(eid));
-  if (state == VTKIS_NONE)
+  decltype(this->InputMap)::key_type key(vtkCommand::Select3DEvent, bd->GetAction());
+  auto it = this->InputMap.find(key);
+  if (it == this->InputMap.end())
   {
     return;
   }
 
-  // Right trigger press/release
-  if (bd->GetAction() == vtkEventDataAction::Press)
+  int state = it->second;
+
+  // if grab mode then convert event data into where the ray is intersecting geometry
+  switch (bd->GetAction())
   {
-    this->StartAction(state, bd);
-  }
-  if (bd->GetAction() == vtkEventDataAction::Release)
-  {
-    this->EndAction(state, bd);
+    case vtkEventDataAction::Press:
+    case vtkEventDataAction::Touch:
+      this->StartAction(state, bd);
+      break;
+    case vtkEventDataAction::Release:
+    case vtkEventDataAction::Untouch:
+      this->EndAction(state, bd);
+      break;
+    default:
+      break;
   }
 }
 
 //------------------------------------------------------------------------------
 void vtkVirtualRealityViewInteractorStyle::OnViewerMovement3D(vtkEventData* edata)
 {
+  if (this->Style == vtkVRInteractorStyle::FLY_STYLE)
+  {
     this->Movement3D(VTKIS_DOLLY, edata);
-    // TODO: Add support for FLY_STYLE, GROUNDED_STYLE, and ElevationEvent that
-    // were added in VTK@7a2c71e and VTK@ca4441c
+  }
+  else if (this->Style == vtkVRInteractorStyle::GROUNDED_STYLE)
+  {
+    this->Movement3D(VTKIS_GROUNDMOVEMENT, edata);
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -364,7 +396,7 @@ void vtkVirtualRealityViewInteractorStyle::Movement3D(int interactionState, vtkE
   this->FindPokedRenderer(x, y);
 
   // Set current state and interaction prop
-  //this->InteractionProp = this->InteractionProps[idev];
+  this->InteractionProp = this->InteractionProps[idev];
 
   double const* pos = edd->GetTrackPadPosition();
 
@@ -373,6 +405,10 @@ void vtkVirtualRealityViewInteractorStyle::Movement3D(int interactionState, vtkE
     this->StartAction(interactionState, edd);
     this->LastTrackPadPosition[0] = 0.0;
     this->LastTrackPadPosition[1] = 0.0;
+    this->LastGroundMovementTrackPadPosition[0] = 0.0;
+    this->LastGroundMovementTrackPadPosition[1] = 0.0;
+    this->LastElevationTrackPadPosition[0] = 0.0;
+    this->LastElevationTrackPadPosition[1] = 0.0;
     return;
   }
 
@@ -385,12 +421,16 @@ void vtkVirtualRealityViewInteractorStyle::Movement3D(int interactionState, vtkE
   // If the input event is from a joystick and is away from the center then
   // call start. When the joystick returns to the center, call end.
   if ((edd->GetInput() == vtkEventDataDeviceInput::Joystick ||
-    edd->GetInput() == vtkEventDataDeviceInput::TrackPad) &&
+        edd->GetInput() == vtkEventDataDeviceInput::TrackPad) &&
     this->InteractionState[idev] != interactionState && fabs(pos[1]) > 0.1)
   {
     this->StartAction(interactionState, edd);
     this->LastTrackPadPosition[0] = 0.0;
     this->LastTrackPadPosition[1] = 0.0;
+    this->LastGroundMovementTrackPadPosition[0] = 0.0;
+    this->LastGroundMovementTrackPadPosition[1] = 0.0;
+    this->LastElevationTrackPadPosition[0] = 0.0;
+    this->LastElevationTrackPadPosition[1] = 0.0;
     return;
   }
 
@@ -398,7 +438,7 @@ void vtkVirtualRealityViewInteractorStyle::Movement3D(int interactionState, vtkE
   {
     // Stop when returning to the center on the joystick
     if ((edd->GetInput() == vtkEventDataDeviceInput::Joystick ||
-      edd->GetInput() == vtkEventDataDeviceInput::TrackPad) &&
+          edd->GetInput() == vtkEventDataDeviceInput::TrackPad) &&
       fabs(pos[1]) < 0.1)
     {
       this->EndAction(interactionState, edd);
@@ -408,13 +448,17 @@ void vtkVirtualRealityViewInteractorStyle::Movement3D(int interactionState, vtkE
     // Do the 3D movement corresponding to the interaction state
     switch (interactionState)
     {
-    case VTKIS_DOLLY:
-      this->Dolly3D(edd);
-      break;
-      // TODO: Add support for FLY_STYLE, GROUNDED_STYLE, and ElevationEvent that
-      // were added in VTK@7a2c71e and VTK@ca4441c
-    default:
-      break;
+      case VTKIS_DOLLY:
+        this->Dolly3D(edd);
+        break;
+      case VTKIS_GROUNDMOVEMENT:
+        this->GroundMovement3D(edd);
+        break;
+      case VTKIS_ELEVATION:
+        this->Elevation3D(edd);
+        break;
+      default:
+        break;
     }
 
     this->InvokeEvent(vtkCommand::InteractionEvent, nullptr);
@@ -609,29 +653,6 @@ void vtkVirtualRealityViewInteractorStyle::EndPositionProp(vtkEventDataDevice3D*
 }
 
 //----------------------------------------------------------------------------
-void vtkVirtualRealityViewInteractorStyle::StartDolly3D(vtkEventDataDevice3D* ed)
-{
-  if (this->CurrentRenderer == nullptr)
-  {
-    return;
-  }
-  vtkEventDataDevice dev = ed->GetDevice();
-  this->InteractionState[static_cast<int>(dev)] = VTKIS_DOLLY;
-  this->LastDolly3DEventTime->StartTimer();
-
-  // this->GrabFocus(this->EventCallbackCommand);
-}
-
-//----------------------------------------------------------------------------
-void vtkVirtualRealityViewInteractorStyle::EndDolly3D(vtkEventDataDevice3D* ed)
-{
-  vtkEventDataDevice dev = ed->GetDevice();
-  this->InteractionState[static_cast<int>(dev)] = VTKIS_NONE;
-
-  this->LastDolly3DEventTime->StopTimer();
-}
-
-//----------------------------------------------------------------------------
 // Multitouch interaction methods
 //----------------------------------------------------------------------------
 
@@ -811,17 +832,32 @@ void vtkVirtualRealityViewInteractorStyle::StartAction(int state, vtkEventDataDe
       this->StartPositionProp(edata);
       break;
     case VTKIS_DOLLY:
-      this->StartDolly3D(edata);
+      this->StartMovement3D(state, edata);
+      this->LastDolly3DEventTime->StartTimer();
       break;
-    //case VTKIS_CLIP:
-    //  this->StartClip(edata);
-    //  break;
-    //case VTKIS_PICK:
-    //  this->StartPick(edata);
-    //  break;
-    //case VTKIS_LOAD_CAMERA_POSE:
-    //  this->StartLoadCamPose(edata);
-    //  break;
+    case VTKIS_GROUNDMOVEMENT:
+      this->StartMovement3D(state, edata);
+      this->LastGroundMovement3DEventTime->StartTimer();
+      break;
+    case VTKIS_ELEVATION:
+      this->StartMovement3D(state, edata);
+      this->LastElevation3DEventTime->StartTimer();
+      break;
+    case VTKIS_CLIP:
+      this->StartClip(edata);
+      break;
+    case VTKIS_PICK:
+      this->StartPick(edata);
+      break;
+    case VTKIS_LOAD_CAMERA_POSE:
+      this->StartLoadCamPose(edata);
+      break;
+    case VTKIS_MENU:
+      // Menu is only displayed upon action end (e.g. button release)
+      break;
+    default:
+      vtkDebugMacro(<< "StartAction: unknown state " << state);
+      break;
   }
 }
 
@@ -834,44 +870,66 @@ void vtkVirtualRealityViewInteractorStyle::EndAction(int state, vtkEventDataDevi
       this->EndPositionProp(edata);
       break;
     case VTKIS_DOLLY:
-      this->EndDolly3D(edata);
+      this->EndMovement3D(edata);
+      this->LastDolly3DEventTime->StopTimer();
       break;
-    //case VTKIS_CLIP:
-    //  this->EndClip(edata);
-    //  break;
-    //case VTKIS_PICK:
-    //  this->EndPick(edata);
-    //  break;
-    //case VTKIS_MENU:
-    //  this->Menu->SetInteractor(this->Interactor);
-    //  this->Menu->Show(edata);
-    //  break;
-    //case VTKIS_LOAD_CAMERA_POSE:
-    //  this->EndLoadCamPose(edata);
-    //  break;
-    //case VTKIS_TOGGLE_DRAW_CONTROLS:
-    //  this->ToggleDrawControls();
-    //  break;
-    //case VTKIS_EXIT:
-    //  if (this->Interactor)
-    //  {
-    //    this->Interactor->ExitCallback();
-    //  }
-    //  break;
+    case VTKIS_GROUNDMOVEMENT:
+      this->EndMovement3D(edata);
+      this->LastGroundMovement3DEventTime->StopTimer();
+      break;
+    case VTKIS_ELEVATION:
+      this->EndMovement3D(edata);
+      this->LastElevation3DEventTime->StopTimer();
+      break;
+    case VTKIS_CLIP:
+      this->EndClip(edata);
+      break;
+    case VTKIS_PICK:
+      this->EndPick(edata);
+      break;
+    case VTKIS_MENU:
+      this->Menu->SetInteractor(this->Interactor);
+      this->Menu->Show(edata);
+      break;
+    case VTKIS_LOAD_CAMERA_POSE:
+      this->EndLoadCamPose(edata);
+      break;
+    case VTKIS_TOGGLE_DRAW_CONTROLS:
+      this->ToggleDrawControls();
+      break;
+    case VTKIS_EXIT:
+      if (this->Interactor)
+      {
+        this->Interactor->ExitCallback();
+      }
+      break;
+    case VTKIS_TELEPORTATION:
+      this->Teleportation3D(edata);
+      break;
+    case VTKIS_USCALE:
+      this->EndUniformScale();
+      break;
+    default:
+      vtkDebugMacro(<< "EndAction: unknown state " << state);
+      break;
   }
 
-  // Reset multitouch state because a button has been released
-  //for (int d = 0; d < vtkEventDataNumberOfDevices; ++d)
-  //{
-  //  switch (this->InteractionState[d])
-  //  {
-  //    case VTKIS_PAN:
-  //    case VTKIS_ZOOM:
-  //    case VTKIS_ROTATE:
-  //      this->InteractionState[d] = VTKIS_NONE;
-  //      break;
-  //  }
-  //}
+  // Reset complex gesture state because a button has been released
+  for (int d = 0; d < vtkEventDataNumberOfDevices; ++d)
+  {
+    switch (this->InteractionState[d])
+    {
+      case VTKIS_PAN:
+      case VTKIS_ZOOM:
+      case VTKIS_ROTATE:
+        this->InteractionState[d] = VTKIS_NONE;
+        break;
+      default:
+        vtkDebugMacro(<< "EndAction: unknown interaction state " << d << ": "
+                      << this->InteractionState[d]);
+        break;
+    }
+  }
 }
 
 //---------------------------------------------------------------------------

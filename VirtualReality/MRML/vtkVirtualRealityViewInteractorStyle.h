@@ -71,8 +71,6 @@ public:
   */
   virtual void StartPositionProp(vtkEventDataDevice3D *);
   virtual void EndPositionProp(vtkEventDataDevice3D *);
-  virtual void StartDolly3D(vtkEventDataDevice3D *);
-  virtual void EndDolly3D(vtkEventDataDevice3D *);
   //@}
 
   //@{
@@ -102,7 +100,6 @@ public:
   */
   int GetMappedAction(vtkCommand::EventIds eid);
   //@}
-
   vtkSetClampMacro(GrabEnabled, int, 0, 1);
   vtkGetMacro(GrabEnabled, int);
   vtkBooleanMacro(GrabEnabled, int);
