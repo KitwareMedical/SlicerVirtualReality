@@ -109,18 +109,6 @@ void vtkVirtualRealityViewInteractorObserver::ProcessEvents(
 
   switch (event)
     {
-
-    case vtkCommand::StartPinchEvent:
-    case vtkCommand::StartRotateEvent:
-    case vtkCommand::StartPanEvent:
-      self->OnStartGesture();
-      break;
-    case vtkCommand::EndPinchEvent:
-    case vtkCommand::EndRotateEvent:
-    case vtkCommand::EndPanEvent:
-      self->OnEndGesture();
-      break;
-
     /// 3D event bindings
     // Move3DEvent: Already observed in vtkMRMLViewInteractorStyle
     // Button3DEvent: Already observed in vtkMRMLViewInteractorStyle
@@ -247,22 +235,6 @@ bool vtkVirtualRealityViewInteractorObserver::DelegateInteractionEventDataToDisp
   ed->SetInteractionContextName(interactionContextName);
 
   return this->Superclass::DelegateInteractionEventDataToDisplayableManagers(ed);
-}
-
-//----------------------------------------------------------------------------
-void vtkVirtualRealityViewInteractorObserver::OnStartGesture()
-{
-  vtkVirtualRealityViewInteractorStyle* vrInteractorStyle =
-      vtkVirtualRealityViewInteractorStyle::SafeDownCast(this->GetInteractorStyle());
-  vrInteractorStyle->OnStartGesture();
-}
-
-//----------------------------------------------------------------------------
-void vtkVirtualRealityViewInteractorObserver::OnEndGesture()
-{
-  vtkVirtualRealityViewInteractorStyle* vrInteractorStyle =
-      vtkVirtualRealityViewInteractorStyle::SafeDownCast(this->GetInteractorStyle());
-  vrInteractorStyle->OnEndGesture();
 }
 
 //----------------------------------------------------------------------------
