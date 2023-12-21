@@ -50,20 +50,10 @@ public:
   vtkTypeMacro(vtkVirtualRealityViewInteractorStyle,vtkOpenVRInteractorStyle);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  /// Set the Interactor wrapper being controlled by this object. (Satisfy superclass API.)
-  void SetInteractor(vtkRenderWindowInteractor *interactor) override;
-
   void SetDisplayableManagers(vtkMRMLDisplayableManagerGroup* displayableManagers);
 
   /// Get MRML scene from the displayable manager group (the first displayable manager's if any)
   vtkMRMLScene* GetMRMLScene();
-
-  //@{
-  /// Override generic event bindings to call the corresponding action.
-  void OnSelect3D(vtkEventData *edata) override;
-  void OnMove3D(vtkEventData *edata) override;
-  void OnViewerMovement3D(vtkEventData* edata) override;
-  //@}
 
   //@{
   /**
@@ -104,10 +94,6 @@ public:
   vtkGetMacro(GrabEnabled, int);
   vtkBooleanMacro(GrabEnabled, int);
 
-  //// allow the user to add options to the menu
-  //vtkOpenVRMenuWidget *GetMenu() {
-  //  return this->Menu.Get(); }
-
   vtkCellPicker* GetAccuratePicker();
   
   /// Set physical to world magnification. Valid value range is [0.01, 100].
@@ -116,10 +102,6 @@ public:
   double GetMagnification();
 
 protected:
-
-  // Utility routines
-  void StartAction(int VTKIS_STATE, vtkEventDataDevice3D *edata);
-  void EndAction(int VTKIS_STATE, vtkEventDataDevice3D *edata);
 
   bool QuickPick(int x, int y, double pickPoint[3]);
 
@@ -134,11 +116,6 @@ protected:
 protected:
   vtkVirtualRealityViewInteractorStyle();
   ~vtkVirtualRealityViewInteractorStyle() override;
-
-  /**
-   * Update the 3D movement according to the given interaction state.
-   */
-  void Movement3D(int interactionState, vtkEventData* edata);
 
   vtkWeakPointer<vtkMRMLDisplayableManagerGroup> DisplayableManagers;
 
