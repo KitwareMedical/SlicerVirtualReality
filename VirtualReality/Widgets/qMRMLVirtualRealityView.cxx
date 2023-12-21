@@ -20,6 +20,7 @@
 
 // Need to be included before qMRMLVRView_p
 #include <vtkOpenVRCamera.h>
+#include <vtkVirtualRealityViewInteractorObserver.h>
 #include <vtkVirtualRealityViewInteractorStyle.h>
 //#include <vtkOpenVRInteractorStyle.h> //TODO: For debugging the original interactor
 #include <vtkVirtualRealityViewInteractor.h>
@@ -163,6 +164,10 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   this->Interactor->SetInteractorStyle(this->InteractorStyle);
   this->InteractorStyle->SetInteractor(this->Interactor);
   this->InteractorStyle->SetCurrentRenderer(this->Renderer);
+
+  this->InteractorObserver = vtkVirtualRealityViewInteractorObserver::New();
+  this->InteractorObserver->SetInteractor(this->Interactor);
+
   this->Camera = vtkSmartPointer<vtkOpenVRCamera>::New();
   this->Renderer->SetActiveCamera(this->Camera);
 
@@ -216,6 +221,7 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
                                     factory->InstantiateDisplayableManagers(q->renderer()));
   this->DisplayableManagerGroup->SetMRMLDisplayableNode(this->MRMLVirtualRealityViewNode);
   this->InteractorStyle->SetDisplayableManagers(this->DisplayableManagerGroup);
+  this->InteractorObserver->SetDisplayableManagers(this->DisplayableManagerGroup);
 
   qDebug() << Q_FUNC_INFO << ": Number of registered displayable manager:" << this->DisplayableManagerGroup->GetDisplayableManagerCount();
 
@@ -682,6 +688,13 @@ qMRMLVirtualRealityView::~qMRMLVirtualRealityView()
 }
 
 //------------------------------------------------------------------------------
+vtkVirtualRealityViewInteractorObserver* qMRMLVirtualRealityView::interactorObserver()const
+{
+  Q_D(const qMRMLVirtualRealityView);
+  return d->InteractorObserver;
+}
+
+//------------------------------------------------------------------------------
 void qMRMLVirtualRealityView::addDisplayableManager(const QString& displayableManagerName)
 {
   Q_D(qMRMLVirtualRealityView);
@@ -777,13 +790,19 @@ bool qMRMLVirtualRealityView::isGrabObjectsEnabled()
 void qMRMLVirtualRealityView::setDolly3DEnabled(bool enable)
 {
   Q_D(qMRMLVirtualRealityView);
+
+  // The "eventId to state" mapping (see call to `MapInputToAction` below) applies to right and left
+  // controller buttons because they are bound to the same eventId:
+  // - `vtk_openvr_binding_*.json` files define the "button to action" mapping
+  // - `vtkOpenVRInteractorStyle()` contructor defines the "action to eventId" mapping
+
   if (enable)
   {
-    d->InteractorStyle->MapInputToAction(vtkEventDataDevice::RightController, vtkEventDataDeviceInput::TrackPad, VTKIS_DOLLY);
+    d->InteractorStyle->MapInputToAction(vtkCommand::ViewerMovement3DEvent, VTKIS_DOLLY);
   }
   else
   {
-    d->InteractorStyle->MapInputToAction(vtkEventDataDevice::RightController, vtkEventDataDeviceInput::TrackPad, VTKIS_NONE);
+    d->InteractorStyle->MapInputToAction(vtkCommand::ViewerMovement3DEvent, VTKIS_NONE);
   }
 }
 
@@ -792,7 +811,7 @@ bool qMRMLVirtualRealityView::isDolly3DEnabled()
 {
   Q_D(qMRMLVirtualRealityView);
 
-  return d->InteractorStyle->GetMappedAction(vtkEventDataDevice::RightController, vtkEventDataDeviceInput::TrackPad) == VTKIS_DOLLY;
+  return d->InteractorStyle->GetMappedAction(vtkCommand::ViewerMovement3DEvent) == VTKIS_DOLLY;
 }
 
 //------------------------------------------------------------------------------

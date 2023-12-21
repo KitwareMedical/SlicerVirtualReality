@@ -39,6 +39,7 @@ class vtkCollection;
 class vtkGenericOpenGLRenderWindow;
 class vtkRenderWindowInteractor;
 class vtkSlicerCamerasModuleLogic;
+class vtkVirtualRealityViewInteractorObserver;
 
 class vtkOpenVRRenderer;
 class vtkOpenVRRenderWindow;
@@ -63,6 +64,9 @@ public:
   /// Constructors
   explicit qMRMLVirtualRealityView(QWidget* parent = nullptr);
   virtual ~qMRMLVirtualRealityView();
+
+  /// Returns the interactor observer of the view
+  Q_INVOKABLE vtkVirtualRealityViewInteractorObserver* interactorObserver()const;
 
   /// Add a displayable manager to the view,
   /// the displayable manager is proper to the 3D view and is not shared

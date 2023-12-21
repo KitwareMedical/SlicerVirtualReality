@@ -57,6 +57,7 @@ class vtkOpenVRInteractorStyle;
 class vtkOpenVRRenderWindowInteractor;
 class vtkTimerLog;
 class vtkVirtualRealityViewInteractor;
+class vtkVirtualRealityViewInteractorObserver;
 class vtkVirtualRealityViewInteractorStyle;
 
 namespace vr
@@ -99,6 +100,7 @@ protected:
   vtkSlicerCamerasModuleLogic* CamerasLogic;
 
   vtkSmartPointer<vtkMRMLDisplayableManagerGroup> DisplayableManagerGroup;
+  vtkSmartPointer<vtkVirtualRealityViewInteractorObserver>  InteractorObserver;
   vtkWeakPointer<vtkMRMLVirtualRealityViewNode> MRMLVirtualRealityViewNode;
   vtkSmartPointer<vtkOpenVRRenderer> Renderer;
   vtkSmartPointer<vtkOpenVRRenderWindow> RenderWindow;

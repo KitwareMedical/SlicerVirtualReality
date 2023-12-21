@@ -18,6 +18,8 @@ set(${KIT}_SRCS
   vtkMRML${MODULE_NAME}LayoutNode.h
   vtk${MODULE_NAME}ViewInteractor.cxx
   vtk${MODULE_NAME}ViewInteractor.h
+  vtk${MODULE_NAME}ViewInteractorObserver.cxx
+  vtk${MODULE_NAME}ViewInteractorObserver.h
   vtk${MODULE_NAME}ViewInteractorStyle.cxx
   vtk${MODULE_NAME}ViewInteractorStyle.h
   )
