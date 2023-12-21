@@ -105,18 +105,13 @@ void vtkVirtualRealityViewInteractor::HandleComplexGestureEvents(vtkEventData* e
   {
     this->DeviceInputDownCount[this->PointerIndex] = 0;
 
-    if (edata->GetInput() == vtkEventDataDeviceInput::Grip)
+    if (this->CurrentGesture == vtkCommand::PinchEvent)
     {
-      if (this->CurrentGesture == vtkCommand::PinchEvent)
-      {
-        //TODO: Execution never reaches here because even if the grip button was pressed (vtkEventDataDeviceInput::Grip = 4),
-        //      edata->GetInput() always has the value 1.
-        this->EndPinchEvent();
-      }
-      this->CurrentGesture = vtkCommand::NoEvent;
-
-      return;
+      this->EndPinchEvent();
     }
+    this->CurrentGesture = vtkCommand::NoEvent;
+
+    return;
   }
 }
 
