@@ -114,6 +114,11 @@ void vtkVirtualRealityViewInteractor::HandleComplexGestureEvents(vtkEventData* e
     if (this->CurrentGesture == vtkCommand::PinchEvent)
     {
       this->EndPinchEvent();
+      vtkInteractorStyle* interactorStyle = vtkInteractorStyle::SafeDownCast(this->InteractorStyle);
+      if (interactorStyle)
+        {
+        interactorStyle->EndGesture();
+        }
     }
     this->CurrentGesture = vtkCommand::NoEvent;
 
@@ -159,6 +164,11 @@ void vtkVirtualRealityViewInteractor::RecognizeComplexGesture(vtkEventDataDevice
       this->CurrentGesture = vtkCommand::PinchEvent;
       // this->Scale = 1.0; // SlicerVirtualReality
       this->StartPinchEvent();
+      vtkInteractorStyle* interactorStyle = vtkInteractorStyle::SafeDownCast(this->InteractorStyle);
+      if (interactorStyle)
+        {
+        interactorStyle->StartGesture();
+        }
     }
 
     // If we have found a specific type of movement then handle it

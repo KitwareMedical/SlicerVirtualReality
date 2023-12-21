@@ -83,8 +83,8 @@ public:
   void OnPinch() override;
   void OnRotate() override;
   void OnPinch3D();
-  void OnStartGesture();
-  void OnEndGesture();
+  void StartGesture() override;
+  void EndGesture() override;
   //@}
 
   //@{

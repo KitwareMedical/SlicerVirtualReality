@@ -747,7 +747,7 @@ void vtkVirtualRealityViewInteractorStyle::OnPinch3D()
 }
 
 //----------------------------------------------------------------------------
-void vtkVirtualRealityViewInteractorStyle::OnStartGesture()
+void vtkVirtualRealityViewInteractorStyle::StartGesture()
 {
   // Store combined starting controller pose
   vtkOpenVRRenderWindowInteractor* rwi = static_cast<vtkOpenVRRenderWindowInteractor*>(this->Interactor);
@@ -771,7 +771,7 @@ void vtkVirtualRealityViewInteractorStyle::OnStartGesture()
 }
 
 //----------------------------------------------------------------------------
-void vtkVirtualRealityViewInteractorStyle::OnEndGesture()
+void vtkVirtualRealityViewInteractorStyle::EndGesture()
 {
   this->Internal->StartingControllerPoseValid = false;
   this->Internal->LastValidCombinedControllerPoseExists = false;
