@@ -150,6 +150,14 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
 {
   Q_Q(qMRMLVirtualRealityView);
 
+  if (this->VirtualRealityLogic == nullptr)
+  {
+    qCritical() << Q_FUNC_INFO << " failed: VirtualRealityLogic is not set";
+    return;
+  }
+
+  vtkMRMLVirtualRealityViewNode::XRRuntimeType xrRuntime = vtkMRMLVirtualRealityViewNode::OpenVR;
+
   this->LastViewUpdateTime = vtkSmartPointer<vtkTimerLog>::New();
   this->LastViewUpdateTime->StartTimer();
   this->LastViewUpdateTime->StopTimer();
@@ -177,7 +185,7 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
 
   // Interactor
   this->Interactor = vtkSmartPointer<vtkVirtualRealityViewOpenVRInteractor>::New();
-  this->Interactor->SetActionManifestDirectory(q->actionManifestPath().toStdString());
+  this->Interactor->SetActionManifestDirectory(this->VirtualRealityLogic->ComputeActionManifestPath(xrRuntime));
   this->Interactor->SetInteractorStyle(this->InteractorStyle);
 
   // InteractorObserver
@@ -299,12 +307,15 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
 
   this->RenderWindow->Initialize();
 
+  const char* xrRuntimeAsStr = vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(xrRuntime);
+
   if (!q->isHardwareConnected())
   {
-    const char* xrRuntimeAsStr = "OpenVR";
     qWarning() << Q_FUNC_INFO << ": Failed to initialize " << xrRuntimeAsStr << " RenderWindow";
     return;
   }
+
+  qDebug() << "ActionManifestPath:" << q->actionManifestPath();
 }
 
 //---------------------------------------------------------------------------
@@ -863,8 +874,11 @@ void qMRMLVirtualRealityView::setGestureButtonToNone()
 }
 
 //------------------------------------------------------------------------------
-CTK_SET_CPP(qMRMLVirtualRealityView, const QString&, setActionManifestPath, ActionManifestPath);
-CTK_GET_CPP(qMRMLVirtualRealityView, QString, actionManifestPath, ActionManifestPath);
+QString qMRMLVirtualRealityView::actionManifestPath() const
+{
+  Q_D(const qMRMLVirtualRealityView);
+  return QString::fromStdString(d->Interactor->GetActionManifestDirectory());
+}
 
 //------------------------------------------------------------------------------
 void qMRMLVirtualRealityView::onPhysicalToWorldMatrixModified()

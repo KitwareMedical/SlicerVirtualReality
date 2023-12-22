@@ -28,7 +28,7 @@
 #include "vtkSlicerVirtualRealityModuleLogicExport.h"
 
 // VR MRML includes
-class vtkMRMLVirtualRealityViewNode;
+#include "vtkMRMLVirtualRealityViewNode.h"
 
 // Slicer includes
 #include <vtkSlicerModuleLogic.h>
@@ -50,6 +50,7 @@ class VTK_SLICER_VIRTUALREALITY_MODULE_LOGIC_EXPORT vtkSlicerVirtualRealityLogic
 public:
   static vtkSlicerVirtualRealityLogic* New();
   vtkTypeMacro(vtkSlicerVirtualRealityLogic, vtkSlicerModuleLogic);
+  typedef vtkSlicerVirtualRealityLogic Self;
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /// Creates a singleton virtual reality view node and adds it to the scene.
@@ -117,6 +118,22 @@ public:
   static void SetGestureButtonToNone(vtkVRRenderWindowInteractor* rwi);
   ///@}
 
+  ///@{
+  /// Whether the module associated with this logic is loaded from an install tree or not.
+  vtkSetMacro(ModuleInstalled, bool);
+  vtkGetMacro(ModuleInstalled, bool);
+  ///@}
+
+  ///@{
+  /// Utility functions for computing the ActionManifestPath based on the module share directory,
+  /// XR runtime and module install state.
+  ///
+  /// \sa vtkVRRenderWindowInteractor::SetActionManifestDirectory()
+  std::string ComputeActionManifestPath(vtkMRMLVirtualRealityViewNode::XRRuntimeType xrRuntime);
+  static std::string ComputeActionManifestPath(
+      const std::string& moduleShareDirectory, vtkMRMLVirtualRealityViewNode::XRRuntimeType xrRuntime, bool installed);
+  ///@}
+
 protected:
   vtkSlicerVirtualRealityLogic();
   ~vtkSlicerVirtualRealityLogic() override;
@@ -138,6 +155,8 @@ protected:
 
   /// Volume rendering logic
   vtkSlicerVolumeRenderingLogic* VolumeRenderingLogic;
+
+  bool ModuleInstalled{false};
 
 private:
   vtkSlicerVirtualRealityLogic(const vtkSlicerVirtualRealityLogic&); // Not implemented
