@@ -37,6 +37,12 @@ public:
   vtkTypeMacro(vtkMRMLVirtualRealityViewNode, vtkMRMLViewNode);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
+  enum XRRuntimeType : int
+    {
+    OpenVR,
+    XRRuntime_Last // must be last
+    };
+
   //--------------------------------------------------------------------------
   /// MRMLNode methods
   //--------------------------------------------------------------------------
@@ -212,6 +218,12 @@ public:
   vtkSetMacro(LighthouseModelsVisible, bool);
   vtkBooleanMacro(LighthouseModelsVisible, bool);
   ///}@
+
+  ///@{
+  /// Convert between XR Runtime Interface identifier and name
+  static const char* GetXRRuntimeAsString(int id);
+  static int GetXRRuntimeFromString(const char* name);
+  ///@}
 
   /// Return true if an error has occurred.
   /// "Connected" member requests connection but this method can tell if the
