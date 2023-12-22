@@ -29,6 +29,7 @@
 
 // Slicer includes
 #include <vtkSlicerVolumeRenderingLogic.h>
+#include <vtkSlicerConfigure.h> // For Slicer_THIRDPARTY_LIB_DIR
 
 // VTK/Rendering/VR includes
 #include <vtkVRInteractorStyle.h>
@@ -595,4 +596,92 @@ void vtkSlicerVirtualRealityLogic::SetGestureButtonToNone(vtkVRRenderWindowInter
                  [](vtkEventData* vtkNotUsed(ed)) { });
   rwi->AddAction("/actions/vtk/in/ComplexGestureAction", /*isAnalog=*/false,
                  [](vtkEventData* vtkNotUsed(ed)) { });
+}
+
+//-----------------------------------------------------------------------------
+std::string vtkSlicerVirtualRealityLogic::ComputeActionManifestPath(vtkMRMLVirtualRealityViewNode::XRRuntimeType xrRuntime)
+{
+  std::string actionManifestPath =
+      Self::ComputeActionManifestPath(this->GetModuleShareDirectory(), xrRuntime, this->ModuleInstalled);
+
+  std::string actionManifestCollapsedPath = vtksys::SystemTools::CollapseFullPath(actionManifestPath);
+
+  if (!vtksys::SystemTools::FileExists(actionManifestCollapsedPath))
+  {
+    vtkErrorMacro(<< "ComputeActionManifestPath: Action manifest path set for "
+                  << vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(xrRuntime) << " runtime does not exist\n"
+                  << "           actionManifestPath: " << actionManifestPath
+                  << "  actionManifestCollapsedPath: " << actionManifestCollapsedPath);
+  }
+
+  return actionManifestCollapsedPath + "/";
+}
+
+//-----------------------------------------------------------------------------
+std::string vtkSlicerVirtualRealityLogic::ComputeActionManifestPath(
+    const std::string& moduleShareDirectory, vtkMRMLVirtualRealityViewNode::XRRuntimeType xrRuntime, bool installed)
+{
+  std::string actionManifestPath;
+
+  if(installed)
+  {
+    // Since the output of vtkSlicerModuleLogic::GetModuleShareDirectory() is
+    //
+    //   <extension-install-dir>/<extension-name>/share/Slicer-X.Y/qt-loadable-modules/<module-name>
+    //
+    // and the action manifest files are in this directory
+    //
+    //   <extension-install-dir>/<extension-name>/<thirdparty-lib-dir>/<actions-subdir>
+    //
+    // where
+    //
+    //   <actions-subdir> is the "*_actions" sub-directory hard-coded in "VTK/Rendering/(OpenVR|OpenXR)/CMakeLists.txt"
+    //
+    //   <thirdparty-lib-dir> corresponds to the Slicer_THIRDPARTY_LIB_DIR macro (e.g "lib/Slicer-X.Y") which
+    //   corresponding CMake option is used in "External_vtkRenderingOpen(VR|XR).cmake"
+    //
+    // we compose the path as such:
+
+    // First, we retrieve <module-share-dir>
+
+    // ... then we change the directory to <extension-name>/<thirdparty-lib-dir>/<actions-subdir>/
+    switch (xrRuntime)
+    {
+      case vtkMRMLVirtualRealityViewNode::OpenVR:
+        actionManifestPath = moduleShareDirectory + "/../../../../" Slicer_THIRDPARTY_LIB_DIR "/vr_actions/";
+        break;
+      default:
+        vtkErrorWithObjectMacro(nullptr, << "ComputeActionManifestPath: No install tree action manifest path set for"
+                                << vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(xrRuntime) << " runtime");
+        break;
+    }
+  }
+  else
+  {
+    // Since the output of vtkSlicerModuleLogic::GetModuleShareDirectory() is
+    //
+    //   <extension-build-dir>/inner-build/share/Slicer-X.Y/qt-loadable-modules/<module-name>
+    //
+    // and the action manifest files are in this directory
+    //
+    //   <extension-build-dir>/<vtk-module-name>-build/<vtk-module-name>/
+    //
+    // we compose the path as such:
+
+    // First, we retrieve <module-share-dir>
+
+    // ... then we change the directory to <vtk-module-name>-build/<vtk-module-name>/
+    switch (xrRuntime)
+    {
+      case vtkMRMLVirtualRealityViewNode::OpenVR:
+        actionManifestPath = moduleShareDirectory + "/../../../../../vtkRenderingOpenVR-build/vtkRenderingOpenVR/";
+        break;
+      default:
+        vtkErrorWithObjectMacro(nullptr, <<"ComputeActionManifestPath: No build tree action manifest path set for"
+                                << vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(xrRuntime) << " runtime");
+        break;
+    }
+  }
+
+  return actionManifestPath;
 }

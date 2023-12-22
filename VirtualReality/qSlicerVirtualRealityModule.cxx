@@ -141,41 +141,6 @@ void qSlicerVirtualRealityModulePrivate::addViewWidget()
 
   this->VirtualRealityViewWidget->setVirtualRealityLogic(this->logic());
 
-  if(q->isInstalled())
-  {
-    // "vr_actions" sub-directory is hard-coded in "VTK/Rendering/OpenVR/CMakeLists.txt"
-    // "Slicer_THIRDPARTY_LIB_DIR" is set in "External_vtkRenderingOpenVR.cmake"
-    QString actionManifestPath = QString("%1/SlicerVirtualReality/%2/vr_actions/").arg(
-      qSlicerCoreApplication::application()->extensionsInstallPath(), Slicer_THIRDPARTY_LIB_DIR);
-    this->VirtualRealityViewWidget->setActionManifestPath(actionManifestPath);
-  }
-  else
-  {
-    // Since the output of qSlicerAbstractCoreModule::path() is
-    //
-    //   <module-lib-dir>/qt-loadable-modules[/(Release|Debug|...)]
-    //
-    // where
-    //
-    //   <module-lib-dir> is equivalent to <extension-build-dir>/inner-build/lib/Slicer-X.Y
-    //
-    // and the action manifest files are in this directory
-    //
-    //   <extension-build-dir>/vtkRenderingOpenVR-build/vtkRenderingOpenVR/
-    //
-    // we compose the path as such:
-
-    // First, we retrieve <module-lib-dir>
-    std::string moduleLibDirectory = vtkSlicerApplicationLogic::GetModuleSlicerXYLibDirectory(q->path().toStdString());
-
-    // ... then we change the directory to vtkRenderingOpenVR-build/vtkRenderingOpenVR/
-    QString actionManifestPath = QString::fromStdString(moduleLibDirectory + "/../../../vtkRenderingOpenVR-build/vtkRenderingOpenVR/");
-
-    this->VirtualRealityViewWidget->setActionManifestPath(actionManifestPath);
-  }
-
-  qDebug() << "actionManifestPath:" << this->VirtualRealityViewWidget->actionManifestPath();
-
   qSlicerAbstractCoreModule* camerasModule =
     qSlicerCoreApplication::application()->moduleManager()->module("Cameras");
   if (camerasModule)
@@ -440,7 +405,9 @@ qSlicerAbstractModuleRepresentation* qSlicerVirtualRealityModule::createWidgetRe
 //-----------------------------------------------------------------------------
 vtkMRMLAbstractLogic* qSlicerVirtualRealityModule::createLogic()
 {
-  return vtkSlicerVirtualRealityLogic::New();
+  vtkSlicerVirtualRealityLogic* logic = vtkSlicerVirtualRealityLogic::New();
+  logic->SetModuleInstalled(this->isInstalled());
+  return logic;;
 }
 
 //-----------------------------------------------------------------------------
