@@ -281,36 +281,58 @@ void vtkVirtualRealityViewInteractorStyle::PositionProp(vtkEventData* ed, double
     return;
   }
 
-  // Get positions and orientations
   vtkRenderWindowInteractor3D* rwi = static_cast<vtkRenderWindowInteractor3D*>(this->Interactor);
+
+  // Retrieve the last and current event positions in world coordinates
   double worldPos[3] = {0.0};
   edd->GetWorldPosition(worldPos);
   double* lastWorldPos = rwi->GetLastWorldEventPosition(rwi->GetPointerIndex());
+
+  // Retrieve the last and current event orientations as angle-axis representation
   double* worldOrientation = rwi->GetWorldEventOrientation(rwi->GetPointerIndex());
   double* lastWorldOrientation = rwi->GetLastWorldEventOrientation(rwi->GetPointerIndex());
 
-  // Calculate transform
+  // Calculate the interaction transform
   vtkNew<vtkTransform> interactionTransform;
   interactionTransform->PreMultiply();
 
+  // Calculate the translation vector
   double translation[3] = {0.0};
   for (int i = 0; i < 3; i++)
   {
     translation[i] = worldPos[i] - lastWorldPos[i];
   }
+
+  // Convert from angle-axis to quaternion for the last and current orientations
   vtkQuaternion<double> q1;
   q1.SetRotationAngleAndAxis(vtkMath::RadiansFromDegrees(
     lastWorldOrientation[0]), lastWorldOrientation[1], lastWorldOrientation[2], lastWorldOrientation[3]);
   vtkQuaternion<double> q2;
   q2.SetRotationAngleAndAxis(vtkMath::RadiansFromDegrees(
     worldOrientation[0]), worldOrientation[1], worldOrientation[2], worldOrientation[3]);
+
+  // Calculate the relative quaternion rotation between the last and
+  // current orientations (q2 * q1')
   q1.Conjugate();
   q2 = q2*q1;
+
+  // Convert from quaternion to angle-axis representation
   double axis[4] = {0.0};
   axis[0] = vtkMath::DegreesFromRadians(q2.GetRotationAngleAndAxis(axis+1));
+
+  // Apply the calculated relative orientation and translation vector to the
+  // interaction transform
+
+  // Step 1: Translate to the current world position
   interactionTransform->Translate(worldPos[0], worldPos[1], worldPos[2]);
+
+  // Step 2: Apply relative rotation
   interactionTransform->RotateWXYZ(axis[0], axis[1], axis[2], axis[3]);
+
+  // Step 3: Translate back to the origin
   interactionTransform->Translate(-worldPos[0], -worldPos[1], -worldPos[2]);
+
+  // Step 4: Final translation based on the computed translation vector
   interactionTransform->Translate(translation[0], translation[1], translation[2]);
 
   // Make sure that the topmost parent transform is the VR interaction transform
