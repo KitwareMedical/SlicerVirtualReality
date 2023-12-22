@@ -600,6 +600,38 @@ void vtkMRMLVirtualRealityViewNode::SetTrackerTransformUpdate(bool enable)
   this->Modified();
 }
 
+//-----------------------------------------------------------
+const char* vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(int id)
+{
+  switch (id)
+  {
+    case OpenVR: return "OpenVR";
+    default:
+      // invalid id
+      return "";
+  }
+}
+
+//-----------------------------------------------------------
+int vtkMRMLVirtualRealityViewNode::GetXRRuntimeFromString(const char* name)
+{
+  if (name == nullptr)
+  {
+    // invalid name
+    return -1;
+  }
+  for (int ii = 0; ii < XRRuntime_Last; ii++)
+  {
+    if (strcmp(name, vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(ii)) == 0)
+    {
+      // found a matching name
+      return ii;
+    }
+  }
+  // unknown name
+  return -1;
+}
+
 //----------------------------------------------------------------------------
 bool vtkMRMLVirtualRealityViewNode::HasError()
 {
