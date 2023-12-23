@@ -108,9 +108,7 @@ protected:
   vtkSmartPointer<vtkOpenVRRenderer> Renderer;
   vtkSmartPointer<vtkOpenVRRenderWindow> RenderWindow;
   vtkSmartPointer<vtkVirtualRealityViewInteractor> Interactor;
-  //vtkSmartPointer<vtkOpenVRRenderWindowInteractor> Interactor; //TODO: For debugging the original interactor
   vtkSmartPointer<vtkVirtualRealityViewInteractorStyle> InteractorStyle;
-  //vtkSmartPointer<vtkOpenVRInteractorStyle> InteractorStyle; //TODO: For debugging the original interactor
   vtkSmartPointer<vtkOpenVRCamera> Camera;
   vtkSmartPointer<vtkLightCollection> Lights;
 
