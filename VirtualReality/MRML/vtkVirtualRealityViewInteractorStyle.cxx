@@ -497,15 +497,10 @@ void vtkVirtualRealityViewInteractorStyle::OnPinch3D()
     this->Interactor->GetEventPositions(pointer)[0], this->Interactor->GetEventPositions(pointer)[1]);
 
   // Get current controller poses
-  vr::TrackedDevicePose_t* tdPose;
-
-  rw->GetOpenVRPose(vtkEventDataDevice::LeftController, &tdPose);
-  vtkNew<vtkMatrix4x4> currentController0Pose_Physical;
-  rw->SetMatrixFromOpenVRPose(currentController0Pose_Physical, *tdPose);
-
-  rw->GetOpenVRPose(vtkEventDataDevice::RightController, &tdPose);
-  vtkNew<vtkMatrix4x4> currentController1Pose_Physical;
-  rw->SetMatrixFromOpenVRPose(currentController1Pose_Physical, *tdPose);
+  vtkMatrix4x4* currentController0Pose_Physical =
+      rw->GetDeviceToPhysicalMatrixForDevice(vtkEventDataDevice::LeftController);
+  vtkMatrix4x4* currentController1Pose_Physical =
+      rw->GetDeviceToPhysicalMatrixForDevice(vtkEventDataDevice::RightController);
 
   // Get combined current controller pose
   vtkNew<vtkMatrix4x4> combinedCurrentControllerPose;
@@ -563,15 +558,10 @@ void vtkVirtualRealityViewInteractorStyle::StartGesture()
   vtkOpenVRRenderWindowInteractor* rwi = static_cast<vtkOpenVRRenderWindowInteractor*>(this->Interactor);
   vtkOpenVRRenderWindow* rw = static_cast<vtkOpenVRRenderWindow*>(rwi->GetRenderWindow());
 
-  vr::TrackedDevicePose_t* tdPose;
-
-  rw->GetOpenVRPose(vtkEventDataDevice::LeftController, &tdPose);
-  vtkNew<vtkMatrix4x4> startingController0Pose_Physical;
-  rw->SetMatrixFromOpenVRPose(startingController0Pose_Physical, *tdPose);
-
-  rw->GetOpenVRPose(vtkEventDataDevice::RightController, &tdPose);
-  vtkNew<vtkMatrix4x4> startingController1Pose_Physical;
-  rw->SetMatrixFromOpenVRPose(startingController1Pose_Physical, *tdPose);
+  vtkMatrix4x4* startingController0Pose_Physical =
+      rw->GetDeviceToPhysicalMatrixForDevice(vtkEventDataDevice::LeftController);
+  vtkMatrix4x4* startingController1Pose_Physical =
+      rw->GetDeviceToPhysicalMatrixForDevice(vtkEventDataDevice::RightController);
 
   if ( this->Internal->CalculateCombinedControllerPose(
     startingController0Pose_Physical, startingController1Pose_Physical, this->Internal->CombinedStartingControllerPose) )
