@@ -21,16 +21,20 @@
 #ifndef vtkVirtualRealityViewInteractor_h
 #define vtkVirtualRealityViewInteractor_h
 
-#include "vtkSlicerVirtualRealityModuleMRMLExport.h"
+// VirtualRealityModule includes
+#include "vtkSlicerVirtualRealityModuleMRMLDisplayableManagerExport.h"
 
+// VTK includes
 #include "vtkOpenVRRenderWindowInteractor.h"
 
+// STD includes
 #include <vector>
 
 // vtkRenderingOpenVR is not python wrapped, so wrapping New causes linking error //TODO:
 #ifndef __VTK_WRAP__
 
-class VTK_SLICER_VIRTUALREALITY_MODULE_MRML_EXPORT vtkVirtualRealityViewInteractor : public vtkOpenVRRenderWindowInteractor
+class VTK_SLICER_VIRTUALREALITY_MODULE_MRMLDISPLAYABLEMANAGER_EXPORT vtkVirtualRealityViewInteractor
+  : public vtkOpenVRRenderWindowInteractor
 {
 public:
   static vtkVirtualRealityViewInteractor *New();

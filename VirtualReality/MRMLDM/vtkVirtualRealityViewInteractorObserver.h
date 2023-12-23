@@ -19,13 +19,14 @@
 #ifndef __vtkVirtualRealityViewInteractorObserver_h
 #define __vtkVirtualRealityViewInteractorObserver_h
 
+// VirtualRealityModule includes
+#include "vtkSlicerVirtualRealityModuleMRMLDisplayableManagerExport.h"
+
 // MRML includes
 #include "vtkMRMLViewInteractorStyle.h"
 
-#include "vtkSlicerVirtualRealityModuleMRMLExport.h"
-
-class VTK_SLICER_VIRTUALREALITY_MODULE_MRML_EXPORT vtkVirtualRealityViewInteractorObserver :
-    public vtkMRMLViewInteractorStyle
+class VTK_SLICER_VIRTUALREALITY_MODULE_MRMLDISPLAYABLEMANAGER_EXPORT vtkVirtualRealityViewInteractorObserver
+  : public vtkMRMLViewInteractorStyle
 {
 public:
   static vtkVirtualRealityViewInteractorObserver *New();

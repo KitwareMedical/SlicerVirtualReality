@@ -11,6 +11,7 @@ find_package(vtkRenderingOpenVR REQUIRED)
 #-----------------------------------------------------------------------------
 add_subdirectory(MRML)
 add_subdirectory(Logic)
+add_subdirectory(MRMLDM)
 add_subdirectory(SubjectHierarchyPlugins)
 add_subdirectory(Widgets)
 

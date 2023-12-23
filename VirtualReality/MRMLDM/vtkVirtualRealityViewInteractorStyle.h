@@ -21,6 +21,9 @@
 #ifndef __vtkVirtualRealityViewInteractorStyle_h
 #define __vtkVirtualRealityViewInteractorStyle_h
 
+// VirtualRealityModule includes
+#include "vtkSlicerVirtualRealityModuleMRMLDisplayableManagerExport.h"
+
 // MRML includes
 #include "vtkMRMLViewInteractorStyle.h"
 
@@ -31,8 +34,6 @@
 #include "vtkEventData.h"
 #include <vtkSmartPointer.h>
 
-#include "vtkSlicerVirtualRealityModuleMRMLExport.h"
-
 class vtkMRMLScene;
 class vtkMRMLDisplayableManagerGroup;
 class vtkCellPicker;
@@ -42,8 +43,8 @@ class vtkWorldPointPicker;
 ///
 /// TODO:
 ///
-class VTK_SLICER_VIRTUALREALITY_MODULE_MRML_EXPORT vtkVirtualRealityViewInteractorStyle :
-    public vtkOpenVRInteractorStyle
+class VTK_SLICER_VIRTUALREALITY_MODULE_MRMLDISPLAYABLEMANAGER_EXPORT vtkVirtualRealityViewInteractorStyle
+  : public vtkOpenVRInteractorStyle
 {
 public:
   static vtkVirtualRealityViewInteractorStyle *New();
