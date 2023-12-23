@@ -7,6 +7,7 @@ set(${KIT}_EXPORT_DIRECTIVE "Q_SLICER_QTMODULES_${MODULE_NAME_UPPER}_WIDGETS_EXP
 
 set(${KIT}_INCLUDE_DIRECTORIES
   ${vtkSlicerVirtualRealityModuleMRML_INCLUDE_DIRS}
+  ${vtkSlicerVirtualRealityModuleMRMLDisplayableManager_INCLUDE_DIRS}
   ${VTK_INCLUDE_DIRS}
   )
 
@@ -34,6 +35,7 @@ set(${KIT}_RESOURCES
 
 set(${KIT}_TARGET_LIBRARIES
   vtkSlicer${MODULE_NAME}ModuleMRML
+  vtkSlicer${MODULE_NAME}ModuleMRMLDisplayableManager
   vtkSlicerCamerasModuleLogic
   ${VTK_LIBRARIES}
   )
