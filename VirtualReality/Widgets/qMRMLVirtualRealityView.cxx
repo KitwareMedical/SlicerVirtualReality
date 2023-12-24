@@ -195,8 +195,10 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   factory->SetMRMLApplicationLogic(appLogic);
 
   QStringList displayableManagers;
-  displayableManagers //<< "vtkMRMLCameraDisplayableManager"
-  //<< "vtkMRMLViewDisplayableManager"
+  displayableManagers
+      // Slicer
+      //<< "vtkMRMLCameraDisplayableManager" // Not supported in VR, vtkVRCamera has no MRML node counterpart
+      //<< "vtkMRMLViewDisplayableManager" // Not supported in VR, require a vtkMRMLCameraNode
       << "vtkMRMLModelDisplayableManager"
       << "vtkMRMLThreeDReformatDisplayableManager"
       << "vtkMRMLCrosshairDisplayableManager3D"
