@@ -93,7 +93,10 @@ protected:
   void updateTransformNodeWithControllerPose(vtkEventDataDevice device);
   void updateTransformNodeWithHMDPose();
   void updateTransformNodesWithTrackerPoses();
-  void updateTransformNodeWithPose(vtkMRMLTransformNode* node, vr::TrackedDevicePose_t* tdPose);
+
+  void updateTransformNodeFromDevice(vtkMRMLTransformNode* node, vtkEventDataDevice device, uint32_t index=0);
+  void updateTransformNodeAttributesFromDevice(vtkMRMLTransformNode* node, vtkEventDataDevice device, uint32_t index=0);
+
   void createRenderWindow();
   void destroyRenderWindow();
 
