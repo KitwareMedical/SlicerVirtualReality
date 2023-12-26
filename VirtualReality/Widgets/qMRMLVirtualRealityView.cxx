@@ -604,7 +604,7 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodesWithTrackerPoses()
     std::stringstream ss;
     ss << dev;
 
-    vtkMRMLTransformNode* node = vtkMRMLTransformNode::SafeDownCast(this->MRMLVirtualRealityViewNode->GetTrackerTransformNode(ss.str().c_str()));
+    vtkMRMLLinearTransformNode* node = this->MRMLVirtualRealityViewNode->GetTrackerTransformNode(ss.str().c_str());
     if (node == nullptr)
     {
       // Node wasn't found for this device, let's create one
