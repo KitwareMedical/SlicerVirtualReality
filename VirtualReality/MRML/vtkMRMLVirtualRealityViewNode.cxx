@@ -353,51 +353,51 @@ std::vector<vtkMRMLLinearTransformNode*> vtkMRMLVirtualRealityViewNode::GetTrack
 }
 
 //----------------------------------------------------------------------------
-vtkMRMLLinearTransformNode* vtkMRMLVirtualRealityViewNode::GetTrackerTransformNode(const char* openVrDeviceId)
+vtkMRMLLinearTransformNode* vtkMRMLVirtualRealityViewNode::GetTrackerTransformNode(uint32_t deviceHandle)
 {
-  if (openVrDeviceId == nullptr)
+  if (deviceHandle == UINT32_MAX /* InvalidDeviceIndex or vr::k_unTrackedDeviceIndexInvalid */)
   {
     return nullptr;
   }
   std::stringstream ss;
-  ss << openVrDeviceId << "." << this->TrackerTransformRole;
+  ss << deviceHandle << "." << this->TrackerTransformRole;
   return vtkMRMLLinearTransformNode::SafeDownCast(
            this->GetNthNodeReference(ss.str().c_str(), 0));
 }
 
 //----------------------------------------------------------------------------
-const char* vtkMRMLVirtualRealityViewNode::GetTrackerTransformNodeID(const char* openVrDeviceId)
+const char* vtkMRMLVirtualRealityViewNode::GetTrackerTransformNodeID(uint32_t deviceHandle)
 {
-  if (openVrDeviceId == nullptr)
+  if (deviceHandle == UINT32_MAX /* InvalidDeviceIndex or vr::k_unTrackedDeviceIndexInvalid */)
   {
     return nullptr;
   }
   std::stringstream ss;
-  ss << openVrDeviceId << "." << this->TrackerTransformRole;
+  ss << deviceHandle << "." << this->TrackerTransformRole;
   return this->GetNthNodeReferenceID(ss.str().c_str(), 0);
 }
 
 //----------------------------------------------------------------------------
-vtkMRMLLinearTransformNode* vtkMRMLVirtualRealityViewNode::SetAndObserveTrackerTransformNodeID(const char* nodeId, const char* openVrDeviceId)
+vtkMRMLLinearTransformNode* vtkMRMLVirtualRealityViewNode::SetAndObserveTrackerTransformNodeID(const char* nodeId, uint32_t deviceHandle)
 {
-  if (openVrDeviceId == nullptr)
+  if (deviceHandle == UINT32_MAX /* InvalidDeviceIndex or vr::k_unTrackedDeviceIndexInvalid */)
   {
     return nullptr;
   }
   std::stringstream ss;
-  ss << openVrDeviceId << "." << this->TrackerTransformRole;
+  ss << deviceHandle << "." << this->TrackerTransformRole;
   return vtkMRMLLinearTransformNode::SafeDownCast(this->SetAndObserveNthNodeReferenceID(ss.str().c_str(), 0, nodeId));
 }
 
 //----------------------------------------------------------------------------
-vtkMRMLLinearTransformNode* vtkMRMLVirtualRealityViewNode::SetAndObserveTrackerTransformNode(vtkMRMLLinearTransformNode* node, const char* openVrDeviceId)
+vtkMRMLLinearTransformNode* vtkMRMLVirtualRealityViewNode::SetAndObserveTrackerTransformNode(vtkMRMLLinearTransformNode* node, uint32_t deviceHandle)
 {
-  if (openVrDeviceId == nullptr)
+  if (deviceHandle == UINT32_MAX /* InvalidDeviceIndex or vr::k_unTrackedDeviceIndexInvalid */)
   {
     return nullptr;
   }
   std::stringstream ss;
-  ss << openVrDeviceId << "." << this->TrackerTransformRole;
+  ss << deviceHandle << "." << this->TrackerTransformRole;
   if (node == nullptr)
   {
     return vtkMRMLLinearTransformNode::SafeDownCast(this->SetAndObserveNthNodeReferenceID(ss.str().c_str(), 0, nullptr));
@@ -406,14 +406,14 @@ vtkMRMLLinearTransformNode* vtkMRMLVirtualRealityViewNode::SetAndObserveTrackerT
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLVirtualRealityViewNode::RemoveTrackerTransformNode(const char* openVrDeviceId)
+void vtkMRMLVirtualRealityViewNode::RemoveTrackerTransformNode(uint32_t deviceHandle)
 {
-  if (openVrDeviceId == nullptr)
+  if (deviceHandle == UINT32_MAX /* InvalidDeviceIndex or vr::k_unTrackedDeviceIndexInvalid */)
   {
     return;
   }
   std::stringstream ss;
-  ss << openVrDeviceId << "." << this->TrackerTransformRole;
+  ss << deviceHandle << "." << this->TrackerTransformRole;
   this->RemoveNthNodeReferenceID(ss.str().c_str(), 0);
 }
 
@@ -495,22 +495,27 @@ void vtkMRMLVirtualRealityViewNode::CreateDefaultHMDTransformNode()
 }
 
 //----------------------------------------------------------------------------
-vtkMRMLLinearTransformNode* vtkMRMLVirtualRealityViewNode::CreateDefaultTrackerTransformNode(const char* openVrDeviceId)
+vtkMRMLLinearTransformNode* vtkMRMLVirtualRealityViewNode::CreateDefaultTrackerTransformNode(uint32_t deviceHandle)
 {
-  if (openVrDeviceId == nullptr)
+  if (deviceHandle == UINT32_MAX /* InvalidDeviceIndex or vr::k_unTrackedDeviceIndexInvalid */)
   {
     return nullptr;
   }
-  vtkSmartPointer<vtkMRMLLinearTransformNode> linearTransformNode = this->GetTrackerTransformNode(openVrDeviceId);
+  vtkSmartPointer<vtkMRMLLinearTransformNode> linearTransformNode = this->GetTrackerTransformNode(deviceHandle);
   if (linearTransformNode == nullptr)
   {
     // Node wasn't found for this device, let's create one
     linearTransformNode = vtkSmartPointer<vtkMRMLLinearTransformNode>::Take(
                             vtkMRMLLinearTransformNode::SafeDownCast(this->GetScene()->CreateNodeByClass("vtkMRMLLinearTransformNode")));
-    linearTransformNode->SetAttribute("VirtualReality.VRDeviceID", openVrDeviceId);
+
+    std::stringstream ss;
+    ss << deviceHandle;
+    std::string deviceHandleAsStr = ss.str();
+
+    linearTransformNode->SetAttribute("VirtualReality.VRDeviceID", deviceHandleAsStr.c_str());
     linearTransformNode->SetName("VirtualReality.GenericTracker");
   }
-  this->SetAndObserveTrackerTransformNode(linearTransformNode, openVrDeviceId);
+  this->SetAndObserveTrackerTransformNode(linearTransformNode, deviceHandle);
   return linearTransformNode;
 }
 
