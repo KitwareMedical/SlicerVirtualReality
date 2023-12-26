@@ -545,10 +545,7 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodesWithTrackerPoses()
   for (uint32_t i = 0; i < this->RenderWindow->GetNumberOfDeviceHandlesForDevice(vtkEventDataDevice::GenericTracker); ++i)
   {
     uint32_t handle = this->RenderWindow->GetDeviceHandleForDevice(vtkEventDataDevice::GenericTracker, i);
-    std::stringstream ss;
-    ss << handle;
-
-    vtkMRMLLinearTransformNode* node = this->MRMLVirtualRealityViewNode->CreateDefaultTrackerTransformNode(ss.str().c_str());
+    vtkMRMLLinearTransformNode* node = this->MRMLVirtualRealityViewNode->CreateDefaultTrackerTransformNode(handle);
 
     int disabledModify = node->StartModify();
     this->updateTransformNodeFromDevice(node, vtkEventDataDevice::GenericTracker, i);

@@ -82,7 +82,7 @@ public:
   void CreateDefaultHMDTransformNode();
 
   /// Create generic tracker transform node if not set already.
-  vtkMRMLLinearTransformNode* CreateDefaultTrackerTransformNode(const char* openVrDeviceId);
+  vtkMRMLLinearTransformNode* CreateDefaultTrackerTransformNode(uint32_t deviceHandle);
 
   /// Get controller node by device identifier
   vtkMRMLLinearTransformNode* GetControllerTransformNode(vtkEventDataDevice device);
@@ -121,17 +121,17 @@ public:
 
   /// Get generic tracker transform node
   std::vector<vtkMRMLLinearTransformNode*> GetTrackerTransformNodes();
-  vtkMRMLLinearTransformNode* GetTrackerTransformNode(const char* openVrDeviceId);
-  const char* GetTrackerTransformNodeID(const char* openVrDeviceId);
+  vtkMRMLLinearTransformNode* GetTrackerTransformNode(uint32_t deviceHandle);
+  const char* GetTrackerTransformNodeID(uint32_t deviceHandle);
   /// Set tracker transform node.
   /// \sa GetTrackerTransformNode
-  vtkMRMLLinearTransformNode* SetAndObserveTrackerTransformNodeID(const char* nodeId, const char* openVrDeviceId);
+  vtkMRMLLinearTransformNode* SetAndObserveTrackerTransformNodeID(const char* nodeId, uint32_t deviceHandle);
   /// Set tracker transform node.
   /// \sa GetTrackerTransformNode
-  vtkMRMLLinearTransformNode* SetAndObserveTrackerTransformNode(vtkMRMLLinearTransformNode* node, const char* openVrDeviceId);
+  vtkMRMLLinearTransformNode* SetAndObserveTrackerTransformNode(vtkMRMLLinearTransformNode* node, uint32_t deviceHandle);
   /// Remove a tracker transform node.
   /// \sa SetAndObserveTrackerTransformNode
-  void RemoveTrackerTransformNode(const char* openVrDeviceId);
+  void RemoveTrackerTransformNode(uint32_t deviceHandle);
   /// Remove all tracker transform node.
   /// \sa SetAndObserveTrackerTransformNode
   void RemoveAllTrackerTransformNodes();
