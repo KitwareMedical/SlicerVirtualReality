@@ -81,6 +81,9 @@ public:
   /// Create camera transform node if not set already.
   void CreateDefaultHMDTransformNode();
 
+  /// Create generic tracker transform node if not set already.
+  vtkMRMLLinearTransformNode* CreateDefaultTrackerTransformNode(const char* openVrDeviceId);
+
   /// Get controller node by device identifier
   vtkMRMLLinearTransformNode* GetControllerTransformNode(vtkEventDataDevice device);
 

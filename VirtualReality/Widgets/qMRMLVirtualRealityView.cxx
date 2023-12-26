@@ -548,20 +548,7 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodesWithTrackerPoses()
     std::stringstream ss;
     ss << handle;
 
-    vtkMRMLLinearTransformNode* node = this->MRMLVirtualRealityViewNode->GetTrackerTransformNode(ss.str().c_str());
-    if (node == nullptr)
-    {
-      // Node wasn't found for this device, let's create one
-      node = vtkMRMLLinearTransformNode::SafeDownCast(this->MRMLVirtualRealityViewNode->GetScene()->AddNode(vtkMRMLLinearTransformNode::New()));
-      if (node == nullptr)
-      {
-        qCritical() << Q_FUNC_INFO << ": Unable to add transform node to scene. Can't update VR tracker with ID: " << handle;
-        continue;
-      }
-      node->SetAttribute("VirtualReality.VRDeviceID", ss.str().c_str());
-      node->SetName("VirtualReality.GenericTracker");
-      this->MRMLVirtualRealityViewNode->SetAndObserveTrackerTransformNode(node, ss.str().c_str());
-    }
+    vtkMRMLLinearTransformNode* node = this->MRMLVirtualRealityViewNode->CreateDefaultTrackerTransformNode(ss.str().c_str());
 
     int disabledModify = node->StartModify();
     this->updateTransformNodeFromDevice(node, vtkEventDataDevice::GenericTracker, i);
