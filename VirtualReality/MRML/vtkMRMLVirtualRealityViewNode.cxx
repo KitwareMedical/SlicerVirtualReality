@@ -441,7 +441,7 @@ void vtkMRMLVirtualRealityViewNode::CreateDefaultControllerTransformNodes()
 
   if (!this->GetLeftControllerTransformNodeID())
   {
-    // We create or get and update the linear transform nodes that correspond to left and right controllers
+    // Create or get and update the linear transform node that correspond to left controller
     vtkSmartPointer<vtkMRMLLinearTransformNode> linearTransformNode = vtkMRMLLinearTransformNode::SafeDownCast(this->GetScene()->GetSingletonNode("VirtualReality.LeftController", "vtkMRMLLinearTransformNode"));
     if (linearTransformNode == nullptr)
     {
@@ -456,6 +456,7 @@ void vtkMRMLVirtualRealityViewNode::CreateDefaultControllerTransformNodes()
 
   if (!this->GetRightControllerTransformNodeID())
   {
+    // Create or get and update the linear transform node that correspond to right controller
     vtkSmartPointer<vtkMRMLLinearTransformNode> linearTransformNode = vtkMRMLLinearTransformNode::SafeDownCast(this->GetScene()->GetSingletonNode("VirtualReality.RightController", "vtkMRMLLinearTransformNode"));
     if (linearTransformNode == nullptr)
     {
@@ -479,7 +480,7 @@ void vtkMRMLVirtualRealityViewNode::CreateDefaultHMDTransformNode()
 
   if (!this->GetHMDTransformNodeID())
   {
-    // We create or get and update the linear transform nodes that correspond to left and right controllers
+    // Create or get and update the linear transform node that correspond to head-mounted display (HMD)
     vtkSmartPointer<vtkMRMLLinearTransformNode> linearTransformNode = vtkMRMLLinearTransformNode::SafeDownCast(this->GetScene()->GetSingletonNode("VirtualReality.HMD", "vtkMRMLLinearTransformNode"));
     if (linearTransformNode == nullptr)
     {
