@@ -517,41 +517,8 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodeWithControllerPose(vtkEv
   }
 
   int disabledModify = node->StartModify();
-  auto handle = this->RenderWindow->GetDeviceHandleForDevice(device);
-  if (handle == vr::k_unTrackedDeviceIndexInvalid)
-  {
-    node->SetAttribute("VirtualReality.ControllerActive", "0");
-    node->SetAttribute("VirtualReality.ControllerConnected", "0");
-    node->EndModify(disabledModify);
-    return;
-  }
-
-  vr::TrackedDevicePose_t* tdPose;
-  this->RenderWindow->GetOpenVRPose(device, &tdPose);
-
-  if (tdPose == nullptr)
-  {
-    qCritical() << Q_FUNC_INFO << ": Unable to retrieve pose associated with VR tracker with ID: " << (int)device;
-  }
-  if (tdPose == nullptr || tdPose->eTrackingResult != vr::TrackingResult_Running_OK)
-  {
-    node->SetAttribute("VirtualReality.ControllerActive", "0");
-  }
-  else
-  {
-    node->SetAttribute("VirtualReality.ControllerActive", "1");
-  }
-
-  if (tdPose == nullptr || !tdPose->bDeviceIsConnected)
-  {
-    node->SetAttribute("VirtualReality.ControllerConnected", "0");
-  }
-  else
-  {
-    node->SetAttribute("VirtualReality.ControllerConnected", "1");
-  }
-  updateTransformNodeWithPose(node, tdPose);
-
+  this->updateTransformNodeFromDevice(node, device);
+  this->updateTransformNodeAttributesFromDevice(node, device);
   node->EndModify(disabledModify);
 }
 
@@ -567,31 +534,8 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodeWithHMDPose()
   }
 
   int disabledModify = node->StartModify();
-  if (this->RenderWindow->GetDeviceHandleForDevice(vtkEventDataDevice::HeadMountedDisplay) == vr::k_unTrackedDeviceIndexInvalid)
-  {
-    node->SetAttribute("VirtualReality.HMDActive", "0");
-    node->EndModify(disabledModify);
-    return;
-  }
-
-  vr::TrackedDevicePose_t* tdPose;
-  this->RenderWindow->GetOpenVRPose(vtkEventDataDevice::HeadMountedDisplay, &tdPose);
-
-  if (tdPose == nullptr)
-  {
-    qCritical() << Q_FUNC_INFO << ": Unable to retrieve HMD pose";
-  }
-  if (tdPose == nullptr || tdPose->eTrackingResult != vr::TrackingResult_Running_OK)
-  {
-    node->SetAttribute("VirtualReality.HMDActive", "0");
-  }
-  else
-  {
-    node->SetAttribute("VirtualReality.HMDActive", "1");
-  }
-
-  updateTransformNodeWithPose(node, tdPose);
-
+  this->updateTransformNodeFromDevice(node, vtkEventDataDevice::HeadMountedDisplay);
+  this->updateTransformNodeAttributesFromDevice(node, vtkEventDataDevice::HeadMountedDisplay);
   node->EndModify(disabledModify);
 }
 
@@ -600,9 +544,9 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodesWithTrackerPoses()
 {
   for (uint32_t i = 0; i < this->RenderWindow->GetNumberOfDeviceHandlesForDevice(vtkEventDataDevice::GenericTracker); ++i)
   {
-    vr::TrackedDeviceIndex_t dev = this->RenderWindow->GetDeviceHandleForDevice(vtkEventDataDevice::GenericTracker, i);
+    uint32_t handle = this->RenderWindow->GetDeviceHandleForDevice(vtkEventDataDevice::GenericTracker, i);
     std::stringstream ss;
-    ss << dev;
+    ss << handle;
 
     vtkMRMLLinearTransformNode* node = this->MRMLVirtualRealityViewNode->GetTrackerTransformNode(ss.str().c_str());
     if (node == nullptr)
@@ -611,7 +555,7 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodesWithTrackerPoses()
       node = vtkMRMLLinearTransformNode::SafeDownCast(this->MRMLVirtualRealityViewNode->GetScene()->AddNode(vtkMRMLLinearTransformNode::New()));
       if (node == nullptr)
       {
-        qCritical() << Q_FUNC_INFO << ": Unable to add transform node to scene. Can't update VR tracker with ID: " << dev;
+        qCritical() << Q_FUNC_INFO << ": Unable to add transform node to scene. Can't update VR tracker with ID: " << handle;
         continue;
       }
       node->SetAttribute("VirtualReality.VRDeviceID", ss.str().c_str());
@@ -620,56 +564,105 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodesWithTrackerPoses()
     }
 
     int disabledModify = node->StartModify();
-
-    // Now, we have our generic tracker node, let's update it!
-    vr::TrackedDevicePose_t* tdPose;
-    this->RenderWindow->GetOpenVRPose(vtkEventDataDevice::GenericTracker, dev, &tdPose);
-
-    if (tdPose == nullptr)
-    {
-      qCritical() << Q_FUNC_INFO << ": Unable to retrieve pose associated with VR tracker with ID: " << dev;
-    }
-    if (tdPose == nullptr || tdPose->eTrackingResult != vr::TrackingResult_Running_OK)
-    {
-      node->SetAttribute("VirtualReality.TrackerActive", "0");
-    }
-    else
-    {
-      node->SetAttribute("VirtualReality.TrackerActive", "1");
-    }
-    updateTransformNodeWithPose(node, tdPose);
-
+    this->updateTransformNodeFromDevice(node, vtkEventDataDevice::GenericTracker, i);
+    this->updateTransformNodeAttributesFromDevice(node, vtkEventDataDevice::GenericTracker, i);
     node->EndModify(disabledModify);
   }
 }
 
-
 //----------------------------------------------------------------------------
-void qMRMLVirtualRealityViewPrivate::updateTransformNodeWithPose(vtkMRMLTransformNode* node, vr::TrackedDevicePose_t* tdPose)
+void qMRMLVirtualRealityViewPrivate
+::updateTransformNodeAttributesFromDevice(vtkMRMLTransformNode* node, vtkEventDataDevice device, uint32_t index)
 {
+  std::string attributePrefix;
+
+  switch(device)
+  {
+    case vtkEventDataDevice::HeadMountedDisplay:
+      attributePrefix = "HMD";
+      break;
+    case vtkEventDataDevice::RightController:
+      attributePrefix = "Controller";
+      break;
+    case vtkEventDataDevice::LeftController:
+      attributePrefix = "Controller";
+      break;
+    case vtkEventDataDevice::GenericTracker:
+      attributePrefix = "Tracker";
+      break;
+    default:
+      attributePrefix = "Unknown";
+      break;
+  }
+
+  vr::TrackedDevicePose_t* tdPose;
+  this->RenderWindow->GetOpenVRPose(device, index, &tdPose);
   if (tdPose == nullptr)
   {
-    node->SetAttribute("VirtualReality.PoseValid", "False");
-    node->SetAttribute("VirtualReality.PoseStatus", "Uninitialized");
+    auto handle = this->RenderWindow->GetDeviceHandleForDevice(device, index);
+    switch(device)
+    {
+      case vtkEventDataDevice::HeadMountedDisplay:
+        qCritical() << Q_FUNC_INFO << ": Unable to retrieve HMD pose";
+        break;
+      case vtkEventDataDevice::RightController:
+        qCritical() << Q_FUNC_INFO << ": Unable to retrieve RightController pose";
+        break;
+      case vtkEventDataDevice::LeftController:
+        qCritical() << Q_FUNC_INFO << ": Unable to retrieve LeftController pose";
+        break;
+      case vtkEventDataDevice::GenericTracker:
+        qCritical() << Q_FUNC_INFO << ": Unable to retrieve pose associated with VR tracker"
+                    << "(index: " << index << ", handle: " << handle << ")";
+        break;
+      default:
+        qCritical() << Q_FUNC_INFO << ": Unable to retrieve pose associated with unknown device";
+        break;
+    }
     return;
   }
+
+  bool active = tdPose != nullptr && tdPose->eTrackingResult == vr::TrackingResult_Running_OK;
+  std::string activeAttributeName = std::string("VirtualReality.") + attributePrefix + "Active";
+  node->SetAttribute(activeAttributeName.c_str(), active ? "1" : "0");
+
+  bool connected = tdPose != nullptr && tdPose->bDeviceIsConnected;
+  std::string connectedAttributeName = std::string("VirtualReality.") + attributePrefix + "Connected";
+  node->SetAttribute(connectedAttributeName.c_str(), connected ? "1" : "0");
+
+  bool poseValid = tdPose != nullptr && tdPose->bPoseIsValid;
+  node->SetAttribute("VirtualReality.PoseValid", poseValid ? "True" : "False");
+  node->SetAttribute("VirtualReality.PoseStatus", tdPose ? PoseStatusToString(tdPose->eTrackingResult).c_str() : "Uninitialized");
+}
+
+//----------------------------------------------------------------------------
+void qMRMLVirtualRealityViewPrivate
+::updateTransformNodeFromDevice(vtkMRMLTransformNode* node, vtkEventDataDevice device, uint32_t index)
+{
+  auto deviceHandle = this->RenderWindow->GetDeviceHandleForDevice(device, index);
+  if (deviceHandle == UINT32_MAX /* InvalidDeviceIndex or vr::k_unTrackedDeviceIndexInvalid */)
+    {
+    return;
+    }
+  vtkMatrix4x4* pose = this->RenderWindow->GetDeviceToPhysicalMatrixForDeviceHandle(deviceHandle);
+  if (!pose)
+  {
+    return;
+  }
+
   double pos[3] = { 0. };
   double ppos[3] = { 0. };
   double wxyz[4] = { 1., 0., 0., 0. };
   double wdir[3] = { 1., 0., 0. };
 
-  vtkNew<vtkMatrix4x4> pose;
-  this->RenderWindow->SetMatrixFromOpenVRPose(pose, *tdPose);
+  // Convert device pose to world coordinates
   this->Interactor->ConvertPoseToWorldCoordinates(pose, pos, wxyz, ppos, wdir);
+
   vtkNew<vtkTransform> transform;
   transform->Translate(pos);
   transform->RotateWXYZ(wxyz[0], wxyz[1], wxyz[2], wxyz[3]);
-  if (node != nullptr)
-  {
-    node->SetMatrixTransformToParent(transform->GetMatrix());
-  }
-  node->SetAttribute("VirtualReality.PoseValid", tdPose->bPoseIsValid ? "True" : "False");
-  node->SetAttribute("VirtualReality.PoseStatus", PoseStatusToString(tdPose->eTrackingResult).c_str());
+
+  node->SetMatrixTransformToParent(transform->GetMatrix());
 }
 
 
