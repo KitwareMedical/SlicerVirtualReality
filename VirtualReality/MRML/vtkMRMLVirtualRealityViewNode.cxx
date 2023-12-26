@@ -495,6 +495,26 @@ void vtkMRMLVirtualRealityViewNode::CreateDefaultHMDTransformNode()
 }
 
 //----------------------------------------------------------------------------
+vtkMRMLLinearTransformNode* vtkMRMLVirtualRealityViewNode::CreateDefaultTrackerTransformNode(const char* openVrDeviceId)
+{
+  if (openVrDeviceId == nullptr)
+  {
+    return nullptr;
+  }
+  vtkSmartPointer<vtkMRMLLinearTransformNode> linearTransformNode = this->GetTrackerTransformNode(openVrDeviceId);
+  if (linearTransformNode == nullptr)
+  {
+    // Node wasn't found for this device, let's create one
+    linearTransformNode = vtkSmartPointer<vtkMRMLLinearTransformNode>::Take(
+                            vtkMRMLLinearTransformNode::SafeDownCast(this->GetScene()->CreateNodeByClass("vtkMRMLLinearTransformNode")));
+    linearTransformNode->SetAttribute("VirtualReality.VRDeviceID", openVrDeviceId);
+    linearTransformNode->SetName("VirtualReality.GenericTracker");
+  }
+  this->SetAndObserveTrackerTransformNode(linearTransformNode, openVrDeviceId);
+  return linearTransformNode;
+}
+
+//----------------------------------------------------------------------------
 void vtkMRMLVirtualRealityViewNode::SetControllerTransformsUpdate(bool enable)
 {
   if (enable == this->ControllerTransformsUpdate)
