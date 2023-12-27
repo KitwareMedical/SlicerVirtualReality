@@ -79,11 +79,6 @@ public:
   void SetGestureButtonToNone();
   ///@}
 
-protected:
-
-  /// List of buttons for which gesture recognition is enabled
-  std::vector<int> GestureEnabledButtons;
-
 private:
   vtkVirtualRealityViewInteractor();
   ~vtkVirtualRealityViewInteractor() override;
