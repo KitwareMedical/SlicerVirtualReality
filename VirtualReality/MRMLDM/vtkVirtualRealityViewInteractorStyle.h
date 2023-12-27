@@ -25,7 +25,6 @@
 #include "vtkSlicerVirtualRealityModuleMRMLDisplayableManagerExport.h"
 
 // MRML includes
-#include "vtkMRMLViewInteractorStyle.h"
 
 // VTK includes
 #include <vtkCellPicker.h>
@@ -33,6 +32,7 @@
 #include "vtkObject.h"
 #include "vtkEventData.h"
 #include <vtkSmartPointer.h>
+#include <vtkWeakPointer.h>
 
 class vtkMRMLScene;
 class vtkMRMLDisplayableManagerGroup;
