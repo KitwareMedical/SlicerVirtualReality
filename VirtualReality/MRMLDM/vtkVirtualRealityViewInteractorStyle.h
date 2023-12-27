@@ -96,13 +96,8 @@ public:
 
 protected:
 
-  bool QuickPick(int x, int y, double pickPoint[3]);
-
-protected:
-
   /// For jump to slice feature (when mouse is moved while shift key is pressed)
   vtkSmartPointer<vtkCellPicker> AccuratePicker;
-  vtkSmartPointer<vtkWorldPointPicker> QuickPicker;
 
   int GrabEnabled;
 
