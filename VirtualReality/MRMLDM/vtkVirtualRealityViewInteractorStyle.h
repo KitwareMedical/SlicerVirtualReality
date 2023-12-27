@@ -83,14 +83,6 @@ public:
   void PositionProp(vtkEventData *, double* lwpos = nullptr, double* lwori = nullptr) override;
   //@}
 
-  //@{
-  /**
-  * Map controller inputs to actions.
-  * Actions are defined by a VTKIS_*STATE*, interaction entry points,
-  * and the corresponding method for interaction.
-  */
-  int GetMappedAction(vtkCommand::EventIds eid);
-  //@}
   vtkSetClampMacro(GrabEnabled, int, 0, 1);
   vtkGetMacro(GrabEnabled, int);
   vtkBooleanMacro(GrabEnabled, int);

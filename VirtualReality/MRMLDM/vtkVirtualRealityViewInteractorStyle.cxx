@@ -581,27 +581,6 @@ void vtkVirtualRealityViewInteractorStyle::EndGesture()
 // Utility routines
 //----------------------------------------------------------------------------
 
-//----------------------------------------------------------------------------
-int vtkVirtualRealityViewInteractorStyle::GetMappedAction(vtkCommand::EventIds eid)
-{
-  // Since both `vtkEventDataAction::Press` and `vtkEventDataAction::Release` actions are
-  // added together to the map when using the 2-argument function
-  // `MapInputToAction(vtkCommand::EventIds eid, int state)`, and we are only using this
-  // version of the function, to get the state for the corresponding `(eventId, action)`,
-  // we simply lookup for `(eventId, vtkEventDataAction::Press)` to check if an event
-  // is already mapped.
-  vtkEventDataAction action = vtkEventDataAction::Press;
-
-  decltype(this->InputMap)::key_type key(eid, action);
-
-  auto it = this->InputMap.find(key);
-  if (it != this->InputMap.end())
-  {
-    return it->second;
-  }
-  return VTKIS_NONE;
-}
-
 //---------------------------------------------------------------------------
 vtkMRMLScene* vtkVirtualRealityViewInteractorStyle::GetMRMLScene()
 {
