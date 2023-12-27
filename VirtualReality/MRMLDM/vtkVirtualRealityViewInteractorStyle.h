@@ -27,7 +27,6 @@
 // MRML includes
 
 // VTK includes
-#include <vtkCellPicker.h>
 #include <vtkOpenVRInteractorStyle.h>
 #include "vtkObject.h"
 #include "vtkEventData.h"
@@ -36,7 +35,6 @@
 
 class vtkMRMLScene;
 class vtkMRMLDisplayableManagerGroup;
-class vtkCellPicker;
 class vtkWorldPointPicker;
 
 /// \brief Virtual reality interactions
@@ -86,8 +84,6 @@ public:
   vtkSetClampMacro(GrabEnabled, int, 0, 1);
   vtkGetMacro(GrabEnabled, int);
   vtkBooleanMacro(GrabEnabled, int);
-
-  vtkCellPicker* GetAccuratePicker();
   
   /// Set physical to world magnification. Valid value range is [0.01, 100].
   /// Note: Conversion is physicalScale = 1000 / magnification
@@ -95,9 +91,6 @@ public:
   double GetMagnification();
 
 protected:
-
-  /// For jump to slice feature (when mouse is moved while shift key is pressed)
-  vtkSmartPointer<vtkCellPicker> AccuratePicker;
 
   int GrabEnabled;
 
