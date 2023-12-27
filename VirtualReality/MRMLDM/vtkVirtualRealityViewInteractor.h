@@ -23,39 +23,43 @@
 
 // VirtualRealityModule includes
 #include "vtkSlicerVirtualRealityModuleMRMLDisplayableManagerExport.h"
+#include "vtkVirtualRealityComplexGestureRecognizer.h"
 
 // VTK includes
+#include <vtkNew.h>
 #include "vtkOpenVRRenderWindowInteractor.h"
-
-// STD includes
-#include <vector>
 
 class VTK_SLICER_VIRTUALREALITY_MODULE_MRMLDISPLAYABLEMANAGER_EXPORT vtkVirtualRealityViewInteractor
   : public vtkOpenVRRenderWindowInteractor
 {
 public:
   static vtkVirtualRealityViewInteractor *New();
-
-  typedef vtkVirtualRealityViewInteractor Self;
-
   vtkTypeMacro(vtkVirtualRealityViewInteractor,vtkOpenVRRenderWindowInteractor);
-  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   ///@{
   /// Define Slicer specific heuristic for handling complex gestures.
-  ///
-  /// See https://gitlab.kitware.com/vtk/vtk/-/merge_requests/9892
-  virtual void HandleComplexGestureEvents(vtkEventData* ed) override;
-  virtual void RecognizeComplexGesture(vtkEventDataDevice3D* edata) override;
+  virtual void HandleComplexGestureEvents(vtkEventData* ed) override
+  {
+    this->ComplexGestureRecognizer->HandleComplexGestureEvents(ed);
+  }
+  virtual void RecognizeComplexGesture(vtkEventDataDevice3D* edata) override
+  {
+    this->ComplexGestureRecognizer->RecognizeComplexGesture(edata);
+  }
   ///@}
 
+protected:
+  vtkNew<vtkVirtualRealityComplexGestureRecognizer> ComplexGestureRecognizer;
+
 private:
-  vtkVirtualRealityViewInteractor();
-  ~vtkVirtualRealityViewInteractor() override;
+  vtkVirtualRealityViewInteractor()
+  {
+    this->ComplexGestureRecognizer->SetInteractor(this);
+  }
+  ~vtkVirtualRealityViewInteractor() override = default;
 
   vtkVirtualRealityViewInteractor(const vtkVirtualRealityViewInteractor&) = delete;
   void operator=(const vtkVirtualRealityViewInteractor&) = delete;
 };
-
 
 #endif
