@@ -30,9 +30,6 @@
 // STD includes
 #include <vector>
 
-// vtkRenderingOpenVR is not python wrapped, so wrapping New causes linking error //TODO:
-#ifndef __VTK_WRAP__
-
 class VTK_SLICER_VIRTUALREALITY_MODULE_MRMLDISPLAYABLEMANAGER_EXPORT vtkVirtualRealityViewInteractor
   : public vtkOpenVRRenderWindowInteractor
 {
@@ -81,6 +78,5 @@ private:
   void operator=(const vtkVirtualRealityViewInteractor&) = delete;
 };
 
-#endif // __VTK_WRAP__
 
 #endif
