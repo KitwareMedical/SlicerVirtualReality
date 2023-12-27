@@ -178,7 +178,6 @@ vtkVirtualRealityViewInteractorStyle::vtkVirtualRealityViewInteractorStyle()
 
   this->AccuratePicker = vtkSmartPointer<vtkCellPicker>::New();
   this->AccuratePicker->SetTolerance( .005 );
-  this->QuickPicker = vtkSmartPointer<vtkWorldPointPicker>::New();
 
   // Create default inputs mapping
 
@@ -681,21 +680,4 @@ double vtkVirtualRealityViewInteractorStyle::GetMagnification()
   vtkOpenVRRenderWindow* rw = static_cast<vtkOpenVRRenderWindow*>(rwi->GetRenderWindow());
 
   return 1000.0 / rw->GetPhysicalScale();
-}
-
-//---------------------------------------------------------------------------
-bool vtkVirtualRealityViewInteractorStyle::QuickPick(int x, int y, double pickPoint[3])
-{
-  this->FindPokedRenderer(x, y);
-  if (this->CurrentRenderer == nullptr)
-  {
-    vtkDebugMacro("Pick: couldn't find the poked renderer at event position " << x << ", " << y);
-    return false;
-  }
-
-  this->QuickPicker->Pick(x, y, 0, this->CurrentRenderer);
-
-  this->QuickPicker->GetPickPosition(pickPoint);
-
-  return true;
 }
