@@ -85,9 +85,6 @@ protected:
 private:
   vtkVirtualRealityViewInteractorObserver(const vtkVirtualRealityViewInteractorObserver&) = delete;
   void operator=(const vtkVirtualRealityViewInteractorObserver&) = delete;
-
-  class vtkInternal;
-  vtkInternal* Internal;
 };
 
 #endif
