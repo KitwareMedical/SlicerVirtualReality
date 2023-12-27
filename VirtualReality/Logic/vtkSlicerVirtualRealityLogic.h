@@ -29,6 +29,9 @@
 
 // MRML includes
 
+// VTK includes
+class vtkMatrix4x4;
+
 // STD includes
 #include <cstdlib>
 
@@ -83,6 +86,13 @@ public:
 
   /// Set volume rendering logic
   void SetVolumeRenderingLogic(vtkSlicerVolumeRenderingLogic* volumeRenderingLogic);
+
+  /// Calculate the average pose of the two controllers for pinch 3D operations
+  ///
+  /// \return Success flag. Failure happens when the average orientation coincides
+  ///         with the direction of the displacement of the two controllers
+  static bool CalculateCombinedControllerPose(
+      vtkMatrix4x4* controller0Pose, vtkMatrix4x4* controller1Pose, vtkMatrix4x4* combinedPose);
 
 protected:
   vtkSlicerVirtualRealityLogic();
