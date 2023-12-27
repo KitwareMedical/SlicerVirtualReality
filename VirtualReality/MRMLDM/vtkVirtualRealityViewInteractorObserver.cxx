@@ -214,7 +214,10 @@ bool vtkVirtualRealityViewInteractorObserver::DelegateInteractionEventDataToDisp
   if (vrViewInteractorStyle)
     {
     ed->SetWorldToPhysicalScale(vrViewInteractorStyle->GetMagnification());
-    ed->SetAccuratePicker(vrViewInteractorStyle->GetAccuratePicker());
+    // The following line is commented out because the "AccuratePicker" associated with
+    // the eventData (ed) is exclusively used in "Libs/MRML/DisplayableManager/vtkMRMLCameraWidget.cxx"
+    // that is irrelevant in the VR context.
+    // ed->SetAccuratePicker(vrViewInteractorStyle->GetAccuratePicker());
     }
 
   vtkRenderer* currentRenderer = this->GetInteractorStyle()->GetCurrentRenderer();

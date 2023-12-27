@@ -175,10 +175,6 @@ vtkVirtualRealityViewInteractorStyle::vtkVirtualRealityViewInteractorStyle()
 
   this->Internal = new vtkInternal();
 
-
-  this->AccuratePicker = vtkSmartPointer<vtkCellPicker>::New();
-  this->AccuratePicker->SetTolerance( .005 );
-
   // Create default inputs mapping
 
   // The "eventId to state" mapping (see call to `MapInputToAction` below) applies to right and left
@@ -590,12 +586,6 @@ vtkMRMLScene* vtkVirtualRealityViewInteractorStyle::GetMRMLScene()
   }
 
   return this->DisplayableManagers->GetNthDisplayableManager(0)->GetMRMLScene();
-}
-
-//---------------------------------------------------------------------------
-vtkCellPicker* vtkVirtualRealityViewInteractorStyle::GetAccuratePicker()
-{
-  return this->AccuratePicker;
 }
 
 //---------------------------------------------------------------------------
