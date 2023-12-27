@@ -30,6 +30,7 @@
 
 // VTK includes
 #include <vtkIntArray.h>
+#include <vtkMatrix4x4.h>
 #include <vtkNew.h>
 #include <vtkObjectFactory.h>
 
@@ -413,4 +414,72 @@ void vtkSlicerVirtualRealityLogic::OptimizeSceneForVirtualReality()
   }
   vtkMRMLSegmentationDisplayNode::SafeDownCast(defaultSegmentationDisplayNode)->SetVisibility2DFill(0);
   vtkMRMLSegmentationDisplayNode::SafeDownCast(defaultSegmentationDisplayNode)->SetVisibility2DOutline(0);
+}
+
+//---------------------------------------------------------------------------
+bool vtkSlicerVirtualRealityLogic::CalculateCombinedControllerPose(
+  vtkMatrix4x4* controller0Pose, vtkMatrix4x4* controller1Pose, vtkMatrix4x4* combinedPose)
+{
+  if (!controller0Pose || !controller1Pose || !combinedPose)
+  {
+    return false;
+  }
+
+  // The position will be the average position
+  double controllerCenterPos[3] = {
+    (controller0Pose->GetElement(0,3) + controller1Pose->GetElement(0,3)) / 2.0,
+    (controller0Pose->GetElement(1,3) + controller1Pose->GetElement(1,3)) / 2.0,
+    (controller0Pose->GetElement(2,3) + controller1Pose->GetElement(2,3)) / 2.0 };
+
+  // Scaling will be the distance between the two controllers
+  double controllerDistance = sqrt(
+    (controller0Pose->GetElement(0,3) - controller1Pose->GetElement(0,3))
+      * (controller0Pose->GetElement(0,3) - controller1Pose->GetElement(0,3)) +
+    (controller0Pose->GetElement(1,3) - controller1Pose->GetElement(1,3))
+      * (controller0Pose->GetElement(1,3) - controller1Pose->GetElement(1,3)) +
+    (controller0Pose->GetElement(2,3) - controller1Pose->GetElement(2,3))
+      * (controller0Pose->GetElement(2,3) - controller1Pose->GetElement(2,3)) );
+
+  // X axis is the displacement vector from controller 0 to 1
+  double xAxis[3] = {
+    controller1Pose->GetElement(0,3) - controller0Pose->GetElement(0,3),
+    controller1Pose->GetElement(1,3) - controller0Pose->GetElement(1,3),
+    controller1Pose->GetElement(2,3) - controller0Pose->GetElement(2,3) };
+  vtkMath::Normalize(xAxis);
+
+  // Y axis is calculated from a Y' and Z.
+  // 1. Y' is the average orientation of the two controller directions
+  // 2. If X and Y' are almost parallel, then return failure
+  // 3. Z is the cross product of X and Y'
+  // 4. Y is then the cross product of Z and X
+  double yAxisPrime[3] = {
+    controller0Pose->GetElement(0,1) + controller1Pose->GetElement(0,1),
+    controller0Pose->GetElement(1,1) + controller1Pose->GetElement(1,1),
+    controller0Pose->GetElement(2,1) + controller1Pose->GetElement(2,1) };
+  vtkMath::Normalize(yAxisPrime);
+
+  if (fabs(vtkMath::Dot(xAxis, yAxisPrime)) > 0.99)
+  {
+    // The two axes are almost parallel
+    return false;
+  }
+
+  double zAxis[3] = {0.0};
+  vtkMath::Cross(xAxis, yAxisPrime, zAxis);
+  vtkMath::Normalize(zAxis);
+
+  double yAxis[3] = {0.0};
+  vtkMath::Cross(zAxis, xAxis, yAxis);
+  vtkMath::Normalize(yAxis);
+
+  // Assemble matrix from the axes, the scaling, and the position
+  for (int row=0;row<3;++row)
+  {
+    combinedPose->SetElement(row, 0, xAxis[row]*controllerDistance);
+    combinedPose->SetElement(row, 1, yAxis[row]*controllerDistance);
+    combinedPose->SetElement(row, 2, zAxis[row]*controllerDistance);
+    combinedPose->SetElement(row, 3, controllerCenterPos[row]);
+  }
+
+  return true;
 }
