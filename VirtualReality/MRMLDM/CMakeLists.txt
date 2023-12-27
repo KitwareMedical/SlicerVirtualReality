@@ -17,6 +17,8 @@ set(${KIT}_INCLUDE_DIRECTORIES
 set(${KIT}_SRCS
   vtkMRML${MODULE_NAME}ViewDisplayableManagerFactory.cxx
   vtkMRML${MODULE_NAME}ViewDisplayableManagerFactory.h
+  vtk${MODULE_NAME}ComplexGestureRecognizer.cxx
+  vtk${MODULE_NAME}ComplexGestureRecognizer.h
   vtk${MODULE_NAME}ViewInteractor.cxx
   vtk${MODULE_NAME}ViewInteractor.h
   vtk${MODULE_NAME}ViewInteractorObserver.cxx
