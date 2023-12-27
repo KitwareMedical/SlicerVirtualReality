@@ -25,6 +25,8 @@ set(${KIT}_SRCS
   vtk${MODULE_NAME}ViewInteractorObserver.h
   vtk${MODULE_NAME}ViewInteractorStyle.cxx
   vtk${MODULE_NAME}ViewInteractorStyle.h
+  vtk${MODULE_NAME}ViewInteractorStyleDelegate.cxx
+  vtk${MODULE_NAME}ViewInteractorStyleDelegate.h
   )
 
 set(${KIT}_TARGET_LIBRARIES

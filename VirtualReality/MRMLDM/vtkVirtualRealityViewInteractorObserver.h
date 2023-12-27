@@ -21,6 +21,7 @@
 
 // VirtualRealityModule includes
 #include "vtkSlicerVirtualRealityModuleMRMLDisplayableManagerExport.h"
+class vtkVirtualRealityViewInteractorStyleDelegate;
 
 // MRML includes
 #include "vtkMRMLViewInteractorStyle.h"
@@ -77,6 +78,8 @@ public:
   virtual void OnPositionProp3D(vtkEventData *edata);
   virtual void OnClip3D(vtkEventData *edata);
   virtual void OnElevation3D(vtkEventData *edata);
+
+  vtkVirtualRealityViewInteractorStyleDelegate* GetInteractorStyleDelegate();
 
 protected:
   vtkVirtualRealityViewInteractorObserver();
