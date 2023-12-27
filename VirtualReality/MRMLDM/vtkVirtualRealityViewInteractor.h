@@ -46,12 +46,6 @@ public:
 
   virtual void SetInteractorStyle(vtkInteractorObserver*) override;
 
-  /// Return the identifier of the complex gesture being handled.
-  /// \sa HandleComplexGestureEvents(), RecognizeComplexGesture()
-  /// \sa vtkVirtualRealityViewInteractorStyle::OnStartGesture()
-  /// \sa vtkVirtualRealityViewInteractorStyle::OnEndGesture()
-  vtkCommand::EventIds GetCurrentGesture() const;
-
   ///@{
   /// Define Slicer specific heuristic for handling complex gestures.
   ///
