@@ -23,6 +23,7 @@
 
 // VirtualRealityModule includes
 #include "vtkSlicerVirtualRealityModuleMRMLDisplayableManagerExport.h"
+#include "vtkVirtualRealityViewInteractorStyleDelegate.h"
 
 // MRML includes
 
@@ -47,65 +48,58 @@ class VTK_SLICER_VIRTUALREALITY_MODULE_MRMLDISPLAYABLEMANAGER_EXPORT vtkVirtualR
 public:
   static vtkVirtualRealityViewInteractorStyle *New();
   vtkTypeMacro(vtkVirtualRealityViewInteractorStyle,vtkOpenVRInteractorStyle);
-  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  void SetDisplayableManagers(vtkMRMLDisplayableManagerGroup* displayableManagers);
-
-  /// Get MRML scene from the displayable manager group (the first displayable manager's if any)
-  vtkMRMLScene* GetMRMLScene();
+  ///@{
+  /// Set/get delegate
+  void SetInteractorStyleDelegate(vtkVirtualRealityViewInteractorStyleDelegate* delegate)
+  {
+    vtkSetSmartPointerBodyMacro(InteractorStyleDelegate, vtkVirtualRealityViewInteractorStyleDelegate, delegate);
+    if (delegate != nullptr)
+      {
+      delegate->SetInteractorStyle(this);
+      }
+  }
+  vtkGetSmartPointerMacro(InteractorStyleDelegate, vtkVirtualRealityViewInteractorStyleDelegate);
+  ///}@
 
   //@{
   /**
   * Interaction mode entry points.
   */
-  void StartPositionProp(vtkEventDataDevice3D *) override;
-  void EndPositionProp(vtkEventDataDevice3D *) override;
+  void StartPositionProp(vtkEventDataDevice3D * edata) override { this->InteractorStyleDelegate->StartPositionProp(edata); }
+  void EndPositionProp(vtkEventDataDevice3D * edata) override { this->InteractorStyleDelegate->EndPositionProp(edata); }
   //@}
 
   //@{
   /**
   * Multitouch events binding.
   */
-  void OnPan() override;
-  void OnPinch() override;
-  void OnRotate() override;
-  void OnPinch3D();
-  void StartGesture() override;
-  void EndGesture() override;
+  void StartGesture() override { this->InteractorStyleDelegate->StartGesture(); }
+  void EndGesture() override { this->InteractorStyleDelegate->EndGesture(); }
+  void OnPan() override { this->InteractorStyleDelegate->OnPan(); }
+  void OnPinch() override { this->InteractorStyleDelegate->OnPinch(); }
+  void OnRotate() override { this->InteractorStyleDelegate->OnRotate(); }
   //@}
 
   //@{
   /**
   * Methods for interaction.
   */
-  void PositionProp(vtkEventData *, double* lwpos = nullptr, double* lwori = nullptr) override;
+  void PositionProp(vtkEventData* ed, double* lwpos = nullptr, double* lwori = nullptr) override
+  {
+    this->InteractorStyleDelegate->PositionProp(ed, lwpos, lwori);
+  }
   //@}
 
-  vtkSetClampMacro(GrabEnabled, int, 0, 1);
-  vtkGetMacro(GrabEnabled, int);
-  vtkBooleanMacro(GrabEnabled, int);
-  
-  /// Set physical to world magnification. Valid value range is [0.01, 100].
-  /// Note: Conversion is physicalScale = 1000 / magnification
-  void SetMagnification(double magnification);
-  double GetMagnification();
-
 protected:
+  vtkVirtualRealityViewInteractorStyle() = default;
+  ~vtkVirtualRealityViewInteractorStyle() override = default;
 
-  int GrabEnabled;
-
-protected:
-  vtkVirtualRealityViewInteractorStyle();
-  ~vtkVirtualRealityViewInteractorStyle() override;
-
-  vtkWeakPointer<vtkMRMLDisplayableManagerGroup> DisplayableManagers;
+  vtkSmartPointer<vtkVirtualRealityViewInteractorStyleDelegate> InteractorStyleDelegate;
 
 private:
-  vtkVirtualRealityViewInteractorStyle(const vtkVirtualRealityViewInteractorStyle&);  /// Not implemented.
-  void operator=(const vtkVirtualRealityViewInteractorStyle&);  /// Not implemented.
-
-  class vtkInternal;
-  vtkInternal* Internal;
+  vtkVirtualRealityViewInteractorStyle(const vtkVirtualRealityViewInteractorStyle&) = delete;
+  void operator=(const vtkVirtualRealityViewInteractorStyle&) = delete;
 };
 
 #endif

@@ -56,6 +56,7 @@ class vtkObject;
 class vtkOpenVRInteractorStyle;
 class vtkOpenVRRenderWindowInteractor;
 class vtkTimerLog;
+class vtkVirtualRealityViewInteractorStyleDelegate;
 class vtkVirtualRealityViewInteractor;
 class vtkVirtualRealityViewInteractorObserver;
 class vtkVirtualRealityViewInteractorStyle;
@@ -104,6 +105,7 @@ protected:
 
   vtkSmartPointer<vtkMRMLDisplayableManagerGroup> DisplayableManagerGroup;
   vtkSmartPointer<vtkVirtualRealityViewInteractorObserver>  InteractorObserver;
+  vtkSmartPointer<vtkVirtualRealityViewInteractorStyleDelegate> InteractorStyleDelegate;
   vtkWeakPointer<vtkMRMLVirtualRealityViewNode> MRMLVirtualRealityViewNode;
   vtkSmartPointer<vtkOpenVRRenderer> Renderer;
   vtkSmartPointer<vtkOpenVRRenderWindow> RenderWindow;

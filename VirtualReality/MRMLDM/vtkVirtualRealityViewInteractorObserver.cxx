@@ -21,6 +21,7 @@
 // SlicerVirtualReality includes
 #include "vtkVirtualRealityViewInteractor.h"
 #include "vtkVirtualRealityViewInteractorStyle.h"
+#include "vtkVirtualRealityViewInteractorStyleDelegate.h"
 
 // MRML includes
 #include <vtkMRML.h> // For MRML_APPLICATION_VERSION and MRML_VERSION_CHECK
@@ -208,16 +209,14 @@ bool vtkVirtualRealityViewInteractorObserver::DelegateInteractionEventToDisplaya
 //----------------------------------------------------------------------------
 bool vtkVirtualRealityViewInteractorObserver::DelegateInteractionEventDataToDisplayableManagers(vtkMRMLInteractionEventData* ed)
 {
-
-  vtkVirtualRealityViewInteractorStyle* vrViewInteractorStyle =
-      vtkVirtualRealityViewInteractorStyle::SafeDownCast(this->GetInteractorStyle());
-  if (vrViewInteractorStyle)
+  vtkVirtualRealityViewInteractorStyleDelegate* delegate = this->GetInteractorStyleDelegate();
+  if (delegate != nullptr)
     {
-    ed->SetWorldToPhysicalScale(vrViewInteractorStyle->GetMagnification());
+    ed->SetWorldToPhysicalScale(delegate->GetMagnification());
     // The following line is commented out because the "AccuratePicker" associated with
     // the eventData (ed) is exclusively used in "Libs/MRML/DisplayableManager/vtkMRMLCameraWidget.cxx"
     // that is irrelevant in the VR context.
-    // ed->SetAccuratePicker(vrViewInteractorStyle->GetAccuratePicker());
+    // ed->SetAccuratePicker(delegate->GetAccuratePicker());
     }
 
   vtkRenderer* currentRenderer = this->GetInteractorStyle()->GetCurrentRenderer();
@@ -295,4 +294,16 @@ void vtkVirtualRealityViewInteractorObserver::OnClip3D(vtkEventData *edata)
 void vtkVirtualRealityViewInteractorObserver::OnElevation3D(vtkEventData *edata)
 {
   this->GetInteractorStyle()->OnElevation3D(edata);
+}
+
+//------------------------------------------------------------------------------
+vtkVirtualRealityViewInteractorStyleDelegate* vtkVirtualRealityViewInteractorObserver::GetInteractorStyleDelegate()
+{
+  vtkVirtualRealityViewInteractorStyle* vrViewInteractorStyle =
+      vtkVirtualRealityViewInteractorStyle::SafeDownCast(this->GetInteractorStyle());
+  if (vrViewInteractorStyle == nullptr)
+  {
+    return nullptr;
+  }
+  return vrViewInteractorStyle->GetInteractorStyleDelegate();
 }

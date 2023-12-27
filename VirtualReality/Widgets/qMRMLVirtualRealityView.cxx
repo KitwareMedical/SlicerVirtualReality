@@ -51,6 +51,7 @@
 // VirtualReality includes
 #include "vtkMRMLVirtualRealityViewNode.h"
 #include "vtkSlicerVirtualRealityLogic.h"
+#include "vtkVirtualRealityViewInteractorStyleDelegate.h"
 
 // MRMLDisplayableManager includes
 #include <vtkMRMLAbstractDisplayableManager.h>
@@ -156,9 +157,13 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   this->RenderWindow = vtkSmartPointer<vtkOpenVRRenderWindow>::New();
   this->Renderer = vtkSmartPointer<vtkOpenVRRenderer>::New();
 
+  // InteractorStyleDelegate
+  this->InteractorStyleDelegate = vtkSmartPointer<vtkVirtualRealityViewInteractorStyleDelegate>::New();
+
   // InteractorStyle
   this->InteractorStyle = vtkSmartPointer<vtkVirtualRealityViewInteractorStyle>::New();
   this->InteractorStyle->SetCurrentRenderer(this->Renderer);
+  this->InteractorStyle->SetInteractorStyleDelegate(this->InteractorStyleDelegate);
 
   // Interactor
   this->Interactor = vtkSmartPointer<vtkVirtualRealityViewInteractor>::New();
@@ -233,7 +238,7 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   this->DisplayableManagerGroup = vtkSmartPointer<vtkMRMLDisplayableManagerGroup>::Take(
                                     factory->InstantiateDisplayableManagers(q->renderer()));
   this->DisplayableManagerGroup->SetMRMLDisplayableNode(this->MRMLVirtualRealityViewNode);
-  this->InteractorStyle->SetDisplayableManagers(this->DisplayableManagerGroup);
+  this->InteractorStyleDelegate->SetDisplayableManagers(this->DisplayableManagerGroup);
   this->InteractorObserver->SetDisplayableManagers(this->DisplayableManagerGroup);
 
   // Default inputs mapping
@@ -375,7 +380,7 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
     {
       magnification = 100.0;
     }
-    this->InteractorStyle->SetMagnification(magnification);
+    this->InteractorStyleDelegate->SetMagnification(magnification);
 
     // Dolly physical speed
     double dollyPhysicalSpeedMps = this ->MRMLVirtualRealityViewNode->GetMotionSpeed();
@@ -763,21 +768,14 @@ bool qMRMLVirtualRealityView::isHardwareConnected()const
 void qMRMLVirtualRealityView::setGrabObjectsEnabled(bool enable)
 {
   Q_D(qMRMLVirtualRealityView);
-  if (enable)
-  {
-    d->InteractorStyle->GrabEnabledOn();
-  }
-  else
-  {
-    d->InteractorStyle->GrabEnabledOff();
-  }
+  d->InteractorStyleDelegate->SetGrabEnabled(enable);
 }
 
 //------------------------------------------------------------------------------
 bool qMRMLVirtualRealityView::isGrabObjectsEnabled()
 {
   Q_D(qMRMLVirtualRealityView);
-  return d->InteractorStyle->GetGrabEnabled() != 0;
+  return d->InteractorStyleDelegate->GetGrabEnabled();
 }
 
 //------------------------------------------------------------------------------
@@ -845,7 +843,7 @@ void qMRMLVirtualRealityView::onPhysicalToWorldMatrixModified()
 {
   Q_D(qMRMLVirtualRealityView);
 
-  d->MRMLVirtualRealityViewNode->SetMagnification(d->InteractorStyle->GetMagnification());
+  d->MRMLVirtualRealityViewNode->SetMagnification(d->InteractorStyleDelegate->GetMagnification());
 
   emit physicalToWorldMatrixModified();
 }
