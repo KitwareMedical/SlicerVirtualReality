@@ -33,7 +33,6 @@ vtkStandardNewMacro(vtkVirtualRealityViewInteractor);
 //----------------------------------------------------------------------------
 vtkVirtualRealityViewInteractor::vtkVirtualRealityViewInteractor()
 {
-  this->GestureEnabledButtons.push_back(static_cast<int>(vtkEventDataDeviceInput::Grip));
 }
 
 //----------------------------------------------------------------------------
@@ -214,17 +213,10 @@ void vtkVirtualRealityViewInteractor::SetTriggerButtonFunction(std::string funct
   if (functionId.empty())
   {
     vrInteractorStyle->MapInputToAction(vtkCommand::Select3DEvent, VTKIS_NONE);
-
-    this->GestureEnabledButtons.clear();
-    this->GestureEnabledButtons.push_back(static_cast<int>(vtkEventDataDeviceInput::Grip));
   }
   else if (!functionId.compare(vtkVirtualRealityViewInteractor::GetButtonFunctionIdForGrabObjectsAndWorld()))
   {
     vrInteractorStyle->MapInputToAction(vtkCommand::Select3DEvent, VTKIS_POSITION_PROP);
-
-    this->GestureEnabledButtons.clear();
-    this->GestureEnabledButtons.push_back(static_cast<int>(vtkEventDataDeviceInput::Grip));
-    this->GestureEnabledButtons.push_back(static_cast<int>(vtkEventDataDeviceInput::Trigger));
   }
   else
   {
@@ -249,9 +241,6 @@ void vtkVirtualRealityViewInteractor::SetGestureButtonToTrigger()
   this->AddAction("/actions/vtk/in/TriggerAction", /*isAnalog=*/false,
                   [this](vtkEventData* ed) { this->HandleComplexGestureEvents(ed); });
   this->AddAction("/actions/vtk/in/ComplexGestureAction", vtkCommand::Select3DEvent, /*isAnalog=*/false);
-
-  this->GestureEnabledButtons.clear();
-  this->GestureEnabledButtons.push_back(static_cast<int>(vtkEventDataDeviceInput::Trigger));
 }
 
 //----------------------------------------------------------------------------
@@ -271,9 +260,6 @@ void vtkVirtualRealityViewInteractor::SetGestureButtonToGrip()
   this->AddAction("/actions/vtk/in/TriggerAction", vtkCommand::Select3DEvent, /*isAnalog=*/false);
   this->AddAction("/actions/vtk/in/ComplexGestureAction", /*isAnalog=*/false,
                   [this](vtkEventData* ed) { this->HandleComplexGestureEvents(ed); });
-
-  this->GestureEnabledButtons.clear();
-  this->GestureEnabledButtons.push_back(static_cast<int>(vtkEventDataDeviceInput::Grip));
 }
 
 //----------------------------------------------------------------------------
@@ -294,10 +280,6 @@ void vtkVirtualRealityViewInteractor::SetGestureButtonToTriggerAndGrip()
                   [this](vtkEventData* ed) { this->HandleComplexGestureEvents(ed); });
   this->AddAction("/actions/vtk/in/ComplexGestureAction", /*isAnalog=*/false,
                   [this](vtkEventData* ed) { this->HandleComplexGestureEvents(ed); });
-
-  this->GestureEnabledButtons.clear();
-  this->GestureEnabledButtons.push_back(static_cast<int>(vtkEventDataDeviceInput::Grip));
-  this->GestureEnabledButtons.push_back(static_cast<int>(vtkEventDataDeviceInput::Trigger));
 }
 
 //----------------------------------------------------------------------------
@@ -318,6 +300,4 @@ void vtkVirtualRealityViewInteractor::SetGestureButtonToNone()
                   [](vtkEventData* vtkNotUsed(ed)) { });
   this->AddAction("/actions/vtk/in/ComplexGestureAction", /*isAnalog=*/false,
                   [](vtkEventData* vtkNotUsed(ed)) { });
-
-  this->GestureEnabledButtons.clear();
 }
