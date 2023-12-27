@@ -52,6 +52,7 @@
 
 // VirtualReality includes
 #include "vtkMRMLVirtualRealityViewNode.h"
+#include "vtkSlicerVirtualRealityLogic.h"
 
 // MRMLDisplayableManager includes
 #include <vtkMRMLAbstractDisplayableManager.h>
@@ -224,6 +225,10 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   this->DisplayableManagerGroup->SetMRMLDisplayableNode(this->MRMLVirtualRealityViewNode);
   this->InteractorStyle->SetDisplayableManagers(this->DisplayableManagerGroup);
   this->InteractorObserver->SetDisplayableManagers(this->DisplayableManagerGroup);
+
+  // Default inputs mapping
+  vtkSlicerVirtualRealityLogic::SetTriggerButtonFunction(
+        this->Interactor, vtkSlicerVirtualRealityLogic::GetButtonFunctionIdForGrabObjectsAndWorld());
 
   qDebug() << Q_FUNC_INFO << ": Number of registered displayable manager:" << this->DisplayableManagerGroup->GetDisplayableManagerCount();
 
@@ -797,28 +802,28 @@ bool qMRMLVirtualRealityView::isDolly3DEnabled()
 void qMRMLVirtualRealityView::setGestureButtonToTrigger()
 {
   Q_D(qMRMLVirtualRealityView);
-  d->Interactor->SetGestureButtonToTrigger();
+  vtkSlicerVirtualRealityLogic::SetGestureButtonToTrigger(d->Interactor);
 }
 
 //------------------------------------------------------------------------------
 void qMRMLVirtualRealityView::setGestureButtonToGrip()
 {
   Q_D(qMRMLVirtualRealityView);
-  d->Interactor->SetGestureButtonToGrip();
+  vtkSlicerVirtualRealityLogic::SetGestureButtonToGrip(d->Interactor);
 }
 
 //------------------------------------------------------------------------------
 void qMRMLVirtualRealityView::setGestureButtonToTriggerAndGrip()
 {
   Q_D(qMRMLVirtualRealityView);
-  d->Interactor->SetGestureButtonToTriggerAndGrip();
+  vtkSlicerVirtualRealityLogic::SetGestureButtonToTriggerAndGrip(d->Interactor);
 }
 
 //------------------------------------------------------------------------------
 void qMRMLVirtualRealityView::setGestureButtonToNone()
 {
   Q_D(qMRMLVirtualRealityView);
-  d->Interactor->SetGestureButtonToNone();
+  vtkSlicerVirtualRealityLogic::SetGestureButtonToNone(d->Interactor);
 }
 
 //------------------------------------------------------------------------------

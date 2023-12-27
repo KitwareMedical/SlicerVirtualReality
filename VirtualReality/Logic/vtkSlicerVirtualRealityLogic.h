@@ -26,8 +26,12 @@
 
 // Slicer includes
 #include "vtkSlicerModuleLogic.h"
+#include "vtkVRRenderWindowInteractor.h"
 
 // MRML includes
+
+// VTK/Rendering/VR includes
+class vtkVRRenderWindowInteractor;
 
 // VTK includes
 class vtkMatrix4x4;
@@ -93,6 +97,25 @@ public:
   ///         with the direction of the displacement of the two controllers
   static bool CalculateCombinedControllerPose(
       vtkMatrix4x4* controller0Pose, vtkMatrix4x4* controller1Pose, vtkMatrix4x4* combinedPose);
+
+  /// Set trigger button function
+  /// By default it is the same as grab (\sa GetButtonFunctionIdForGrabObjectsAndWorld)
+  /// Empty string disables button
+  static void SetTriggerButtonFunction(vtkVRRenderWindowInteractor* rwi, const std::string& functionId);
+
+  /// Get string constant corresponding to button function "grab objects and world"
+  static std::string GetButtonFunctionIdForGrabObjectsAndWorld() { return "GrabObjectsAndWorld"; };
+
+  ///@{
+  /// Convenience functions to easily associate grab and world functions to one or more buttons.
+  /// When interaction with markups and other VTK MRML widgets will be implemented then we probably
+  /// will not need these low-level event mappings anymore, but in the short term it is an effective
+  /// workaround that enables prototyping of ideas.
+  static void SetGestureButtonToTrigger(vtkVRRenderWindowInteractor* rwi);
+  static void SetGestureButtonToGrip(vtkVRRenderWindowInteractor* rwi);
+  static void SetGestureButtonToTriggerAndGrip(vtkVRRenderWindowInteractor* rwi);
+  static void SetGestureButtonToNone(vtkVRRenderWindowInteractor* rwi);
+  ///@}
 
 protected:
   vtkSlicerVirtualRealityLogic();

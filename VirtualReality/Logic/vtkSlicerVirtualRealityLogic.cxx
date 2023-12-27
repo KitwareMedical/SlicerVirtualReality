@@ -28,6 +28,10 @@
 // Slicer includes
 #include "vtkSlicerVolumeRenderingLogic.h"
 
+// VTK/Rendering/VR includes
+#include <vtkVRInteractorStyle.h>
+#include <vtkVRRenderWindowInteractor.h>
+
 // VTK includes
 #include <vtkIntArray.h>
 #include <vtkMatrix4x4.h>
@@ -482,4 +486,111 @@ bool vtkSlicerVirtualRealityLogic::CalculateCombinedControllerPose(
   }
 
   return true;
+}
+
+//---------------------------------------------------------------------------
+void vtkSlicerVirtualRealityLogic::SetTriggerButtonFunction(vtkVRRenderWindowInteractor* rwi, const std::string& functionId)
+{
+  vtkVRInteractorStyle* vrInteractorStyle = vtkVRInteractorStyle::SafeDownCast(rwi->GetInteractorStyle());
+  if (!vrInteractorStyle)
+  {
+    vtkWarningWithObjectMacro(rwi, "SetTriggerButtonFunction: Current interactor style is not a VR interactor style");
+    return;
+  }
+
+  // The "eventId to state" mapping (see call to `MapInputToAction` below) applies to right and left
+  // controller buttons because they are bound to the same eventId:
+  // - `vtk_openvr_binding_*.json` files define the "button to action" mapping
+  // - `vtkOpenVRInteractorStyle()` contructor defines the "action to eventId" mapping
+
+  if (functionId.empty())
+  {
+    vrInteractorStyle->MapInputToAction(vtkCommand::Select3DEvent, VTKIS_NONE);
+  }
+  else if (!functionId.compare(vtkSlicerVirtualRealityLogic::GetButtonFunctionIdForGrabObjectsAndWorld()))
+  {
+    vrInteractorStyle->MapInputToAction(vtkCommand::Select3DEvent, VTKIS_POSITION_PROP);
+  }
+  else
+  {
+    vtkErrorWithObjectMacro(rwi, "SetTriggerButtonFunction: Unknown function identifier '" << functionId << "'");
+  }
+}
+
+//----------------------------------------------------------------------------
+void vtkSlicerVirtualRealityLogic::SetGestureButtonToTrigger(vtkVRRenderWindowInteractor* rwi)
+{
+  vtkVRInteractorStyle* vrInteractorStyle = vtkVRInteractorStyle::SafeDownCast(rwi->GetInteractorStyle());
+  if (!vrInteractorStyle)
+  {
+    vtkWarningWithObjectMacro(rwi, "SetGestureButtonToTrigger: Current interactor style is not a VR interactor style");
+    return;
+  }
+
+  // The update "action to (eventId|function)" mapping (see call to `AddAction` below) applies to
+  // right and left controller buttons because they are bound to the same eventId:
+  // - "vtk_openvr_binding_*.json" defines the "button -> action" mapping
+  // - vtkOpenVRInteractorStyle defines the "action -> eventId" mapping
+  rwi->AddAction("/actions/vtk/in/TriggerAction", /*isAnalog=*/false,
+                 [rwi](vtkEventData* ed) { rwi->HandleComplexGestureEvents(ed); });
+  rwi->AddAction("/actions/vtk/in/ComplexGestureAction", vtkCommand::Select3DEvent, /*isAnalog=*/false);
+}
+
+//----------------------------------------------------------------------------
+void vtkSlicerVirtualRealityLogic::SetGestureButtonToGrip(vtkVRRenderWindowInteractor* rwi)
+{
+  vtkVRInteractorStyle* vrInteractorStyle = vtkVRInteractorStyle::SafeDownCast(rwi->GetInteractorStyle());
+  if (!vrInteractorStyle)
+  {
+    vtkWarningWithObjectMacro(rwi, "SetGestureButtonToGrip: Current interactor style is not a VR interactor style");
+    return;
+  }
+
+  // The update "action to (eventId|function)" mapping (see call to `AddAction` below) applies to
+  // right and left controller buttons because they are bound to the same eventId:
+  // - "vtk_openvr_binding_*.json" defines the "button -> action" mapping
+  // - vtkOpenVRInteractorStyle defines the "action -> eventId" mapping
+  rwi->AddAction("/actions/vtk/in/TriggerAction", vtkCommand::Select3DEvent, /*isAnalog=*/false);
+  rwi->AddAction("/actions/vtk/in/ComplexGestureAction", /*isAnalog=*/false,
+                 [rwi](vtkEventData* ed) { rwi->HandleComplexGestureEvents(ed); });
+}
+
+//----------------------------------------------------------------------------
+void vtkSlicerVirtualRealityLogic::SetGestureButtonToTriggerAndGrip(vtkVRRenderWindowInteractor* rwi)
+{
+  vtkVRInteractorStyle* vrInteractorStyle = vtkVRInteractorStyle::SafeDownCast(rwi->GetInteractorStyle());
+  if (!vrInteractorStyle)
+  {
+    vtkWarningWithObjectMacro(rwi, "SetGestureButtonToTriggerAndGrip: Current interactor style is not a VR interactor style");
+    return;
+  }
+
+  // The update "action to (eventId|function)" mapping (see call to `AddAction` below) applies to
+  // right and left controller buttons because they are bound to the same eventId:
+  // - "vtk_openvr_binding_*.json" defines the "button -> action" mapping
+  // - vtkOpenVRInteractorStyle defines the "action -> eventId" mapping
+  rwi->AddAction("/actions/vtk/in/TriggerAction", /*isAnalog=*/false,
+                 [rwi](vtkEventData* ed) { rwi->HandleComplexGestureEvents(ed); });
+  rwi->AddAction("/actions/vtk/in/ComplexGestureAction", /*isAnalog=*/false,
+                 [rwi](vtkEventData* ed) { rwi->HandleComplexGestureEvents(ed); });
+}
+
+//----------------------------------------------------------------------------
+void vtkSlicerVirtualRealityLogic::SetGestureButtonToNone(vtkVRRenderWindowInteractor* rwi)
+{
+  vtkVRInteractorStyle* vrInteractorStyle = vtkVRInteractorStyle::SafeDownCast(rwi->GetInteractorStyle());
+  if (!vrInteractorStyle)
+  {
+    vtkWarningWithObjectMacro(rwi, "SetGestureButtonToNone: Current interactor style is not a VR interactor style");
+    return;
+  }
+
+  // The update "action to (eventId|function)" mapping (see call to `AddAction` below) applies to
+  // right and left controller buttons because they are bound to the same eventId:
+  // - "vtk_openvr_binding_*.json" defines the "button -> action" mapping
+  // - vtkOpenVRInteractorStyle defines the "action -> eventId" mapping
+  rwi->AddAction("/actions/vtk/in/TriggerAction", /*isAnalog=*/false,
+                 [](vtkEventData* vtkNotUsed(ed)) { });
+  rwi->AddAction("/actions/vtk/in/ComplexGestureAction", /*isAnalog=*/false,
+                 [](vtkEventData* vtkNotUsed(ed)) { });
 }
