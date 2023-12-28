@@ -18,18 +18,22 @@
 // Qt includes
 #include <QDebug>
 
-// SlicerQt includes
+// CTK includes
+#include <ctkDoubleSpinBox.h>
+
+// VR includes
+#include "qSlicerVirtualRealityModule.h"
 #include "qSlicerVirtualRealityModuleWidget.h"
 #include "ui_qSlicerVirtualRealityModuleWidget.h"
 
-// CTK includes
-#include "ctkDoubleSpinBox.h"
-
-// VirtualReality includes
-#include "qSlicerVirtualRealityModule.h"
-#include "qMRMLVirtualRealityView.h"
-#include "vtkMRMLVirtualRealityViewNode.h"
+// VR Logic includes
 #include "vtkSlicerVirtualRealityLogic.h"
+
+// VR MRML includes
+#include "vtkMRMLVirtualRealityViewNode.h"
+
+// VR widgets includes
+#include "qMRMLVirtualRealityView.h"
 
 //-----------------------------------------------------------------------------
 /// \ingroup Slicer_QtModules_ExtensionTemplate

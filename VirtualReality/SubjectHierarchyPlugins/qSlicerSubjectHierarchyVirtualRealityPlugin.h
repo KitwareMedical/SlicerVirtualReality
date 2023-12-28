@@ -21,10 +21,11 @@
 #ifndef __qSlicerSubjectHierarchyVirtualRealityPlugin_h
 #define __qSlicerSubjectHierarchyVirtualRealityPlugin_h
 
+// VR SubjectHierarchy includes
+#include "qSlicerVirtualRealitySubjectHierarchyPluginsExport.h"
+
 // SubjectHierarchy includes
 #include "qSlicerSubjectHierarchyAbstractPlugin.h"
-
-#include "qSlicerVirtualRealitySubjectHierarchyPluginsExport.h"
 
 class qSlicerSubjectHierarchyVirtualRealityPluginPrivate;
 

@@ -16,15 +16,14 @@
 
 ==============================================================================*/
 
-#include "vtkVirtualRealityViewInteractorStyleDelegate.h"
-
-// VirtualRealityModule includes
-
 // VR Logic includes
 #include "vtkSlicerVirtualRealityLogic.h"
 
 // VR MRML includes
 #include "vtkMRMLVirtualRealityViewNode.h"
+
+// VR MRMLDM includes
+#include "vtkVirtualRealityViewInteractorStyleDelegate.h"
 
 // MRML includes
 #include <vtkMRMLDisplayableNode.h>

@@ -15,14 +15,17 @@
 
 ==============================================================================*/
 
-// Slicer includes
-#include <qSlicerAbstractCoreModule.h>
-#include <qSlicerApplication.h>
-#include <qSlicerModuleManager.h>
+// VR MRML includes
+#include "vtkMRMLVirtualRealityViewNode.h"
 
-// qMRML includes
+// VR Widgts includes
 #include "qMRMLVirtualRealityTransformWidget.h"
 #include "ui_qMRMLVirtualRealityTransformWidget.h"
+
+// Qt includes
+#include <QDebug>
+#include <QIcon>
+#include <QPushButton>
 
 // MRML includes
 #include <vtkMRMLLinearTransformNode.h>
@@ -30,13 +33,6 @@
 // OpenVR includes
 #include <openvr.h>
 
-// SlicerVR includes
-#include <qMRMLVirtualRealityView.h>
-#include <vtkMRMLVirtualRealityViewNode.h>
-
-// Qt includes
-#include <QDebug>
-#include <QPushButton>
 
 namespace
 {
@@ -71,7 +67,6 @@ namespace
   }
 }
 //-----------------------------------------------------------------------------
-/// \ingroup Slicer_QtModules_Markups
 class qMRMLVirtualRealityTransformWidgetPrivate
   : public Ui_qMRMLVirtualRealityTransformWidget
 {

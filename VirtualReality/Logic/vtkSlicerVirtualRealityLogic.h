@@ -24,11 +24,15 @@
 #ifndef __vtkSlicerVirtualRealityLogic_h
 #define __vtkSlicerVirtualRealityLogic_h
 
-// Slicer includes
-#include "vtkSlicerModuleLogic.h"
-#include "vtkVRRenderWindowInteractor.h"
+// VR Logic includes
+#include "vtkSlicerVirtualRealityModuleLogicExport.h"
 
-// MRML includes
+// VR MRML includes
+class vtkMRMLVirtualRealityViewNode;
+
+// Slicer includes
+#include <vtkSlicerModuleLogic.h>
+class vtkSlicerVolumeRenderingLogic;
 
 // VTK/Rendering/VR includes
 class vtkVRRenderWindowInteractor;
@@ -39,10 +43,6 @@ class vtkMatrix4x4;
 // STD includes
 #include <cstdlib>
 
-#include "vtkSlicerVirtualRealityModuleLogicExport.h"
-
-class vtkSlicerVolumeRenderingLogic;
-class vtkMRMLVirtualRealityViewNode;
 
 class VTK_SLICER_VIRTUALREALITY_MODULE_LOGIC_EXPORT vtkSlicerVirtualRealityLogic :
   public vtkSlicerModuleLogic

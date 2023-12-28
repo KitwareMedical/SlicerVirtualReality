@@ -21,7 +21,7 @@
 #ifndef __vtkMRMLVirtualRealityViewDisplayableManagerFactory_h
 #define __vtkMRMLVirtualRealityViewDisplayableManagerFactory_h
 
-// VirtualRealityModule includes
+// VR MRMLDM includes
 #include "vtkSlicerVirtualRealityModuleMRMLDisplayableManagerExport.h"
 
 // MRMLDisplayableManager includes

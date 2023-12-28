@@ -18,12 +18,14 @@
 #ifndef __qSlicerVirtualRealityModule_h
 #define __qSlicerVirtualRealityModule_h
 
-// SlicerQt includes
+// Slicer includes
 #include <qSlicerLoadableModule.h>
 
-#include "qSlicerVirtualRealityModuleExport.h"
-
+// CTK includes
 #include <ctkVTKObject.h>
+
+// VR includes
+#include "qSlicerVirtualRealityModuleExport.h"
 
 class vtkMRMLVirtualRealityViewNode;
 class qSlicerVirtualRealityModulePrivate;

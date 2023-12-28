@@ -18,15 +18,15 @@
 
 ==============================================================================*/
 
-// STL includes
-#include <sstream>
-
 // VTK includes
 #include <vtkNew.h>
 #include <vtkObjectFactory.h>
 
-// MRML includes
+// VR MRML includes
 #include "vtkMRMLVirtualRealityLayoutNode.h"
+
+// STD includes
+#include <sstream>
 
 //----------------------------------------------------------------------------
 vtkMRMLNodeNewMacro(vtkMRMLVirtualRealityLayoutNode);

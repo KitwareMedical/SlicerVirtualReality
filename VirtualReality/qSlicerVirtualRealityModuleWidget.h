@@ -18,9 +18,10 @@
 #ifndef __qSlicerVirtualRealityModuleWidget_h
 #define __qSlicerVirtualRealityModuleWidget_h
 
-// SlicerQt includes
+// Slicer includes
 #include <qSlicerAbstractModuleWidget.h>
 
+// VR includes
 #include "qSlicerVirtualRealityModuleExport.h"
 
 class qSlicerVirtualRealityModuleWidgetPrivate;

@@ -15,9 +15,11 @@
 
 ==============================================================================*/
 
-// VirtualReality Logic includes
-#include "vtkMRMLVirtualRealityViewNode.h"
+// VR Logic includes
 #include "vtkSlicerVirtualRealityLogic.h"
+
+// VR MRML includes
+#include "vtkMRMLVirtualRealityViewNode.h"
 
 // MRML includes
 #include <vtkMRMLLinearTransformNode.h>

@@ -21,13 +21,16 @@
 #ifndef vtkVirtualRealityViewInteractor_h
 #define vtkVirtualRealityViewInteractor_h
 
-// VirtualRealityModule includes
+// VR MRMLDM includes
 #include "vtkSlicerVirtualRealityModuleMRMLDisplayableManagerExport.h"
 #include "vtkVirtualRealityComplexGestureRecognizer.h"
 
+// VTK Rendering/OpenVR includes
+#include <vtkOpenVRRenderWindowInteractor.h>
+
 // VTK includes
 #include <vtkNew.h>
-#include <vtkOpenVRRenderWindowInteractor.h>
+
 
 class VTK_SLICER_VIRTUALREALITY_MODULE_MRMLDISPLAYABLEMANAGER_EXPORT vtkVirtualRealityViewInteractor
   : public vtkOpenVRRenderWindowInteractor

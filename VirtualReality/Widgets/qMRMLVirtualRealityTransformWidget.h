@@ -21,21 +21,22 @@
 #ifndef __qMRMLVirtualRealityTransformWidget_h
 #define __qMRMLVirtualRealityTransformWidget_h
 
-// CTK includes
-#include <ctkPimpl.h>
-#include <ctkVTKObject.h>
-
-// SlicerQt includes
-#include "qMRMLWidget.h"
-
-#include "qSlicerVirtualRealityModuleWidgetsExport.h"
-
-class qMRMLVirtualRealityTransformWidgetPrivate;
-class vtkMRMLLinearTransformNode;
-class vtkMRMLNode;
+// VR MRML includes
 class vtkMRMLVirtualRealityViewNode;
 
-/// \ingroup Slicer_QtModules_Markups
+// VR Widgets includes
+#include "qSlicerVirtualRealityModuleWidgetsExport.h"
+class qMRMLVirtualRealityTransformWidgetPrivate;
+
+// CTK includes
+#include <ctkVTKObject.h>
+
+// MRML includes
+#include <qMRMLWidget.h>
+class vtkMRMLLinearTransformNode;
+class vtkMRMLNode;
+
+
 class Q_SLICER_QTMODULES_VIRTUALREALITY_WIDGETS_EXPORT qMRMLVirtualRealityTransformWidget
   : public qMRMLWidget
 {
