@@ -24,7 +24,7 @@
 class vtkVirtualRealityViewInteractorStyleDelegate;
 
 // MRML includes
-#include "vtkMRMLViewInteractorStyle.h"
+#include <vtkMRMLViewInteractorStyle.h>
 
 class VTK_SLICER_VIRTUALREALITY_MODULE_MRMLDISPLAYABLEMANAGER_EXPORT vtkVirtualRealityViewInteractorObserver
   : public vtkMRMLViewInteractorStyle

@@ -19,7 +19,7 @@
 #define __qSlicerVirtualRealityModuleWidget_h
 
 // SlicerQt includes
-#include "qSlicerAbstractModuleWidget.h"
+#include <qSlicerAbstractModuleWidget.h>
 
 #include "qSlicerVirtualRealityModuleExport.h"
 

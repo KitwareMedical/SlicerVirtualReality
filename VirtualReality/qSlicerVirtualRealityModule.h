@@ -19,7 +19,7 @@
 #define __qSlicerVirtualRealityModule_h
 
 // SlicerQt includes
-#include "qSlicerLoadableModule.h"
+#include <qSlicerLoadableModule.h>
 
 #include "qSlicerVirtualRealityModuleExport.h"
 

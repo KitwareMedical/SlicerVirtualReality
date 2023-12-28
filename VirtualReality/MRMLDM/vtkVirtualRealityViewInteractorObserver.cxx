@@ -25,7 +25,7 @@
 
 // MRML includes
 #include <vtkMRML.h> // For MRML_APPLICATION_VERSION and MRML_VERSION_CHECK
-#include "vtkMRMLInteractionEventData.h"
+#include <vtkMRMLInteractionEventData.h>
 
 // VTK includes
 #include <vtkCallbackCommand.h>

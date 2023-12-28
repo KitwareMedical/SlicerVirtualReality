@@ -27,7 +27,7 @@
 
 // VTK includes
 #include <vtkNew.h>
-#include "vtkOpenVRRenderWindowInteractor.h"
+#include <vtkOpenVRRenderWindowInteractor.h>
 
 class VTK_SLICER_VIRTUALREALITY_MODULE_MRMLDISPLAYABLEMANAGER_EXPORT vtkVirtualRealityViewInteractor
   : public vtkOpenVRRenderWindowInteractor
