@@ -18,8 +18,8 @@
 
 ==============================================================================*/
 
-#ifndef vtkVirtualRealityViewInteractor_h
-#define vtkVirtualRealityViewInteractor_h
+#ifndef vtkVirtualRealityViewOpenVRInteractor_h
+#define vtkVirtualRealityViewOpenVRInteractor_h
 
 // VR MRMLDM includes
 #include "vtkSlicerVirtualRealityModuleMRMLDisplayableManagerExport.h"
@@ -32,12 +32,12 @@
 #include <vtkNew.h>
 
 
-class VTK_SLICER_VIRTUALREALITY_MODULE_MRMLDISPLAYABLEMANAGER_EXPORT vtkVirtualRealityViewInteractor
+class VTK_SLICER_VIRTUALREALITY_MODULE_MRMLDISPLAYABLEMANAGER_EXPORT vtkVirtualRealityViewOpenVRInteractor
   : public vtkOpenVRRenderWindowInteractor
 {
 public:
-  static vtkVirtualRealityViewInteractor *New();
-  vtkTypeMacro(vtkVirtualRealityViewInteractor,vtkOpenVRRenderWindowInteractor);
+  static vtkVirtualRealityViewOpenVRInteractor *New();
+  vtkTypeMacro(vtkVirtualRealityViewOpenVRInteractor,vtkOpenVRRenderWindowInteractor);
 
   ///@{
   /// Define Slicer specific heuristic for handling complex gestures.
@@ -55,14 +55,14 @@ protected:
   vtkNew<vtkVirtualRealityComplexGestureRecognizer> ComplexGestureRecognizer;
 
 private:
-  vtkVirtualRealityViewInteractor()
+  vtkVirtualRealityViewOpenVRInteractor()
   {
     this->ComplexGestureRecognizer->SetInteractor(this);
   }
-  ~vtkVirtualRealityViewInteractor() override = default;
+  ~vtkVirtualRealityViewOpenVRInteractor() override = default;
 
-  vtkVirtualRealityViewInteractor(const vtkVirtualRealityViewInteractor&) = delete;
-  void operator=(const vtkVirtualRealityViewInteractor&) = delete;
+  vtkVirtualRealityViewOpenVRInteractor(const vtkVirtualRealityViewOpenVRInteractor&) = delete;
+  void operator=(const vtkVirtualRealityViewOpenVRInteractor&) = delete;
 };
 
 #endif

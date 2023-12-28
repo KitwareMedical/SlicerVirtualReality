@@ -19,14 +19,14 @@ set(${KIT}_SRCS
   vtkMRML${MODULE_NAME}ViewDisplayableManagerFactory.h
   vtk${MODULE_NAME}ComplexGestureRecognizer.cxx
   vtk${MODULE_NAME}ComplexGestureRecognizer.h
-  vtk${MODULE_NAME}ViewInteractor.cxx
-  vtk${MODULE_NAME}ViewInteractor.h
   vtk${MODULE_NAME}ViewInteractorObserver.cxx
   vtk${MODULE_NAME}ViewInteractorObserver.h
-  vtk${MODULE_NAME}ViewInteractorStyle.cxx
-  vtk${MODULE_NAME}ViewInteractorStyle.h
   vtk${MODULE_NAME}ViewInteractorStyleDelegate.cxx
   vtk${MODULE_NAME}ViewInteractorStyleDelegate.h
+  vtk${MODULE_NAME}ViewOpenVRInteractor.cxx
+  vtk${MODULE_NAME}ViewOpenVRInteractor.h
+  vtk${MODULE_NAME}ViewOpenVRInteractorStyle.cxx
+  vtk${MODULE_NAME}ViewOpenVRInteractorStyle.h
   )
 
 set(${KIT}_TARGET_LIBRARIES

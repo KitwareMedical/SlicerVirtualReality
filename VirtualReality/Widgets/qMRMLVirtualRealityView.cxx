@@ -25,10 +25,10 @@
 #include "vtkMRMLVirtualRealityViewNode.h"
 
 // VR MRMLDM includes
-#include "vtkVirtualRealityViewInteractor.h"
 #include "vtkVirtualRealityViewInteractorObserver.h"
-#include "vtkVirtualRealityViewInteractorStyle.h"
 #include "vtkVirtualRealityViewInteractorStyleDelegate.h"
+#include "vtkVirtualRealityViewOpenVRInteractor.h"
+#include "vtkVirtualRealityViewOpenVRInteractorStyle.h"
 
 // VR Widgets includes
 #include "qMRMLVirtualRealityView_p.h"
@@ -166,12 +166,12 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   this->InteractorStyleDelegate = vtkSmartPointer<vtkVirtualRealityViewInteractorStyleDelegate>::New();
 
   // InteractorStyle
-  this->InteractorStyle = vtkSmartPointer<vtkVirtualRealityViewInteractorStyle>::New();
+  this->InteractorStyle = vtkSmartPointer<vtkVirtualRealityViewOpenVRInteractorStyle>::New();
   this->InteractorStyle->SetCurrentRenderer(this->Renderer);
   this->InteractorStyle->SetInteractorStyleDelegate(this->InteractorStyleDelegate);
 
   // Interactor
-  this->Interactor = vtkSmartPointer<vtkVirtualRealityViewInteractor>::New();
+  this->Interactor = vtkSmartPointer<vtkVirtualRealityViewOpenVRInteractor>::New();
   this->Interactor->SetActionManifestDirectory(q->actionManifestPath().toStdString());
   this->Interactor->SetInteractorStyle(this->InteractorStyle);
 
