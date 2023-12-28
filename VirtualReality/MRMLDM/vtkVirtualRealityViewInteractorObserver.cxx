@@ -18,7 +18,7 @@
 
 #include "vtkVirtualRealityViewInteractorObserver.h"
 
-// SlicerVirtualReality includes
+// VR MRMLDM includes
 #include "vtkVirtualRealityViewInteractor.h"
 #include "vtkVirtualRealityViewInteractorStyle.h"
 #include "vtkVirtualRealityViewInteractorStyleDelegate.h"

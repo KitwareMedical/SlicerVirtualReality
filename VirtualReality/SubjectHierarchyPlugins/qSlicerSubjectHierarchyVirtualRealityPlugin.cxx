@@ -36,8 +36,8 @@
 #include <vtkSmartPointer.h>
 
 // Qt includes
-#include <QDebug>
 #include <QAction>
+#include <QDebug>
 
 //-----------------------------------------------------------------------------
 /// \ingroup Slicer_QtModules_SubjectHierarchy_Plugins

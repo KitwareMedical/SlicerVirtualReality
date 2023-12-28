@@ -24,6 +24,7 @@
 // MRML includes
 #include "vtkMRMLAbstractLayoutNode.h"
 
+// VR MRML includes
 #include "vtkSlicerVirtualRealityModuleMRMLExport.h"
 
 /// \brief Node that describes the virtual reality layout of the application.

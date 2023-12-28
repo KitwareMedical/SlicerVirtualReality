@@ -18,7 +18,7 @@
 
 ==============================================================================*/
 
-// MRMLDisplayableManager includes
+// VR MRMLDM includes
 #include "vtkMRMLVirtualRealityViewDisplayableManagerFactory.h"
 
 // VTK includes

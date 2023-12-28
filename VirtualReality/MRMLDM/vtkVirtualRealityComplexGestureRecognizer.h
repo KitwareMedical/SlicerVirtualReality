@@ -19,7 +19,7 @@
 #ifndef vtkVirtualRealityComplexGestureRecognizer_h
 #define vtkVirtualRealityComplexGestureRecognizer_h
 
-// VirtualRealityModule includes
+// VR MRMLDM includes
 #include "vtkSlicerVirtualRealityModuleMRMLDisplayableManagerExport.h"
 
 // VTK/Rendering/VR includes

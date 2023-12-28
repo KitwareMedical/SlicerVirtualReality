@@ -18,19 +18,19 @@
 
 ==============================================================================*/
 
-#ifndef __vtkVirtualRealityViewInteractorStyle_h
-#define __vtkVirtualRealityViewInteractorStyle_h
+#ifndef vtkVirtualRealityViewInteractorStyle_h
+#define vtkVirtualRealityViewInteractorStyle_h
 
-// VirtualRealityModule includes
+// VR MRMLDM includes
 #include "vtkSlicerVirtualRealityModuleMRMLDisplayableManagerExport.h"
 #include "vtkVirtualRealityViewInteractorStyleDelegate.h"
 
-// MRML includes
+// VTK Rendering/OpenVR
+#include <vtkOpenVRInteractorStyle.h>
 
 // VTK includes
-#include <vtkOpenVRInteractorStyle.h>
-#include "vtkObject.h"
-#include "vtkEventData.h"
+#include <vtkObject.h>
+#include <vtkEventData.h>
 #include <vtkSmartPointer.h>
 #include <vtkWeakPointer.h>
 
@@ -38,10 +38,7 @@ class vtkMRMLScene;
 class vtkMRMLDisplayableManagerGroup;
 class vtkWorldPointPicker;
 
-/// \brief Virtual reality interactions
-///
-/// TODO:
-///
+
 class VTK_SLICER_VIRTUALREALITY_MODULE_MRMLDISPLAYABLEMANAGER_EXPORT vtkVirtualRealityViewInteractorStyle
   : public vtkOpenVRInteractorStyle
 {

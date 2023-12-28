@@ -21,30 +21,36 @@
 #ifndef __qMRMLVirtualRealityView_h
 #define __qMRMLVirtualRealityView_h
 
-// CTK includes
-#include <ctkPimpl.h>
-#include <ctkVTKRenderView.h>
-
-// Qt includes
-#include <QWidget>
-
-#include "qSlicerVirtualRealityModuleWidgetsExport.h"
-
-// CTK includes
-#include <ctkVTKObject.h> 
-
-class qMRMLVirtualRealityViewPrivate;
+// VR MRML includes
 class vtkMRMLVirtualRealityViewNode;
-class vtkCollection;
-class vtkGenericOpenGLRenderWindow;
-class vtkRenderWindowInteractor;
-class vtkSlicerCamerasModuleLogic;
+
+// VR MRMLDM includes
 class vtkVirtualRealityViewInteractorObserver;
 
+// VR Widgets includes
+#include "qSlicerVirtualRealityModuleWidgetsExport.h"
+class qMRMLVirtualRealityViewPrivate;
+
+// Qt includes
+#include <QString>
+#include <QWidget>
+
+// CTK includes
+#include <ctkVTKObject.h>
+
+// Slicer includes
+class vtkSlicerCamerasModuleLogic;
+
+// VTK Rendering/OpenVR includes
 class vtkOpenVRRenderer;
 class vtkOpenVRRenderWindow;
 class vtkOpenVRRenderWindowInteractor;
-class vtkOpenVRCamera;
+
+// VTK includes
+class vtkCollection;
+class vtkGenericOpenGLRenderWindow;
+class vtkObject;
+class vtkRenderWindowInteractor;
 
 /// \brief 3D view for view nodes.
 /// For performance reasons, the view block refreshes when the scene is in

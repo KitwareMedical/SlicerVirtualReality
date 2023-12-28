@@ -18,15 +18,19 @@
 
 ==============================================================================*/
 
-// Need to be included before qMRMLVRView_p
-#include <vtkOpenVRCamera.h>
-#include <vtkVirtualRealityViewInteractorObserver.h>
-#include <vtkVirtualRealityViewInteractorStyle.h>
-#include <vtkVirtualRealityViewInteractor.h>
-#include <vtkOpenVRModel.h>
-#include <vtkOpenVRRenderWindow.h>
-#include <vtkOpenVRRenderer.h>
+// VR Logic includes
+#include "vtkSlicerVirtualRealityLogic.h"
 
+// VR MRML includes
+#include "vtkMRMLVirtualRealityViewNode.h"
+
+// VR MRMLDM includes
+#include "vtkVirtualRealityViewInteractor.h"
+#include "vtkVirtualRealityViewInteractorObserver.h"
+#include "vtkVirtualRealityViewInteractorStyle.h"
+#include "vtkVirtualRealityViewInteractorStyleDelegate.h"
+
+// VR Widgets includes
 #include "qMRMLVirtualRealityView_p.h"
 
 // Qt includes
@@ -41,29 +45,30 @@
 #include <QTimer>
 
 // CTK includes
-#include <ctkAxesWidget.h>
-#include <ctkPimpl.h>
+#include <ctkPimpl.h> // For CTK_GET_CPP, CTK_SET_CPP
 
 // Slicer includes
-#include "qSlicerApplication.h"
-#include "vtkSlicerCamerasModuleLogic.h"
-
-// VirtualReality includes
-#include "vtkMRMLVirtualRealityViewNode.h"
-#include "vtkSlicerVirtualRealityLogic.h"
-#include "vtkVirtualRealityViewInteractorStyleDelegate.h"
+#include <qSlicerApplication.h>
+#include <vtkSlicerCamerasModuleLogic.h>
 
 // MRMLDisplayableManager includes
 #include <vtkMRMLAbstractDisplayableManager.h>
 #include <vtkMRMLDisplayableManagerGroup.h>
 #include <vtkMRMLVirtualRealityViewDisplayableManagerFactory.h>
 
-#include <vtkMRMLThreeDViewInteractorStyle.h>
-
 // MRML includes
 #include <vtkMRMLCameraNode.h>
 #include <vtkMRMLLinearTransformNode.h>
 #include <vtkMRMLScene.h>
+
+// VTK Rendering/OpenVR includes
+#include <vtkOpenVRCamera.h>
+#include <vtkOpenVRModel.h>
+#include <vtkOpenVRRenderWindow.h>
+#include <vtkOpenVRRenderer.h>
+
+// OpenVR includes
+#include <openvr.h>
 
 // VTK includes
 #include <vtkCollection.h>

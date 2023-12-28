@@ -15,6 +15,19 @@
 
 ==============================================================================*/
 
+// VR includes
+#include "qSlicerVirtualRealityModule.h"
+#include "qSlicerVirtualRealityModuleWidget.h"
+
+// VR Logic includes
+#include <vtkSlicerVirtualRealityLogic.h>
+
+// VR MRML includes
+#include <vtkMRMLVirtualRealityViewNode.h>
+
+// VR Widgets includes
+#include <qMRMLVirtualRealityView.h>
+
 // Qt includes
 #include <QAction>
 #include <QDebug>
@@ -32,16 +45,7 @@
 // VirtualReality Widget includes
 #include <qMRMLVirtualRealityTransformWidget.h>
 
-// VirtualReality Logic includes
-#include <vtkSlicerVirtualRealityLogic.h>
-
-// VirtualReality includes
-#include "qSlicerVirtualRealityModule.h"
-#include "qSlicerVirtualRealityModuleWidget.h"
-#include "qMRMLVirtualRealityView.h"
-#include "vtkMRMLVirtualRealityViewNode.h"
-
-// SlicerQt includes
+// Slicer includes
 #include <qSlicerApplication.h>
 #include <qSlicerCoreApplication.h>
 #include <qSlicerModuleManager.h>

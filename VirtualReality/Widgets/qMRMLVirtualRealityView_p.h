@@ -32,39 +32,46 @@
 // We mean it.
 //
 
-// VTK includes
-#include <vtkEventData.h>
-#include <vtkWeakPointer.h>
-
-// CTK includes
-#include <ctkPimpl.h>
-#include <ctkVTKObject.h>
-
-// qMRML includes
-#include "qMRMLVirtualRealityView.h"
-
-// Qt includes
-#include <QTimer>
-
-class QLabel;
-class vtkLightCollection;
-class vtkMRMLCameraNode;
-class vtkMRMLDisplayableManagerGroup;
-class vtkMRMLTransformNode;
+// VR MRML includes
 class vtkMRMLVirtualRealityViewNode;
-class vtkObject;
-class vtkOpenVRInteractorStyle;
-class vtkOpenVRRenderWindowInteractor;
-class vtkTimerLog;
+
+// VR MRMLDM includes
+class vtkVirtualRealityViewInteractorStyle;
 class vtkVirtualRealityViewInteractorStyleDelegate;
 class vtkVirtualRealityViewInteractor;
 class vtkVirtualRealityViewInteractorObserver;
-class vtkVirtualRealityViewInteractorStyle;
 
-namespace vr
-{
-  struct TrackedDevicePose_t;
-}
+// VR Widgets includes
+#include "qMRMLVirtualRealityView.h"
+
+// MRML includes
+class vtkMRMLDisplayableManagerGroup;
+class vtkMRMLTransformNode;
+
+// VTK Rendering/VR includes
+class vtkVRInteractorStyle;
+class vtkVRRenderer;
+class vtkVRRenderWindow;
+class vtkVRRenderWindowInteractor;
+
+// VTK Rendering/OpenVR includes
+class vtkOpenVRCamera;
+
+// VTK includes
+#include <vtkEventData.h>
+#include <vtkSmartPointer.h>
+#include <vtkWeakPointer.h>
+class vtkLightCollection;
+class vtkObject;
+class vtkTimerLog;
+
+// CTK includes
+#include <ctkVTKObject.h>
+
+// Qt includes
+#include <QObject>
+#include <QString>
+#include <QTimer>
 
 //-----------------------------------------------------------------------------
 class qMRMLVirtualRealityViewPrivate: public QObject

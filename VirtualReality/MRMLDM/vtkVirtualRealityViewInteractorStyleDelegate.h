@@ -19,7 +19,7 @@
 #ifndef vtkVirtualRealityViewInteractorStyleDelegate_h
 #define vtkVirtualRealityViewInteractorStyleDelegate_h
 
-// VirtualRealityModule includes
+// VR MRMLDM includes
 #include "vtkSlicerVirtualRealityModuleMRMLDisplayableManagerExport.h"
 
 // MRML includes

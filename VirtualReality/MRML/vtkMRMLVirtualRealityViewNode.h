@@ -22,6 +22,7 @@
 // VTK includes
 #include <vtkEventData.h>
 
+// VR MRML includes
 #include "vtkSlicerVirtualRealityModuleMRMLExport.h"
 
 /// \brief MRML node to represent a 3D view.

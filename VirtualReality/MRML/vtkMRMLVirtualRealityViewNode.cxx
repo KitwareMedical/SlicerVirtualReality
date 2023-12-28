@@ -15,6 +15,8 @@ Version:   $Revision: 1.3 $
 // MRML includes
 #include <vtkMRMLScene.h>
 #include <vtkMRMLViewNode.h>
+
+// VR MRML includes
 #include "vtkMRMLVirtualRealityViewNode.h"
 
 // VTK includes
