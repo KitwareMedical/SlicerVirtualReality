@@ -177,20 +177,34 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   this->LastViewPosition[1] = 0.0;
   this->LastViewPosition[2] = 0.0;
 
-  this->RenderWindow = vtkSmartPointer<vtkOpenVRRenderWindow>::New();
-  this->Renderer = vtkSmartPointer<vtkOpenVRRenderer>::New();
-
   // InteractorStyleDelegate
   this->InteractorStyleDelegate = vtkSmartPointer<vtkVirtualRealityViewInteractorStyleDelegate>::New();
 
+  // XRRuntime
+  if (xrRuntime == vtkMRMLVirtualRealityViewNode::OpenVR)
+  {
+    vtkNew<vtkVirtualRealityViewOpenVRInteractorStyle> interactorStyle;
+    interactorStyle->SetInteractorStyleDelegate(this->InteractorStyleDelegate);
+
+    this->RenderWindow = vtkSmartPointer<vtkOpenVRRenderWindow>::New();
+    this->Renderer = vtkSmartPointer<vtkOpenVRRenderer>::New();
+    this->InteractorStyle = interactorStyle;
+    this->Interactor = vtkSmartPointer<vtkVirtualRealityViewOpenVRInteractor>::New();
+    this->Camera = vtkSmartPointer<vtkOpenVRCamera>::New();
+  }
+  else
+  {
+    this->destroyRenderWindow();
+    qDebug() << "";
+    qDebug() << "SlicerVirtualReality: No XR runtime initialized";
+    qDebug() << "";
+    return;
+  }
+
   // InteractorStyle
-  vtkNew<vtkVirtualRealityViewOpenVRInteractorStyle> interactorStyle;
-  interactorStyle->SetInteractorStyleDelegate(this->InteractorStyleDelegate);
-  this->InteractorStyle = interactorStyle;
   this->InteractorStyle->SetCurrentRenderer(this->Renderer);
 
   // Interactor
-  this->Interactor = vtkSmartPointer<vtkVirtualRealityViewOpenVRInteractor>::New();
   this->Interactor->SetActionManifestDirectory(this->VirtualRealityLogic->ComputeActionManifestPath(xrRuntime));
   this->Interactor->SetInteractorStyle(this->InteractorStyle);
 
@@ -199,7 +213,6 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   this->InteractorObserver->SetInteractor(this->Interactor);
 
   // Camera
-  this->Camera = vtkSmartPointer<vtkOpenVRCamera>::New();
   this->Renderer->SetActiveCamera(this->Camera);
 
   // RenderWindow

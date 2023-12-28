@@ -111,11 +111,14 @@ protected:
   vtkSmartPointer<vtkVirtualRealityViewInteractorObserver>  InteractorObserver;
   vtkSmartPointer<vtkVirtualRealityViewInteractorStyleDelegate> InteractorStyleDelegate;
   vtkWeakPointer<vtkMRMLVirtualRealityViewNode> MRMLVirtualRealityViewNode;
+
+  // XRRuntime
   vtkSmartPointer<vtkVRRenderer> Renderer;
   vtkSmartPointer<vtkVRRenderWindow> RenderWindow;
   vtkSmartPointer<vtkVRRenderWindowInteractor> Interactor;
   vtkSmartPointer<vtkVRInteractorStyle> InteractorStyle;
   vtkSmartPointer<vtkVRCamera> Camera;
+
   vtkSmartPointer<vtkLightCollection> Lights;
 
   vtkSmartPointer<vtkTimerLog> LastViewUpdateTime;
