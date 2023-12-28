@@ -155,24 +155,35 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
 
   this->RenderWindow = vtkSmartPointer<vtkOpenVRRenderWindow>::New();
   this->Renderer = vtkSmartPointer<vtkOpenVRRenderer>::New();
-  this->Interactor = vtkSmartPointer<vtkVirtualRealityViewInteractor>::New();
-  this->Interactor->SetActionManifestDirectory(q->actionManifestPath().toStdString());
+
+  // InteractorStyle
   this->InteractorStyle = vtkSmartPointer<vtkVirtualRealityViewInteractorStyle>::New();
-  this->Interactor->SetInteractorStyle(this->InteractorStyle);
-  this->InteractorStyle->SetInteractor(this->Interactor);
   this->InteractorStyle->SetCurrentRenderer(this->Renderer);
 
+  // Interactor
+  this->Interactor = vtkSmartPointer<vtkVirtualRealityViewInteractor>::New();
+  this->Interactor->SetActionManifestDirectory(q->actionManifestPath().toStdString());
+  this->Interactor->SetInteractorStyle(this->InteractorStyle);
+
+  // InteractorObserver
   this->InteractorObserver = vtkVirtualRealityViewInteractorObserver::New();
   this->InteractorObserver->SetInteractor(this->Interactor);
 
+  // Camera
   this->Camera = vtkSmartPointer<vtkOpenVRCamera>::New();
   this->Renderer->SetActiveCamera(this->Camera);
 
+  // RenderWindow
   this->RenderWindow->SetMultiSamples(0);
   this->RenderWindow->AddRenderer(this->Renderer);
   this->RenderWindow->SetInteractor(this->Interactor);
   // Set default 10x magnification (conversion: PhysicalScale = 1000 / Magnification)
   this->RenderWindow->SetPhysicalScale(100.0);
+
+  //
+  // Connections
+  //
+
   // Observe VR render window event
   qvtkReconnect(this->RenderWindow, vtkOpenVRRenderWindow::PhysicalToWorldMatrixModified,
                 q, SLOT(onPhysicalToWorldMatrixModified()));
@@ -180,6 +191,9 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   // Observe button press event
   qvtkReconnect(this->Interactor, vtkCommand::Button3DEvent, q, SLOT(onButton3DEvent(vtkObject*,void*,unsigned long,void*)));
 
+  //
+  // DisplayableManager registration
+  //
   vtkMRMLVirtualRealityViewDisplayableManagerFactory* factory
     = vtkMRMLVirtualRealityViewDisplayableManagerFactory::GetInstance();
 
