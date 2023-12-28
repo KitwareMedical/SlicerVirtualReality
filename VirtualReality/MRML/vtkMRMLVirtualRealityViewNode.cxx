@@ -13,8 +13,8 @@ Version:   $Revision: 1.3 $
 =========================================================================auto=*/
 
 // MRML includes
-#include "vtkMRMLScene.h"
-#include "vtkMRMLViewNode.h"
+#include <vtkMRMLScene.h>
+#include <vtkMRMLViewNode.h>
 #include "vtkMRMLVirtualRealityViewNode.h"
 
 // VTK includes

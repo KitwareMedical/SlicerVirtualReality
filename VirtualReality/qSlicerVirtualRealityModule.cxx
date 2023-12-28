@@ -26,8 +26,8 @@
 #include <QSpacerItem>
 
 // SubjectHierarchy Plugins includes
-#include "qSlicerSubjectHierarchyPluginHandler.h"
-#include "qSlicerSubjectHierarchyVirtualRealityPlugin.h"
+#include <qSlicerSubjectHierarchyPluginHandler.h>
+#include <qSlicerSubjectHierarchyVirtualRealityPlugin.h>
 
 // VirtualReality Widget includes
 #include <qMRMLVirtualRealityTransformWidget.h>
@@ -42,17 +42,17 @@
 #include "vtkMRMLVirtualRealityViewNode.h"
 
 // SlicerQt includes
-#include "qSlicerApplication.h"
-#include "qSlicerCoreApplication.h"
-#include "qSlicerModuleManager.h"
+#include <qSlicerApplication.h>
+#include <qSlicerCoreApplication.h>
+#include <qSlicerModuleManager.h>
 
 // MRML includes
-#include "vtkMRMLScene.h"
+#include <vtkMRMLScene.h>
 
 // Slicer includes
-#include "vtkSlicerApplicationLogic.h"
-#include "vtkSlicerCamerasModuleLogic.h"
-#include "vtkSlicerVolumeRenderingLogic.h"
+#include <vtkSlicerApplicationLogic.h>
+#include <vtkSlicerCamerasModuleLogic.h>
+#include <vtkSlicerVolumeRenderingLogic.h>
 
 //-----------------------------------------------------------------------------
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))

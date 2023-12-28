@@ -26,7 +26,7 @@
 #include <vtkMRMLSegmentationDisplayNode.h>
 
 // Slicer includes
-#include "vtkSlicerVolumeRenderingLogic.h"
+#include <vtkSlicerVolumeRenderingLogic.h>
 
 // VTK/Rendering/VR includes
 #include <vtkVRInteractorStyle.h>
