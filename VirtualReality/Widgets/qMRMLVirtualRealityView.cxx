@@ -133,13 +133,13 @@ CTK_SET_CPP(qMRMLVirtualRealityView, vtkSlicerCamerasModuleLogic*, setCamerasLog
 CTK_GET_CPP(qMRMLVirtualRealityView, vtkSlicerCamerasModuleLogic*, camerasLogic, CamerasLogic);
 
 //----------------------------------------------------------------------------
-CTK_GET_CPP(qMRMLVirtualRealityView, vtkOpenVRRenderer*, renderer, Renderer);
+CTK_GET_CPP(qMRMLVirtualRealityView, vtkVRRenderer*, renderer, Renderer);
 
 //----------------------------------------------------------------------------
-CTK_GET_CPP(qMRMLVirtualRealityView, vtkOpenVRRenderWindow*, renderWindow, RenderWindow);
+CTK_GET_CPP(qMRMLVirtualRealityView, vtkVRRenderWindow*, renderWindow, RenderWindow);
 
 //----------------------------------------------------------------------------
-CTK_GET_CPP(qMRMLVirtualRealityView, vtkOpenVRRenderWindowInteractor*, interactor, Interactor);
+CTK_GET_CPP(qMRMLVirtualRealityView, vtkVRRenderWindowInteractor*, interactor, Interactor);
 
 //---------------------------------------------------------------------------
 void qMRMLVirtualRealityViewPrivate::createRenderWindow()
@@ -166,9 +166,10 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   this->InteractorStyleDelegate = vtkSmartPointer<vtkVirtualRealityViewInteractorStyleDelegate>::New();
 
   // InteractorStyle
-  this->InteractorStyle = vtkSmartPointer<vtkVirtualRealityViewOpenVRInteractorStyle>::New();
+  vtkNew<vtkVirtualRealityViewOpenVRInteractorStyle> interactorStyle;
+  interactorStyle->SetInteractorStyleDelegate(this->InteractorStyleDelegate);
+  this->InteractorStyle = interactorStyle;
   this->InteractorStyle->SetCurrentRenderer(this->Renderer);
-  this->InteractorStyle->SetInteractorStyleDelegate(this->InteractorStyleDelegate);
 
   // Interactor
   this->Interactor = vtkSmartPointer<vtkVirtualRealityViewOpenVRInteractor>::New();
@@ -195,7 +196,7 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   //
 
   // Observe VR render window event
-  qvtkReconnect(this->RenderWindow, vtkOpenVRRenderWindow::PhysicalToWorldMatrixModified,
+  qvtkReconnect(this->RenderWindow, vtkVRRenderWindow::PhysicalToWorldMatrixModified,
                 q, SLOT(onPhysicalToWorldMatrixModified()));
 
   // Observe button press event
@@ -395,12 +396,13 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
     // 1.6666 m/s is walking speed (= 6 km/h), which is the default. We multiply it with the factor
     this->InteractorStyle->SetDollyPhysicalSpeed(dollyPhysicalSpeedMps);
 
-    if (this->RenderWindow->GetHMD())
+    vtkOpenVRRenderWindow* vrRenderWindow = vtkOpenVRRenderWindow::SafeDownCast(this->RenderWindow);
+    if (vrRenderWindow != nullptr && vrRenderWindow->GetHMD() != nullptr)
     {
       vtkEventDataDevice deviceIdsToUpdate[] = { vtkEventDataDevice::RightController, vtkEventDataDevice::LeftController, vtkEventDataDevice::Unknown };
       for (int deviceIdIndex = 0; deviceIdsToUpdate[deviceIdIndex] != vtkEventDataDevice::Unknown; deviceIdIndex++)
       {
-        vtkOpenVRModel* model = vtkOpenVRModel::SafeDownCast(this->RenderWindow->GetModelForDevice(deviceIdsToUpdate[deviceIdIndex]));
+        vtkVRModel* model = vtkVRModel::SafeDownCast(vrRenderWindow->GetModelForDevice(deviceIdsToUpdate[deviceIdIndex]));
         if (!model)
         {
           continue;
@@ -411,10 +413,10 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
       // Update tracking reference visibility
       for (uint32_t deviceIdIndex = 0; deviceIdIndex < vr::k_unMaxTrackedDeviceCount; ++deviceIdIndex)
       {
-        if (this->RenderWindow->GetHMD()->GetTrackedDeviceClass(deviceIdIndex) == vr::TrackedDeviceClass_TrackingReference)
+        if (vrRenderWindow->GetHMD()->GetTrackedDeviceClass(deviceIdIndex) == vr::TrackedDeviceClass_TrackingReference)
         {
-          vtkOpenVRModel* model = vtkOpenVRModel::SafeDownCast(this->RenderWindow->GetModelForDevice(
-            this->RenderWindow->GetDeviceForOpenVRHandle(deviceIdIndex)));
+          vtkVRModel* model = vtkVRModel::SafeDownCast(vrRenderWindow->GetModelForDevice(
+            vrRenderWindow->GetDeviceForOpenVRHandle(deviceIdIndex)));
           if (!model)
           {
             continue;
@@ -459,7 +461,19 @@ double qMRMLVirtualRealityViewPrivate::stillUpdateRate()
 // --------------------------------------------------------------------------
 void qMRMLVirtualRealityViewPrivate::doOpenVirtualReality()
 {
-  if (this->Interactor && this->RenderWindow && this->RenderWindow->GetHMD() && this->Renderer)
+  if (this->Interactor == nullptr)
+  {
+    qCritical() << Q_FUNC_INFO << "failed: Interactor is not set";
+    return;
+  }
+  if (this->Renderer == nullptr)
+  {
+    qCritical() << Q_FUNC_INFO << "failed: Renderer is not set";
+    return;
+  }
+
+  vtkOpenVRRenderWindow* vrRenderWindow = vtkOpenVRRenderWindow::SafeDownCast(this->RenderWindow);
+  if (vrRenderWindow != nullptr && vrRenderWindow->GetHMD() != nullptr)
   {
     this->Interactor->DoOneEvent(this->RenderWindow, this->Renderer);
 
@@ -585,6 +599,12 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodesWithTrackerPoses()
 void qMRMLVirtualRealityViewPrivate
 ::updateTransformNodeAttributesFromDevice(vtkMRMLTransformNode* node, vtkEventDataDevice device, uint32_t index)
 {
+  vtkOpenVRRenderWindow* vrRenderWindow = vtkOpenVRRenderWindow::SafeDownCast(this->RenderWindow);
+  if (vrRenderWindow == nullptr)
+  {
+    return;
+  }
+
   std::string attributePrefix;
 
   switch(device)
@@ -607,7 +627,7 @@ void qMRMLVirtualRealityViewPrivate
   }
 
   vr::TrackedDevicePose_t* tdPose;
-  this->RenderWindow->GetOpenVRPose(device, index, &tdPose);
+  vrRenderWindow->GetOpenVRPose(device, index, &tdPose);
   if (tdPose == nullptr)
   {
     auto handle = this->RenderWindow->GetDeviceHandleForDevice(device, index);
@@ -758,12 +778,9 @@ void qMRMLVirtualRealityView::getDisplayableManagers(vtkCollection* displayableM
 //------------------------------------------------------------------------------
 bool qMRMLVirtualRealityView::isHardwareConnected()const
 {
-  vtkOpenVRRenderWindow* renWin = this->renderWindow();
-  if (!renWin)
-  {
-    return false;
-  }
-  if (!renWin->GetHMD())
+  Q_D(const qMRMLVirtualRealityView);
+  vtkOpenVRRenderWindow* vrRenderWindow = vtkOpenVRRenderWindow::SafeDownCast(d->RenderWindow);
+  if (vrRenderWindow != nullptr && vrRenderWindow->GetHMD() == nullptr)
   {
     return false;
   }
@@ -984,7 +1001,7 @@ void qMRMLVirtualRealityView::updateViewFromReferenceViewCamera()
     qWarning() << Q_FUNC_INFO << ": The renderer must be set prior to calling InitializeViewFromCamera";
     return;
   }
-  vtkOpenVRCamera* cam = vtkOpenVRCamera::SafeDownCast(ren->GetActiveCamera());
+  vtkVRCamera* cam = vtkVRCamera::SafeDownCast(ren->GetActiveCamera());
   if (!cam)
   {
     qWarning() << Q_FUNC_INFO << ": The renderer's active camera must be set prior to calling InitializeViewFromCamera";

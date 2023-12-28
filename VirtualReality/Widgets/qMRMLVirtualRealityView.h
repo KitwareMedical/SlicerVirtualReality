@@ -41,10 +41,10 @@ class qMRMLVirtualRealityViewPrivate;
 // Slicer includes
 class vtkSlicerCamerasModuleLogic;
 
-// VTK Rendering/OpenVR includes
-class vtkOpenVRRenderer;
-class vtkOpenVRRenderWindow;
-class vtkOpenVRRenderWindowInteractor;
+// VTK Rendering/VR includes
+class vtkVRRenderer;
+class vtkVRRenderWindow;
+class vtkVRRenderWindowInteractor;
 
 // VTK includes
 class vtkCollection;
@@ -95,13 +95,13 @@ public:
   Q_INVOKABLE vtkMRMLVirtualRealityViewNode* mrmlVirtualRealityViewNode()const;
 
   /// Get a reference to the associated vtkRenderer
-  vtkOpenVRRenderer* renderer()const;
+  vtkVRRenderer* renderer()const;
 
   /// Get underlying RenderWindow
-  Q_INVOKABLE vtkOpenVRRenderWindow* renderWindow()const;
+  Q_INVOKABLE vtkVRRenderWindow* renderWindow()const;
 
   /// Get underlying RenderWindow
-  Q_INVOKABLE vtkOpenVRRenderWindowInteractor* interactor()const;
+  Q_INVOKABLE vtkVRRenderWindowInteractor* interactor()const;
 
   /// Initialize the virtual reality view to most closely
   /// matched the camera of the reference view camera.
