@@ -150,6 +150,11 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
 {
   Q_Q(qMRMLVirtualRealityView);
 
+  if (this->MRMLVirtualRealityViewNode == nullptr)
+  {
+    qCritical() << Q_FUNC_INFO << " failed: MRMLVirtualRealityViewNode is not set";
+    return;
+  }
   if (this->VirtualRealityLogic == nullptr)
   {
     qCritical() << Q_FUNC_INFO << " failed: VirtualRealityLogic is not set";
@@ -195,9 +200,8 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   else
   {
     this->destroyRenderWindow();
-    qDebug() << "";
-    qDebug() << "SlicerVirtualReality: No XR runtime initialized";
-    qDebug() << "";
+    qWarning() << "No XR runtime initialized";
+    this->MRMLVirtualRealityViewNode->SetError("Connection failed: No XR runtime initialized");
     return;
   }
 
@@ -315,12 +319,15 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
 
   q->updateViewFromReferenceViewCamera();
 
+  QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
   this->RenderWindow->Initialize();
+  QApplication::restoreOverrideCursor();
 
   const char* xrRuntimeAsStr = vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(xrRuntime);
 
   if (!q->isHardwareConnected())
   {
+    this->MRMLVirtualRealityViewNode->SetError("Connection failed");
     qWarning() << Q_FUNC_INFO << ": Failed to initialize " << xrRuntimeAsStr << " RenderWindow";
     return;
   }
@@ -335,6 +342,7 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   {
     qDebug() << " " << this->DisplayableManagerGroup->GetNthDisplayableManager(idx)->GetClassName();
   }
+
 }
 
 //---------------------------------------------------------------------------
@@ -344,7 +352,10 @@ void qMRMLVirtualRealityViewPrivate::destroyRenderWindow()
   // Must break the connection between interactor and render window,
   // otherwise they would circularly refer to each other and would not
   // be deleted.
-  this->Interactor->SetRenderWindow(nullptr);
+  if (this->Interactor != nullptr)
+  {
+    this->Interactor->SetRenderWindow(nullptr);
+  }
   this->Interactor = nullptr;
   this->InteractorStyle = nullptr;
   this->DisplayableManagerGroup = nullptr;
@@ -360,28 +371,20 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
   Q_Q(qMRMLVirtualRealityView);
   if (!this->MRMLVirtualRealityViewNode || !this->MRMLVirtualRealityViewNode->GetVisibility())
   {
-    if (this->RenderWindow != nullptr)
-    {
-      this->destroyRenderWindow();
-    }
-    if (this->MRMLVirtualRealityViewNode)
-    {
-      this->MRMLVirtualRealityViewNode->ClearError();
-    }
+    this->destroyRenderWindow();
+    this->MRMLVirtualRealityViewNode->ClearError();
     return;
   }
 
   if (!this->RenderWindow)
   {
-    QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
     this->createRenderWindow();
-    QApplication::restoreOverrideCursor();
-    if (!q->isHardwareConnected())
-    {
-      this->MRMLVirtualRealityViewNode->SetError("Connection failed");
-      return;
-    }
-    this->MRMLVirtualRealityViewNode->ClearError();
+  }
+
+
+  if (this->MRMLVirtualRealityViewNode->HasError())
+  {
+    return;
   }
 
   if (this->DisplayableManagerGroup->GetMRMLDisplayableNode() != this->MRMLVirtualRealityViewNode.GetPointer())
