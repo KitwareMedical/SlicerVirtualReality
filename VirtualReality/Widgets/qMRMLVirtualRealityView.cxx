@@ -145,6 +145,13 @@ CTK_GET_CPP(qMRMLVirtualRealityView, vtkVRRenderWindow*, renderWindow, RenderWin
 //----------------------------------------------------------------------------
 CTK_GET_CPP(qMRMLVirtualRealityView, vtkVRRenderWindowInteractor*, interactor, Interactor);
 
+// --------------------------------------------------------------------------
+int qMRMLVirtualRealityView::currentXRRuntime() const
+{
+  Q_D(const qMRMLVirtualRealityView);
+  return static_cast<int>(d->currentXRRuntime());
+}
+
 //---------------------------------------------------------------------------
 void qMRMLVirtualRealityViewPrivate::createRenderWindow()
 {
@@ -363,6 +370,22 @@ void qMRMLVirtualRealityViewPrivate::destroyRenderWindow()
   this->Camera = nullptr;
   this->Lights = nullptr;
   this->RenderWindow = nullptr;
+}
+
+// --------------------------------------------------------------------------
+vtkMRMLVirtualRealityViewNode::XRRuntimeType qMRMLVirtualRealityViewPrivate::currentXRRuntime() const
+{
+  if (this->RenderWindow == nullptr)
+  {
+    return vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime;
+  }
+  if (vtkOpenVRRenderWindow::SafeDownCast(this->RenderWindow) != nullptr)
+  {
+    return vtkMRMLVirtualRealityViewNode::OpenVR;
+  }
+  qCritical() << Q_FUNC_INFO << " failed: RenderWindow is not a supported type: "
+              << this->RenderWindow->GetClassName();
+  return vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime;
 }
 
 // --------------------------------------------------------------------------
