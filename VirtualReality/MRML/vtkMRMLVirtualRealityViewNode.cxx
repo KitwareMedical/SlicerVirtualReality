@@ -72,6 +72,7 @@ void vtkMRMLVirtualRealityViewNode::WriteXML(ostream& of, int nIndent)
   this->Superclass::WriteXML(of, nIndent);
 
   vtkMRMLWriteXMLBeginMacro(of);
+  vtkMRMLWriteXMLEnumMacro(xrRuntimeInteface, XRRuntime);
   vtkMRMLWriteXMLBooleanMacro(twoSidedLighting, TwoSidedLighting);
   vtkMRMLWriteXMLBooleanMacro(backLights, BackLights);
   vtkMRMLWriteXMLFloatMacro(desiredUpdateRate, DesiredUpdateRate);
@@ -93,6 +94,7 @@ void vtkMRMLVirtualRealityViewNode::ReadXMLAttributes(const char** atts)
   this->Superclass::ReadXMLAttributes(atts);
 
   vtkMRMLReadXMLBeginMacro(atts);
+  vtkMRMLReadXMLEnumMacro(xrRuntime, XRRuntime);
   vtkMRMLReadXMLBooleanMacro(twoSidedLighting, TwoSidedLighting);
   vtkMRMLReadXMLBooleanMacro(backLights, BackLights);
   vtkMRMLReadXMLFloatMacro(desiredUpdateRate, DesiredUpdateRate);
@@ -118,6 +120,7 @@ void vtkMRMLVirtualRealityViewNode::Copy(vtkMRMLNode* anode)
   this->Superclass::Copy(anode);
 
   vtkMRMLCopyBeginMacro(anode);
+  vtkMRMLCopyEnumMacro(XRRuntime);
   vtkMRMLCopyBooleanMacro(TwoSidedLighting);
   vtkMRMLCopyBooleanMacro(BackLights);
   vtkMRMLCopyFloatMacro(DesiredUpdateRate);
@@ -139,6 +142,7 @@ void vtkMRMLVirtualRealityViewNode::PrintSelf(ostream& os, vtkIndent indent)
   this->Superclass::PrintSelf(os, indent);
 
   vtkMRMLPrintBeginMacro(os, indent);
+  vtkMRMLPrintEnumMacro(XRRuntime);
   vtkMRMLPrintBooleanMacro(TwoSidedLighting);
   vtkMRMLPrintBooleanMacro(BackLights);
   vtkMRMLPrintFloatMacro(DesiredUpdateRate);
@@ -603,10 +607,17 @@ void vtkMRMLVirtualRealityViewNode::SetTrackerTransformUpdate(bool enable)
 }
 
 //-----------------------------------------------------------
+void vtkMRMLVirtualRealityViewNode::SetXRRuntime(int id)
+{
+  this->SetXRRuntime(static_cast<vtkMRMLVirtualRealityViewNode::XRRuntimeType>(id));
+}
+
+//-----------------------------------------------------------
 const char* vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(int id)
 {
   switch (id)
   {
+    case UndefinedXRRuntime: return "undefined";
     case OpenVR: return "OpenVR";
     default:
       // invalid id
