@@ -21,6 +21,9 @@
 #ifndef __qMRMLVirtualRealityView_h
 #define __qMRMLVirtualRealityView_h
 
+// VR Logic includes
+class vtkSlicerVirtualRealityLogic;
+
 // VR MRML includes
 class vtkMRMLVirtualRealityViewNode;
 
@@ -86,10 +89,18 @@ public:
   void addDisplayableManager(const QString& displayableManager);
   Q_INVOKABLE void getDisplayableManagers(vtkCollection *displayableManagers);
 
+  ///@{
   /// Set Cameras module logic.
   /// Required for updating camera from reference view node.
   void setCamerasLogic(vtkSlicerCamerasModuleLogic* camerasLogic);
   vtkSlicerCamerasModuleLogic* camerasLogic()const;
+  ///}@
+
+  ///@{
+  /// VirtualReality module logic.
+  void setVirtualRealityLogic(vtkSlicerVirtualRealityLogic* camerasLogic);
+  vtkSlicerVirtualRealityLogic* virtualRealityLogic()const;
+  ///}@
 
   /// Get the 3D View node observed by view.
   Q_INVOKABLE vtkMRMLVirtualRealityViewNode* mrmlVirtualRealityViewNode()const;

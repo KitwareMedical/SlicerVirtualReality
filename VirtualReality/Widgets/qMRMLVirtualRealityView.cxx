@@ -133,6 +133,10 @@ CTK_SET_CPP(qMRMLVirtualRealityView, vtkSlicerCamerasModuleLogic*, setCamerasLog
 CTK_GET_CPP(qMRMLVirtualRealityView, vtkSlicerCamerasModuleLogic*, camerasLogic, CamerasLogic);
 
 //----------------------------------------------------------------------------
+CTK_SET_CPP(qMRMLVirtualRealityView, vtkSlicerVirtualRealityLogic*, setVirtualRealityLogic, VirtualRealityLogic);
+CTK_GET_CPP(qMRMLVirtualRealityView, vtkSlicerVirtualRealityLogic*, virtualRealityLogic, VirtualRealityLogic);
+
+//----------------------------------------------------------------------------
 CTK_GET_CPP(qMRMLVirtualRealityView, vtkVRRenderer*, renderer, Renderer);
 
 //----------------------------------------------------------------------------

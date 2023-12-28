@@ -139,6 +139,8 @@ void qSlicerVirtualRealityModulePrivate::addViewWidget()
   this->VirtualRealityViewWidget = new qMRMLVirtualRealityView();
   this->VirtualRealityViewWidget->setObjectName(QString("VirtualRealityWidget"));
 
+  this->VirtualRealityViewWidget->setVirtualRealityLogic(this->logic());
+
   if(q->isInstalled())
   {
     // "vr_actions" sub-directory is hard-coded in "VTK/Rendering/OpenVR/CMakeLists.txt"

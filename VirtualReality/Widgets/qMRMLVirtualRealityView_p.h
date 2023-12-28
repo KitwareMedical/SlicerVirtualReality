@@ -105,6 +105,7 @@ protected:
   void destroyRenderWindow();
 
   vtkSlicerCamerasModuleLogic* CamerasLogic;
+  vtkSmartPointer<vtkSlicerVirtualRealityLogic> VirtualRealityLogic;
 
   vtkSmartPointer<vtkMRMLDisplayableManagerGroup> DisplayableManagerGroup;
   vtkSmartPointer<vtkVirtualRealityViewInteractorObserver>  InteractorObserver;
