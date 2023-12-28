@@ -18,8 +18,8 @@
 
 ==============================================================================*/
 
-#ifndef vtkVirtualRealityViewInteractorStyle_h
-#define vtkVirtualRealityViewInteractorStyle_h
+#ifndef vtkVirtualRealityViewOpenVRInteractorStyle_h
+#define vtkVirtualRealityViewOpenVRInteractorStyle_h
 
 // VR MRMLDM includes
 #include "vtkSlicerVirtualRealityModuleMRMLDisplayableManagerExport.h"
@@ -39,12 +39,12 @@ class vtkMRMLDisplayableManagerGroup;
 class vtkWorldPointPicker;
 
 
-class VTK_SLICER_VIRTUALREALITY_MODULE_MRMLDISPLAYABLEMANAGER_EXPORT vtkVirtualRealityViewInteractorStyle
+class VTK_SLICER_VIRTUALREALITY_MODULE_MRMLDISPLAYABLEMANAGER_EXPORT vtkVirtualRealityViewOpenVRInteractorStyle
   : public vtkOpenVRInteractorStyle
 {
 public:
-  static vtkVirtualRealityViewInteractorStyle *New();
-  vtkTypeMacro(vtkVirtualRealityViewInteractorStyle,vtkOpenVRInteractorStyle);
+  static vtkVirtualRealityViewOpenVRInteractorStyle *New();
+  vtkTypeMacro(vtkVirtualRealityViewOpenVRInteractorStyle,vtkOpenVRInteractorStyle);
 
   ///@{
   /// Set/get delegate
@@ -89,14 +89,14 @@ public:
   //@}
 
 protected:
-  vtkVirtualRealityViewInteractorStyle() = default;
-  ~vtkVirtualRealityViewInteractorStyle() override = default;
+  vtkVirtualRealityViewOpenVRInteractorStyle() = default;
+  ~vtkVirtualRealityViewOpenVRInteractorStyle() override = default;
 
   vtkSmartPointer<vtkVirtualRealityViewInteractorStyleDelegate> InteractorStyleDelegate;
 
 private:
-  vtkVirtualRealityViewInteractorStyle(const vtkVirtualRealityViewInteractorStyle&) = delete;
-  void operator=(const vtkVirtualRealityViewInteractorStyle&) = delete;
+  vtkVirtualRealityViewOpenVRInteractorStyle(const vtkVirtualRealityViewOpenVRInteractorStyle&) = delete;
+  void operator=(const vtkVirtualRealityViewOpenVRInteractorStyle&) = delete;
 };
 
 #endif

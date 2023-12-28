@@ -19,10 +19,10 @@
 ==============================================================================*/
 
 // VR MRMLDM includes
-#include "vtkVirtualRealityViewInteractorStyle.h"
+#include "vtkVirtualRealityViewOpenVRInteractorStyle.h"
 
 // VTK includes
 #include <vtkObjectFactory.h>
 
 //----------------------------------------------------------------------------
-vtkStandardNewMacro(vtkVirtualRealityViewInteractorStyle);
+vtkStandardNewMacro(vtkVirtualRealityViewOpenVRInteractorStyle);

@@ -36,10 +36,10 @@
 class vtkMRMLVirtualRealityViewNode;
 
 // VR MRMLDM includes
-class vtkVirtualRealityViewInteractorStyle;
 class vtkVirtualRealityViewInteractorStyleDelegate;
-class vtkVirtualRealityViewInteractor;
 class vtkVirtualRealityViewInteractorObserver;
+class vtkVirtualRealityViewOpenVRInteractor;
+class vtkVirtualRealityViewOpenVRInteractorStyle;
 
 // VR Widgets includes
 #include "qMRMLVirtualRealityView.h"
@@ -116,8 +116,8 @@ protected:
   vtkWeakPointer<vtkMRMLVirtualRealityViewNode> MRMLVirtualRealityViewNode;
   vtkSmartPointer<vtkOpenVRRenderer> Renderer;
   vtkSmartPointer<vtkOpenVRRenderWindow> RenderWindow;
-  vtkSmartPointer<vtkVirtualRealityViewInteractor> Interactor;
-  vtkSmartPointer<vtkVirtualRealityViewInteractorStyle> InteractorStyle;
+   vtkSmartPointer<vtkVirtualRealityViewOpenVRInteractor> Interactor;
+  vtkSmartPointer<vtkVirtualRealityViewOpenVRInteractorStyle> InteractorStyle;
   vtkSmartPointer<vtkOpenVRCamera> Camera;
   vtkSmartPointer<vtkLightCollection> Lights;
 

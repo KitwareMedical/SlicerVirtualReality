@@ -19,9 +19,9 @@
 #include "vtkVirtualRealityViewInteractorObserver.h"
 
 // VR MRMLDM includes
-#include "vtkVirtualRealityViewInteractor.h"
-#include "vtkVirtualRealityViewInteractorStyle.h"
 #include "vtkVirtualRealityViewInteractorStyleDelegate.h"
+#include "vtkVirtualRealityViewOpenVRInteractor.h"
+#include "vtkVirtualRealityViewOpenVRInteractorStyle.h"
 
 // MRML includes
 #include <vtkMRML.h> // For MRML_APPLICATION_VERSION and MRML_VERSION_CHECK
@@ -222,8 +222,8 @@ bool vtkVirtualRealityViewInteractorObserver::DelegateInteractionEventDataToDisp
   vtkRenderer* currentRenderer = this->GetInteractorStyle()->GetCurrentRenderer();
   ed->SetRenderer(currentRenderer);
 
-  vtkVirtualRealityViewInteractor* vrViewInteractor =
-      vtkVirtualRealityViewInteractor::SafeDownCast(this->GetInteractor());
+  vtkVirtualRealityViewOpenVRInteractor* vrViewInteractor =
+          vtkVirtualRealityViewOpenVRInteractor::SafeDownCast(this->GetInteractor());
 
   std::string interactionContextName;
   if (ed->GetDevice() == vtkEventDataDevice::LeftController)
@@ -299,8 +299,8 @@ void vtkVirtualRealityViewInteractorObserver::OnElevation3D(vtkEventData *edata)
 //------------------------------------------------------------------------------
 vtkVirtualRealityViewInteractorStyleDelegate* vtkVirtualRealityViewInteractorObserver::GetInteractorStyleDelegate()
 {
-  vtkVirtualRealityViewInteractorStyle* vrViewInteractorStyle =
-      vtkVirtualRealityViewInteractorStyle::SafeDownCast(this->GetInteractorStyle());
+  vtkVirtualRealityViewOpenVRInteractorStyle* vrViewInteractorStyle =
+      vtkVirtualRealityViewOpenVRInteractorStyle::SafeDownCast(this->GetInteractorStyle());
   if (vrViewInteractorStyle == nullptr)
   {
     return nullptr;
