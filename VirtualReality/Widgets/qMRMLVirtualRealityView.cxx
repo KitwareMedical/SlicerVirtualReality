@@ -293,9 +293,11 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   q->updateViewFromReferenceViewCamera();
 
   this->RenderWindow->Initialize();
-  if (!this->RenderWindow->GetHMD())
+
+  if (!q->isHardwareConnected())
   {
-    qWarning() << Q_FUNC_INFO << ": Failed to initialize OpenVR RenderWindow";
+    const char* xrRuntimeAsStr = "OpenVR";
+    qWarning() << Q_FUNC_INFO << ": Failed to initialize " << xrRuntimeAsStr << " RenderWindow";
     return;
   }
 }
