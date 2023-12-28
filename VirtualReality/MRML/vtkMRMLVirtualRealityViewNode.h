@@ -40,6 +40,7 @@ public:
 
   enum XRRuntimeType : int
     {
+    UndefinedXRRuntime,
     OpenVR,
     XRRuntime_Last // must be last
     };
@@ -221,6 +222,20 @@ public:
   ///}@
 
   ///@{
+  /// Get/Set the XR runtime interface.
+  vtkGetMacro(XRRuntime, XRRuntimeType);
+  vtkSetMacro(XRRuntime, XRRuntimeType);
+  ///@}
+
+#ifndef __WRAP__
+  /// Set the XR runtime interface.
+  ///
+  /// Excluded from wrapping to avoid the following error:
+  /// `TypeError: "ambuguous call, multiple overloaded methods match the arguments`
+  void SetXRRuntime(int id);
+#endif
+
+  ///@{
   /// Convert between XR Runtime Interface identifier and name
   static const char* GetXRRuntimeAsString(int id);
   static int GetXRRuntimeFromString(const char* name);
@@ -241,6 +256,8 @@ public:
   std::string GetError() const;
 
 protected:
+  XRRuntimeType XRRuntime{vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime};
+
   bool TwoSidedLighting;
   bool BackLights;
   double DesiredUpdateRate;
