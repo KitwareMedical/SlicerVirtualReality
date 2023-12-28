@@ -38,8 +38,6 @@ class vtkMRMLVirtualRealityViewNode;
 // VR MRMLDM includes
 class vtkVirtualRealityViewInteractorStyleDelegate;
 class vtkVirtualRealityViewInteractorObserver;
-class vtkVirtualRealityViewOpenVRInteractor;
-class vtkVirtualRealityViewOpenVRInteractorStyle;
 
 // VR Widgets includes
 #include "qMRMLVirtualRealityView.h"
@@ -49,13 +47,11 @@ class vtkMRMLDisplayableManagerGroup;
 class vtkMRMLTransformNode;
 
 // VTK Rendering/VR includes
+class vtkVRCamera;
 class vtkVRInteractorStyle;
 class vtkVRRenderer;
 class vtkVRRenderWindow;
 class vtkVRRenderWindowInteractor;
-
-// VTK Rendering/OpenVR includes
-class vtkOpenVRCamera;
 
 // VTK includes
 #include <vtkEventData.h>
@@ -114,11 +110,11 @@ protected:
   vtkSmartPointer<vtkVirtualRealityViewInteractorObserver>  InteractorObserver;
   vtkSmartPointer<vtkVirtualRealityViewInteractorStyleDelegate> InteractorStyleDelegate;
   vtkWeakPointer<vtkMRMLVirtualRealityViewNode> MRMLVirtualRealityViewNode;
-  vtkSmartPointer<vtkOpenVRRenderer> Renderer;
-  vtkSmartPointer<vtkOpenVRRenderWindow> RenderWindow;
-   vtkSmartPointer<vtkVirtualRealityViewOpenVRInteractor> Interactor;
-  vtkSmartPointer<vtkVirtualRealityViewOpenVRInteractorStyle> InteractorStyle;
-  vtkSmartPointer<vtkOpenVRCamera> Camera;
+  vtkSmartPointer<vtkVRRenderer> Renderer;
+  vtkSmartPointer<vtkVRRenderWindow> RenderWindow;
+  vtkSmartPointer<vtkVRRenderWindowInteractor> Interactor;
+  vtkSmartPointer<vtkVRInteractorStyle> InteractorStyle;
+  vtkSmartPointer<vtkVRCamera> Camera;
   vtkSmartPointer<vtkLightCollection> Lights;
 
   vtkSmartPointer<vtkTimerLog> LastViewUpdateTime;
