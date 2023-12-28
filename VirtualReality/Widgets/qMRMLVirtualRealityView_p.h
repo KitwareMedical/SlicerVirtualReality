@@ -33,7 +33,7 @@
 //
 
 // VR MRML includes
-class vtkMRMLVirtualRealityViewNode;
+#include "vtkMRMLVirtualRealityViewNode.h"
 
 // VR MRMLDM includes
 class vtkVirtualRealityViewInteractorStyleDelegate;
@@ -88,6 +88,8 @@ public:
 
   double desiredUpdateRate();
   double stillUpdateRate();
+
+  vtkMRMLVirtualRealityViewNode::XRRuntimeType currentXRRuntime() const;
 
 public slots:
   void updateWidgetFromMRML();

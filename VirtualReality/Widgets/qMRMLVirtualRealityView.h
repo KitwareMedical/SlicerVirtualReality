@@ -111,6 +111,18 @@ public:
   /// Get underlying RenderWindow
   Q_INVOKABLE vtkVRRenderWindow* renderWindow()const;
 
+  /// Get the current XR runtime
+  ///
+  /// The runtime is determined from the instance of vtkVRRenderWindow associated
+  /// with this view.
+  ///
+  /// \warning The return type has been deliberately changed from `vtkMRMLVirtualRealityViewNode::XRRuntimeType`
+  /// to `int` to enable invocation from Python. Attempts to register the enum using both Q_DECLARE_METATYPE
+  /// and `qRegisterMetaType()` resulted in a runtime segfault.
+  ///
+  /// \sa renderWindow()
+  Q_INVOKABLE int currentXRRuntime() const;
+
   /// Get underlying RenderWindow
   Q_INVOKABLE vtkVRRenderWindowInteractor* interactor()const;
 
