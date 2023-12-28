@@ -391,7 +391,21 @@ vtkMRMLVirtualRealityViewNode::XRRuntimeType qMRMLVirtualRealityViewPrivate::cur
 // --------------------------------------------------------------------------
 void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
 {
-  Q_Q(qMRMLVirtualRealityView);
+  if (this->IsUpdatingWidgetFromMRML)
+    {
+    // Updating widget from MRML is already in progress
+    return;
+    }
+  this->IsUpdatingWidgetFromMRML = true;
+
+  this->updateWidgetFromMRMLNoModify();
+
+  this->IsUpdatingWidgetFromMRML = false;
+}
+
+// --------------------------------------------------------------------------
+void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRMLNoModify()
+{
   if (!this->MRMLVirtualRealityViewNode || !this->MRMLVirtualRealityViewNode->GetVisibility())
   {
     this->destroyRenderWindow();

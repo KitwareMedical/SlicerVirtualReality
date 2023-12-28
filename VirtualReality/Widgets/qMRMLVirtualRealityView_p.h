@@ -96,6 +96,7 @@ public slots:
   void doOpenVirtualReality();
 
 protected:
+  void updateWidgetFromMRMLNoModify();
   void updateTransformNodeWithControllerPose(vtkEventDataDevice device);
   void updateTransformNodeWithHMDPose();
   void updateTransformNodesWithTrackerPoses();
@@ -129,6 +130,8 @@ protected:
   double LastViewPosition[3];
 
   QString ActionManifestPath;
+
+  bool IsUpdatingWidgetFromMRML{false};
 
   QTimer VirtualRealityLoopTimer;
 };
