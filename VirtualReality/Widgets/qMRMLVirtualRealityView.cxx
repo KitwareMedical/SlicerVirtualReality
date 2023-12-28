@@ -155,6 +155,12 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
     qCritical() << Q_FUNC_INFO << " failed: VirtualRealityLogic is not set";
     return;
   }
+  vtkSlicerApplicationLogic* appLogic = qSlicerApplication::application()->applicationLogic();
+  if (!appLogic)
+  {
+    qCritical() << Q_FUNC_INFO << " failed: Application logic not available";
+    return;
+  }
 
   vtkMRMLVirtualRealityViewNode::XRRuntimeType xrRuntime = vtkMRMLVirtualRealityViewNode::OpenVR;
 
@@ -219,13 +225,6 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   //
   vtkMRMLVirtualRealityViewDisplayableManagerFactory* factory
     = vtkMRMLVirtualRealityViewDisplayableManagerFactory::GetInstance();
-
-  vtkSlicerApplicationLogic* appLogic = qSlicerApplication::application()->applicationLogic();
-  if (!appLogic)
-  {
-    qCritical() << Q_FUNC_INFO << ": Failed to access application logic";
-    return;
-  }
   factory->SetMRMLApplicationLogic(appLogic);
 
   QStringList displayableManagers;
