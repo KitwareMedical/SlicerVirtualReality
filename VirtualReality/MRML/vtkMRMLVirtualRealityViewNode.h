@@ -256,7 +256,7 @@ public:
   std::string GetError() const;
 
 protected:
-  XRRuntimeType XRRuntime{vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime};
+  XRRuntimeType XRRuntime{vtkMRMLVirtualRealityViewNode::OpenVR};
 
   bool TwoSidedLighting;
   bool BackLights;
