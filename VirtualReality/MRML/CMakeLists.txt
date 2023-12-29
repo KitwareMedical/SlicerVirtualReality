@@ -32,6 +32,11 @@ if(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
     VTK::RenderingOpenVR
     )
 endif()
+if(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
+  list(APPEND ${KIT}_TARGET_LIBRARIES
+    VTK::RenderingOpenXR
+    )
+endif()
 
 #-----------------------------------------------------------------------------
 SlicerMacroBuildModuleMRML(

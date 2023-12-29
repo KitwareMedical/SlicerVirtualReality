@@ -10,6 +10,9 @@ find_package(vtkRenderingVR REQUIRED)
 if(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
   find_package(vtkRenderingOpenVR REQUIRED)
 endif()
+if(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
+  find_package(vtkRenderingOpenXR REQUIRED)
+endif()
 
 #-----------------------------------------------------------------------------
 add_subdirectory(MRML)

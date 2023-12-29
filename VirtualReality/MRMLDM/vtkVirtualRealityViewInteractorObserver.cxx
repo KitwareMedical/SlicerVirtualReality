@@ -20,12 +20,16 @@
 
 // For:
 //  - SlicerVirtualReality_HAS_OPENVR_SUPPORT
+//  - SlicerVirtualReality_HAS_OPENXR_SUPPORT
 #include "vtkMRMLVirtualRealityConfigure.h"
 
 // VR MRMLDM includes
 #include "vtkVirtualRealityViewInteractorStyleDelegate.h"
 #if defined(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
 #include "vtkVirtualRealityViewOpenVRInteractorStyle.h"
+#endif
+#if defined(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
+#include "vtkVirtualRealityViewOpenXRInteractorStyle.h"
 #endif
 
 // MRML includes

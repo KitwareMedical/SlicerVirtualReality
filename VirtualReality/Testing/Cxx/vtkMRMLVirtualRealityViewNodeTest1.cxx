@@ -15,5 +15,7 @@ int vtkMRMLVirtualRealityViewNodeTest1(int , char * [])
   CHECK_INT(vtkMRMLVirtualRealityViewNode::GetXRRuntimeFromString("any"), -1);
   CHECK_INT(vtkMRMLVirtualRealityViewNode::GetXRRuntimeFromString("undefined"), vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime);
   CHECK_INT(vtkMRMLVirtualRealityViewNode::GetXRRuntimeFromString("OpenVR"), vtkMRMLVirtualRealityViewNode::OpenVR);
+  CHECK_INT(vtkMRMLVirtualRealityViewNode::GetXRRuntimeFromString("OpenXR"), vtkMRMLVirtualRealityViewNode::OpenXR);
+
   return EXIT_SUCCESS;
 }

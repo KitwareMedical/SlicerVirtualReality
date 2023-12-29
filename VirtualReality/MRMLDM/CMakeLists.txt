@@ -32,6 +32,14 @@ if(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
     vtk${MODULE_NAME}ViewOpenVRInteractorStyle.h
     )
 endif()
+if(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
+  list(APPEND ${KIT}_SRCS
+    vtk${MODULE_NAME}ViewOpenXRInteractor.cxx
+    vtk${MODULE_NAME}ViewOpenXRInteractor.h
+    vtk${MODULE_NAME}ViewOpenXRInteractorStyle.cxx
+    vtk${MODULE_NAME}ViewOpenXRInteractorStyle.h
+    )
+endif()
 
 set(${KIT}_TARGET_LIBRARIES
   ${MRML_LIBRARIES}

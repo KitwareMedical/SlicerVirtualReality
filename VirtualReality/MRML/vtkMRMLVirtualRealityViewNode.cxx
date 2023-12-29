@@ -619,6 +619,7 @@ const char* vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(int id)
   {
     case UndefinedXRRuntime: return "undefined";
     case OpenVR: return "OpenVR";
+    case OpenXR: return "OpenXR";
     default:
       // invalid id
       return "";
