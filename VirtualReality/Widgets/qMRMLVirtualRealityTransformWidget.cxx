@@ -30,39 +30,53 @@
 // MRML includes
 #include <vtkMRMLLinearTransformNode.h>
 
-// OpenVR includes
-#include <openvr.h>
+// VTK includes
+#include <vtkEventData.h>
 
 
 namespace
 {
-  vr::ETrackingResult StringToPoseStatus(const char* cpose)
+  // Copied from https://github.com/ValveSoftware/openvr/blob/v2.0.10/headers/openvr.h
+  enum ETrackingResult
+  {
+    TrackingResult_Uninitialized = 1,
+
+    TrackingResult_Calibrating_InProgress	= 100,
+    TrackingResult_Calibrating_OutOfRange	= 101,
+
+    TrackingResult_Running_OK = 200,
+    TrackingResult_Running_OutOfRange = 201,
+
+    TrackingResult_Fallback_RotationOnly = 300,
+  };
+
+  ::ETrackingResult StringToPoseStatus(const char* cpose)
   {
     if (cpose == nullptr)
     {
-      return vr::TrackingResult_Uninitialized;
+      return ::TrackingResult_Uninitialized;
     }
     std::string pose(cpose);
 
     if (pose.compare("CalibratingInProgress") == 0)
     {
-      return vr::TrackingResult_Calibrating_InProgress;
+      return ::TrackingResult_Calibrating_InProgress;
     }
     else if (pose.compare("CalibratingOutOfRange") == 0)
     {
-      return vr::TrackingResult_Calibrating_OutOfRange;
+      return ::TrackingResult_Calibrating_OutOfRange;
     }
     else if (pose.compare("RunningOk") == 0)
     {
-      return vr::TrackingResult_Running_OK;
+      return ::TrackingResult_Running_OK;
     }
     else if (pose.compare("RunningOutOfRange") == 0)
     {
-      return vr::TrackingResult_Running_OutOfRange;
+      return ::TrackingResult_Running_OutOfRange;
     }
     else
     {
-      return vr::TrackingResult_Uninitialized;
+      return ::TrackingResult_Uninitialized;
     }
   }
 }
@@ -79,8 +93,8 @@ public:
 
   vtkWeakPointer<vtkMRMLVirtualRealityViewNode> VRViewNode;
   vtkWeakPointer<vtkMRMLLinearTransformNode>    TransformNode;
-  vr::ETrackedDeviceClass                       TransformType;
-  vr::ETrackingResult                           PreviousStatus;
+  vtkEventDataDevice                            TransformType;
+  ::ETrackingResult                             PreviousStatus;
 };
 
 //-----------------------------------------------------------------------------
@@ -91,8 +105,8 @@ qMRMLVirtualRealityTransformWidgetPrivate::qMRMLVirtualRealityTransformWidgetPri
   : q_ptr(&object)
   , VRViewNode(nullptr)
   , TransformNode(nullptr)
-  , TransformType(vr::TrackedDeviceClass_Invalid)
-  , PreviousStatus(vr::TrackingResult_Uninitialized)
+  , TransformType(vtkEventDataDevice::Unknown)
+  , PreviousStatus(::TrackingResult_Uninitialized)
 {
 
 }
@@ -155,26 +169,26 @@ void qMRMLVirtualRealityTransformWidget::setMRMLLinearTransformNode(vtkMRMLLinea
   if (name.find("VirtualReality") != std::string::npos && name.find("Controller") != std::string::npos)
   {
     // It's a controller!
-    d->TransformType = vr::TrackedDeviceClass_Controller;
+    d->TransformType = vtkEventDataDevice::LeftController; // Used for both Left and Right
   }
   else
   {
     if (name.find("VirtualReality") != std::string::npos && name.find("HMD") != std::string::npos)
     {
       // It's a headset!
-      d->TransformType = vr::TrackedDeviceClass_HMD;
+      d->TransformType = vtkEventDataDevice::HeadMountedDisplay;
     }
     else
     {
       if (name.find("VirtualReality") != std::string::npos && name.find("GenericTracker") != std::string::npos)
       {
         // It's a generic tracker!
-        d->TransformType = vr::TrackedDeviceClass_GenericTracker;
+        d->TransformType = vtkEventDataDevice::GenericTracker;
       }
     }
   }
 
-  if (d->TransformType == vr::TrackedDeviceClass_Invalid)
+  if (d->TransformType == vtkEventDataDevice::Unknown)
   {
     qCritical() << "Non-VR transform sent to VRTransformWidget";
   }
@@ -196,18 +210,20 @@ void qMRMLVirtualRealityTransformWidget::onButtonClicked()
 
   switch (d->TransformType)
   {
-    case vr::TrackedDeviceClass_HMD:
+    case vtkEventDataDevice::HeadMountedDisplay:
       d->VRViewNode->SetHMDTransformUpdate(!d->VRViewNode->GetHMDTransformUpdate());
       break;
-    case vr::TrackedDeviceClass_GenericTracker:
+    case vtkEventDataDevice::GenericTracker:
       d->VRViewNode->SetTrackerTransformUpdate(!d->VRViewNode->GetTrackerTransformUpdate());
       break;
-    case vr::TrackedDeviceClass_Controller:
+    case vtkEventDataDevice::LeftController:
+      Q_FALLTHROUGH();
+    case vtkEventDataDevice::RightController:
       d->VRViewNode->SetControllerTransformsUpdate(!d->VRViewNode->GetControllerTransformsUpdate());
       break;
     default:
       qCritical() << Q_FUNC_INFO << ": Unable to handle controller button click due to unknown transform type:"
-        << d->TransformType;
+        << static_cast<int>(d->TransformType);
       return;
   }
 
@@ -219,7 +235,7 @@ void qMRMLVirtualRealityTransformWidget::updateWidgetFromMRML()
 {
   Q_D(qMRMLVirtualRealityTransformWidget);
 
-  if (d->TransformType == vr::TrackedDeviceClass_Invalid ||
+  if (d->TransformType == vtkEventDataDevice::Unknown ||
       d->TransformNode == nullptr)
   {
     d->pushButton_Transform->setEnabled(false);
@@ -233,7 +249,7 @@ void qMRMLVirtualRealityTransformWidget::updateWidgetFromMRML()
     d->pushButton_Transform->setEnabled(true);
   }
 
-  vr::ETrackingResult status = StringToPoseStatus(d->TransformNode->GetAttribute("VirtualReality.PoseStatus"));
+  ::ETrackingResult status = StringToPoseStatus(d->TransformNode->GetAttribute("VirtualReality.PoseStatus"));
   if (d->PreviousStatus == status)
   {
     // No change
@@ -248,7 +264,7 @@ void qMRMLVirtualRealityTransformWidget::updateWidgetFromMRML()
   // Choose correct icon based on node attributes
   switch (d->TransformType)
   {
-    case vr::TrackedDeviceClass_HMD:
+    case vtkEventDataDevice::HeadMountedDisplay:
       {
         if (!d->VRViewNode->GetHMDTransformUpdate())
         {
@@ -257,19 +273,19 @@ void qMRMLVirtualRealityTransformWidget::updateWidgetFromMRML()
         }
         switch (status)
         {
-          case vr::TrackingResult_Running_OK:
+          case ::TrackingResult_Running_OK:
             d->pushButton_Transform->setIcon(QIcon(":/Icons/headset_status_ready.png"));
 
             break;
-          case vr::TrackingResult_Running_OutOfRange:
+          case ::TrackingResult_Running_OutOfRange:
             d->pushButton_Transform->setIcon(QIcon(":/Icons/headset_status_range.png"));
 
             break;
-          case vr::TrackingResult_Calibrating_InProgress:
+          case ::TrackingResult_Calibrating_InProgress:
             d->pushButton_Transform->setIcon(QIcon(":/Icons/headset_status_alert.png"));
 
             break;
-          case vr::TrackingResult_Calibrating_OutOfRange:
+          case ::TrackingResult_Calibrating_OutOfRange:
             d->pushButton_Transform->setIcon(QIcon(":/Icons/headset_status_range.png"));
             break;
           default:
@@ -277,7 +293,7 @@ void qMRMLVirtualRealityTransformWidget::updateWidgetFromMRML()
         }
         break;
       }
-    case vr::TrackedDeviceClass_GenericTracker:
+    case vtkEventDataDevice::GenericTracker:
       {
         if (!d->VRViewNode->GetTrackerTransformUpdate())
         {
@@ -286,19 +302,19 @@ void qMRMLVirtualRealityTransformWidget::updateWidgetFromMRML()
         }
         switch (status)
         {
-          case vr::TrackingResult_Running_OK:
+          case ::TrackingResult_Running_OK:
             d->pushButton_Transform->setIcon(QIcon(":/Icons/tracker_status_ready.png"));
 
             break;
-          case vr::TrackingResult_Running_OutOfRange:
+          case ::TrackingResult_Running_OutOfRange:
             d->pushButton_Transform->setIcon(QIcon(":/Icons/tracker_status_range.png"));
 
             break;
-          case vr::TrackingResult_Calibrating_InProgress:
+          case ::TrackingResult_Calibrating_InProgress:
             d->pushButton_Transform->setIcon(QIcon(":/Icons/tracker_status_alert.png"));
 
             break;
-          case vr::TrackingResult_Calibrating_OutOfRange:
+          case ::TrackingResult_Calibrating_OutOfRange:
             d->pushButton_Transform->setIcon(QIcon(":/Icons/tracker_status_range.png"));
 
             break;
@@ -308,7 +324,9 @@ void qMRMLVirtualRealityTransformWidget::updateWidgetFromMRML()
         }
         break;
       }
-    case vr::TrackedDeviceClass_Controller:
+    case vtkEventDataDevice::LeftController:
+      Q_FALLTHROUGH();
+    case vtkEventDataDevice::RightController:
       {
         if (!d->VRViewNode->GetControllerTransformsUpdate())
         {
@@ -317,19 +335,19 @@ void qMRMLVirtualRealityTransformWidget::updateWidgetFromMRML()
         }
         switch (status)
         {
-          case vr::TrackingResult_Running_OK:
+          case ::TrackingResult_Running_OK:
             d->pushButton_Transform->setIcon(QIcon(":/Icons/controller_status_ready.png"));
 
             break;
-          case vr::TrackingResult_Running_OutOfRange:
+          case ::TrackingResult_Running_OutOfRange:
             d->pushButton_Transform->setIcon(QIcon(":/Icons/controller_status_range.png"));
 
             break;
-          case vr::TrackingResult_Calibrating_InProgress:
+          case ::TrackingResult_Calibrating_InProgress:
             d->pushButton_Transform->setIcon(QIcon(":/Icons/controller_status_alert.png"));
 
             break;
-          case vr::TrackingResult_Calibrating_OutOfRange:
+          case ::TrackingResult_Calibrating_OutOfRange:
             d->pushButton_Transform->setIcon(QIcon(":/Icons/controller_status_range.png"));
 
             break;
@@ -341,7 +359,7 @@ void qMRMLVirtualRealityTransformWidget::updateWidgetFromMRML()
       break;
     default:
       qCritical() << Q_FUNC_INFO << ": Unable to update transform widget due to unknown transform type:"
-        << d->TransformType;
+        << static_cast<int>(d->TransformType);
       break;
   }
 }
