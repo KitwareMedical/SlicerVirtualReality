@@ -263,8 +263,6 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
   vtkSlicerVirtualRealityLogic::SetTriggerButtonFunction(
         this->Interactor, vtkSlicerVirtualRealityLogic::GetButtonFunctionIdForGrabObjectsAndWorld());
 
-  qDebug() << Q_FUNC_INFO << ": Number of registered displayable manager:" << this->DisplayableManagerGroup->GetDisplayableManagerCount();
-
   ///CONFIGURATION OF THE OPENVR ENVIRONEMENT
 
   this->Renderer->RemoveCuller(this->Renderer->GetCullers()->GetLastItem());
@@ -315,7 +313,16 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
     return;
   }
 
+  qDebug() << "";
+  qDebug() << "XR runtime \"" << xrRuntimeAsStr << "\" initialized";
+  qDebug() << "";
   qDebug() << "ActionManifestPath:" << q->actionManifestPath();
+  qDebug() << "Number of registered displayable manager:" << this->DisplayableManagerGroup->GetDisplayableManagerCount();
+  qDebug() << "Registered displayable managers:";
+  for (int idx=0; idx < this->DisplayableManagerGroup->GetDisplayableManagerCount(); idx++)
+  {
+    qDebug() << " " << this->DisplayableManagerGroup->GetNthDisplayableManager(idx)->GetClassName();
+  }
 }
 
 //---------------------------------------------------------------------------
