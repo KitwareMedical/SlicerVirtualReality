@@ -103,6 +103,33 @@ public:
   /// Set volume rendering logic
   void SetVolumeRenderingLogic(vtkSlicerVolumeRenderingLogic* volumeRenderingLogic);
 
+  /// Determines whether rendering should occur as quick view motion.
+  ///
+  /// This function evaluates the motion sensitivity and elapsed time to decide
+  /// whether rendering should be considered as quick view motion. It computes
+  /// limits based on the motion sensitivity and checks the change speed of
+  /// view position, direction, and up vector to determine if it qualifies as
+  /// quick view motion.
+  ///
+  /// \param motionSensitivity The sensitivity value (0.0 to 1.0) indicating the user's preference for motion.
+  /// \param physicalScale The physical scale of the rendering.
+  /// \param elapsedTimeInSec The time elapsed in seconds since the last view update.
+  /// \param lastViewPos The position in the last view.
+  /// \param lastViewDir The direction in the last view.
+  /// \param lastViewUp The up vector in the last view.
+  /// \param viewPos The current position.
+  /// \param viewDir The current direction.
+  /// \param viewUp The current up vector.
+  ///
+  /// \return True if rendering should be considered as quick view motion, false otherwise.
+  ///
+  /// \sa vtkMRMLVirtualRealityViewNode::MotionSensitivity()
+  /// \sa vtkVRRenderWindow::GetPhysicalScale()
+  static bool ShouldConsiderQuickViewMotion(
+      double motionSensitivity, double physicalScale, double elapsedTimeInSec,
+      double lastViewPos[3], double lastViewDir[3], double lastViewUp[3],
+      double viewPos[3], double viewDir[3], double viewUp[3]);
+
   /// Calculate the average pose of the two controllers for pinch 3D operations
   ///
   /// \return Success flag. Failure happens when the average orientation coincides

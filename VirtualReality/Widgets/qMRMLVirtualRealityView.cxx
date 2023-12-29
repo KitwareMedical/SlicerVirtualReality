@@ -586,47 +586,24 @@ void qMRMLVirtualRealityViewPrivate::doOpenVirtualReality()
     this->LastViewUpdateTime->StopTimer();
     if (this->LastViewUpdateTime->GetElapsedTime() > 0.0)
     {
-      bool quickViewMotion = true;
-
-      if (this->MRMLVirtualRealityViewNode->GetMotionSensitivity() > 0.999)
-      {
-        quickViewMotion = true;
-      }
-      else if (this->MRMLVirtualRealityViewNode->GetMotionSensitivity() <= 0.001)
-      {
-        quickViewMotion = false;
-      }
-      else if (this->LastViewUpdateTime->GetElapsedTime() < 3.0) // don't consider stale measurements
-      {
-        // limit scale:
-        // sensitivity = 0    -> limit = 10.0x
-        // sensitivity = 50%  -> limit =  1.0x
-        // sensitivity = 100% -> limit =  0.1x
-        double limitScale = pow(100, 0.5 - this->MRMLVirtualRealityViewNode->GetMotionSensitivity());
-
-        const double angularSpeedLimitRadiansPerSec = vtkMath::RadiansFromDegrees(5.0 * limitScale);
-        double viewDirectionChangeSpeed = vtkMath::AngleBetweenVectors(this->LastViewDirection,
-                                          this->Camera->GetViewPlaneNormal()) / this->LastViewUpdateTime->GetElapsedTime();
-        double viewUpDirectionChangeSpeed = vtkMath::AngleBetweenVectors(this->LastViewUp,
-                                            this->Camera->GetViewUp()) / this->LastViewUpdateTime->GetElapsedTime();
-
-        const double translationSpeedLimitMmPerSec = 100.0 * limitScale;
-        // Physical scale = 100 if virtual objects are real-world size; <100 if virtual objects are larger
-        double viewTranslationSpeedMmPerSec = this->RenderWindow->GetPhysicalScale() * 0.01 *
-                                              sqrt(vtkMath::Distance2BetweenPoints(this->LastViewPosition, this->Camera->GetPosition()))
-                                              / this->LastViewUpdateTime->GetElapsedTime();
-
-        if (viewDirectionChangeSpeed < angularSpeedLimitRadiansPerSec
-            && viewUpDirectionChangeSpeed < angularSpeedLimitRadiansPerSec
-            && viewTranslationSpeedMmPerSec  < translationSpeedLimitMmPerSec)
-        {
-          quickViewMotion = false;
-        }
-      }
+      bool quickViewMotion =
+          vtkSlicerVirtualRealityLogic::ShouldConsiderQuickViewMotion(
+            this->MRMLVirtualRealityViewNode->GetMotionSensitivity(),
+            this->RenderWindow->GetPhysicalScale(),
+            this->LastViewUpdateTime->GetElapsedTime(),
+            // position and orientation since last view update
+            this->LastViewPosition,
+            this->LastViewDirection,
+            this->LastViewUp,
+            // current view position and orientation
+            this->Camera->GetPosition(),
+            this->Camera->GetViewPlaneNormal(),
+            this->Camera->GetViewUp());
 
       double updateRate = quickViewMotion ? this->desiredUpdateRate() : this->stillUpdateRate();
       this->RenderWindow->SetDesiredUpdateRate(updateRate);
 
+      // Save current view position and orientation
       this->Camera->GetViewPlaneNormal(this->LastViewDirection);
       this->Camera->GetViewUp(this->LastViewUp);
       this->Camera->GetPosition(this->LastViewPosition);
