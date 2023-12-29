@@ -37,6 +37,7 @@
 
 // VTK includes
 #include <vtkIntArray.h>
+#include <vtkMath.h>
 #include <vtkMatrix4x4.h>
 #include <vtkNew.h>
 #include <vtkObjectFactory.h>
@@ -447,6 +448,52 @@ void vtkSlicerVirtualRealityLogic::OptimizeSceneForVirtualReality()
   }
   vtkMRMLSegmentationDisplayNode::SafeDownCast(defaultSegmentationDisplayNode)->SetVisibility2DFill(0);
   vtkMRMLSegmentationDisplayNode::SafeDownCast(defaultSegmentationDisplayNode)->SetVisibility2DOutline(0);
+}
+
+// --------------------------------------------------------------------------
+bool vtkSlicerVirtualRealityLogic::ShouldConsiderQuickViewMotion(
+    double motionSensitivity, double physicalScale, double elapsedTimeInSec,
+    double lastViewPos[3], double lastViewDir[3], double lastViewUp[3],
+    double viewPos[3], double viewDir[3], double viewUp[3])
+{
+  if (motionSensitivity > 0.999)
+  {
+    return true;
+  }
+  else if (motionSensitivity <= 0.001)
+  {
+    return false;
+  }
+  else if (elapsedTimeInSec < 3.0) // don't consider stale measurements
+  {
+    // Compute limits
+
+    // Limit scale:
+    //  sensitivity = 0    -> limit = 10.0x
+    //  sensitivity = 50%  -> limit =  1.0x
+    //  sensitivity = 100% -> limit =  0.1x
+    const double limitScale = pow(100, 0.5 - motionSensitivity);
+    const double angularSpeedLimitRadiansPerSec = vtkMath::RadiansFromDegrees(5.0 * limitScale);
+    const double translationSpeedLimitMmPerSec = 100.0 * limitScale;
+
+    // Compute change speed for viewPos, viewDir, and viewUp based on last and current view properties
+
+    // Physical scale = 100 if virtual objects are real-world size; <100 if virtual objects are larger
+
+    const double viewDirectionChangeSpeed = vtkMath::AngleBetweenVectors(lastViewDir, viewDir) / elapsedTimeInSec;
+    const double viewUpChangeSpeed = vtkMath::AngleBetweenVectors(lastViewUp, viewUp) / elapsedTimeInSec;
+    const double viewTranslationSpeedMmPerSec =
+        physicalScale * 0.01 * sqrt(vtkMath::Distance2BetweenPoints(lastViewPos, viewPos)) / elapsedTimeInSec;
+
+    if (viewDirectionChangeSpeed < angularSpeedLimitRadiansPerSec
+        && viewUpChangeSpeed < angularSpeedLimitRadiansPerSec
+        && viewTranslationSpeedMmPerSec  < translationSpeedLimitMmPerSec)
+    {
+      return false;
+    }
+  }
+
+  return true; // Default
 }
 
 //---------------------------------------------------------------------------
