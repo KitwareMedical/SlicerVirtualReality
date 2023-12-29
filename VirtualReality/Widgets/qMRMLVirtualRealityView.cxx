@@ -330,7 +330,7 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow(vtkMRMLVirtualRealityVie
 
   const char* xrRuntimeAsStr = vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(xrRuntime);
 
-  if (!q->isHardwareConnected())
+  if (!this->RenderWindow->GetVRInitialized())
   {
     this->MRMLVirtualRealityViewNode->SetError("Connection failed");
     qWarning() << Q_FUNC_INFO << ": Failed to initialize " << xrRuntimeAsStr << " RenderWindow";
@@ -577,9 +577,19 @@ void qMRMLVirtualRealityViewPrivate::doOpenVirtualReality()
     qCritical() << Q_FUNC_INFO << "failed: Renderer is not set";
     return;
   }
+  if (this->RenderWindow == nullptr)
+  {
+    qCritical() << Q_FUNC_INFO << "failed: RenderWindow is not set";
+    return;
+  }
 
+  bool hmdConnected = true;
   vtkOpenVRRenderWindow* vrRenderWindow = vtkOpenVRRenderWindow::SafeDownCast(this->RenderWindow);
-  if (vrRenderWindow != nullptr && vrRenderWindow->GetHMD() != nullptr)
+  if (vrRenderWindow != nullptr)
+  {
+    hmdConnected = vrRenderWindow->GetHMD() != nullptr;
+  }
+  if (this->RenderWindow->GetVRInitialized() && hmdConnected)
   {
     this->Interactor->DoOneEvent(this->RenderWindow, this->Renderer);
 
@@ -856,19 +866,6 @@ void qMRMLVirtualRealityView::getDisplayableManagers(vtkCollection* displayableM
   {
     displayableManagers->AddItem(d->DisplayableManagerGroup->GetNthDisplayableManager(n));
   }
-}
-
-//------------------------------------------------------------------------------
-bool qMRMLVirtualRealityView::isHardwareConnected()const
-{
-  Q_D(const qMRMLVirtualRealityView);
-  vtkOpenVRRenderWindow* vrRenderWindow = vtkOpenVRRenderWindow::SafeDownCast(d->RenderWindow);
-  if (vrRenderWindow != nullptr && vrRenderWindow->GetHMD() == nullptr)
-  {
-    return false;
-  }
-  // connected successfully
-  return true;
 }
 
 //------------------------------------------------------------------------------
