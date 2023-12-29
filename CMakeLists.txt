@@ -42,6 +42,15 @@ message(STATUS "")
 message(STATUS "Setting SlicerVirtualReality_HAS_OPENVR_SUPPORT to ${SlicerVirtualReality_HAS_OPENVR_SUPPORT}${_reason}")
 message(STATUS "")
 
+# OpenXR
+set(_default ON)
+set(_reason)
+option(SlicerVirtualReality_HAS_OPENXR_SUPPORT "Build OpenXR XR runtime" ${_default})
+mark_as_superbuild(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
+message(STATUS "")
+message(STATUS "Setting SlicerVirtualReality_HAS_OPENXR_SUPPORT to ${SlicerVirtualReality_HAS_OPENXR_SUPPORT}${_reason}")
+message(STATUS "")
+
 #-----------------------------------------------------------------------------
 # SuperBuild setup
 option(${EXTENSION_NAME}_SUPERBUILD "Build ${EXTENSION_NAME} and the projects it depends on." ON)
@@ -86,6 +95,12 @@ if(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
   set(vtkRenderingOpenVR_DIR \"${vtkRenderingOpenVR_DIR}\")
   find_package(vtkRenderingOpenVR REQUIRED)
 endif()
+
+set(SlicerVirtualReality_HAS_OPENXR_SUPPORT ${SlicerVirtualReality_HAS_OPENXR_SUPPORT})
+if(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
+  set(vtkRenderingOpenXR_DIR \"${vtkRenderingOpenXR_DIR}\")
+  find_package(vtkRenderingOpenXR REQUIRED)
+endif()
 ##################################################
 ")
 include(${Slicer_EXTENSION_GENERATE_CONFIG})
@@ -102,10 +117,29 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
       COMPONENT RuntimeLibraries
       )
   endif()
+
+  if(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
+    # ${OpenXR_LIBRARY} contains import library which does not have to be installed.
+    # Instead, the dll must be added to the package.
+    set(_library "${OpenXR-SDK_LIBRARY_PATHS_LAUNCHER_BUILD}/openxr_loader.dll")
+    # Since the launcher settings include the placeholder <CMAKE_CFG_INTDIR>, let's
+    # replace if with the corresponding generator expression.
+    install(FILES ${_library}
+      DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
+      COMPONENT RuntimeLibraries
+      )
+  endif()
 else()
   if(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
     install(FILES ${OpenVR_LIBRARY}
       DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
+      COMPONENT RuntimeLibraries
+      )
+  endif()
+
+  if(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
+    install(FILES ${OpenXR_LIBRARY}
+      DESTINATION ${Slicer_INSTALL_THIRDPARTY_LIB_DIR}
       COMPONENT RuntimeLibraries
       )
   endif()
@@ -123,6 +157,13 @@ if(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
   list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${vtkRenderingOpenVR_DIR};vtkRenderingOpenVR;runtime;/")
   if(Slicer_USE_PYTHONQT)
     list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${vtkRenderingOpenVR_DIR};vtkRenderingOpenVR;python;/")
+  endif()
+endif()
+
+if(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
+  list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${vtkRenderingOpenXR_DIR};vtkRenderingOpenXR;runtime;/")
+  if(Slicer_USE_PYTHONQT)
+    list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${vtkRenderingOpenXR_DIR};vtkRenderingOpenXR;python;/")
   endif()
 endif()
 

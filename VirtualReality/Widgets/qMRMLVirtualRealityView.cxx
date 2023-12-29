@@ -20,6 +20,7 @@
 
 // For:
 //  - SlicerVirtualReality_HAS_OPENVR_SUPPORT
+//  - SlicerVirtualReality_HAS_OPENXR_SUPPORT
 #include "vtkMRMLVirtualRealityConfigure.h"
 
 // VR Logic includes
@@ -35,6 +36,10 @@
 #include "vtkVirtualRealityViewOpenVRInteractor.h"
 #include "vtkVirtualRealityViewOpenVRInteractorStyle.h"
 #endif
+#if defined(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
+#include "vtkVirtualRealityViewOpenXRInteractor.h"
+#include "vtkVirtualRealityViewOpenXRInteractorStyle.h"
+#endif
 
 // VR Widgets includes
 #include "qMRMLVirtualRealityView_p.h"
@@ -47,6 +52,7 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QStringList>
 #include <QToolButton>
 #include <QTimer>
 
@@ -76,6 +82,14 @@
 
 // OpenVR includes
 #include <openvr.h>
+#endif
+
+#if defined(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
+// VTK Rendering/OpenXR includes
+#include <vtkOpenXRCamera.h>
+#include <vtkOpenXRModel.h>
+#include <vtkOpenXRRenderWindow.h>
+#include <vtkOpenXRRenderer.h>
 #endif
 
 // VTK Rendering/VR includes
@@ -218,6 +232,20 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow(vtkMRMLVirtualRealityVie
     this->InteractorStyle = interactorStyle;
     this->Interactor = vtkSmartPointer<vtkVirtualRealityViewOpenVRInteractor>::New();
     this->Camera = vtkSmartPointer<vtkOpenVRCamera>::New();
+  }
+  else
+#endif
+#if defined(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
+  if (xrRuntime == vtkMRMLVirtualRealityViewNode::OpenXR)
+  {
+    vtkNew<vtkVirtualRealityViewOpenXRInteractorStyle> interactorStyle;
+    interactorStyle->SetInteractorStyleDelegate(this->InteractorStyleDelegate);
+
+    this->RenderWindow = vtkSmartPointer<vtkOpenXRRenderWindow>::New();
+    this->Renderer = vtkSmartPointer<vtkOpenXRRenderer>::New();
+    this->InteractorStyle = interactorStyle;
+    this->Interactor = vtkSmartPointer<vtkVirtualRealityViewOpenXRInteractor>::New();
+    this->Camera = vtkSmartPointer<vtkOpenXRCamera>::New();
   }
   else
 #endif
@@ -399,6 +427,12 @@ vtkMRMLVirtualRealityViewNode::XRRuntimeType qMRMLVirtualRealityViewPrivate::cur
   if (vtkOpenVRRenderWindow::SafeDownCast(this->RenderWindow) != nullptr)
   {
     return vtkMRMLVirtualRealityViewNode::OpenVR;
+  }
+#endif
+#if defined(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
+  if (vtkOpenXRRenderWindow::SafeDownCast(this->RenderWindow) != nullptr)
+  {
+    return vtkMRMLVirtualRealityViewNode::OpenXR;
   }
 #endif
   qCritical() << Q_FUNC_INFO << " failed: RenderWindow is not a supported type: "

@@ -750,6 +750,9 @@ std::string vtkSlicerVirtualRealityLogic::ComputeActionManifestPath(
       case vtkMRMLVirtualRealityViewNode::OpenVR:
         actionManifestPath = moduleShareDirectory + "/../../../../" Slicer_THIRDPARTY_LIB_DIR "/vr_actions/";
         break;
+      case vtkMRMLVirtualRealityViewNode::OpenXR:
+        actionManifestPath = moduleShareDirectory + "/../../../../" Slicer_THIRDPARTY_LIB_DIR "/xr_actions/";
+        break;
       default:
         vtkErrorWithObjectMacro(nullptr, << "ComputeActionManifestPath: No install tree action manifest path set for"
                                 << vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(xrRuntime) << " runtime");
@@ -775,6 +778,9 @@ std::string vtkSlicerVirtualRealityLogic::ComputeActionManifestPath(
     {
       case vtkMRMLVirtualRealityViewNode::OpenVR:
         actionManifestPath = moduleShareDirectory + "/../../../../../vtkRenderingOpenVR-build/vtkRenderingOpenVR/";
+        break;
+      case vtkMRMLVirtualRealityViewNode::OpenXR:
+        actionManifestPath = moduleShareDirectory + "/../../../../../vtkRenderingOpenXR-build/vtkRenderingOpenXR/";
         break;
       default:
         vtkErrorWithObjectMacro(nullptr, <<"ComputeActionManifestPath: No build tree action manifest path set for"

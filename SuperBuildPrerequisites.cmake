@@ -12,6 +12,9 @@ endif()
 if(NOT DEFINED SlicerVirtualReality_HAS_OPENVR_SUPPORT)
   message(FATAL_ERROR "SlicerVirtualReality_HAS_OPENVR_SUPPORT is not set")
 endif()
+if(NOT DEFINED SlicerVirtualReality_HAS_OPENXR_SUPPORT)
+  message(FATAL_ERROR "SlicerVirtualReality_HAS_OPENXR_SUPPORT is not set")
+endif()
 
 # Set list of dependencies to ensure the custom application bundling this
 # extension does NOT automatically collect the project list and attempt to
@@ -22,6 +25,11 @@ if(DEFINED Slicer_SOURCE_DIR)
   if(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
     list(APPEND SlicerVirtualReality_EXTERNAL_PROJECT_DEPENDENCIES
       OpenVR
+      )
+  endif()
+  if(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
+    list(APPEND SlicerVirtualReality_EXTERNAL_PROJECT_DEPENDENCIES
+      OpenXR-SDK
       )
   endif()
 else()
@@ -35,6 +43,11 @@ else()
       vtkRenderingOpenVR
       )
   endif()
+  if(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
+    list(APPEND SlicerVirtualReality_EXTERNAL_PROJECT_DEPENDENCIES
+      vtkRenderingOpenXR
+      )
+  endif()
 endif()
 message(STATUS "SlicerVirtualReality_EXTERNAL_PROJECT_DEPENDENCIES:${SlicerVirtualReality_EXTERNAL_PROJECT_DEPENDENCIES}")
 
@@ -44,6 +57,7 @@ if(NOT DEFINED Slicer_SOURCE_DIR)
   # VTKExternalModule is required to configure these external projects:
   # - vtkRenderingVR
   # - vtkRenderingOpenVR
+  # - vtkRenderingOpenXR
   include(${SlicerVirtualReality_SOURCE_DIR}/FetchVTKExternalModule.cmake)
 
 else()
@@ -56,6 +70,12 @@ else()
         OpenVR
       )
   endif()
+  if(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
+    ExternalProject_Add_Dependencies(VTK
+      DEPENDS
+        OpenXR-SDK
+      )
+  endif()
 
   # Additional external project options
   set(VTK_MODULE_ENABLE_VTK_RenderingVR YES)
@@ -64,11 +84,17 @@ else()
   else()
     set(VTK_MODULE_ENABLE_VTK_RenderingOpenVR NO)
   endif()
+  if(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
+    set(VTK_MODULE_ENABLE_VTK_RenderingOpenXR YES)
+  else()
+    set(VTK_MODULE_ENABLE_VTK_RenderingOpenXR NO)
+  endif()
 
   mark_as_superbuild(
     VARS
       VTK_MODULE_ENABLE_VTK_RenderingVR:STRING
       VTK_MODULE_ENABLE_VTK_RenderingOpenVR:STRING
+      VTK_MODULE_ENABLE_VTK_RenderingOpenXR:STRING
     PROJECTS
       VTK
     )

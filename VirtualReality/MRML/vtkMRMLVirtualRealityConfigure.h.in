@@ -2,5 +2,6 @@
 #define __vtkMRMLVirtualRealityConfigure_h
 
 #cmakedefine SlicerVirtualReality_HAS_OPENVR_SUPPORT
+#cmakedefine SlicerVirtualReality_HAS_OPENXR_SUPPORT
 
 #endif
