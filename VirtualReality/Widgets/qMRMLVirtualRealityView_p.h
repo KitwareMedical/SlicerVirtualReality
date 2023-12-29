@@ -104,7 +104,7 @@ protected:
   void updateTransformNodeFromDevice(vtkMRMLTransformNode* node, vtkEventDataDevice device, uint32_t index=0);
   void updateTransformNodeAttributesFromDevice(vtkMRMLTransformNode* node, vtkEventDataDevice device, uint32_t index=0);
 
-  void createRenderWindow();
+  void createRenderWindow(vtkMRMLVirtualRealityViewNode::XRRuntimeType xrRuntime);
   void destroyRenderWindow();
 
   vtkSlicerCamerasModuleLogic* CamerasLogic;
@@ -132,6 +132,7 @@ protected:
   QString ActionManifestPath;
 
   bool IsUpdatingWidgetFromMRML{false};
+  int InitializationAttempts{0};
 
   QTimer VirtualRealityLoopTimer;
 };
