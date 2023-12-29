@@ -66,6 +66,14 @@ public:
   vtkMRMLVirtualRealityViewNode* GetDefaultVirtualRealityViewNode();
 
   ///@{
+  /// Set/get the XR runtime.
+  /// Adds virtual reality view node if not added yet.
+  /// \sa InitializeActiveViewNode()
+  void SetVirtualRealityXRRuntime(vtkMRMLVirtualRealityViewNode::XRRuntimeType id);
+  vtkMRMLVirtualRealityViewNode::XRRuntimeType GetVirtualRealityXRRuntime();
+  ///}@
+
+  ///@{
   /// Connect/disconnect to headset.
   /// Adds virtual reality view node if not added yet.
   /// \sa InitializeActiveViewNode()
