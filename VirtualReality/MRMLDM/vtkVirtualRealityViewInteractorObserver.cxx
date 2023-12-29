@@ -20,12 +20,14 @@
 
 // VR MRMLDM includes
 #include "vtkVirtualRealityViewInteractorStyleDelegate.h"
-#include "vtkVirtualRealityViewOpenVRInteractor.h"
 #include "vtkVirtualRealityViewOpenVRInteractorStyle.h"
 
 // MRML includes
 #include <vtkMRML.h> // For MRML_APPLICATION_VERSION and MRML_VERSION_CHECK
 #include <vtkMRMLInteractionEventData.h>
+
+// VTK Rendering/VR includes
+#include <vtkVRRenderWindowInteractor.h>
 
 // VTK includes
 #include <vtkCallbackCommand.h>
@@ -222,8 +224,8 @@ bool vtkVirtualRealityViewInteractorObserver::DelegateInteractionEventDataToDisp
   vtkRenderer* currentRenderer = this->GetInteractorStyle()->GetCurrentRenderer();
   ed->SetRenderer(currentRenderer);
 
-  vtkVirtualRealityViewOpenVRInteractor* vrViewInteractor =
-          vtkVirtualRealityViewOpenVRInteractor::SafeDownCast(this->GetInteractor());
+  vtkVRRenderWindowInteractor* vrViewInteractor =
+          vtkVRRenderWindowInteractor::SafeDownCast(this->GetInteractor());
 
   std::string interactionContextName;
   if (ed->GetDevice() == vtkEventDataDevice::LeftController)
