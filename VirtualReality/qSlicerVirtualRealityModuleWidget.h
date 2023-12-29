@@ -38,6 +38,7 @@ public:
   ~qSlicerVirtualRealityModuleWidget() override;
 
 public slots:
+  void setVirtualRealityXRRuntime(int index);
   void setVirtualRealityConnected(bool connect);
   void setVirtualRealityActive(bool activate);
   void setTwoSidedLighting(bool);

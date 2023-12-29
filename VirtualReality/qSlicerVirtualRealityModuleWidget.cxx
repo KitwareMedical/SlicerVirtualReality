@@ -73,6 +73,12 @@ void qSlicerVirtualRealityModuleWidget::setup()
   d->setupUi(this);
   this->Superclass::setup();
 
+  for (int xrRuntimeIndex=0; xrRuntimeIndex < vtkMRMLVirtualRealityViewNode::XRRuntime_Last; xrRuntimeIndex++)
+  {
+    d->XRRuntimeComboBox->addItem(vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(xrRuntimeIndex), xrRuntimeIndex);
+  }
+  connect(d->XRRuntimeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setVirtualRealityXRRuntime(int)));
+
   connect(d->ConnectCheckBox, SIGNAL(toggled(bool)), this, SLOT(setVirtualRealityConnected(bool)));
   connect(d->RenderingEnabledCheckBox, SIGNAL(toggled(bool)), this, SLOT(setVirtualRealityActive(bool)));
   connect(d->TwoSidedLightingCheckBox, SIGNAL(toggled(bool)), this, SLOT(setTwoSidedLighting(bool)));
@@ -102,6 +108,15 @@ void qSlicerVirtualRealityModuleWidget::setup()
 }
 
 //--------------------------------------------------------------------------
+namespace
+{
+vtkMRMLVirtualRealityViewNode::XRRuntimeType defaultXRRuntime()
+{
+  return vtkMRMLVirtualRealityViewNode::OpenVR;
+}
+}
+
+//--------------------------------------------------------------------------
 void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
 {
   Q_D(qSlicerVirtualRealityModuleWidget);
@@ -111,6 +126,12 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   bool wasBlocked = d->ConnectCheckBox->blockSignals(true);
   d->ConnectCheckBox->setChecked(vrViewNode != nullptr && vrViewNode->GetVisibility());
   d->ConnectCheckBox->blockSignals(wasBlocked);
+
+  wasBlocked = d->XRRuntimeComboBox->blockSignals(true);
+  d->XRRuntimeComboBox->setCurrentIndex(
+        d->XRRuntimeComboBox->findData(
+          vrViewNode != nullptr ? vrViewNode->GetXRRuntime() : defaultXRRuntime()));
+  d->XRRuntimeComboBox->blockSignals(wasBlocked);
 
   QString errorText;
   if (vrViewNode && vrViewNode->HasError())
@@ -190,6 +211,14 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
 
   d->UpdateViewFromReferenceViewCameraButton->setEnabled(vrViewNode != nullptr
       && vrViewNode->GetReferenceViewNode() != nullptr);
+}
+
+
+//-----------------------------------------------------------------------------
+void qSlicerVirtualRealityModuleWidget::setVirtualRealityXRRuntime(int index)
+{
+  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  vrLogic->SetVirtualRealityXRRuntime(static_cast<vtkMRMLVirtualRealityViewNode::XRRuntimeType>(index));
 }
 
 //-----------------------------------------------------------------------------

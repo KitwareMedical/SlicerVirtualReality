@@ -205,6 +205,26 @@ void vtkSlicerVirtualRealityLogic::ProcessMRMLNodesEvents(vtkObject* caller, uns
 }
 
 //-----------------------------------------------------------------------------
+void vtkSlicerVirtualRealityLogic::SetVirtualRealityXRRuntime(vtkMRMLVirtualRealityViewNode::XRRuntimeType id)
+{
+  this->InitializeActiveViewNode();
+  if (this->ActiveViewNode)
+  {
+    this->ActiveViewNode->SetXRRuntime(id);
+  }
+}
+
+//-----------------------------------------------------------------------------
+vtkMRMLVirtualRealityViewNode::XRRuntimeType vtkSlicerVirtualRealityLogic::GetVirtualRealityXRRuntime()
+{
+  if (!this->ActiveViewNode)
+  {
+    return vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime;
+  }
+  return this->ActiveViewNode->GetXRRuntime();
+}
+
+//-----------------------------------------------------------------------------
 void vtkSlicerVirtualRealityLogic::SetVirtualRealityConnected(bool connect)
 {
   if (connect)
