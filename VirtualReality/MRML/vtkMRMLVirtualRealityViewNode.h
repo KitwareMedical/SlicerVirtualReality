@@ -15,6 +15,10 @@
 #ifndef __vtkMRMLVirtualRealityViewNode_h
 #define __vtkMRMLVirtualRealityViewNode_h
 
+// For:
+//  - SlicerVirtualReality_HAS_OPENVR_SUPPORT
+#include "vtkMRMLVirtualRealityConfigure.h"
+
 // MRML includes
 #include <vtkMRMLViewNode.h>
 #include <vtkMRMLLinearTransformNode.h>
@@ -256,7 +260,11 @@ public:
   std::string GetError() const;
 
 protected:
+#if defined(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
   XRRuntimeType XRRuntime{vtkMRMLVirtualRealityViewNode::OpenVR};
+#else
+  XRRuntimeType XRRuntime{vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime};
+#endif
 
   bool TwoSidedLighting;
   bool BackLights;

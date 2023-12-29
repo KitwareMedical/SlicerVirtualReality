@@ -6,7 +6,10 @@ set(MODULE_TITLE "Virtual Reality")
 string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
 
 #-----------------------------------------------------------------------------
-find_package(vtkRenderingOpenVR REQUIRED)
+find_package(vtkRenderingVR REQUIRED)
+if(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
+  find_package(vtkRenderingOpenVR REQUIRED)
+endif()
 
 #-----------------------------------------------------------------------------
 add_subdirectory(MRML)

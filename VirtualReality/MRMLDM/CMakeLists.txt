@@ -23,11 +23,15 @@ set(${KIT}_SRCS
   vtk${MODULE_NAME}ViewInteractorObserver.h
   vtk${MODULE_NAME}ViewInteractorStyleDelegate.cxx
   vtk${MODULE_NAME}ViewInteractorStyleDelegate.h
-  vtk${MODULE_NAME}ViewOpenVRInteractor.cxx
-  vtk${MODULE_NAME}ViewOpenVRInteractor.h
-  vtk${MODULE_NAME}ViewOpenVRInteractorStyle.cxx
-  vtk${MODULE_NAME}ViewOpenVRInteractorStyle.h
   )
+if(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
+  list(APPEND ${KIT}_SRCS
+    vtk${MODULE_NAME}ViewOpenVRInteractor.cxx
+    vtk${MODULE_NAME}ViewOpenVRInteractor.h
+    vtk${MODULE_NAME}ViewOpenVRInteractorStyle.cxx
+    vtk${MODULE_NAME}ViewOpenVRInteractorStyle.h
+    )
+endif()
 
 set(${KIT}_TARGET_LIBRARIES
   ${MRML_LIBRARIES}

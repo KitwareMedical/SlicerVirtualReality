@@ -9,10 +9,8 @@ if(DEFINED slicersources_SOURCE_DIR AND NOT DEFINED Slicer_SOURCE_DIR)
   set(Slicer_SOURCE_DIR ${slicersources_SOURCE_DIR})
 endif()
 
-if(APPLE)
-  set(SlicerVirtualReality_EXTERNAL_PROJECT_DEPENDENCIES "")
-  message(STATUS "SlicerVirtualReality_EXTERNAL_PROJECT_DEPENDENCIES:${SlicerVirtualReality_EXTERNAL_PROJECT_DEPENDENCIES}")
-  return()
+if(NOT DEFINED SlicerVirtualReality_HAS_OPENVR_SUPPORT)
+  message(FATAL_ERROR "SlicerVirtualReality_HAS_OPENVR_SUPPORT is not set")
 endif()
 
 # Set list of dependencies to ensure the custom application bundling this
@@ -20,15 +18,23 @@ endif()
 # build external projects associated with VTK modules enabled below.
 if(DEFINED Slicer_SOURCE_DIR)
   # Extension is bundled in a custom application
-  set(SlicerVirtualReality_EXTERNAL_PROJECT_DEPENDENCIES
-    OpenVR
-    )
+  set(SlicerVirtualReality_EXTERNAL_PROJECT_DEPENDENCIES "")
+  if(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
+    list(APPEND SlicerVirtualReality_EXTERNAL_PROJECT_DEPENDENCIES
+      OpenVR
+      )
+  endif()
 else()
   # Extension is build standalone against Slicer itself built
   # against VTK without the relevant modules enabled.
   set(SlicerVirtualReality_EXTERNAL_PROJECT_DEPENDENCIES
-    vtkRenderingOpenVR
+    vtkRenderingVR
     )
+  if(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
+    list(APPEND SlicerVirtualReality_EXTERNAL_PROJECT_DEPENDENCIES
+      vtkRenderingOpenVR
+      )
+  endif()
 endif()
 message(STATUS "SlicerVirtualReality_EXTERNAL_PROJECT_DEPENDENCIES:${SlicerVirtualReality_EXTERNAL_PROJECT_DEPENDENCIES}")
 
@@ -44,16 +50,24 @@ else()
   # Extension is bundled in a custom application
 
   # Additional external project dependencies
-  ExternalProject_Add_Dependencies(VTK
-    DEPENDS
-      OpenVR
-    )
+  if(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
+    ExternalProject_Add_Dependencies(VTK
+      DEPENDS
+        OpenVR
+      )
+  endif()
 
   # Additional external project options
-  set(VTK_MODULE_ENABLE_VTK_RenderingOpenVR YES)
+  set(VTK_MODULE_ENABLE_VTK_RenderingVR YES)
+  if(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
+    set(VTK_MODULE_ENABLE_VTK_RenderingOpenVR YES)
+  else()
+    set(VTK_MODULE_ENABLE_VTK_RenderingOpenVR NO)
+  endif()
 
   mark_as_superbuild(
     VARS
+      VTK_MODULE_ENABLE_VTK_RenderingVR:STRING
       VTK_MODULE_ENABLE_VTK_RenderingOpenVR:STRING
     PROJECTS
       VTK

@@ -18,9 +18,15 @@
 
 #include "vtkVirtualRealityViewInteractorObserver.h"
 
+// For:
+//  - SlicerVirtualReality_HAS_OPENVR_SUPPORT
+#include "vtkMRMLVirtualRealityConfigure.h"
+
 // VR MRMLDM includes
 #include "vtkVirtualRealityViewInteractorStyleDelegate.h"
+#if defined(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
 #include "vtkVirtualRealityViewOpenVRInteractorStyle.h"
+#endif
 
 // MRML includes
 #include <vtkMRML.h> // For MRML_APPLICATION_VERSION and MRML_VERSION_CHECK
@@ -301,11 +307,20 @@ void vtkVirtualRealityViewInteractorObserver::OnElevation3D(vtkEventData *edata)
 //------------------------------------------------------------------------------
 vtkVirtualRealityViewInteractorStyleDelegate* vtkVirtualRealityViewInteractorObserver::GetInteractorStyleDelegate()
 {
-  vtkVirtualRealityViewOpenVRInteractorStyle* vrViewInteractorStyle =
-      vtkVirtualRealityViewOpenVRInteractorStyle::SafeDownCast(this->GetInteractorStyle());
-  if (vrViewInteractorStyle == nullptr)
+  vtkVirtualRealityViewInteractorStyleDelegate* delegate = nullptr;
+
+#if defined(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
+  if (delegate == nullptr)
   {
-    return nullptr;
+    vtkVirtualRealityViewOpenVRInteractorStyle* vrViewInteractorStyle =
+        vtkVirtualRealityViewOpenVRInteractorStyle::SafeDownCast(this->GetInteractorStyle());
+    if (vrViewInteractorStyle == nullptr)
+    {
+      return nullptr;
+    }
+    delegate = vrViewInteractorStyle->GetInteractorStyleDelegate();
   }
-  return vrViewInteractorStyle->GetInteractorStyleDelegate();
+#endif
+
+  return delegate;
 }
