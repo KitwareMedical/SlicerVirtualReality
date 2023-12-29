@@ -65,10 +65,13 @@ public:
   /// Retrieves the default VR view node from the scene. Creates it if does not exist.
   vtkMRMLVirtualRealityViewNode* GetDefaultVirtualRealityViewNode();
 
+  ///@{
   /// Connect/disconnect to headset.
   /// Adds virtual reality view node if not added yet.
+  /// \sa InitializeActiveViewNode()
   void SetVirtualRealityConnected(bool connect);
   bool GetVirtualRealityConnected();
+  ///}@
 
   /// Enable rendering updates in headset.
   /// Connects to device if not yet connected.
@@ -137,6 +140,18 @@ public:
 protected:
   vtkSlicerVirtualRealityLogic();
   ~vtkSlicerVirtualRealityLogic() override;
+
+  /// Initialize the active Virtual Reality view node.
+  ///
+  /// Checks if there is already an active Virtual Reality view node.
+  /// If not, it looks for an existing node in the MRML scene.
+  /// If no node is found, a new Virtual Reality view node is added to
+  /// the scene and set as the active node.
+  /// If the creation or retrieval fails, an error message is logged.
+  ///
+  /// The active view node is set internally for future use and can
+  /// be obtained using GetActiveViewNode().
+  void InitializeActiveViewNode();
 
   void SetActiveViewNode(vtkMRMLVirtualRealityViewNode* vrViewNode);
 

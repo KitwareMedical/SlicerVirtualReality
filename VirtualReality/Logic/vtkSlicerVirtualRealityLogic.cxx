@@ -207,38 +207,12 @@ void vtkSlicerVirtualRealityLogic::ProcessMRMLNodesEvents(vtkObject* caller, uns
 //-----------------------------------------------------------------------------
 void vtkSlicerVirtualRealityLogic::SetVirtualRealityConnected(bool connect)
 {
-  vtkMRMLScene* scene = this->GetMRMLScene();
-  if (!scene)
-  {
-    vtkErrorMacro("SetVirtualRealityConnected: Invalid MRML scene");
-    return;
-  }
-
   if (connect)
   {
-    if (!this->ActiveViewNode)
-    {
-      // Check if there is a VirtualReality view node in the scene, in case the scene has been loaded
-      // from file and VR view properties has been changed
-      if (scene->GetNumberOfNodesByClass("vtkMRMLVirtualRealityViewNode") > 0)
-      {
-        // Use the first one if any found
-        this->SetActiveViewNode(
-          vtkMRMLVirtualRealityViewNode::SafeDownCast(scene->GetNthNodeByClass(0, "vtkMRMLVirtualRealityViewNode")));
-      }
-      else
-      {
-        vtkMRMLVirtualRealityViewNode* newViewNode = this->AddVirtualRealityViewNode();
-        this->SetActiveViewNode(newViewNode);
-      }
-    }
+    this->InitializeActiveViewNode();
     if (this->ActiveViewNode)
     {
       this->ActiveViewNode->SetVisibility(1);
-    }
-    else
-    {
-      vtkErrorMacro("Failed to create virtual reality view node");
     }
   }
   else
@@ -300,6 +274,38 @@ bool vtkSlicerVirtualRealityLogic::GetVirtualRealityActive()
     return false;
   }
   return (this->ActiveViewNode->GetVisibility() != 0 && this->ActiveViewNode->GetActive() != 0);
+}
+
+//-----------------------------------------------------------------------------
+void vtkSlicerVirtualRealityLogic::InitializeActiveViewNode()
+{
+  vtkMRMLScene* scene = this->GetMRMLScene();
+  if (!scene)
+  {
+    vtkErrorMacro("InitializeActiveViewNode: Invalid MRML scene");
+    return;
+  }
+
+  if (!this->ActiveViewNode)
+  {
+    // Check if there is a VirtualReality view node in the scene, in case the scene has been loaded
+    // from file and VR view properties has been changed
+    if (scene->GetNumberOfNodesByClass("vtkMRMLVirtualRealityViewNode") > 0)
+    {
+      // Use the first one if any found
+      this->SetActiveViewNode(
+        vtkMRMLVirtualRealityViewNode::SafeDownCast(scene->GetNthNodeByClass(0, "vtkMRMLVirtualRealityViewNode")));
+    }
+    else
+    {
+      vtkMRMLVirtualRealityViewNode* newViewNode = this->AddVirtualRealityViewNode();
+      this->SetActiveViewNode(newViewNode);
+    }
+  }
+  if (!this->ActiveViewNode)
+  {
+    vtkErrorMacro("Failed to create virtual reality view node");
+  }
 }
 
 //---------------------------------------------------------------------------
