@@ -153,7 +153,7 @@ int qMRMLVirtualRealityView::currentXRRuntime() const
 }
 
 //---------------------------------------------------------------------------
-void qMRMLVirtualRealityViewPrivate::createRenderWindow()
+void qMRMLVirtualRealityViewPrivate::createRenderWindow(vtkMRMLVirtualRealityViewNode::XRRuntimeType xrRuntime)
 {
   Q_Q(qMRMLVirtualRealityView);
 
@@ -173,8 +173,6 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow()
     qCritical() << Q_FUNC_INFO << " failed: Application logic not available";
     return;
   }
-
-  vtkMRMLVirtualRealityViewNode::XRRuntimeType xrRuntime = vtkMRMLVirtualRealityViewNode::OpenVR;
 
   this->LastViewUpdateTime = vtkSmartPointer<vtkTimerLog>::New();
   this->LastViewUpdateTime->StartTimer();
@@ -406,20 +404,54 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
 // --------------------------------------------------------------------------
 void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRMLNoModify()
 {
+  // Finalize XR runtime if the view node is not present or visibility is turned off
+  // (i.e., disconnected from hardware)
   if (!this->MRMLVirtualRealityViewNode || !this->MRMLVirtualRealityViewNode->GetVisibility())
   {
     this->destroyRenderWindow();
+    this->InitializationAttempts = 0;
     this->MRMLVirtualRealityViewNode->ClearError();
     return;
   }
 
-  if (!this->RenderWindow)
+  // Reset initialization attempts and clear errors if the XR runtime has changed
+  if (this->currentXRRuntime() != this->MRMLVirtualRealityViewNode->GetXRRuntime())
   {
-    this->createRenderWindow();
+    this->InitializationAttempts = 0;
+    this->MRMLVirtualRealityViewNode->ClearError();
   }
 
+  // Attempt to initialize XR runtime if the current runtime differs or is undefined, and
+  // the view is visible (i.e., connected to the hardware)
+  if ((this->currentXRRuntime() != this->MRMLVirtualRealityViewNode->GetXRRuntime()
+       || this->currentXRRuntime() == vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime)
+      && this->MRMLVirtualRealityViewNode->GetVisibility())
+  {
+    // Bail if there are no more attempts left
+    constexpr int maximumNumberOfAttempts = 1;
+    if (this->InitializationAttempts >= maximumNumberOfAttempts)
+    {
+      return;
+    }
+    this->InitializationAttempts++;
+    this->MRMLVirtualRealityViewNode->ClearError();
 
-  if (this->MRMLVirtualRealityViewNode->HasError())
+    vtkMRMLVirtualRealityViewNode::XRRuntimeType xrRuntime = this->MRMLVirtualRealityViewNode->GetXRRuntime();
+    const char* xrRuntimeAsStr = vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(xrRuntime);
+
+    // Log the initialization attempt
+    qDebug().noquote().nospace()
+        << "Initializing \"" << xrRuntimeAsStr << "\" XR runtime "
+        << QString("(%1/%2)").arg(this->InitializationAttempts).arg(maximumNumberOfAttempts);
+
+    // Destroy and recreate the render window
+    this->destroyRenderWindow();
+    this->createRenderWindow(xrRuntime);
+  }
+
+  // Skip further updates if the XR runtime is undefined or if the view node has an error
+  if (this->currentXRRuntime() == vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime
+      || this->MRMLVirtualRealityViewNode->HasError())
   {
     return;
   }
