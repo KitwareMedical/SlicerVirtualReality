@@ -18,6 +18,10 @@
 
 ==============================================================================*/
 
+// For:
+//  - SlicerVirtualReality_HAS_OPENVR_SUPPORT
+#include "vtkMRMLVirtualRealityConfigure.h"
+
 // VR Logic includes
 #include "vtkSlicerVirtualRealityLogic.h"
 
@@ -27,8 +31,10 @@
 // VR MRMLDM includes
 #include "vtkVirtualRealityViewInteractorObserver.h"
 #include "vtkVirtualRealityViewInteractorStyleDelegate.h"
+#if defined(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
 #include "vtkVirtualRealityViewOpenVRInteractor.h"
 #include "vtkVirtualRealityViewOpenVRInteractorStyle.h"
+#endif
 
 // VR Widgets includes
 #include "qMRMLVirtualRealityView_p.h"
@@ -61,6 +67,7 @@
 #include <vtkMRMLLinearTransformNode.h>
 #include <vtkMRMLScene.h>
 
+#if defined(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
 // VTK Rendering/OpenVR includes
 #include <vtkOpenVRCamera.h>
 #include <vtkOpenVRModel.h>
@@ -69,6 +76,13 @@
 
 // OpenVR includes
 #include <openvr.h>
+#endif
+
+// VTK Rendering/VR includes
+#include <vtkVRCamera.h>
+#include <vtkVRRenderer.h>
+#include <vtkVRRenderWindow.h>
+#include <vtkVRRenderWindowInteractor.h>
 
 // VTK includes
 #include <vtkCollection.h>
@@ -86,6 +100,7 @@
 
 namespace
 {
+#if defined(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
   //--------------------------------------------------------------------------
   std::string PoseStatusToString(vr::ETrackingResult result)
   {
@@ -104,6 +119,7 @@ namespace
         return "Uninitialized";
     }
   }
+#endif
 }
 
 //--------------------------------------------------------------------------
@@ -191,6 +207,7 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow(vtkMRMLVirtualRealityVie
   this->InteractorStyleDelegate = vtkSmartPointer<vtkVirtualRealityViewInteractorStyleDelegate>::New();
 
   // XRRuntime
+#if defined(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
   if (xrRuntime == vtkMRMLVirtualRealityViewNode::OpenVR)
   {
     vtkNew<vtkVirtualRealityViewOpenVRInteractorStyle> interactorStyle;
@@ -203,6 +220,7 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow(vtkMRMLVirtualRealityVie
     this->Camera = vtkSmartPointer<vtkOpenVRCamera>::New();
   }
   else
+#endif
   {
     this->destroyRenderWindow();
     qWarning() << "No XR runtime initialized";
@@ -377,10 +395,12 @@ vtkMRMLVirtualRealityViewNode::XRRuntimeType qMRMLVirtualRealityViewPrivate::cur
   {
     return vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime;
   }
+#if defined(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
   if (vtkOpenVRRenderWindow::SafeDownCast(this->RenderWindow) != nullptr)
   {
     return vtkMRMLVirtualRealityViewNode::OpenVR;
   }
+#endif
   qCritical() << Q_FUNC_INFO << " failed: RenderWindow is not a supported type: "
               << this->RenderWindow->GetClassName();
   return vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime;
@@ -502,6 +522,7 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRMLNoModify()
     // 1.6666 m/s is walking speed (= 6 km/h), which is the default. We multiply it with the factor
     this->InteractorStyle->SetDollyPhysicalSpeed(dollyPhysicalSpeedMps);
 
+#if defined(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
     vtkOpenVRRenderWindow* vrRenderWindow = vtkOpenVRRenderWindow::SafeDownCast(this->RenderWindow);
     if (vrRenderWindow != nullptr && vrRenderWindow->GetHMD() != nullptr)
     {
@@ -531,6 +552,7 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRMLNoModify()
         }
       }
     }
+#endif
   }
 
   if (this->MRMLVirtualRealityViewNode->GetActive())
@@ -584,11 +606,13 @@ void qMRMLVirtualRealityViewPrivate::doOpenVirtualReality()
   }
 
   bool hmdConnected = true;
+#if defined(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
   vtkOpenVRRenderWindow* vrRenderWindow = vtkOpenVRRenderWindow::SafeDownCast(this->RenderWindow);
   if (vrRenderWindow != nullptr)
   {
     hmdConnected = vrRenderWindow->GetHMD() != nullptr;
   }
+#endif
   if (this->RenderWindow->GetVRInitialized() && hmdConnected)
   {
     this->Interactor->DoOneEvent(this->RenderWindow, this->Renderer);
@@ -692,6 +716,7 @@ void qMRMLVirtualRealityViewPrivate::updateTransformNodesWithTrackerPoses()
 void qMRMLVirtualRealityViewPrivate
 ::updateTransformNodeAttributesFromDevice(vtkMRMLTransformNode* node, vtkEventDataDevice device, uint32_t index)
 {
+#ifdef SlicerVirtualReality_HAS_OPENVR_SUPPORT
   vtkOpenVRRenderWindow* vrRenderWindow = vtkOpenVRRenderWindow::SafeDownCast(this->RenderWindow);
   if (vrRenderWindow == nullptr)
   {
@@ -757,6 +782,11 @@ void qMRMLVirtualRealityViewPrivate
   bool poseValid = tdPose != nullptr && tdPose->bPoseIsValid;
   node->SetAttribute("VirtualReality.PoseValid", poseValid ? "True" : "False");
   node->SetAttribute("VirtualReality.PoseStatus", tdPose ? PoseStatusToString(tdPose->eTrackingResult).c_str() : "Uninitialized");
+#else
+  Q_UNUSED(node);
+  Q_UNUSED(device);
+  Q_UNUSED(index);
+#endif
 }
 
 //----------------------------------------------------------------------------

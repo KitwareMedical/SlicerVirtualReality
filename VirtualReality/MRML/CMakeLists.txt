@@ -3,6 +3,12 @@ project(vtkSlicer${MODULE_NAME}ModuleMRML)
 set(KIT ${PROJECT_NAME})
 
 #-----------------------------------------------------------------------------
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/vtkMRMLVirtualRealityConfigure.h.in
+  ${CMAKE_CURRENT_BINARY_DIR}/vtkMRMLVirtualRealityConfigure.h
+  )
+
+#-----------------------------------------------------------------------------
 set(${KIT}_EXPORT_DIRECTIVE "VTK_SLICER_${MODULE_NAME_UPPER}_MODULE_MRML_EXPORT")
 
 set(${KIT}_INCLUDE_DIRECTORIES
@@ -19,8 +25,13 @@ set(${KIT}_SRCS
 set(${KIT}_TARGET_LIBRARIES
   ${VTK_LIBRARIES}
   ${MRML_LIBRARIES}
-  VTK::RenderingOpenVR
+  VTK::RenderingVR
   )
+if(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
+  list(APPEND ${KIT}_TARGET_LIBRARIES
+    VTK::RenderingOpenVR
+    )
+endif()
 
 #-----------------------------------------------------------------------------
 SlicerMacroBuildModuleMRML(
