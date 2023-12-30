@@ -15,6 +15,9 @@ endif()
 if(NOT DEFINED SlicerVirtualReality_HAS_OPENXR_SUPPORT)
   message(FATAL_ERROR "SlicerVirtualReality_HAS_OPENXR_SUPPORT is not set")
 endif()
+if(NOT DEFINED SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT)
+  message(FATAL_ERROR "SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT is not set")
+endif()
 
 # Set list of dependencies to ensure the custom application bundling this
 # extension does NOT automatically collect the project list and attempt to
@@ -48,6 +51,11 @@ else()
       vtkRenderingOpenXR
       )
   endif()
+  if(SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT)
+    list(APPEND SlicerVirtualReality_EXTERNAL_PROJECT_DEPENDENCIES
+      vtkRenderingOpenXRRemoting
+      )
+  endif()
 endif()
 message(STATUS "SlicerVirtualReality_EXTERNAL_PROJECT_DEPENDENCIES:${SlicerVirtualReality_EXTERNAL_PROJECT_DEPENDENCIES}")
 
@@ -58,6 +66,7 @@ if(NOT DEFINED Slicer_SOURCE_DIR)
   # - vtkRenderingVR
   # - vtkRenderingOpenVR
   # - vtkRenderingOpenXR
+  # - vtkRenderingOpenXRRemoting
   include(${SlicerVirtualReality_SOURCE_DIR}/FetchVTKExternalModule.cmake)
 
 else()
@@ -89,12 +98,18 @@ else()
   else()
     set(VTK_MODULE_ENABLE_VTK_RenderingOpenXR NO)
   endif()
+  if(SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT)
+    set(VTK_MODULE_ENABLE_VTK_RenderingOpenXRRemoting YES)
+  else()
+    set(VTK_MODULE_ENABLE_VTK_RenderingOpenXRRemoting NO)
+  endif()
 
   mark_as_superbuild(
     VARS
       VTK_MODULE_ENABLE_VTK_RenderingVR:STRING
       VTK_MODULE_ENABLE_VTK_RenderingOpenVR:STRING
       VTK_MODULE_ENABLE_VTK_RenderingOpenXR:STRING
+      VTK_MODULE_ENABLE_VTK_RenderingOpenXRRemoting:STRING
     PROJECTS
       VTK
     )

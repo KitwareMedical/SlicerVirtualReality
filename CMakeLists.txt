@@ -51,6 +51,29 @@ message(STATUS "")
 message(STATUS "Setting SlicerVirtualReality_HAS_OPENXR_SUPPORT to ${SlicerVirtualReality_HAS_OPENXR_SUPPORT}${_reason}")
 message(STATUS "")
 
+# OpenXRRemoting
+set(_default OFF)
+set(_reason)
+if(NOT DEFINED SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT)
+  if(WIN32)
+    if(NOT SlicerVirtualReality_HAS_OPENXR_SUPPORT)
+      set(_default OFF)
+      set(_reason " (OpenXR support was disabled)")
+    else()
+      set(_default ON)
+      set(_reason " (OpenXRRemoting is supported on Windows)")
+    endif()
+  else()
+    set(_default OFF)
+    set(_reason " (OpenXRRemoting is not supported on this platform)")
+  endif()
+endif()
+option(SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT "Build OpenXR Remoting support" ${_default})
+mark_as_superbuild(SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT)
+message(STATUS "")
+message(STATUS "Setting SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT to ${SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT}${_reason}")
+message(STATUS "")
+
 #-----------------------------------------------------------------------------
 # SuperBuild setup
 option(${EXTENSION_NAME}_SUPERBUILD "Build ${EXTENSION_NAME} and the projects it depends on." ON)
@@ -100,6 +123,12 @@ set(SlicerVirtualReality_HAS_OPENXR_SUPPORT ${SlicerVirtualReality_HAS_OPENXR_SU
 if(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
   set(vtkRenderingOpenXR_DIR \"${vtkRenderingOpenXR_DIR}\")
   find_package(vtkRenderingOpenXR REQUIRED)
+endif()
+
+set(SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT ${SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT})
+if(SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT)
+  set(vtkRenderingOpenXRRemoting_DIR \"${vtkRenderingOpenXRRemoting_DIR}\")
+  find_package(vtkRenderingOpenXRRemoting REQUIRED)
 endif()
 ##################################################
 ")
@@ -165,11 +194,13 @@ endif()
 #-----------------------------------------------------------------------------
 set(EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS)
 
+# vtkRenderingVR
 list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${vtkRenderingVR_DIR};vtkRenderingVR;runtime;/")
 if(Slicer_USE_PYTHONQT)
   list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${vtkRenderingVR_DIR};vtkRenderingVR;python;/")
 endif()
 
+# vtkRenderingOpenVR
 if(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
   list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${vtkRenderingOpenVR_DIR};vtkRenderingOpenVR;runtime;/")
   if(Slicer_USE_PYTHONQT)
@@ -177,10 +208,19 @@ if(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
   endif()
 endif()
 
+# vtkRenderingOpenXR
 if(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
   list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${vtkRenderingOpenXR_DIR};vtkRenderingOpenXR;runtime;/")
   if(Slicer_USE_PYTHONQT)
     list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${vtkRenderingOpenXR_DIR};vtkRenderingOpenXR;python;/")
+  endif()
+endif()
+
+# vtkRenderingOpenXRRemoting
+if(SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT)
+  list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${vtkRenderingOpenXRRemoting_DIR};vtkRenderingOpenXRRemoting;runtime;/")
+  if(Slicer_USE_PYTHONQT)
+    list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${vtkRenderingOpenXRRemoting_DIR};vtkRenderingOpenXRRemoting;python;/")
   endif()
 endif()
 
