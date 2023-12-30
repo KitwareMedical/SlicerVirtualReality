@@ -687,6 +687,33 @@ std::string vtkSlicerVirtualRealityLogic::ComputeActionManifestPath(vtkMRMLVirtu
                   << "  actionManifestCollapsedPath: " << actionManifestCollapsedPath);
   }
 
+  std::string expectedActionManifestFileName;
+
+  switch (xrRuntime)
+  {
+    case vtkMRMLVirtualRealityViewNode::OpenVR:
+      expectedActionManifestFileName = "vtk_openvr_actions.json";
+      break;
+    case vtkMRMLVirtualRealityViewNode::OpenXR:
+      expectedActionManifestFileName = "vtk_openxr_actions.json";
+      break;
+    default:
+      vtkErrorWithObjectMacro(nullptr, << "ComputeActionManifestPath: Failed to set the expected action manifest filename for "
+                              << vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(xrRuntime) << " runtime");
+      break;
+  }
+
+  if (!expectedActionManifestFileName.empty())
+  {
+    std::string manifestFullPath = actionManifestCollapsedPath + "/" + expectedActionManifestFileName;
+    if (!vtksys::SystemTools::FileExists(manifestFullPath))
+    {
+      vtkErrorMacro(<< "ComputeActionManifestPath: Action manifest not found for "
+                    << vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(xrRuntime) << " runtime: "
+                    << manifestFullPath);
+    }
+  }
+
   return actionManifestCollapsedPath + "/";
 }
 
