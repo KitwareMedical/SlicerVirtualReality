@@ -222,6 +222,34 @@ if(SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT)
   if(Slicer_USE_PYTHONQT)
     list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${vtkRenderingOpenXRRemoting_DIR};vtkRenderingOpenXRRemoting;python;/")
   endif()
+
+  # OpenXRRemoting: RemotingXR.json and companion files are copied or installed along side the
+  # vtkRenderingRemotingOpenXR library so that "vtkOpenXRManagerRemoteConnection::Initialize()"
+  # can locate the files and set the XR_RUNTIME_JSON env. variable
+  set(OpenXRRemoting_FILES )
+  if(WIN32)
+    set(OpenXRRemoting_FILES
+      Microsoft.Holographic.AppRemoting.OpenXr.dll
+      Microsoft.Holographic.AppRemoting.OpenXr.SU.dll
+      PerceptionDevice.dll
+      RemotingXR.json
+      )
+  endif()
+  set(_dest ${CMAKE_BINARY_DIR}/${Slicer_THIRDPARTY_BIN_DIR})
+  foreach(file IN LISTS OpenXRRemoting_FILES)
+    # Copy
+    message(STATUS "Copying ${file} to ${_dest}")
+    file(COPY ${OpenXRRemoting_BIN_DIR}/${file}
+      DESTINATION ${_dest}
+      USE_SOURCE_PERMISSIONS
+      )
+    # Install
+    install(FILES ${OpenXRRemoting_BIN_DIR}/${file}
+      DESTINATION ${Slicer_INSTALL_THIRDPARTY_LIB_DIR}
+      COMPONENT RuntimeLibraries
+      )
+  endforeach()
+
 endif()
 
 set(${EXTENSION_NAME}_CPACK_INSTALL_CMAKE_PROJECTS "${EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS}" CACHE STRING "List of external projects to install" FORCE)
