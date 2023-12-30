@@ -44,7 +44,10 @@ message(STATUS "")
 
 # OpenXR
 set(_default ON)
-set(_reason)
+if(NOT DEFINED SlicerVirtualReality_HAS_OPENXR_SUPPORT AND APPLE)
+  set(_default OFF)
+  set(_reason " (OpenXR not supported on macOS)")
+endif()
 option(SlicerVirtualReality_HAS_OPENXR_SUPPORT "Build OpenXR XR runtime" ${_default})
 mark_as_superbuild(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
 message(STATUS "")
