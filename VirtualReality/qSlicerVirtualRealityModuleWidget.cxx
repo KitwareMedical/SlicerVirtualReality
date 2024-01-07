@@ -15,6 +15,11 @@
 
 ==============================================================================*/
 
+// For:
+//  - SlicerVirtualReality_HAS_OPENVR_SUPPORT
+//  - SlicerVirtualReality_HAS_OPENXR_SUPPORT
+#include "vtkMRMLVirtualRealityConfigure.h"
+
 // Qt includes
 #include <QDebug>
 
@@ -113,17 +118,8 @@ void qSlicerVirtualRealityModuleWidget::setup()
 
   this->updateWidgetFromMRML();
 
-  // If virtual reality logic is modified it indicates that the view node may changed
+  // If virtual reality logic is modified it indicates that the view node may have changed
   qvtkConnect(logic(), vtkCommand::ModifiedEvent, this, SLOT(updateWidgetFromMRML()));
-}
-
-//--------------------------------------------------------------------------
-namespace
-{
-vtkMRMLVirtualRealityViewNode::XRRuntimeType defaultXRRuntime()
-{
-  return vtkMRMLVirtualRealityViewNode::OpenVR;
-}
 }
 
 //--------------------------------------------------------------------------
@@ -140,7 +136,7 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   wasBlocked = d->XRRuntimeComboBox->blockSignals(true);
   d->XRRuntimeComboBox->setCurrentIndex(
         d->XRRuntimeComboBox->findData(
-          vrViewNode != nullptr ? vrViewNode->GetXRRuntime() : defaultXRRuntime()));
+          vrViewNode != nullptr ? vrViewNode->GetXRRuntime() : vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime));
   d->XRRuntimeComboBox->blockSignals(wasBlocked);
 
   QString errorText;
