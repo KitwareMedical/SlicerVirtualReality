@@ -54,6 +54,9 @@ public slots:
   void setControllerTransformsUpdate(bool);
   void setHMDTransformUpdate(bool);
   void setTrackerTransformsUpdate(bool);
+  // OpenXRRemoting
+  void setRemotingEnabled(bool);
+  void onPlayerIPAddressLineEditEditingFinished();
 
 protected slots:
   void updateWidgetFromMRML();

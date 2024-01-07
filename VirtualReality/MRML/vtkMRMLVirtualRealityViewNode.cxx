@@ -83,6 +83,9 @@ void vtkMRMLVirtualRealityViewNode::WriteXML(ostream& of, int nIndent)
   vtkMRMLWriteXMLBooleanMacro(hmdTransformUpdate, HMDTransformUpdate);
   vtkMRMLWriteXMLBooleanMacro(controllerModelsVisible, ControllerModelsVisible);
   vtkMRMLWriteXMLBooleanMacro(lighthouseModelsVisible, LighthouseModelsVisible);
+  // OpenXRRemoting
+  vtkMRMLWriteXMLBooleanMacro(remoting, Remoting);
+  vtkMRMLWriteXMLStdStringMacro(playerIPAddress, PlayerIPAddress);
   vtkMRMLWriteXMLEndMacro();
 }
 
@@ -105,6 +108,9 @@ void vtkMRMLVirtualRealityViewNode::ReadXMLAttributes(const char** atts)
   vtkMRMLReadXMLBooleanMacro(hmdTransformUpdate, HMDTransformUpdate);
   vtkMRMLReadXMLBooleanMacro(controllerModelsVisible, ControllerModelsVisible);
   vtkMRMLReadXMLBooleanMacro(lighthouseModelsVisible, LighthouseModelsVisible);
+  // OpenXRRemoting
+  vtkMRMLReadXMLBooleanMacro(remoting, Remoting);
+  vtkMRMLReadXMLStdStringMacro(playerIPAddress, PlayerIPAddress);
   vtkMRMLReadXMLEndMacro();
 
   this->EndModify(disabledModify);
@@ -131,6 +137,9 @@ void vtkMRMLVirtualRealityViewNode::Copy(vtkMRMLNode* anode)
   vtkMRMLCopyBooleanMacro(HMDTransformUpdate);
   vtkMRMLCopyBooleanMacro(ControllerModelsVisible);
   vtkMRMLCopyBooleanMacro(LighthouseModelsVisible);
+  // OpenXRRemoting
+  vtkMRMLCopyBooleanMacro(Remoting);
+  vtkMRMLCopyStringMacro(PlayerIPAddress);
   vtkMRMLCopyEndMacro();
 
   this->EndModify(disabledModify);
@@ -153,6 +162,9 @@ void vtkMRMLVirtualRealityViewNode::PrintSelf(ostream& os, vtkIndent indent)
   vtkMRMLPrintBooleanMacro(HMDTransformUpdate);
   vtkMRMLPrintBooleanMacro(ControllerModelsVisible);
   vtkMRMLPrintBooleanMacro(LighthouseModelsVisible);
+  // OpenXRRemoting
+  vtkMRMLPrintBooleanMacro(Remoting);
+  vtkMRMLPrintStdStringMacro(PlayerIPAddress);
   vtkMRMLPrintEndMacro();
 }
 

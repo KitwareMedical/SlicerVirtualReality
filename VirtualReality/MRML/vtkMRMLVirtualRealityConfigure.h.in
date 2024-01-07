@@ -3,5 +3,6 @@
 
 #cmakedefine SlicerVirtualReality_HAS_OPENVR_SUPPORT
 #cmakedefine SlicerVirtualReality_HAS_OPENXR_SUPPORT
+#cmakedefine SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT
 
 #endif

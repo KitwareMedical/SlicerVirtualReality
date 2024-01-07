@@ -13,6 +13,9 @@ endif()
 if(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
   find_package(vtkRenderingOpenXR REQUIRED)
 endif()
+if(SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT)
+  find_package(vtkRenderingOpenXRRemoting REQUIRED)
+endif()
 
 #-----------------------------------------------------------------------------
 add_subdirectory(MRML)

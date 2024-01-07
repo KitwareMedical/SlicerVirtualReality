@@ -93,6 +93,8 @@ void qSlicerVirtualRealityModuleWidget::setup()
 #endif
 
   connect(d->XRRuntimeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setVirtualRealityXRRuntime(int)));
+  connect(d->RemotingEnabledCheckBox, SIGNAL(toggled(bool)), this, SLOT(setRemotingEnabled(bool)));
+  connect(d->PlayerIPAddressLineEdit, SIGNAL(editingFinished()), this, SLOT(onPlayerIPAddressLineEditEditingFinished()));
 
   connect(d->ConnectCheckBox, SIGNAL(toggled(bool)), this, SLOT(setVirtualRealityConnected(bool)));
   connect(d->RenderingEnabledCheckBox, SIGNAL(toggled(bool)), this, SLOT(setVirtualRealityActive(bool)));
@@ -220,6 +222,25 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
 
   d->UpdateViewFromReferenceViewCameraButton->setEnabled(vrViewNode != nullptr
       && vrViewNode->GetReferenceViewNode() != nullptr);
+
+  // OpenXRRemoting
+  wasBlocked = d->RemotingEnabledCheckBox->blockSignals(true);
+  d->RemotingEnabledCheckBox->setChecked(vrViewNode != nullptr ? vrViewNode->GetRemoting() : false);
+  d->RemotingEnabledCheckBox->setEnabled(
+        (vrViewNode != nullptr)
+        && vrViewNode->GetXRRuntime() == vtkMRMLVirtualRealityViewNode::OpenXR
+        && !vrLogic->GetVirtualRealityConnected());
+  d->RemotingEnabledCheckBox->blockSignals(wasBlocked);
+
+  wasBlocked = d->PlayerIPAddressLineEdit->blockSignals(true);
+  d->PlayerIPAddressLineEdit->setText(
+        vrViewNode != nullptr ? QString::fromStdString(vrViewNode->GetPlayerIPAddress()) : QString());
+  d->PlayerIPAddressLineEdit->setEnabled(
+        (vrViewNode != nullptr)
+        && vrViewNode->GetXRRuntime() == vtkMRMLVirtualRealityViewNode::OpenXR
+        && vrViewNode->GetRemoting());
+  d->PlayerIPAddressLineEdit->setReadOnly(vrLogic->GetVirtualRealityConnected());
+  d->PlayerIPAddressLineEdit->blockSignals(wasBlocked);
 }
 
 
@@ -443,5 +464,28 @@ void qSlicerVirtualRealityModuleWidget::setTrackerTransformsUpdate(bool active)
   if (vrViewNode)
   {
     vrViewNode->SetTrackerTransformUpdate(active);
+  }
+}
+
+//----------------------------------------------------------------------------
+void qSlicerVirtualRealityModuleWidget::setRemotingEnabled(bool enabled)
+{
+  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
+  if (vrViewNode)
+  {
+    vrViewNode->SetRemoting(enabled);
+  }
+}
+
+//----------------------------------------------------------------------------
+void qSlicerVirtualRealityModuleWidget::onPlayerIPAddressLineEditEditingFinished()
+{
+  Q_D(qSlicerVirtualRealityModuleWidget);
+  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
+  if (vrViewNode)
+  {
+    vrViewNode->SetPlayerIPAddress(d->PlayerIPAddressLineEdit->text().toStdString());
   }
 }

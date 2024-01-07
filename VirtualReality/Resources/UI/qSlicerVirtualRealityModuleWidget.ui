@@ -37,13 +37,41 @@
        <widget class="QComboBox" name="XRRuntimeComboBox"/>
       </item>
       <item row="1" column="0">
+       <widget class="QLabel" name="EnableRemotingLabel">
+        <property name="text">
+         <string>Enable Remoting:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <layout class="QHBoxLayout" name="RemotingLayout">
+        <item>
+         <widget class="QCheckBox" name="RemotingEnabledCheckBox">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="PlayerIPAddressLineEdit">
+          <property name="inputMask">
+           <string>000.000.000.000</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="2" column="0">
        <widget class="QLabel" name="ConnectToHardwareLabel">
         <property name="text">
          <string>Connect to hardware:</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="2" column="1">
        <layout class="QHBoxLayout" name="ConnectionLayout">
         <item>
          <widget class="ctkCheckBox" name="ConnectCheckBox"/>
@@ -100,14 +128,14 @@
         </item>
        </layout>
       </item>
-      <item row="2" column="0">
+      <item row="3" column="0">
        <widget class="QLabel" name="EnableRenderingLabel">
         <property name="text">
          <string>Enable rendering:</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
+      <item row="3" column="1">
        <widget class="ctkCheckBox" name="RenderingEnabledCheckBox"/>
       </item>
      </layout>
