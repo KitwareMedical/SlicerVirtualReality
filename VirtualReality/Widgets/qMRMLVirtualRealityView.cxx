@@ -21,6 +21,7 @@
 // For:
 //  - SlicerVirtualReality_HAS_OPENVR_SUPPORT
 //  - SlicerVirtualReality_HAS_OPENXR_SUPPORT
+//  - SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT
 #include "vtkMRMLVirtualRealityConfigure.h"
 
 // VR Logic includes
@@ -91,6 +92,11 @@
 #include <vtkOpenXRModel.h>
 #include <vtkOpenXRRenderWindow.h>
 #include <vtkOpenXRRenderer.h>
+#endif
+
+#if defined(SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT)
+// VTK Rendering/OpenXRRemoting includes
+#include <vtkOpenXRRemotingRenderWindow.h>
 #endif
 
 // VTK Rendering/VR includes
@@ -242,7 +248,20 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow(vtkMRMLVirtualRealityVie
     vtkNew<vtkVirtualRealityViewOpenXRInteractorStyle> interactorStyle;
     interactorStyle->SetInteractorStyleDelegate(this->InteractorStyleDelegate);
 
-    this->RenderWindow = vtkSmartPointer<vtkOpenXRRenderWindow>::New();
+#if defined(SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT)
+    if (this->MRMLVirtualRealityViewNode->GetRemoting())
+    {
+      vtkSmartPointer<vtkOpenXRRemotingRenderWindow> xrRemotingRenderWindow = vtkSmartPointer<vtkOpenXRRemotingRenderWindow>::New();
+      xrRemotingRenderWindow->SetRemotingIPAddress(this->MRMLVirtualRealityViewNode->GetPlayerIPAddress().c_str());
+      // Address "wglDXRegisterObjectNV failed in RegisterSharedTexture()" reported when using "OpenXRRemoting"
+      xrRemotingRenderWindow->GetHelperWindow()->SetMultiSamples(0);
+      this->RenderWindow = xrRemotingRenderWindow;
+    }
+    else
+#endif
+    {
+      this->RenderWindow = vtkSmartPointer<vtkOpenXRRenderWindow>::New();
+    }
     this->Renderer = vtkSmartPointer<vtkOpenXRRenderer>::New();
     this->InteractorStyle = interactorStyle;
     this->Interactor = vtkSmartPointer<vtkVirtualRealityViewOpenXRInteractor>::New();
@@ -386,6 +405,10 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow(vtkMRMLVirtualRealityVie
 
   // Keep track of last valid parameters in the settings
   QSettings().setValue("VirtualReality/DefaultXRRuntime", xrRuntimeAsStr);
+#if defined(SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT)
+  QSettings().setValue("VirtualReality/DefaultRemotingEnabled", this->MRMLVirtualRealityViewNode->GetRemoting());
+  QSettings().setValue("VirtualReality/DefaultPlayerIPAddress", QString::fromStdString(this->MRMLVirtualRealityViewNode->GetPlayerIPAddress()));
+#endif
 
   qDebug() << "";
   qDebug() << "XR runtime \"" << xrRuntimeAsStr << "\" initialized";
@@ -434,7 +457,11 @@ vtkMRMLVirtualRealityViewNode::XRRuntimeType qMRMLVirtualRealityViewPrivate::cur
   }
 #endif
 #if defined(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
-  if (vtkOpenXRRenderWindow::SafeDownCast(this->RenderWindow) != nullptr)
+  if (vtkOpenXRRenderWindow::SafeDownCast(this->RenderWindow) != nullptr
+#if defined(SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT)
+      || vtkOpenXRRemotingRenderWindow::SafeDownCast(this->RenderWindow) != nullptr
+#endif
+      )
   {
     return vtkMRMLVirtualRealityViewNode::OpenXR;
   }
@@ -442,6 +469,22 @@ vtkMRMLVirtualRealityViewNode::XRRuntimeType qMRMLVirtualRealityViewPrivate::cur
   qCritical() << Q_FUNC_INFO << " failed: RenderWindow is not a supported type: "
               << this->RenderWindow->GetClassName();
   return vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime;
+}
+
+// --------------------------------------------------------------------------
+bool qMRMLVirtualRealityViewPrivate::currentXRRuntimeRemotingEnabled() const
+{
+#if defined(SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT)
+  return vtkOpenXRRemotingRenderWindow::SafeDownCast(this->RenderWindow) != nullptr;
+#else
+  return false;
+#endif
+}
+
+// --------------------------------------------------------------------------
+std::string qMRMLVirtualRealityViewPrivate::currentXRRuntimeRemotingIPAddress() const
+{
+  return vtkOpenXRManager::GetInstance().GetConnectionStrategy()->GetIPAddress();
 }
 
 // --------------------------------------------------------------------------
@@ -473,7 +516,9 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRMLNoModify()
   }
 
   // Reset initialization attempts and clear errors if the XR runtime has changed
-  if (this->currentXRRuntime() != this->MRMLVirtualRealityViewNode->GetXRRuntime())
+  if (this->currentXRRuntime() != this->MRMLVirtualRealityViewNode->GetXRRuntime()
+      || this->currentXRRuntimeRemotingEnabled() != this->MRMLVirtualRealityViewNode->GetRemoting()
+      || this->currentXRRuntimeRemotingIPAddress() != this->MRMLVirtualRealityViewNode->GetPlayerIPAddress())
   {
     this->InitializationAttempts = 0;
     this->MRMLVirtualRealityViewNode->ClearError();
@@ -482,6 +527,8 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRMLNoModify()
   // Attempt to initialize XR runtime if the current runtime differs or is undefined, and
   // the view is visible (i.e., connected to the hardware)
   if ((this->currentXRRuntime() != this->MRMLVirtualRealityViewNode->GetXRRuntime()
+       || this->currentXRRuntimeRemotingEnabled() != this->MRMLVirtualRealityViewNode->GetRemoting()
+       || this->currentXRRuntimeRemotingIPAddress() != this->MRMLVirtualRealityViewNode->GetPlayerIPAddress()
        || this->currentXRRuntime() == vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime)
       && this->MRMLVirtualRealityViewNode->GetVisibility())
   {
@@ -520,9 +567,18 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRMLNoModify()
   }
 
   // Renderer properties
-  this->Renderer->SetGradientBackground(1);
-  this->Renderer->SetBackground(this->MRMLVirtualRealityViewNode->GetBackgroundColor());
-  this->Renderer->SetBackground2(this->MRMLVirtualRealityViewNode->GetBackgroundColor2());
+  if (this->MRMLVirtualRealityViewNode->GetRemoting())
+  {
+    this->Renderer->SetGradientBackground(0);
+    this->Renderer->SetBackground(0.0, 0.0, 0.0);
+    this->Renderer->SetBackgroundAlpha(0.0);
+  }
+  else
+  {
+    this->Renderer->SetGradientBackground(1);
+    this->Renderer->SetBackground(this->MRMLVirtualRealityViewNode->GetBackgroundColor());
+    this->Renderer->SetBackground2(this->MRMLVirtualRealityViewNode->GetBackgroundColor2());
+  }
 
   this->Renderer->SetTwoSidedLighting(this->MRMLVirtualRealityViewNode->GetTwoSidedLighting());
 

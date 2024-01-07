@@ -242,6 +242,19 @@ public:
   static int GetXRRuntimeFromString(const char* name);
   ///@}
 
+  ///@{
+  /// Get/Set if remoting is enabled.
+  vtkGetMacro(Remoting, bool);
+  vtkSetMacro(Remoting, bool);
+  vtkBooleanMacro(Remoting, bool);
+  ///@}
+
+  ///@{
+  /// OpenXR remoting IP address to connect to.
+  vtkSetMacro(PlayerIPAddress, const std::string);
+  vtkGetMacro(PlayerIPAddress, std::string);
+  ///@}
+
   /// Return true if an error has occurred.
   /// "Connected" member requests connection but this method can tell if the
   /// hardware connection has been actually successfully established.
@@ -272,6 +285,10 @@ protected:
   bool TrackerTransformUpdate;
 
   std::string LastErrorMessage;
+
+  // OpenXRRemoting
+  bool Remoting{false};
+  std::string PlayerIPAddress;
 
   vtkMRMLVirtualRealityViewNode();
   ~vtkMRMLVirtualRealityViewNode() override;

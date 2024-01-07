@@ -90,6 +90,8 @@ public:
   double stillUpdateRate();
 
   vtkMRMLVirtualRealityViewNode::XRRuntimeType currentXRRuntime() const;
+  bool currentXRRuntimeRemotingEnabled() const;
+  std::string currentXRRuntimeRemotingIPAddress() const;
 
 public slots:
   void updateWidgetFromMRML();

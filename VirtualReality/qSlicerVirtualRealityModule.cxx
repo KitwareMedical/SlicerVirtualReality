@@ -469,6 +469,16 @@ void qSlicerVirtualRealityModule::updateDefaultViewNodeFromSettings(vtkMRMLVirtu
                           settings.value("DefaultXRRuntime").toString().toUtf8().constData());
   }
   defaultViewNode->SetXRRuntime(defaultXRRuntime);
+  // Remoting
+  if (settings.contains("DefaultRemotingEnabled"))
+  {
+    defaultViewNode->SetRemoting(settings.value("DefaultRemotingEnabled").toBool());
+  }
+  // PlayerIPAddress
+  if (settings.contains("DefaultPlayerIPAddress"))
+  {
+    defaultViewNode->SetPlayerIPAddress(settings.value("DefaultPlayerIPAddress").toString().toStdString());
+  }
   settings.endGroup(); // VirtualReality
 }
 
