@@ -15,6 +15,11 @@
 
 ==============================================================================*/
 
+// For:
+//  - SlicerVirtualReality_HAS_OPENVR_SUPPORT
+//  - SlicerVirtualReality_HAS_OPENXR_SUPPORT
+#include "vtkMRMLVirtualRealityConfigure.h"
+
 // VR includes
 #include "qSlicerVirtualRealityModule.h"
 #include "qSlicerVirtualRealityModuleWidget.h"
@@ -448,6 +453,16 @@ void qSlicerVirtualRealityModule::updateDefaultViewNodeFromSettings(vtkMRMLVirtu
     defaultViewNode->SetUseDepthPeeling(settings.value("UseDepthPeeling").toBool());
   }
   settings.endGroup(); // Default3DView
+
+  // XR runtime
+#if defined(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
+  int defaultXRRuntime = vtkMRMLVirtualRealityViewNode::OpenVR;
+#elif defined(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
+    int defaultXRRuntime = vtkMRMLVirtualRealityViewNode::OpenXR;
+#else
+    int defaultXRRuntime = vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime;
+#endif
+  defaultViewNode->SetXRRuntime(defaultXRRuntime);
 }
 
 // --------------------------------------------------------------------------
