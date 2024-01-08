@@ -73,10 +73,20 @@ void qSlicerVirtualRealityModuleWidget::setup()
   d->setupUi(this);
   this->Superclass::setup();
 
-  for (int xrRuntimeIndex=0; xrRuntimeIndex < vtkMRMLVirtualRealityViewNode::XRRuntime_Last; xrRuntimeIndex++)
-  {
-    d->XRRuntimeComboBox->addItem(vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(xrRuntimeIndex), xrRuntimeIndex);
-  }
+  d->XRRuntimeComboBox->addItem(
+        vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime),
+        vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime);
+#if defined(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
+  d->XRRuntimeComboBox->addItem(
+        vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(vtkMRMLVirtualRealityViewNode::OpenVR),
+        vtkMRMLVirtualRealityViewNode::OpenVR);
+#endif
+#if defined(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
+  d->XRRuntimeComboBox->addItem(
+        vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(vtkMRMLVirtualRealityViewNode::OpenXR),
+        vtkMRMLVirtualRealityViewNode::OpenXR);
+#endif
+
   connect(d->XRRuntimeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setVirtualRealityXRRuntime(int)));
 
   connect(d->ConnectCheckBox, SIGNAL(toggled(bool)), this, SLOT(setVirtualRealityConnected(bool)));
