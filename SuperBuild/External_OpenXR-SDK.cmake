@@ -64,21 +64,22 @@ if((NOT OpenXR_INCLUDE_DIR OR NOT OpenXR_LIBRARY)
       -DBUILD_TESTING:BOOL=OFF
       -DDYNAMIC_LOADER:BOOL=ON
       # Install directories
+      -DCMAKE_INSTALL_LIBDIR:STRING=${Slicer_INSTALL_THIRDPARTY_LIB_DIR} # Skip default initialization by GNUInstallDirs CMake module
       -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
       ${EXTERNAL_PROJECT_OPTIONAL_CMAKE_CACHE_ARGS}
     DEPENDS
       ${${proj}_DEPENDENCIES}
     )
-  set(OpenXR_DIR "${EP_INSTALL_DIR}/lib/cmake/openxr")
+  set(OpenXR_DIR "${EP_INSTALL_DIR}/${Slicer_INSTALL_THIRDPARTY_LIB_DIR}/cmake/openxr")
 
   set(OpenXR_INCLUDE_DIR "${EP_INSTALL_DIR}/include/openxr")
 
   if(WIN32)
-    set(OpenXR_LIBRARY "${EP_INSTALL_DIR}/lib/openxr_loader.lib")
+    set(OpenXR_LIBRARY "${EP_INSTALL_DIR}/${Slicer_INSTALL_THIRDPARTY_LIB_DIR}/openxr_loader.lib")
   elseif(APPLE)
-    set(OpenXR_LIBRARY "${EP_INSTALL_DIR}/lib/libopenxr_loader.dylib")
+    set(OpenXR_LIBRARY "${EP_INSTALL_DIR}/${Slicer_INSTALL_THIRDPARTY_LIB_DIR}/libopenxr_loader.dylib")
   elseif(UNIX)
-    set(OpenXR_LIBRARY "${EP_INSTALL_DIR}/lib/libopenxr_loader.so")
+    set(OpenXR_LIBRARY "${EP_INSTALL_DIR}/${Slicer_INSTALL_THIRDPARTY_LIB_DIR}/libopenxr_loader.so")
   endif()
 
   #-----------------------------------------------------------------------------
