@@ -23,8 +23,8 @@ if((NOT OpenXRRemoting_BIN_DIR OR NOT OpenXRRemoting_INCLUDE_DIR)
 
   set(EP_INSTALL_DIR ${CMAKE_BINARY_DIR}/${proj}-install)
 
-  set(_ver "2.9.1")
-  set(_sha256 "e8174adaf64089a0cd7cc7e21445dbe8151b57b364312eab773e5c64d9dc28b1")
+  set(_ver "2.9.3")
+  set(_sha256 "9ef533aeff9ddef40104ad0d03e1e631c314729b18690385a4a624fab2408797")
 
   ExternalProject_Add(${proj}
     ${${proj}_EP_ARGS}
