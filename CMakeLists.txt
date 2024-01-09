@@ -124,6 +124,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set(_library "${OpenXR-SDK_LIBRARY_PATHS_LAUNCHER_BUILD}/openxr_loader.dll")
     # Since the launcher settings include the placeholder <CMAKE_CFG_INTDIR>, let's
     # replace if with the corresponding generator expression.
+    string(REPLACE "<CMAKE_CFG_INTDIR>" "$<CONFIG>" _library ${_library})
     install(FILES ${_library}
       DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
       COMPONENT RuntimeLibraries
