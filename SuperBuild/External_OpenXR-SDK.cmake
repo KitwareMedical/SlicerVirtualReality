@@ -7,26 +7,16 @@ set(${proj}_DEPENDENCIES "")
 ExternalProject_Include_Dependencies(${proj} PROJECT_VAR proj DEPENDS_VAR ${proj}_DEPENDENCIES)
 
 if(${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${proj})
-  unset(OpenXR_INCLUDE_DIR CACHE)
-  unset(OpenXR_LIBRARY CACHE)
+  unset(OpenXR_DIR CACHE)
   find_package(OpenXR REQUIRED)
-  if(NOT DEFINED OpenXR_LIBRARY)
-    # Since the OpenXRConfig.cmake file provided by OpenXR-SDK does not set OpenXR_LIBRARY, its
-    # value may be retrieved from the OpenXR::OpenXR target.
-    # TODO
-  endif()
 endif()
 
 # Sanity checks
-if(DEFINED OpenXR_INCLUDE_DIR AND NOT EXISTS ${OpenXR_INCLUDE_DIR})
-  message(FATAL_ERROR "OpenXR_INCLUDE_DIR variable is defined but corresponds to nonexistent directory")
-endif()
-if(DEFINED OpenXR_LIBRARY AND NOT EXISTS ${OpenXR_LIBRARY})
-  message(FATAL_ERROR "OpenXR_LIBRARY variable is defined but corresponds to nonexistent path")
+if(DEFINED OpenXR_DIR AND NOT EXISTS ${OpenXR_DIR})
+  message(FATAL_ERROR "OpenXR_DIR variable is defined but corresponds to nonexistent directory")
 endif()
 
-if((NOT OpenXR_INCLUDE_DIR OR NOT OpenXR_LIBRARY)
-   AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${proj})
+if(NOT OpenXR_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${proj})
 
   ExternalProject_SetIfNotDefined(
     ${SUPERBUILD_TOPLEVEL_PROJECT}_${proj}_GIT_REPOSITORY
@@ -43,6 +33,10 @@ if((NOT OpenXR_INCLUDE_DIR OR NOT OpenXR_LIBRARY)
   set(EP_SOURCE_DIR ${CMAKE_BINARY_DIR}/${proj})
   set(EP_BINARY_DIR ${CMAKE_BINARY_DIR}/${proj}-build)
   set(EP_INSTALL_DIR ${CMAKE_BINARY_DIR}/${proj}-install)
+
+  # Strip "./" to workaround CMake issue #23312
+  # See https://gitlab.kitware.com/cmake/cmake/-/issues/23312
+  string(REGEX REPLACE "^\.\/(.*)" "\\1"  Slicer_INSTALL_THIRDPARTY_LIB_DIR ${Slicer_INSTALL_THIRDPARTY_LIB_DIR})
 
   ExternalProject_Add(${proj}
     ${${proj}_EP_ARGS}
@@ -70,17 +64,14 @@ if((NOT OpenXR_INCLUDE_DIR OR NOT OpenXR_LIBRARY)
     DEPENDS
       ${${proj}_DEPENDENCIES}
     )
-  set(OpenXR_DIR "${EP_INSTALL_DIR}/${Slicer_INSTALL_THIRDPARTY_LIB_DIR}/cmake/openxr")
 
-  set(OpenXR_INCLUDE_DIR "${EP_INSTALL_DIR}/include/openxr")
-
+  # See TARGET_DESTINATION variable in OpenXR-SDK/src/loader/CMakeLists.txt
   if(WIN32)
-    set(OpenXR_LIBRARY "${EP_INSTALL_DIR}/${Slicer_INSTALL_THIRDPARTY_LIB_DIR}/openxr_loader.lib")
-  elseif(APPLE)
-    set(OpenXR_LIBRARY "${EP_INSTALL_DIR}/${Slicer_INSTALL_THIRDPARTY_LIB_DIR}/libopenxr_loader.dylib")
-  elseif(UNIX)
-    set(OpenXR_LIBRARY "${EP_INSTALL_DIR}/${Slicer_INSTALL_THIRDPARTY_LIB_DIR}/libopenxr_loader.so")
+    set(_config_install_dir "cmake")
+  else()
+    set(_config_install_dir "${Slicer_INSTALL_THIRDPARTY_LIB_DIR}/cmake/openxr")
   endif()
+  set(OpenXR_DIR "${EP_INSTALL_DIR}/${_config_install_dir}")
 
   #-----------------------------------------------------------------------------
   # Launcher setting specific to build tree
@@ -103,12 +94,9 @@ else()
   ExternalProject_Add_Empty(${proj} DEPENDS ${${proj}_DEPENDS})
 endif()
 
-ExternalProject_Message(${proj} "OpenXR_INCLUDE_DIR:${OpenXR_INCLUDE_DIR}")
-ExternalProject_Message(${proj} "OpenXR_LIBRARY:${OpenXR_LIBRARY}")
+ExternalProject_Message(${proj} "OpenXR_DIR:${OpenXR_DIR}")
 
 mark_as_superbuild(
   VARS
-    OpenXR_INCLUDE_DIR:PATH
-    OpenXR_LIBRARY:FILEPATH
+    OpenXR_DIR:PATH
   )
-
