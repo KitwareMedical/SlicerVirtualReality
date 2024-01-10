@@ -137,6 +137,9 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   d->XRRuntimeComboBox->setCurrentIndex(
         d->XRRuntimeComboBox->findData(
           vrViewNode != nullptr ? vrViewNode->GetXRRuntime() : vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime));
+  d->XRRuntimeComboBox->setEnabled(
+        (vrViewNode != nullptr)
+        && !vrLogic->GetVirtualRealityConnected());
   d->XRRuntimeComboBox->blockSignals(wasBlocked);
 
   QString errorText;
