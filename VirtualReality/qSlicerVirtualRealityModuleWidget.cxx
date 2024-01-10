@@ -218,7 +218,7 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
 void qSlicerVirtualRealityModuleWidget::setVirtualRealityXRRuntime(int index)
 {
   vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
-  vrLogic->SetVirtualRealityXRRuntime(static_cast<vtkMRMLVirtualRealityViewNode::XRRuntimeType>(index));
+  vrLogic->SetVirtualRealityXRRuntime(index);
 }
 
 //-----------------------------------------------------------------------------
