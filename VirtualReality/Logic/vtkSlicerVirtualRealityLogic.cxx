@@ -216,6 +216,12 @@ void vtkSlicerVirtualRealityLogic::SetVirtualRealityXRRuntime(vtkMRMLVirtualReal
 }
 
 //-----------------------------------------------------------------------------
+void vtkSlicerVirtualRealityLogic::SetVirtualRealityXRRuntime(int id)
+{
+  this->SetVirtualRealityXRRuntime(static_cast<vtkMRMLVirtualRealityViewNode::XRRuntimeType>(id));
+}
+
+//-----------------------------------------------------------------------------
 vtkMRMLVirtualRealityViewNode::XRRuntimeType vtkSlicerVirtualRealityLogic::GetVirtualRealityXRRuntime()
 {
   if (!this->ActiveViewNode)

@@ -73,6 +73,14 @@ public:
   vtkMRMLVirtualRealityViewNode::XRRuntimeType GetVirtualRealityXRRuntime();
   ///}@
 
+#ifndef __WRAP__
+  /// Set the XR runtime.
+  ///
+  /// Excluded from wrapping to avoid the following error:
+  /// `TypeError: "ambuguous call, multiple overloaded methods match the arguments`
+  void SetVirtualRealityXRRuntime(int id);
+#endif
+
   ///@{
   /// Connect/disconnect to headset.
   /// Adds virtual reality view node if not added yet.
