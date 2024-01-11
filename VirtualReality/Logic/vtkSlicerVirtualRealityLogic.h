@@ -67,8 +67,6 @@ public:
 
   ///@{
   /// Set/get the XR runtime.
-  /// Adds virtual reality view node if not added yet.
-  /// \sa InitializeActiveViewNode()
   void SetVirtualRealityXRRuntime(vtkMRMLVirtualRealityViewNode::XRRuntimeType id);
   vtkMRMLVirtualRealityViewNode::XRRuntimeType GetVirtualRealityXRRuntime();
   ///}@
@@ -83,8 +81,6 @@ public:
 
   ///@{
   /// Connect/disconnect to headset.
-  /// Adds virtual reality view node if not added yet.
-  /// \sa InitializeActiveViewNode()
   void SetVirtualRealityConnected(bool connect);
   bool GetVirtualRealityConnected();
   ///}@
@@ -180,10 +176,6 @@ public:
       const std::string& moduleShareDirectory, vtkMRMLVirtualRealityViewNode::XRRuntimeType xrRuntime, bool installed);
   ///@}
 
-protected:
-  vtkSlicerVirtualRealityLogic();
-  ~vtkSlicerVirtualRealityLogic() override;
-
   /// Initialize the active Virtual Reality view node.
   ///
   /// Checks if there is already an active Virtual Reality view node.
@@ -195,6 +187,10 @@ protected:
   /// The active view node is set internally for future use and can
   /// be obtained using GetActiveViewNode().
   void InitializeActiveViewNode();
+
+protected:
+  vtkSlicerVirtualRealityLogic();
+  ~vtkSlicerVirtualRealityLogic() override;
 
   void SetActiveViewNode(vtkMRMLVirtualRealityViewNode* vrViewNode);
 

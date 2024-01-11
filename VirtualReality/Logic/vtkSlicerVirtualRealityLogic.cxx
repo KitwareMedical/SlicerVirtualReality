@@ -208,11 +208,12 @@ void vtkSlicerVirtualRealityLogic::ProcessMRMLNodesEvents(vtkObject* caller, uns
 //-----------------------------------------------------------------------------
 void vtkSlicerVirtualRealityLogic::SetVirtualRealityXRRuntime(vtkMRMLVirtualRealityViewNode::XRRuntimeType id)
 {
-  this->InitializeActiveViewNode();
-  if (this->ActiveViewNode)
+  if (!this->ActiveViewNode)
   {
-    this->ActiveViewNode->SetXRRuntime(id);
+    vtkErrorMacro("SetVirtualRealityXRRuntime: Invalid ActiveViewNode");
+    return;
   }
+  this->ActiveViewNode->SetXRRuntime(id);
 }
 
 //-----------------------------------------------------------------------------
@@ -234,21 +235,12 @@ vtkMRMLVirtualRealityViewNode::XRRuntimeType vtkSlicerVirtualRealityLogic::GetVi
 //-----------------------------------------------------------------------------
 void vtkSlicerVirtualRealityLogic::SetVirtualRealityConnected(bool connect)
 {
-  if (connect)
+  if (!this->ActiveViewNode)
   {
-    this->InitializeActiveViewNode();
-    if (this->ActiveViewNode)
-    {
-      this->ActiveViewNode->SetVisibility(1);
-    }
+    vtkErrorMacro("SetVirtualRealityConnected: Invalid ActiveViewNode");
+    return;
   }
-  else
-  {
-    if (this->ActiveViewNode)
-    {
-      this->ActiveViewNode->SetVisibility(0);
-    }
-  }
+  this->ActiveViewNode->SetVisibility(connect ? 1 : 0);
 }
 
 //-----------------------------------------------------------------------------
