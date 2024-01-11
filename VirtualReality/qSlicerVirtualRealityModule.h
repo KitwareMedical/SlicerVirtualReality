@@ -86,6 +86,8 @@ protected:
   /// Initialize the module
   void setup() override;
 
+  void updateDefaultViewNodeFromSettings(vtkMRMLVirtualRealityViewNode* defaultViewNode);
+
   /// Create and return the widget representation associated to this module
   qSlicerAbstractModuleRepresentation* createWidgetRepresentation() override;
 

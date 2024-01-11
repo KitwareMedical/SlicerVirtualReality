@@ -431,6 +431,25 @@ bool qSlicerVirtualRealityModule::isToolBarVisible()
   return d->ToolBar->isVisible();
 }
 
+//--------------------------------------------------------------------------
+void qSlicerVirtualRealityModule::updateDefaultViewNodeFromSettings(vtkMRMLVirtualRealityViewNode* defaultViewNode)
+{
+  if (!defaultViewNode)
+  {
+    qCritical() << Q_FUNC_INFO << " failed: defaultViewNode is invalid";
+    return;
+  }
+
+  QSettings settings;
+
+  settings.beginGroup("Default3DView");
+  if (settings.contains("UseDepthPeeling"))
+  {
+    defaultViewNode->SetUseDepthPeeling(settings.value("UseDepthPeeling").toBool());
+  }
+  settings.endGroup(); // Default3DView
+}
+
 // --------------------------------------------------------------------------
 void qSlicerVirtualRealityModule::onViewNodeModified()
 {
@@ -521,18 +540,7 @@ void qSlicerVirtualRealityModule::setMRMLScene(vtkMRMLScene* scene)
     return;
   }
 
-  vtkMRMLVirtualRealityViewNode* defaultViewNode = logic->GetDefaultVirtualRealityViewNode();
-  if (!defaultViewNode)
-  {
-    qCritical() << Q_FUNC_INFO << " failed: defaultViewNode is invalid";
-    return;
-  }
-  QSettings settings;
-  settings.beginGroup("Default3DView");
-  if (settings.contains("UseDepthPeeling"))
-  {
-    defaultViewNode->SetUseDepthPeeling(settings.value("UseDepthPeeling").toBool());
-  }
+  this->updateDefaultViewNodeFromSettings(logic->GetDefaultVirtualRealityViewNode());
 
   logic->InitializeActiveViewNode();
 }
