@@ -96,6 +96,7 @@
 
 #if defined(SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT)
 // VTK Rendering/OpenXRRemoting includes
+#include <vtkOpenXRManager.h>
 #include <vtkOpenXRRemotingRenderWindow.h>
 #endif
 
@@ -484,7 +485,11 @@ bool qMRMLVirtualRealityViewPrivate::currentXRRuntimeRemotingEnabled() const
 // --------------------------------------------------------------------------
 std::string qMRMLVirtualRealityViewPrivate::currentXRRuntimeRemotingIPAddress() const
 {
+#if defined(SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT)
   return vtkOpenXRManager::GetInstance().GetConnectionStrategy()->GetIPAddress();
+#else
+  return std::string();
+#endif
 }
 
 // --------------------------------------------------------------------------
