@@ -55,6 +55,7 @@
 #include <QStringList>
 #include <QToolButton>
 #include <QTimer>
+#include <QSettings>
 
 // CTK includes
 #include <ctkPimpl.h> // For CTK_GET_CPP, CTK_SET_CPP
@@ -382,6 +383,9 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow(vtkMRMLVirtualRealityVie
     qWarning() << Q_FUNC_INFO << ": Failed to initialize " << xrRuntimeAsStr << " RenderWindow";
     return;
   }
+
+  // Keep track of last valid parameters in the settings
+  QSettings().setValue("VirtualReality/DefaultXRRuntime", xrRuntimeAsStr);
 
   qDebug() << "";
   qDebug() << "XR runtime \"" << xrRuntimeAsStr << "\" initialized";

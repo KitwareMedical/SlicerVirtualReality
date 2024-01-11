@@ -454,6 +454,7 @@ void qSlicerVirtualRealityModule::updateDefaultViewNodeFromSettings(vtkMRMLVirtu
   }
   settings.endGroup(); // Default3DView
 
+  settings.beginGroup("VirtualReality");
   // XR runtime
 #if defined(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
   int defaultXRRuntime = vtkMRMLVirtualRealityViewNode::OpenVR;
@@ -462,7 +463,13 @@ void qSlicerVirtualRealityModule::updateDefaultViewNodeFromSettings(vtkMRMLVirtu
 #else
     int defaultXRRuntime = vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime;
 #endif
+  if (settings.contains("DefaultXRRuntime"))
+  {
+    defaultXRRuntime = vtkMRMLVirtualRealityViewNode::GetXRRuntimeFromString(
+                          settings.value("DefaultXRRuntime").toString().toUtf8().constData());
+  }
   defaultViewNode->SetXRRuntime(defaultXRRuntime);
+  settings.endGroup(); // VirtualReality
 }
 
 // --------------------------------------------------------------------------
