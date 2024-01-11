@@ -533,4 +533,6 @@ void qSlicerVirtualRealityModule::setMRMLScene(vtkMRMLScene* scene)
   {
     defaultViewNode->SetUseDepthPeeling(settings.value("UseDepthPeeling").toBool());
   }
+
+  logic->InitializeActiveViewNode();
 }
