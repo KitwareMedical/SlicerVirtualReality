@@ -139,65 +139,65 @@ include(${Slicer_EXTENSION_GENERATE_CONFIG})
 
 #-----------------------------------------------------------------------------
 if(NOT APPLE)
-set(_platform)
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  # Install OpenVR
-  if(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
-    # ${OpenVR_LIBRARY} contains import library which does not have to be installed.
-    # Instead, the dll must be added to the package.
-    install(FILES ${OpenVR_LIBRARY_PATHS_LAUNCHER_BUILD}/openvr_api.dll
-      DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
-      COMPONENT RuntimeLibraries
-      )
-  endif()
-
-  # Install OpenXR (CMake < 3.21)
-  if(SlicerVirtualReality_HAS_OPENXR_SUPPORT AND CMAKE_VERSION VERSION_LESS "3.21")
-    # ${OpenXR_LIBRARY} contains import library which does not have to be installed.
-    # Instead, the dll must be added to the package.
-    set(_library "${OpenXR-SDK_LIBRARY_PATHS_LAUNCHER_BUILD}/openxr_loader.dll")
-    # Since the launcher settings include the placeholder <CMAKE_CFG_INTDIR>, let's
-    # replace if with the corresponding generator expression.
-    string(REPLACE "<CMAKE_CFG_INTDIR>" "$<CONFIG>" _library ${_library})
-    install(FILES ${_library}
-      DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
-      COMPONENT RuntimeLibraries
-      )
-  endif()
-else()
-  # Install OpenVR
-  if(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
-    install(FILES ${OpenVR_LIBRARY}
-      DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
-      COMPONENT RuntimeLibraries
-      )
-  endif()
-
-  # Install OpenXR (CMake < 3.21)
-  if(SlicerVirtualReality_HAS_OPENXR_SUPPORT AND CMAKE_VERSION VERSION_LESS "3.21")
-    find_package(OpenXR REQUIRED)
-    string(TOUPPER ${CMAKE_BUILD_TYPE} _config)
-    get_target_property(_imported_library OpenXR::openxr_loader IMPORTED_LOCATION_${_config})
-    if(_imported_library)
-      install(FILES ${_imported_library}
-        DESTINATION ${Slicer_INSTALL_THIRDPARTY_LIB_DIR}
+  set(_platform)
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    # Install OpenVR
+    if(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
+      # ${OpenVR_LIBRARY} contains import library which does not have to be installed.
+      # Instead, the dll must be added to the package.
+      install(FILES ${OpenVR_LIBRARY_PATHS_LAUNCHER_BUILD}/openvr_api.dll
+        DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
         COMPONENT RuntimeLibraries
         )
-      message(STATUS "Adding install rule for ${_imported_library}")
-    else()
-      message(WARNING "Failed to retrieve OpenXR library imported location: OpenXR library will not be installed.")
+    endif()
+
+    # Install OpenXR (CMake < 3.21)
+    if(SlicerVirtualReality_HAS_OPENXR_SUPPORT AND CMAKE_VERSION VERSION_LESS "3.21")
+      # ${OpenXR_LIBRARY} contains import library which does not have to be installed.
+      # Instead, the dll must be added to the package.
+      set(_library "${OpenXR-SDK_LIBRARY_PATHS_LAUNCHER_BUILD}/openxr_loader.dll")
+      # Since the launcher settings include the placeholder <CMAKE_CFG_INTDIR>, let's
+      # replace if with the corresponding generator expression.
+      string(REPLACE "<CMAKE_CFG_INTDIR>" "$<CONFIG>" _library ${_library})
+      install(FILES ${_library}
+        DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
+        COMPONENT RuntimeLibraries
+        )
+    endif()
+  else()
+    # Install OpenVR
+    if(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
+      install(FILES ${OpenVR_LIBRARY}
+        DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
+        COMPONENT RuntimeLibraries
+        )
+    endif()
+
+    # Install OpenXR (CMake < 3.21)
+    if(SlicerVirtualReality_HAS_OPENXR_SUPPORT AND CMAKE_VERSION VERSION_LESS "3.21")
+      find_package(OpenXR REQUIRED)
+      string(TOUPPER ${CMAKE_BUILD_TYPE} _config)
+      get_target_property(_imported_library OpenXR::openxr_loader IMPORTED_LOCATION_${_config})
+      if(_imported_library)
+        install(FILES ${_imported_library}
+          DESTINATION ${Slicer_INSTALL_THIRDPARTY_LIB_DIR}
+          COMPONENT RuntimeLibraries
+          )
+        message(STATUS "Adding install rule for ${_imported_library}")
+      else()
+        message(WARNING "Failed to retrieve OpenXR library imported location: OpenXR library will not be installed.")
+      endif()
     endif()
   endif()
-endif()
 
-# Install OpenXR (CMake >= 3.21)
-if(SlicerVirtualReality_HAS_OPENXR_SUPPORT AND CMAKE_VERSION VERSION_GREATER_EQUAL "3.21")
-  find_package(OpenXR REQUIRED)
-  install(IMPORTED_RUNTIME_ARTIFACTS OpenXR::openxr_loader
-    RUNTIME DESTINATION ${Slicer_INSTALL_THIRDPARTY_BIN_DIR} COMPONENT RuntimeLibraries
-    LIBRARY DESTINATION ${Slicer_INSTALL_THIRDPARTY_LIB_DIR} COMPONENT RuntimeLibraries
-    )
-endif()
+  # Install OpenXR (CMake >= 3.21)
+  if(SlicerVirtualReality_HAS_OPENXR_SUPPORT AND CMAKE_VERSION VERSION_GREATER_EQUAL "3.21")
+    find_package(OpenXR REQUIRED)
+    install(IMPORTED_RUNTIME_ARTIFACTS OpenXR::openxr_loader
+      RUNTIME DESTINATION ${Slicer_INSTALL_THIRDPARTY_BIN_DIR} COMPONENT RuntimeLibraries
+      LIBRARY DESTINATION ${Slicer_INSTALL_THIRDPARTY_LIB_DIR} COMPONENT RuntimeLibraries
+      )
+  endif()
 endif()
 
 #-----------------------------------------------------------------------------
