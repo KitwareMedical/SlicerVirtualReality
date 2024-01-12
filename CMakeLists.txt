@@ -138,9 +138,10 @@ endif()
 include(${Slicer_EXTENSION_GENERATE_CONFIG})
 
 #-----------------------------------------------------------------------------
-# Install OpenVR
+if(NOT APPLE)
 set(_platform)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  # Install OpenVR
   if(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
     # ${OpenVR_LIBRARY} contains import library which does not have to be installed.
     # Instead, the dll must be added to the package.
@@ -150,6 +151,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
       )
   endif()
 
+  # Install OpenXR (CMake < 3.21)
   if(SlicerVirtualReality_HAS_OPENXR_SUPPORT AND CMAKE_VERSION VERSION_LESS "3.21")
     # ${OpenXR_LIBRARY} contains import library which does not have to be installed.
     # Instead, the dll must be added to the package.
@@ -163,6 +165,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
       )
   endif()
 else()
+  # Install OpenVR
   if(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
     install(FILES ${OpenVR_LIBRARY}
       DESTINATION ${Slicer_THIRDPARTY_LIB_DIR}
@@ -170,6 +173,7 @@ else()
       )
   endif()
 
+  # Install OpenXR (CMake < 3.21)
   if(SlicerVirtualReality_HAS_OPENXR_SUPPORT AND CMAKE_VERSION VERSION_LESS "3.21")
     find_package(OpenXR REQUIRED)
     string(TOUPPER ${CMAKE_BUILD_TYPE} _config)
@@ -186,12 +190,14 @@ else()
   endif()
 endif()
 
+# Install OpenXR (CMake >= 3.21)
 if(SlicerVirtualReality_HAS_OPENXR_SUPPORT AND CMAKE_VERSION VERSION_GREATER_EQUAL "3.21")
   find_package(OpenXR REQUIRED)
   install(IMPORTED_RUNTIME_ARTIFACTS OpenXR::openxr_loader
     RUNTIME DESTINATION ${Slicer_INSTALL_THIRDPARTY_BIN_DIR} COMPONENT RuntimeLibraries
     LIBRARY DESTINATION ${Slicer_INSTALL_THIRDPARTY_LIB_DIR} COMPONENT RuntimeLibraries
     )
+endif()
 endif()
 
 #-----------------------------------------------------------------------------
