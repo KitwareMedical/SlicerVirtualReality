@@ -26,7 +26,7 @@ if(NOT OpenXR_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${proj})
 
   ExternalProject_SetIfNotDefined(
     ${SUPERBUILD_TOPLEVEL_PROJECT}_${proj}_GIT_TAG
-    "release-1.0.26"
+    "release-1.0.33"
     QUIET
     )
 
