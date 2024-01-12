@@ -50,6 +50,10 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
   set(_module_subdir Rendering/OpenVR)
   set(_module_name RenderingOpenVR)
 
+  # The python module destination directory is set to `bin/Python/vtkmodules` to
+  # match the value hard-coded in "CMake/SlicerExtensionCPackBundleFixup.cmake.in"
+  set(_module_python_module_dir "${Slicer_INSTALL_THIRDPARTY_BIN_DIR}/Python/vtkmodules")
+
   set(EP_SOURCE_DIR ${VTK_SOURCE_DIR}/${_module_subdir})
   set(EP_BINARY_DIR ${CMAKE_BINARY_DIR}/${proj}-build)
 
@@ -68,6 +72,7 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
       -DVTK_MODULE_NAME:STRING=${_module_name}
       -DVTK_MODULE_SOURCE_DIR:PATH=${EP_SOURCE_DIR}
       -DVTK_MODULE_CMAKE_MODULE_PATH:PATH=${VTK_SOURCE_DIR}/CMake
+      -DVTK_MODULE_PYTHON_MODULE_DESTINATION:STRING=${_module_python_module_dir}/.. # "vtkmodules" is implicitly appended
       -DOpenVR_FIND_PACKAGE_VARS:STRING=OpenVR_INCLUDE_DIR;OpenVR_LIBRARY
       # vtkRenderingOpenVR
       -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
@@ -103,7 +108,7 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
 
   # pythonpath
   set(${proj}_PYTHONPATH_LAUNCHER_BUILD
-    ${${proj}_DIR}/${Slicer_INSTALL_THIRDPARTY_LIB_DIR}/${PYTHON_SITE_PACKAGES_SUBDIR}/vtkmodules
+    ${${proj}_DIR}/${_module_python_module_dir}
     )
   mark_as_superbuild(
     VARS ${proj}_PYTHONPATH_LAUNCHER_BUILD
