@@ -40,6 +40,15 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
       )
   endif()
 
+  if(APPLE)
+    # Clearing CMAKE_INSTALL_NAME_TOOL is crucial to ensure that the installed
+    # VTK libraries have their ID associated with a full path. This step is
+    # required for the fix-up process to work as expected.
+    list(APPEND EXTERNAL_PROJECT_OPTIONAL_CMAKE_CACHE_ARGS
+      -DCMAKE_INSTALL_NAME_TOOL:FILEPATH=
+      )
+  endif()
+
   if(NOT EXISTS ${VTKExternalModule_SOURCE_DIR})
     message(FATAL_ERROR "VTKExternalModule_SOURCE_DIR [${VTKExternalModule_SOURCE_DIR}] variable is set to a nonexistent directory")
   endif()
