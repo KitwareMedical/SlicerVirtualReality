@@ -27,14 +27,14 @@
      </property>
      <layout class="QFormLayout" name="formLayout_4">
       <item row="0" column="0">
-       <widget class="QLabel" name="XRRuntimeLabel">
+       <widget class="QLabel" name="XRBackendLabel">
         <property name="text">
-         <string>Desired XR runtime:</string>
+         <string>Desired XR backend:</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QComboBox" name="XRRuntimeComboBox"/>
+       <widget class="QComboBox" name="XRBackendComboBox"/>
       </item>
       <item row="1" column="0">
        <widget class="QLabel" name="EnableRemotingLabel">

@@ -206,30 +206,30 @@ void vtkSlicerVirtualRealityLogic::ProcessMRMLNodesEvents(vtkObject* caller, uns
 }
 
 //-----------------------------------------------------------------------------
-void vtkSlicerVirtualRealityLogic::SetVirtualRealityXRRuntime(vtkMRMLVirtualRealityViewNode::XRRuntimeType id)
+void vtkSlicerVirtualRealityLogic::SetVirtualRealityXRBackend(vtkMRMLVirtualRealityViewNode::XRBackendType id)
 {
   if (!this->ActiveViewNode)
   {
-    vtkErrorMacro("SetVirtualRealityXRRuntime: Invalid ActiveViewNode");
+    vtkErrorMacro("SetVirtualRealityXRBackend: Invalid ActiveViewNode");
     return;
   }
-  this->ActiveViewNode->SetXRRuntime(id);
+  this->ActiveViewNode->SetXRBackend(id);
 }
 
 //-----------------------------------------------------------------------------
-void vtkSlicerVirtualRealityLogic::SetVirtualRealityXRRuntime(int id)
+void vtkSlicerVirtualRealityLogic::SetVirtualRealityXRBackend(int id)
 {
-  this->SetVirtualRealityXRRuntime(static_cast<vtkMRMLVirtualRealityViewNode::XRRuntimeType>(id));
+  this->SetVirtualRealityXRBackend(static_cast<vtkMRMLVirtualRealityViewNode::XRBackendType>(id));
 }
 
 //-----------------------------------------------------------------------------
-vtkMRMLVirtualRealityViewNode::XRRuntimeType vtkSlicerVirtualRealityLogic::GetVirtualRealityXRRuntime()
+vtkMRMLVirtualRealityViewNode::XRBackendType vtkSlicerVirtualRealityLogic::GetVirtualRealityXRBackend()
 {
   if (!this->ActiveViewNode)
   {
-    return vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime;
+    return vtkMRMLVirtualRealityViewNode::UndefinedXRBackend;
   }
-  return this->ActiveViewNode->GetXRRuntime();
+  return this->ActiveViewNode->GetXRBackend();
 }
 
 //-----------------------------------------------------------------------------
@@ -670,24 +670,24 @@ void vtkSlicerVirtualRealityLogic::SetGestureButtonToNone(vtkVRRenderWindowInter
 }
 
 //-----------------------------------------------------------------------------
-std::string vtkSlicerVirtualRealityLogic::ComputeActionManifestPath(vtkMRMLVirtualRealityViewNode::XRRuntimeType xrRuntime)
+std::string vtkSlicerVirtualRealityLogic::ComputeActionManifestPath(vtkMRMLVirtualRealityViewNode::XRBackendType xrBackend)
 {
   std::string actionManifestPath =
-      Self::ComputeActionManifestPath(this->GetModuleShareDirectory(), xrRuntime, this->ModuleInstalled);
+      Self::ComputeActionManifestPath(this->GetModuleShareDirectory(), xrBackend, this->ModuleInstalled);
 
   std::string actionManifestCollapsedPath = vtksys::SystemTools::CollapseFullPath(actionManifestPath);
 
   if (!vtksys::SystemTools::FileExists(actionManifestCollapsedPath))
   {
     vtkErrorMacro(<< "ComputeActionManifestPath: Action manifest path set for "
-                  << vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(xrRuntime) << " runtime does not exist\n"
+                  << vtkMRMLVirtualRealityViewNode::GetXRBackendAsString(xrBackend) << " backend does not exist\n"
                   << "           actionManifestPath: " << actionManifestPath
                   << "  actionManifestCollapsedPath: " << actionManifestCollapsedPath);
   }
 
   std::string expectedActionManifestFileName;
 
-  switch (xrRuntime)
+  switch (xrBackend)
   {
     case vtkMRMLVirtualRealityViewNode::OpenVR:
       expectedActionManifestFileName = "vtk_openvr_actions.json";
@@ -697,7 +697,7 @@ std::string vtkSlicerVirtualRealityLogic::ComputeActionManifestPath(vtkMRMLVirtu
       break;
     default:
       vtkErrorWithObjectMacro(nullptr, << "ComputeActionManifestPath: Failed to set the expected action manifest filename for "
-                              << vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(xrRuntime) << " runtime");
+                              << vtkMRMLVirtualRealityViewNode::GetXRBackendAsString(xrBackend) << " backend");
       break;
   }
 
@@ -707,7 +707,7 @@ std::string vtkSlicerVirtualRealityLogic::ComputeActionManifestPath(vtkMRMLVirtu
     if (!vtksys::SystemTools::FileExists(manifestFullPath))
     {
       vtkErrorMacro(<< "ComputeActionManifestPath: Action manifest not found for "
-                    << vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(xrRuntime) << " runtime: "
+                    << vtkMRMLVirtualRealityViewNode::GetXRBackendAsString(xrBackend) << " backend: "
                     << manifestFullPath);
     }
   }
@@ -717,7 +717,7 @@ std::string vtkSlicerVirtualRealityLogic::ComputeActionManifestPath(vtkMRMLVirtu
 
 //-----------------------------------------------------------------------------
 std::string vtkSlicerVirtualRealityLogic::ComputeActionManifestPath(
-    const std::string& moduleShareDirectory, vtkMRMLVirtualRealityViewNode::XRRuntimeType xrRuntime, bool installed)
+    const std::string& moduleShareDirectory, vtkMRMLVirtualRealityViewNode::XRBackendType xrBackend, bool installed)
 {
   std::string actionManifestPath;
 
@@ -743,7 +743,7 @@ std::string vtkSlicerVirtualRealityLogic::ComputeActionManifestPath(
     // First, we retrieve <module-share-dir>
 
     // ... then we change the directory to <extension-name>/<thirdparty-lib-dir>/<actions-subdir>/
-    switch (xrRuntime)
+    switch (xrBackend)
     {
       case vtkMRMLVirtualRealityViewNode::OpenVR:
         actionManifestPath = moduleShareDirectory + "/../../../../" Slicer_THIRDPARTY_LIB_DIR "/vr_actions/";
@@ -753,7 +753,7 @@ std::string vtkSlicerVirtualRealityLogic::ComputeActionManifestPath(
         break;
       default:
         vtkErrorWithObjectMacro(nullptr, << "ComputeActionManifestPath: No install tree action manifest path set for"
-                                << vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(xrRuntime) << " runtime");
+                                << vtkMRMLVirtualRealityViewNode::GetXRBackendAsString(xrBackend) << " backend");
         break;
     }
   }
@@ -772,7 +772,7 @@ std::string vtkSlicerVirtualRealityLogic::ComputeActionManifestPath(
     // First, we retrieve <module-share-dir>
 
     // ... then we change the directory to <vtk-module-name>-build/<vtk-module-name>/
-    switch (xrRuntime)
+    switch (xrBackend)
     {
       case vtkMRMLVirtualRealityViewNode::OpenVR:
         actionManifestPath = moduleShareDirectory + "/../../../../../vtkRenderingOpenVR-build/vtkRenderingOpenVR/";
@@ -782,7 +782,7 @@ std::string vtkSlicerVirtualRealityLogic::ComputeActionManifestPath(
         break;
       default:
         vtkErrorWithObjectMacro(nullptr, <<"ComputeActionManifestPath: No build tree action manifest path set for"
-                                << vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(xrRuntime) << " runtime");
+                                << vtkMRMLVirtualRealityViewNode::GetXRBackendAsString(xrBackend) << " backend");
         break;
     }
   }

@@ -66,17 +66,17 @@ public:
   vtkMRMLVirtualRealityViewNode* GetDefaultVirtualRealityViewNode();
 
   ///@{
-  /// Set/get the XR runtime.
-  void SetVirtualRealityXRRuntime(vtkMRMLVirtualRealityViewNode::XRRuntimeType id);
-  vtkMRMLVirtualRealityViewNode::XRRuntimeType GetVirtualRealityXRRuntime();
+  /// Set/get the XR backend.
+  void SetVirtualRealityXRBackend(vtkMRMLVirtualRealityViewNode::XRBackendType id);
+  vtkMRMLVirtualRealityViewNode::XRBackendType GetVirtualRealityXRBackend();
   ///}@
 
 #ifndef __WRAP__
-  /// Set the XR runtime.
+  /// Set the XR backend.
   ///
   /// Excluded from wrapping to avoid the following error:
   /// `TypeError: "ambuguous call, multiple overloaded methods match the arguments`
-  void SetVirtualRealityXRRuntime(int id);
+  void SetVirtualRealityXRBackend(int id);
 #endif
 
   ///@{
@@ -168,12 +168,12 @@ public:
 
   ///@{
   /// Utility functions for computing the ActionManifestPath based on the module share directory,
-  /// XR runtime and module install state.
+  /// XR backend and module install state.
   ///
   /// \sa vtkVRRenderWindowInteractor::SetActionManifestDirectory()
-  std::string ComputeActionManifestPath(vtkMRMLVirtualRealityViewNode::XRRuntimeType xrRuntime);
+  std::string ComputeActionManifestPath(vtkMRMLVirtualRealityViewNode::XRBackendType xrBackend);
   static std::string ComputeActionManifestPath(
-      const std::string& moduleShareDirectory, vtkMRMLVirtualRealityViewNode::XRRuntimeType xrRuntime, bool installed);
+      const std::string& moduleShareDirectory, vtkMRMLVirtualRealityViewNode::XRBackendType xrBackend, bool installed);
   ///@}
 
   /// Initialize the active Virtual Reality view node.

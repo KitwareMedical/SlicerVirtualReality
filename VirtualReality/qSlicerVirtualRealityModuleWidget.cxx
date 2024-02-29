@@ -78,21 +78,21 @@ void qSlicerVirtualRealityModuleWidget::setup()
   d->setupUi(this);
   this->Superclass::setup();
 
-  d->XRRuntimeComboBox->addItem(
-        vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime),
-        vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime);
+  d->XRBackendComboBox->addItem(
+        vtkMRMLVirtualRealityViewNode::GetXRBackendAsString(vtkMRMLVirtualRealityViewNode::UndefinedXRBackend),
+        vtkMRMLVirtualRealityViewNode::UndefinedXRBackend);
 #if defined(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
-  d->XRRuntimeComboBox->addItem(
-        vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(vtkMRMLVirtualRealityViewNode::OpenVR),
+  d->XRBackendComboBox->addItem(
+        vtkMRMLVirtualRealityViewNode::GetXRBackendAsString(vtkMRMLVirtualRealityViewNode::OpenVR),
         vtkMRMLVirtualRealityViewNode::OpenVR);
 #endif
 #if defined(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
-  d->XRRuntimeComboBox->addItem(
-        vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(vtkMRMLVirtualRealityViewNode::OpenXR),
+  d->XRBackendComboBox->addItem(
+        vtkMRMLVirtualRealityViewNode::GetXRBackendAsString(vtkMRMLVirtualRealityViewNode::OpenXR),
         vtkMRMLVirtualRealityViewNode::OpenXR);
 #endif
 
-  connect(d->XRRuntimeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setVirtualRealityXRRuntime(int)));
+  connect(d->XRBackendComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setVirtualRealityXRBackend(int)));
   connect(d->RemotingEnabledCheckBox, SIGNAL(toggled(bool)), this, SLOT(setRemotingEnabled(bool)));
   connect(d->PlayerIPAddressLineEdit, SIGNAL(editingFinished()), this, SLOT(onPlayerIPAddressLineEditEditingFinished()));
 
@@ -135,14 +135,14 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   d->ConnectCheckBox->setChecked(vrViewNode != nullptr && vrViewNode->GetVisibility());
   d->ConnectCheckBox->blockSignals(wasBlocked);
 
-  wasBlocked = d->XRRuntimeComboBox->blockSignals(true);
-  d->XRRuntimeComboBox->setCurrentIndex(
-        d->XRRuntimeComboBox->findData(
-          vrViewNode != nullptr ? vrViewNode->GetXRRuntime() : vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime));
-  d->XRRuntimeComboBox->setEnabled(
+  wasBlocked = d->XRBackendComboBox->blockSignals(true);
+  d->XRBackendComboBox->setCurrentIndex(
+        d->XRBackendComboBox->findData(
+          vrViewNode != nullptr ? vrViewNode->GetXRBackend() : vtkMRMLVirtualRealityViewNode::UndefinedXRBackend));
+  d->XRBackendComboBox->setEnabled(
         (vrViewNode != nullptr)
         && !vrLogic->GetVirtualRealityConnected());
-  d->XRRuntimeComboBox->blockSignals(wasBlocked);
+  d->XRBackendComboBox->blockSignals(wasBlocked);
 
   QString errorText;
   if (vrViewNode && vrViewNode->HasError())
@@ -228,7 +228,7 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
   d->RemotingEnabledCheckBox->setChecked(vrViewNode != nullptr ? vrViewNode->GetRemoting() : false);
   d->RemotingEnabledCheckBox->setEnabled(
         (vrViewNode != nullptr)
-        && vrViewNode->GetXRRuntime() == vtkMRMLVirtualRealityViewNode::OpenXR
+        && vrViewNode->GetXRBackend() == vtkMRMLVirtualRealityViewNode::OpenXR
         && !vrLogic->GetVirtualRealityConnected());
   d->RemotingEnabledCheckBox->blockSignals(wasBlocked);
 
@@ -237,7 +237,7 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
         vrViewNode != nullptr ? QString::fromStdString(vrViewNode->GetPlayerIPAddress()) : QString());
   d->PlayerIPAddressLineEdit->setEnabled(
         (vrViewNode != nullptr)
-        && vrViewNode->GetXRRuntime() == vtkMRMLVirtualRealityViewNode::OpenXR
+        && vrViewNode->GetXRBackend() == vtkMRMLVirtualRealityViewNode::OpenXR
         && vrViewNode->GetRemoting());
   d->PlayerIPAddressLineEdit->setReadOnly(vrLogic->GetVirtualRealityConnected());
   d->PlayerIPAddressLineEdit->blockSignals(wasBlocked);
@@ -245,10 +245,10 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
 
 
 //-----------------------------------------------------------------------------
-void qSlicerVirtualRealityModuleWidget::setVirtualRealityXRRuntime(int index)
+void qSlicerVirtualRealityModuleWidget::setVirtualRealityXRBackend(int index)
 {
   vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
-  vrLogic->SetVirtualRealityXRRuntime(index);
+  vrLogic->SetVirtualRealityXRBackend(index);
 }
 
 //-----------------------------------------------------------------------------
