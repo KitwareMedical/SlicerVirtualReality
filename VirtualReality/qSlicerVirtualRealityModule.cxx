@@ -463,15 +463,6 @@ void qSlicerVirtualRealityModule::updateDefaultViewNodeFromSettings(vtkMRMLVirtu
 #else
     int defaultXRBackend = vtkMRMLVirtualRealityViewNode::UndefinedXRBackend;
 #endif
-  // For backward compatibility with existing settings, read value using
-  // obsolete key and remove it.
-  if (settings.contains("DefaultXRRuntime"))
-  {
-    defaultXRBackend = vtkMRMLVirtualRealityViewNode::GetXRBackendFromString(
-                          settings.value("DefaultXRRuntime").toString().toUtf8().constData());
-    settings.remove("DefaultXRRuntime");
-
-  }
   if (settings.contains("DefaultXRBackend"))
   {
     defaultXRBackend = vtkMRMLVirtualRealityViewNode::GetXRBackendFromString(
