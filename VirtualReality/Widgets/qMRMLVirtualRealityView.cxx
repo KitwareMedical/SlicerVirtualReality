@@ -189,14 +189,14 @@ CTK_GET_CPP(qMRMLVirtualRealityView, vtkVRRenderWindow*, renderWindow, RenderWin
 CTK_GET_CPP(qMRMLVirtualRealityView, vtkVRRenderWindowInteractor*, interactor, Interactor);
 
 // --------------------------------------------------------------------------
-int qMRMLVirtualRealityView::currentXRRuntime() const
+int qMRMLVirtualRealityView::currentXRBackend() const
 {
   Q_D(const qMRMLVirtualRealityView);
-  return static_cast<int>(d->currentXRRuntime());
+  return static_cast<int>(d->currentXRBackend());
 }
 
 //---------------------------------------------------------------------------
-void qMRMLVirtualRealityViewPrivate::createRenderWindow(vtkMRMLVirtualRealityViewNode::XRRuntimeType xrRuntime)
+void qMRMLVirtualRealityViewPrivate::createRenderWindow(vtkMRMLVirtualRealityViewNode::XRBackendType xrBackend)
 {
   Q_Q(qMRMLVirtualRealityView);
 
@@ -233,9 +233,9 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow(vtkMRMLVirtualRealityVie
   // InteractorStyleDelegate
   this->InteractorStyleDelegate = vtkSmartPointer<vtkVirtualRealityViewInteractorStyleDelegate>::New();
 
-  // XRRuntime
+  // XRBackend
 #if defined(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
-  if (xrRuntime == vtkMRMLVirtualRealityViewNode::OpenVR)
+  if (xrBackend == vtkMRMLVirtualRealityViewNode::OpenVR)
   {
     vtkNew<vtkVirtualRealityViewOpenVRInteractorStyle> interactorStyle;
     interactorStyle->SetInteractorStyleDelegate(this->InteractorStyleDelegate);
@@ -249,7 +249,7 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow(vtkMRMLVirtualRealityVie
   else
 #endif
 #if defined(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
-  if (xrRuntime == vtkMRMLVirtualRealityViewNode::OpenXR)
+  if (xrBackend == vtkMRMLVirtualRealityViewNode::OpenXR)
   {
     vtkNew<vtkVirtualRealityViewOpenXRInteractorStyle> interactorStyle;
     interactorStyle->SetInteractorStyleDelegate(this->InteractorStyleDelegate);
@@ -277,8 +277,8 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow(vtkMRMLVirtualRealityVie
 #endif
   {
     this->destroyRenderWindow();
-    qWarning() << "No XR runtime initialized";
-    this->MRMLVirtualRealityViewNode->SetError("Connection failed: No XR runtime initialized");
+    qWarning() << "No XR backend initialized";
+    this->MRMLVirtualRealityViewNode->SetError("Connection failed: No XR backend initialized");
     return;
   }
 
@@ -286,7 +286,7 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow(vtkMRMLVirtualRealityVie
   this->InteractorStyle->SetCurrentRenderer(this->Renderer);
 
   // Interactor
-  this->Interactor->SetActionManifestDirectory(this->VirtualRealityLogic->ComputeActionManifestPath(xrRuntime));
+  this->Interactor->SetActionManifestDirectory(this->VirtualRealityLogic->ComputeActionManifestPath(xrBackend));
   this->Interactor->SetInteractorStyle(this->InteractorStyle);
 
   // InteractorObserver
@@ -404,24 +404,24 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow(vtkMRMLVirtualRealityVie
   this->RenderWindow->Initialize();
   QApplication::restoreOverrideCursor();
 
-  const char* xrRuntimeAsStr = vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(xrRuntime);
+  const char* xrBackendAsStr = vtkMRMLVirtualRealityViewNode::GetXRBackendAsString(xrBackend);
 
   if (!this->RenderWindow->GetVRInitialized())
   {
     this->MRMLVirtualRealityViewNode->SetError("Connection failed");
-    qWarning() << Q_FUNC_INFO << ": Failed to initialize " << xrRuntimeAsStr << " RenderWindow";
+    qWarning() << Q_FUNC_INFO << ": Failed to initialize " << xrBackendAsStr << " RenderWindow";
     return;
   }
 
   // Keep track of last valid parameters in the settings
-  QSettings().setValue("VirtualReality/DefaultXRRuntime", xrRuntimeAsStr);
+  QSettings().setValue("VirtualReality/DefaultXRBackend", xrBackendAsStr);
 #if defined(SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT)
   QSettings().setValue("VirtualReality/DefaultRemotingEnabled", this->MRMLVirtualRealityViewNode->GetRemoting());
   QSettings().setValue("VirtualReality/DefaultPlayerIPAddress", QString::fromStdString(this->MRMLVirtualRealityViewNode->GetPlayerIPAddress()));
 #endif
 
   qDebug() << "";
-  qDebug() << "XR runtime \"" << xrRuntimeAsStr << "\" initialized";
+  qDebug() << "XR backend \"" << xrBackendAsStr << "\" initialized";
   qDebug() << "";
   qDebug() << "ActionManifestPath:" << q->actionManifestPath();
   qDebug() << "Number of registered displayable manager:" << this->DisplayableManagerGroup->GetDisplayableManagerCount();
@@ -454,11 +454,11 @@ void qMRMLVirtualRealityViewPrivate::destroyRenderWindow()
 }
 
 // --------------------------------------------------------------------------
-vtkMRMLVirtualRealityViewNode::XRRuntimeType qMRMLVirtualRealityViewPrivate::currentXRRuntime() const
+vtkMRMLVirtualRealityViewNode::XRBackendType qMRMLVirtualRealityViewPrivate::currentXRBackend() const
 {
   if (this->RenderWindow == nullptr)
   {
-    return vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime;
+    return vtkMRMLVirtualRealityViewNode::UndefinedXRBackend;
   }
 #if defined(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
   if (vtkOpenVRRenderWindow::SafeDownCast(this->RenderWindow) != nullptr)
@@ -478,11 +478,11 @@ vtkMRMLVirtualRealityViewNode::XRRuntimeType qMRMLVirtualRealityViewPrivate::cur
 #endif
   qCritical() << Q_FUNC_INFO << " failed: RenderWindow is not a supported type: "
               << this->RenderWindow->GetClassName();
-  return vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime;
+  return vtkMRMLVirtualRealityViewNode::UndefinedXRBackend;
 }
 
 // --------------------------------------------------------------------------
-bool qMRMLVirtualRealityViewPrivate::currentXRRuntimeRemotingEnabled() const
+bool qMRMLVirtualRealityViewPrivate::currentXRBackendRemotingEnabled() const
 {
 #if defined(SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT)
   return vtkOpenXRRemotingRenderWindow::SafeDownCast(this->RenderWindow) != nullptr;
@@ -492,7 +492,7 @@ bool qMRMLVirtualRealityViewPrivate::currentXRRuntimeRemotingEnabled() const
 }
 
 // --------------------------------------------------------------------------
-std::string qMRMLVirtualRealityViewPrivate::currentXRRuntimeRemotingIPAddress() const
+std::string qMRMLVirtualRealityViewPrivate::currentXRBackendRemotingIPAddress() const
 {
 #if defined(SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT)
   return vtkOpenXRManager::GetInstance().GetConnectionStrategy()->GetIPAddress();
@@ -519,7 +519,7 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRML()
 // --------------------------------------------------------------------------
 void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRMLNoModify()
 {
-  // Finalize XR runtime if the view node is not present or visibility is turned off
+  // Finalize XR backend if the view node is not present or visibility is turned off
   // (i.e., disconnected from hardware)
   if (!this->MRMLVirtualRealityViewNode || !this->MRMLVirtualRealityViewNode->GetVisibility())
   {
@@ -529,21 +529,21 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRMLNoModify()
     return;
   }
 
-  // Reset initialization attempts and clear errors if the XR runtime has changed
-  if (this->currentXRRuntime() != this->MRMLVirtualRealityViewNode->GetXRRuntime()
-      || this->currentXRRuntimeRemotingEnabled() != this->MRMLVirtualRealityViewNode->GetRemoting()
-      || this->currentXRRuntimeRemotingIPAddress() != this->MRMLVirtualRealityViewNode->GetPlayerIPAddress())
+  // Reset initialization attempts and clear errors if the XR backend has changed
+  if (this->currentXRBackend() != this->MRMLVirtualRealityViewNode->GetXRBackend()
+      || this->currentXRBackendRemotingEnabled() != this->MRMLVirtualRealityViewNode->GetRemoting()
+      || this->currentXRBackendRemotingIPAddress() != this->MRMLVirtualRealityViewNode->GetPlayerIPAddress())
   {
     this->InitializationAttempts = 0;
     this->MRMLVirtualRealityViewNode->ClearError();
   }
 
-  // Attempt to initialize XR runtime if the current runtime differs or is undefined, and
+  // Attempt to initialize XR backend if the current backend differs or is undefined, and
   // the view is visible (i.e., connected to the hardware)
-  if ((this->currentXRRuntime() != this->MRMLVirtualRealityViewNode->GetXRRuntime()
-       || this->currentXRRuntimeRemotingEnabled() != this->MRMLVirtualRealityViewNode->GetRemoting()
-       || this->currentXRRuntimeRemotingIPAddress() != this->MRMLVirtualRealityViewNode->GetPlayerIPAddress()
-       || this->currentXRRuntime() == vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime)
+  if ((this->currentXRBackend() != this->MRMLVirtualRealityViewNode->GetXRBackend()
+       || this->currentXRBackendRemotingEnabled() != this->MRMLVirtualRealityViewNode->GetRemoting()
+       || this->currentXRBackendRemotingIPAddress() != this->MRMLVirtualRealityViewNode->GetPlayerIPAddress()
+       || this->currentXRBackend() == vtkMRMLVirtualRealityViewNode::UndefinedXRBackend)
       && this->MRMLVirtualRealityViewNode->GetVisibility())
   {
     // Bail if there are no more attempts left
@@ -555,21 +555,21 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRMLNoModify()
     this->InitializationAttempts++;
     this->MRMLVirtualRealityViewNode->ClearError();
 
-    vtkMRMLVirtualRealityViewNode::XRRuntimeType xrRuntime = this->MRMLVirtualRealityViewNode->GetXRRuntime();
-    const char* xrRuntimeAsStr = vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(xrRuntime);
+    vtkMRMLVirtualRealityViewNode::XRBackendType xrBackend = this->MRMLVirtualRealityViewNode->GetXRBackend();
+    const char* xrBackendAsStr = vtkMRMLVirtualRealityViewNode::GetXRBackendAsString(xrBackend);
 
     // Log the initialization attempt
     qDebug().noquote().nospace()
-        << "Initializing \"" << xrRuntimeAsStr << "\" XR runtime "
+        << "Initializing \"" << xrBackendAsStr << "\" XR backend "
         << QString("(%1/%2)").arg(this->InitializationAttempts).arg(maximumNumberOfAttempts);
 
     // Destroy and recreate the render window
     this->destroyRenderWindow();
-    this->createRenderWindow(xrRuntime);
+    this->createRenderWindow(xrBackend);
   }
 
-  // Skip further updates if the XR runtime is undefined or if the view node has an error
-  if (this->currentXRRuntime() == vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime
+  // Skip further updates if the XR backend is undefined or if the view node has an error
+  if (this->currentXRBackend() == vtkMRMLVirtualRealityViewNode::UndefinedXRBackend
       || this->MRMLVirtualRealityViewNode->HasError())
   {
     return;

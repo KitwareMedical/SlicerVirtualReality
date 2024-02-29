@@ -38,12 +38,12 @@ public:
   vtkTypeMacro(vtkMRMLVirtualRealityViewNode, vtkMRMLViewNode);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  enum XRRuntimeType : int
+  enum XRBackendType : int
     {
-    UndefinedXRRuntime,
+    UndefinedXRBackend,
     OpenVR,
     OpenXR,
-    XRRuntime_Last // must be last
+    XRBackend_Last // must be last
     };
 
   //--------------------------------------------------------------------------
@@ -223,23 +223,23 @@ public:
   ///}@
 
   ///@{
-  /// Get/Set the XR runtime interface.
-  vtkGetMacro(XRRuntime, XRRuntimeType);
-  vtkSetMacro(XRRuntime, XRRuntimeType);
+  /// Get/Set the XR backend.
+  vtkGetMacro(XRBackend, XRBackendType);
+  vtkSetMacro(XRBackend, XRBackendType);
   ///@}
 
 #ifndef __WRAP__
-  /// Set the XR runtime interface.
+  /// Set the XR backend.
   ///
   /// Excluded from wrapping to avoid the following error:
   /// `TypeError: "ambuguous call, multiple overloaded methods match the arguments`
-  void SetXRRuntime(int id);
+  void SetXRBackend(int id);
 #endif
 
   ///@{
-  /// Convert between XR Runtime Interface identifier and name
-  static const char* GetXRRuntimeAsString(int id);
-  static int GetXRRuntimeFromString(const char* name);
+  /// Convert between XR backend identifier and name
+  static const char* GetXRBackendAsString(int id);
+  static int GetXRBackendFromString(const char* name);
   ///@}
 
   ///@{
@@ -270,7 +270,7 @@ public:
   std::string GetError() const;
 
 protected:
-  XRRuntimeType XRRuntime{vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime};
+  XRBackendType XRBackend{vtkMRMLVirtualRealityViewNode::UndefinedXRBackend};
 
   bool TwoSidedLighting;
   bool BackLights;

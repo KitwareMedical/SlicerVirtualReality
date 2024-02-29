@@ -72,7 +72,7 @@ void vtkMRMLVirtualRealityViewNode::WriteXML(ostream& of, int nIndent)
   this->Superclass::WriteXML(of, nIndent);
 
   vtkMRMLWriteXMLBeginMacro(of);
-  vtkMRMLWriteXMLEnumMacro(xrRuntimeInteface, XRRuntime);
+  vtkMRMLWriteXMLEnumMacro(xrBackend, XRBackend);
   vtkMRMLWriteXMLBooleanMacro(twoSidedLighting, TwoSidedLighting);
   vtkMRMLWriteXMLBooleanMacro(backLights, BackLights);
   vtkMRMLWriteXMLFloatMacro(desiredUpdateRate, DesiredUpdateRate);
@@ -97,7 +97,7 @@ void vtkMRMLVirtualRealityViewNode::ReadXMLAttributes(const char** atts)
   this->Superclass::ReadXMLAttributes(atts);
 
   vtkMRMLReadXMLBeginMacro(atts);
-  vtkMRMLReadXMLEnumMacro(xrRuntime, XRRuntime);
+  vtkMRMLReadXMLEnumMacro(xrBackend, XRBackend);
   vtkMRMLReadXMLBooleanMacro(twoSidedLighting, TwoSidedLighting);
   vtkMRMLReadXMLBooleanMacro(backLights, BackLights);
   vtkMRMLReadXMLFloatMacro(desiredUpdateRate, DesiredUpdateRate);
@@ -126,7 +126,7 @@ void vtkMRMLVirtualRealityViewNode::Copy(vtkMRMLNode* anode)
   this->Superclass::Copy(anode);
 
   vtkMRMLCopyBeginMacro(anode);
-  vtkMRMLCopyEnumMacro(XRRuntime);
+  vtkMRMLCopyEnumMacro(XRBackend);
   vtkMRMLCopyBooleanMacro(TwoSidedLighting);
   vtkMRMLCopyBooleanMacro(BackLights);
   vtkMRMLCopyFloatMacro(DesiredUpdateRate);
@@ -151,7 +151,7 @@ void vtkMRMLVirtualRealityViewNode::PrintSelf(ostream& os, vtkIndent indent)
   this->Superclass::PrintSelf(os, indent);
 
   vtkMRMLPrintBeginMacro(os, indent);
-  vtkMRMLPrintEnumMacro(XRRuntime);
+  vtkMRMLPrintEnumMacro(XRBackend);
   vtkMRMLPrintBooleanMacro(TwoSidedLighting);
   vtkMRMLPrintBooleanMacro(BackLights);
   vtkMRMLPrintFloatMacro(DesiredUpdateRate);
@@ -619,17 +619,17 @@ void vtkMRMLVirtualRealityViewNode::SetTrackerTransformUpdate(bool enable)
 }
 
 //-----------------------------------------------------------
-void vtkMRMLVirtualRealityViewNode::SetXRRuntime(int id)
+void vtkMRMLVirtualRealityViewNode::SetXRBackend(int id)
 {
-  this->SetXRRuntime(static_cast<vtkMRMLVirtualRealityViewNode::XRRuntimeType>(id));
+  this->SetXRBackend(static_cast<vtkMRMLVirtualRealityViewNode::XRBackendType>(id));
 }
 
 //-----------------------------------------------------------
-const char* vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(int id)
+const char* vtkMRMLVirtualRealityViewNode::GetXRBackendAsString(int id)
 {
   switch (id)
   {
-    case UndefinedXRRuntime: return "undefined";
+    case UndefinedXRBackend: return "undefined";
     case OpenVR: return "OpenVR";
     case OpenXR: return "OpenXR";
     default:
@@ -639,16 +639,16 @@ const char* vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(int id)
 }
 
 //-----------------------------------------------------------
-int vtkMRMLVirtualRealityViewNode::GetXRRuntimeFromString(const char* name)
+int vtkMRMLVirtualRealityViewNode::GetXRBackendFromString(const char* name)
 {
   if (name == nullptr)
   {
     // invalid name
     return -1;
   }
-  for (int ii = 0; ii < XRRuntime_Last; ii++)
+  for (int ii = 0; ii < XRBackend_Last; ii++)
   {
-    if (strcmp(name, vtkMRMLVirtualRealityViewNode::GetXRRuntimeAsString(ii)) == 0)
+    if (strcmp(name, vtkMRMLVirtualRealityViewNode::GetXRBackendAsString(ii)) == 0)
     {
       // found a matching name
       return ii;

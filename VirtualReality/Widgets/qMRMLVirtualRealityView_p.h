@@ -89,9 +89,9 @@ public:
   double desiredUpdateRate();
   double stillUpdateRate();
 
-  vtkMRMLVirtualRealityViewNode::XRRuntimeType currentXRRuntime() const;
-  bool currentXRRuntimeRemotingEnabled() const;
-  std::string currentXRRuntimeRemotingIPAddress() const;
+  vtkMRMLVirtualRealityViewNode::XRBackendType currentXRBackend() const;
+  bool currentXRBackendRemotingEnabled() const;
+  std::string currentXRBackendRemotingIPAddress() const;
 
 public slots:
   void updateWidgetFromMRML();
@@ -106,7 +106,7 @@ protected:
   void updateTransformNodeFromDevice(vtkMRMLTransformNode* node, vtkEventDataDevice device, uint32_t index=0);
   void updateTransformNodeAttributesFromDevice(vtkMRMLTransformNode* node, vtkEventDataDevice device, uint32_t index=0);
 
-  void createRenderWindow(vtkMRMLVirtualRealityViewNode::XRRuntimeType xrRuntime);
+  void createRenderWindow(vtkMRMLVirtualRealityViewNode::XRBackendType xrBackend);
   void destroyRenderWindow();
 
   vtkSlicerCamerasModuleLogic* CamerasLogic;
@@ -117,7 +117,7 @@ protected:
   vtkSmartPointer<vtkVirtualRealityViewInteractorStyleDelegate> InteractorStyleDelegate;
   vtkWeakPointer<vtkMRMLVirtualRealityViewNode> MRMLVirtualRealityViewNode;
 
-  // XRRuntime
+  // XRBackend
   vtkSmartPointer<vtkVRRenderer> Renderer;
   vtkSmartPointer<vtkVRRenderWindow> RenderWindow;
   vtkSmartPointer<vtkVRRenderWindowInteractor> Interactor;

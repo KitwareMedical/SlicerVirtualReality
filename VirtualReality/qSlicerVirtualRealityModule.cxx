@@ -455,20 +455,29 @@ void qSlicerVirtualRealityModule::updateDefaultViewNodeFromSettings(vtkMRMLVirtu
   settings.endGroup(); // Default3DView
 
   settings.beginGroup("VirtualReality");
-  // XR runtime
+  // XR backend
 #if defined(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
-  int defaultXRRuntime = vtkMRMLVirtualRealityViewNode::OpenVR;
+  int defaultXRBackend = vtkMRMLVirtualRealityViewNode::OpenVR;
 #elif defined(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
-    int defaultXRRuntime = vtkMRMLVirtualRealityViewNode::OpenXR;
+    int defaultXRBackend = vtkMRMLVirtualRealityViewNode::OpenXR;
 #else
-    int defaultXRRuntime = vtkMRMLVirtualRealityViewNode::UndefinedXRRuntime;
+    int defaultXRBackend = vtkMRMLVirtualRealityViewNode::UndefinedXRBackend;
 #endif
+  // For backward compatibility with existing settings, read value using
+  // obsolete key and remove it.
   if (settings.contains("DefaultXRRuntime"))
   {
-    defaultXRRuntime = vtkMRMLVirtualRealityViewNode::GetXRRuntimeFromString(
+    defaultXRBackend = vtkMRMLVirtualRealityViewNode::GetXRBackendFromString(
                           settings.value("DefaultXRRuntime").toString().toUtf8().constData());
+    settings.remove("DefaultXRRuntime");
+
   }
-  defaultViewNode->SetXRRuntime(defaultXRRuntime);
+  if (settings.contains("DefaultXRBackend"))
+  {
+    defaultXRBackend = vtkMRMLVirtualRealityViewNode::GetXRBackendFromString(
+                          settings.value("DefaultXRBackend").toString().toUtf8().constData());
+  }
+  defaultViewNode->SetXRBackend(defaultXRBackend);
   // Remoting
   if (settings.contains("DefaultRemotingEnabled"))
   {
