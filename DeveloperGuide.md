@@ -1,10 +1,8 @@
-Information for developers
-==========================
+# Information for developers
 
 This Slicer extension is in active development. The API may change from version to version without notice.
 
-Build instructions
-------------------
+## Build instructions
 
 - Build the extension against the newly built Slicer with Qt5 and VTK9 enabled.
 - To start Slicer from a build tree and ensure the extension is properly loaded, considering using the ``--launcher-additional-settings`` option:
@@ -21,8 +19,7 @@ Alternatively, to avoid the need to specify additional command-line parameters, 
 
 Note that specifying the top-level build directory of the extension ensures that Slicer find all types of modules.
 
-Useful Python Snippets
-----------------------
+## Useful Python Snippets
 
 Activate virtual reality view:
 

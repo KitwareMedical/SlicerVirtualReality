@@ -1,5 +1,4 @@
-SlicerVirtualReality
-====================
+# SlicerVirtualReality
 
 Extension for 3D slicer that enables user to interact with the 3D scene using virtual reality.
 
@@ -8,6 +7,8 @@ Extension for 3D slicer that enables user to interact with the 3D scene using vi
 The extension works with all OpenVR-compatible headsets, such as [HTC Vive](#setup-htc-vive), all [Windows Mixed Reality headsets](#setup-windows-mixed-reality) (by Acer, Lenovo, HP, etc.), and with [Oculus Rift](#setup-oculus-rift). See the YouTube video below or this [Kitware blog post](https://blog.kitware.com/slicervirtualreality/) for some more background and application examples.
 
 [![Demo: Pedicle screw insertion in virtual reality using Slicer](https://img.youtube.com/vi/F_UBoE4FaoY/0.jpg)](https://www.youtube.com/watch?v=F_UBoE4FaoY)
+
+## Features
 
 Features include:
 - View all content of any of the 3D viewers in Slicer, anytime, by a single click.
@@ -21,9 +22,6 @@ Features include:
 - Make position of controllers available as transforms in the Slicer scene. These transforms can be used in custom modules to reslice volumes (using Volume Reslice Driver module in SlicerIGT extension) or transform any nodes in the scene.
 
 Feature set of the extension is continuously improved. You can give us feedback and propose ideas for improvements by submitting them on the [issue tracker](https://github.com/KitwareMedical/SlicerVirtualReality/issues).
-
-Usage
------
 
 ## Setup
 
@@ -72,10 +70,10 @@ Controls:
 - Touchpad forward: fly forward
 - Touchpad backwad: fly backward
 
-Notes:
-- Flying direction is specified by the orientation of the controller.
-- Speed is proportional to distance of the fingertip from the touchpad center.
-- Maximum speed is configurable in Virtual Reality module.
+> [!NOTE]
+> - Flying direction is specified by the orientation of the controller.
+> - Speed is proportional to distance of the fingertip from the touchpad center.
+> - Maximum speed is configurable in Virtual Reality module.
 
 ### Transform entire scene
 
@@ -86,9 +84,9 @@ Controls: while keeping grip button depressed on both controllers
 - Translate controllers in parallel up/down/left/right/forward/backward: translate the entire scene
 - Pivot controllers around: rotate the entire scene
 
-Notes:
-- Object positions in the scene are not modified.
-- Controllers must be outside of all selectable objects when grip buttons are pressed.
+> [!NOTE]
+> - Object positions in the scene are not modified.
+> - Controllers must be outside of all selectable objects when grip buttons are pressed.
 
 ### Transform objects
 
@@ -99,12 +97,12 @@ Controls: press grip button when a controller is inside a selectable object
 - Translate controllers in parallel up/down/left/right/forward/backward: translate all objects
 - Move controller
 
-Notes:
-- When you grab and move object, a parent transform is automatically created for it (if it has not been under a transform already) and that transform is modified.
-- To move a group of objects together, assign the same parent transform to them. You can do that in _Data_ module's _Transform hierarchy_ tab by drag-and-dropping objects under the same transform (or by double-clicking in the _Applied Transform_ column in  _Data_ module's _Transform hierarchy_ tab and selecting a transform; or by selecting a transform in _Transforms_ module and applying it to all the nodes that must move together).
-- Either left or right controller can be used to grab an object. Each controller can be used to grab an object and move independently.
-- By default all objects are selectable. An object can be made non-selectable (thus non-movable) in Data module / Subject hierarchy tab, right-clicking on the node and unchecking "Toggle Selectable".
-- Moving of segmentation nodes is slow. If you want to move segmentations using controllers then export them to model nodes (in _Data_ module, right-click on the segmentation node and choose _Export visible segments to models_) and transform the model nodes.
+> [!NOTE]
+> - When you grab and move object, a parent transform is automatically created for it (if it has not been under a transform already) and that transform is modified.
+> - To move a group of objects together, assign the same parent transform to them. You can do that in _Data_ module's _Transform hierarchy_ tab by drag-and-dropping objects under the same transform (or by double-clicking in the _Applied Transform_ column in  _Data_ module's _Transform hierarchy_ tab and selecting a transform; or by selecting a transform in _Transforms_ module and applying it to all the nodes that must move together).
+> - Either left or right controller can be used to grab an object. Each controller can be used to grab an object and move independently.
+> - By default all objects are selectable. An object can be made non-selectable (thus non-movable) in Data module / Subject hierarchy tab, right-clicking on the node and unchecking "Toggle Selectable".
+> - Moving of segmentation nodes is slow. If you want to move segmentations using controllers then export them to model nodes (in _Data_ module, right-click on the segmentation node and choose _Export visible segments to models_) and transform the model nodes.
 
 ## Other features
 
@@ -167,26 +165,22 @@ If you are certain that you have found a software bug and no similar issue has b
 
 Please do not use "VR" acronym (you can spell out "virtual reality" instead), because "VR" may mean "volume rendering" just as well as "virtual reality" - you can even do volume rendering in virtual reality in Slicer - and so it becomes confusing very quickly.
 
-For developers
---------------
+## For developers
 
 Information for developers is available in the [Developer Guide](DeveloperGuide.md).
 
-Contributors
-------------
+## Contributors
 
 Contributors include:
 - Kitware: Jean-Christophe Fillion-Robin, Jean-Baptiste Vimort
 - PerkLab (Queen's University): Csaba Pinter, Andras Lasso
 - VASST Lab (Robarts Research Insitute): Adam Rankin
 
-How to cite
------------
+## How to cite
 
 Pinter, C., Lasso, A., Choueib, S., Asselin, M., Fillion-Robin, J. C., Vimort, J. B., Martin, K., Jolley, M. A. & Fichtinger, G. (2020). SlicerVR for Medical Intervention Training and Planning in Immersive Virtual Reality. IEEE Transactions on Medical Robotics and Bionics, vol. 2, no. 2, pp. 108-117, May 2020, doi: 10.1109/TMRB.2020.2983199
 
-License
--------
+## License
 
 It is covered by the Apache License, Version 2.0:
 
