@@ -27,8 +27,7 @@
 // For:
 //  - Slicer_VERSION_MAJOR
 //  - Slicer_VERSION_MINOR
-//  - Slicer_REVISION
-#include <vtkSlicerVersionConfigure.h>
+#include <vtkSlicerVersionConfigureMinimal.h>
 
 // VR Logic includes
 #include "vtkSlicerVirtualRealityLogic.h"
@@ -336,7 +335,7 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow(vtkMRMLVirtualRealityVie
       << "vtkMRMLMarkupsDisplayableManager"
       << "vtkMRMLSegmentationsDisplayableManager3D"
       << "vtkMRMLTransformsDisplayableManager3D"
-#if (Slicer_VERSION_MAJOR >= 5 && Slicer_VERSION_MINOR >= 7 && Slicer_REVISION >= 32721)
+#if (Slicer_VERSION_MAJOR >= 5 && Slicer_VERSION_MINOR >= 7)
       << "vtkMRMLLinearTransformsDisplayableManager"
 #else
       << "vtkMRMLLinearTransformsDisplayableManager3D"
