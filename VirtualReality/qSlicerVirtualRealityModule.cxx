@@ -456,10 +456,10 @@ void qSlicerVirtualRealityModule::updateDefaultViewNodeFromSettings(vtkMRMLVirtu
 
   settings.beginGroup("VirtualReality");
   // XR backend
-#if defined(SlicerVirtualReality_HAS_OPENVR_SUPPORT)
-  int defaultXRBackend = vtkMRMLVirtualRealityViewNode::OpenVR;
+#if defined(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
+  int defaultXRBackend = vtkMRMLVirtualRealityViewNode::OpenXR;
 #elif defined(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
-    int defaultXRBackend = vtkMRMLVirtualRealityViewNode::OpenXR;
+    int defaultXRBackend = vtkMRMLVirtualRealityViewNode::OpenVR;
 #else
     int defaultXRBackend = vtkMRMLVirtualRealityViewNode::UndefinedXRBackend;
 #endif
