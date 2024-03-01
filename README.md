@@ -10,18 +10,19 @@ The extension works with all OpenVR-compatible headsets, such as [HTC Vive](#set
 
 ## Features
 
-Features include:
-- View all content of any of the 3D viewers in Slicer, anytime, by a single click.
-- Show volumes as 2D image slices or volume rendering, render surfaces, points, etc.
-- View any 4D data sets, using any rendering technique (including volume rendering) - provided by Sequences extension
-- Align the headset's view to match viewpoint of the selected 3D view in Slicer
-- Fly around using the touchpad of the right controller: direction is specified by orientation of the controller; speed is determined by the position of the finger on the touchpad (touch at the top to fly forward, touch at the bottom to fly backward).
-- Grab and reposition objects using the grab button on the controller.
-- Translate, rotate, scale the world (all objects) by pressing grab buttons on both controllers at the same time.
-- Advanced volume rendering performance tuning: available in Virtual Reality module, to find good balance between image quality and refresh rate.
-- Make position of controllers available as transforms in the Slicer scene. These transforms can be used in custom modules to reslice volumes (using Volume Reslice Driver module in SlicerIGT extension) or transform any nodes in the scene.
+Key features:
 
-Feature set of the extension is continuously improved. You can give us feedback and propose ideas for improvements by submitting them on the [issue tracker](https://github.com/KitwareMedical/SlicerVirtualReality/issues).
+- View all content of any 3D viewer in Slicer with a single click.
+- Display volumes as 2D image slices or volume renderings, render surfaces, points, etc.
+- Visualize any 4D datasets using various rendering techniques (including volume rendering) provided by the Sequences extension.
+- Align the headset's view to match the viewpoint of the selected 3D view in Slicer.
+- Fly around using the touchpad of the right controller: direction is specified by orientation of the controller; speed is determined by the position of the finger on the touchpad (touch at the top to fly forward, touch at the bottom to fly backward).
+- Grab and reposition objects using the controller's grab button.
+- Translate, rotate, and scale the entire scene by pressing grab buttons on both controllers simultaneously.
+- Advanced volume rendering performance tuning available in the Virtual Reality module to balance image quality and refresh rate.
+- Make controller positions available as transforms in the Slicer scene. These transforms can be used in custom modules to reslice volumes (using Volume Reslice Driver module in SlicerIGT extension) or transform any nodes in the scene.
+
+Continuous improvements are made to the feature set. Feedback and ideas for improvement can be submitted via the [issue tracker](https://github.com/KitwareMedical/SlicerVirtualReality/issues).
 
 ## Setup
 
