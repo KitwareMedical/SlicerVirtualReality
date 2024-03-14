@@ -290,7 +290,7 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow(vtkMRMLVirtualRealityVie
   this->Interactor->SetInteractorStyle(this->InteractorStyle);
 
   // InteractorObserver
-  this->InteractorObserver = vtkVirtualRealityViewInteractorObserver::New();
+  this->InteractorObserver = vtkSmartPointer<vtkVirtualRealityViewInteractorObserver>::New();
   this->InteractorObserver->SetInteractor(this->Interactor);
 
   // Camera
