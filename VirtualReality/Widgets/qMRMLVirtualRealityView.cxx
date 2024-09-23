@@ -335,7 +335,7 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow(vtkMRMLVirtualRealityVie
       << "vtkMRMLMarkupsDisplayableManager"
       << "vtkMRMLSegmentationsDisplayableManager3D"
       << "vtkMRMLTransformsDisplayableManager3D"
-#if (Slicer_VERSION_MAJOR >= 5 && Slicer_VERSION_MINOR >= 7)
+#if ((Slicer_VERSION_MAJOR == 5 && Slicer_VERSION_MINOR >= 7) || (Slicer_VERSION_MAJOR > 5))
       << "vtkMRMLLinearTransformsDisplayableManager"
 #else
       << "vtkMRMLLinearTransformsDisplayableManager3D"
