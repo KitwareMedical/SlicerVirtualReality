@@ -21,6 +21,11 @@
 #ifndef __vtkMRMLVirtualRealityViewDisplayableManagerFactory_h
 #define __vtkMRMLVirtualRealityViewDisplayableManagerFactory_h
 
+// For:
+//  - Slicer_VERSION_MAJOR
+//  - Slicer_VERSION_MINOR
+#include <vtkSlicerVersionConfigureMinimal.h>
+
 // VR MRMLDM includes
 #include "vtkSlicerVirtualRealityModuleMRMLDisplayableManagerExport.h"
 
@@ -63,8 +68,14 @@ protected:
 
 private:
 
+#if ((Slicer_VERSION_MAJOR == 5 && Slicer_VERSION_MINOR >= 7) || (Slicer_VERSION_MAJOR > 5))
+  vtkMRMLVirtualRealityViewDisplayableManagerFactory(const vtkMRMLVirtualRealityViewDisplayableManagerFactory&) = delete;
+  void operator=(const vtkMRMLVirtualRealityViewDisplayableManagerFactory&) = delete;
+#else
+  // legacy implementation for Slicer<5.7
   vtkMRMLVirtualRealityViewDisplayableManagerFactory(const vtkMRMLVirtualRealityViewDisplayableManagerFactory&);
   void operator=(const vtkMRMLVirtualRealityViewDisplayableManagerFactory&);
+#endif
 
 };
 

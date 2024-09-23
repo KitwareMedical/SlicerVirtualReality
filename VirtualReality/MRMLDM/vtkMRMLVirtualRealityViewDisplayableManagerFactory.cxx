@@ -27,6 +27,11 @@
 //----------------------------------------------------------------------------
 // vtkMRMLVirtualRealityViewDisplayableManagerFactory methods
 
+#if ((Slicer_VERSION_MAJOR == 5 && Slicer_VERSION_MINOR >= 7) || (Slicer_VERSION_MAJOR > 5))
+  // When using current Slicer versions, the updated vtkSingleton class in vtkAddon does not need custom New and GetInstance methods.
+#else
+  // legacy implementation for Slicer<5.7
+
 //----------------------------------------------------------------------------
 // Up the reference count so it behaves like New
 vtkMRMLVirtualRealityViewDisplayableManagerFactory* vtkMRMLVirtualRealityViewDisplayableManagerFactory::New()
@@ -58,16 +63,15 @@ vtkMRMLVirtualRealityViewDisplayableManagerFactory* vtkMRMLVirtualRealityViewDis
   return Self::Instance;
 }
 
-//----------------------------------------------------------------------------
+#endif
+
 vtkMRMLVirtualRealityViewDisplayableManagerFactory::
     vtkMRMLVirtualRealityViewDisplayableManagerFactory():Superclass()
 {
 }
 
 //----------------------------------------------------------------------------
-vtkMRMLVirtualRealityViewDisplayableManagerFactory::~vtkMRMLVirtualRealityViewDisplayableManagerFactory()
-{
-}
+vtkMRMLVirtualRealityViewDisplayableManagerFactory::~vtkMRMLVirtualRealityViewDisplayableManagerFactory() = default;
 
 //----------------------------------------------------------------------------
 void vtkMRMLVirtualRealityViewDisplayableManagerFactory::PrintSelf(ostream& os, vtkIndent indent)
