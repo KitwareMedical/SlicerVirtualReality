@@ -93,7 +93,7 @@ _Supported XR modality: Augmented Reality_
 
 ### How to set up my Meta Quest headset
 
-- Install [Oculus PC app][OculusSetup-link] and set up your headset.
+- Install [Meta Quest Link app][OculusSetup-link] and set up your headset.
 - Install Slicer and the SlicerVirtualReality extension.
 - To view content of the selected 3D view in your headset, click on the "Show scene in virtual reality" button <img src="https://github.com/KitwareMedical/SlicerVirtualReality/raw/master/VirtualReality/Resources/Icons/VirtualRealityHeadset.png" width="24"> on the Slicer toolbar.
 
