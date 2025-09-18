@@ -240,7 +240,14 @@ if(SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT)
       COMPONENT RuntimeLibraries
       )
   endforeach()
+endif()
 
+# vtkRenderingVRModels
+if(VTK_VERSION VERSION_GREATER_EQUAL "9.4")
+  list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${vtkRenderingVRModels_DIR};vtkRenderingVRModels;runtime;/")
+  if(Slicer_USE_PYTHONQT)
+    list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${vtkRenderingVRModels_DIR};vtkRenderingVRModels;python;/")
+  endif()
 endif()
 
 set(${EXTENSION_NAME}_CPACK_INSTALL_CMAKE_PROJECTS "${EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS}" CACHE STRING "List of external projects to install" FORCE)

@@ -1,15 +1,12 @@
 #-----------------------------------------------------------------------------
-# Build VTK Rendering VR module, pointing it to Slicer's VTK and the VR
+# Build VTK Rendering VR Models module, pointing it to Slicer's VTK and the VR
 # libraries also downloaded by this extension.
 
-set(proj vtkRenderingVR)
+set(proj vtkRenderingVRModels)
 
 # Set dependency list
 set(${proj}_DEPENDS
   )
-if (VTK_VERSION VERSION_GREATER_EQUAL "9.4")
-  list(APPEND ${proj}_DEPENDS vtkRenderingVRModels)
-endif()
 
 # Include dependent projects if any
 ExternalProject_Include_Dependencies(${proj} PROJECT_VAR proj)
@@ -57,8 +54,8 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
   set(VTK_SOURCE_DIR ${VTK_DIR}/../VTK)
   ExternalProject_Message(${proj} "VTK_SOURCE_DIR:${VTK_SOURCE_DIR}")
 
-  set(_module_subdir Rendering/VR)
-  set(_module_name RenderingVR)
+  set(_module_subdir Rendering/VRModels)
+  set(_module_name RenderingVRModels)
 
   # The python module destination directory is set to `bin/Python/vtkmodules` to
   # match the value hard-coded in "CMake/SlicerExtensionCPackBundleFixup.cmake.in"
@@ -79,7 +76,7 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
       -DVTK_MODULE_SOURCE_DIR:PATH=${EP_SOURCE_DIR}
       -DVTK_MODULE_CMAKE_MODULE_PATH:PATH=${VTK_SOURCE_DIR}/CMake
       -DVTK_MODULE_PYTHON_MODULE_DESTINATION:STRING=${_module_python_module_dir}/.. # "vtkmodules" is implicitly appended
-      # vtkRenderingVR
+      # vtkRenderingVRModels
       -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
       -DCMAKE_CXX_FLAGS:STRING=${ep_common_cxx_flags}
       -DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}
@@ -93,8 +90,6 @@ if(NOT DEFINED ${proj}_DIR AND NOT ${SUPERBUILD_TOPLEVEL_PROJECT}_USE_SYSTEM_${p
       # Required to find VTK
       -DVTK_DIR:PATH=${VTK_DIR}
       ${EXTERNAL_PROJECT_OPTIONAL_CMAKE_CACHE_ARGS}
-      # Required to find vtkRenderingVRModels
-      -DvtkRenderingVRModels_DIR:PATH=${vtkRenderingVRModels_DIR}
     DEPENDS
       ${${proj}_DEPENDS}
     )
