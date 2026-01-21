@@ -53,6 +53,7 @@ vtkMRMLVirtualRealityViewNode::vtkMRMLVirtualRealityViewNode()
   this->BackgroundColor2[0] = this->defaultBackgroundColor2()[0];
   this->BackgroundColor2[1] = this->defaultBackgroundColor2()[1];
   this->BackgroundColor2[2] = this->defaultBackgroundColor2()[2];
+  this->MarkupsOcclusionEnabled = false;
 }
 
 //----------------------------------------------------------------------------
