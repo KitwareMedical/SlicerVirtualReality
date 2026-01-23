@@ -94,6 +94,7 @@ _Supported XR modality: Augmented Reality_
 ### How to set up my Meta Quest headset
 
 - Install [Meta Horizon Link app][OculusSetup-link] and set up your headset.
+- In Meta Horizon Link, click on `Settings`, then in `General` section at `OpenXR Runtime` click `Set Meta Horizon Link as...` button. If this step is skipped then Slicer will not be able to connect to the headset (it will log the error: "Error [GENERAL |  | OpenXR-Loader] : RuntimeManifestFile::FindManifestFiles - failed to find active runtime file in registry")
 - Install Slicer and the SlicerVirtualReality extension.
 - To view content of the selected 3D view in your headset, click on the "Show scene in virtual reality" button <img src="https://github.com/KitwareMedical/SlicerVirtualReality/raw/master/VirtualReality/Resources/Icons/VirtualRealityHeadset.png" width="24"> on the Slicer toolbar.
 
