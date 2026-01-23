@@ -53,6 +53,9 @@ vtkMRMLVirtualRealityViewNode::vtkMRMLVirtualRealityViewNode()
   this->BackgroundColor2[0] = this->defaultBackgroundColor2()[0];
   this->BackgroundColor2[1] = this->defaultBackgroundColor2()[1];
   this->BackgroundColor2[2] = this->defaultBackgroundColor2()[2];
+  // Computation of markup visibility is very expensive operation, as it requires transfer
+  // of the Z-buffer from the GPU to the CPU, therefore we disable it by default for VR views.
+  this->MarkupsOcclusionEnabled = false;
 }
 
 //----------------------------------------------------------------------------
