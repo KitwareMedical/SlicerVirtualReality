@@ -177,6 +177,7 @@ bool vtkVirtualRealityViewInteractorObserver::DelegateInteractionEventToDisplaya
 #endif
     {
     ed = vtkSmartPointer(static_cast<vtkEventData*>(calldata));
+    ed->SetType(event);
     }
   else
     {

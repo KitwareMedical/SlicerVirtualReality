@@ -98,27 +98,6 @@ HoloLens 2 is supported via [OpenXR Holographic Remoting](https://learn.microsof
 
 _Supported XR modality: Augmented Reality_
 
-<a name="setup-oculus-rift" ></a>
-
-### How to set up my Oculus Rift headset
-
-- Install [Oculus PC app][OculusSetup-link] and set up your headset.
-- Install Slicer and the SlicerVirtualReality extension.
-- To view content of the selected 3D view in your headset:
-  - Start Oculus app (put on the headset for a moment and it will be started)
-  - Click on the "Show scene in virtual reality" button <img src="https://github.com/KitwareMedical/SlicerVirtualReality/raw/master/VirtualReality/Resources/Icons/VirtualRealityHeadset.png" width="24"> on the Slicer toolbar.
-
-OpenXR is used by default. If OpenXR does not work, the legacy OpenVR backend can be used instead:
-- Install [Steam][Steam-link], [SteamVR][SteamVR-link] and start the SteamVR home application in your headset.
-- In Slicer, click on the wrench icon :wrench: in the toolbar, then select the OpenVR backend and enable rendering.
-
-_Supported headsets: Rift S, Rift_
-
-_Supported XR modality: Virtual Reality_
-
-[Steam-link]: https://store.steampowered.com/about/
-[SteamVR-link]: https://store.steampowered.com/steamvr
-
 <a name="controllers" ></a>
 
 ## How to use controllers
