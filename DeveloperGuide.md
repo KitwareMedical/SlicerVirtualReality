@@ -4,8 +4,32 @@ This Slicer extension is in active development. The API may change from version 
 
 ## Build instructions
 
-- Build the extension against the newly built Slicer.
+- Build the extension against the newly built Slicer using the SuperBuild system.
 - To start Slicer from a build tree and ensure the extension is properly loaded, consider running the `SlicerWithVirtualReality` launcher. For more details, see [here](https://slicer.readthedocs.io/en/latest/developer_guide/extensions.html#run-slicer-with-your-custom-modules).
+
+### CMake build options
+
+The top-level `CMakeLists.txt` exposes three backend options:
+
+| CMake option | Default (Windows) | Default (macOS) | Description |
+| --- | --- | --- | --- |
+| `SlicerVirtualReality_HAS_OPENVR_SUPPORT` | `ON` | `OFF` | Build the OpenVR XR backend |
+| `SlicerVirtualReality_HAS_OPENXR_SUPPORT` | `ON` | `OFF` | Build the OpenXR XR backend |
+| `SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT` | `ON` | `OFF` | Build OpenXR Remoting support (HoloLens 2) |
+
+OpenXR Remoting is automatically disabled if `SlicerVirtualReality_HAS_OPENXR_SUPPORT` is `OFF`. It is only supported on Windows.
+
+### Key classes
+
+| Class | Location | Description |
+| --- | --- | --- |
+| `vtkMRMLVirtualRealityViewNode` | `VirtualReality/MRML/` | MRML node holding all VR view settings (backend, magnification, controller transforms, etc.) |
+| `vtkSlicerVirtualRealityLogic` | `VirtualReality/Logic/` | Main logic class: activates/deactivates VR, manages the active view node, and sets up button bindings |
+| `qMRMLVirtualRealityView` | `VirtualReality/Widgets/` | Qt widget that owns the VTK render window and interactor for the VR view |
+| `vtkVirtualRealityViewInteractorObserver` | `VirtualReality/MRMLDM/` | Bridges VTK VR interactor events to Slicer displayable managers |
+| `vtkVirtualRealityViewInteractorStyleDelegate` | `VirtualReality/MRMLDM/` | Shared delegate implementing scene/object grab and gesture logic for both OpenVR and OpenXR styles |
+| `vtkVirtualRealityComplexGestureRecognizer` | `VirtualReality/MRMLDM/` | Slicer-specific two-controller gesture recognition (translate/rotate/scale) |
+| `vtkMRMLVirtualRealityViewDisplayableManagerFactory` | `VirtualReality/MRMLDM/` | Singleton factory that registers displayable managers for the VR view |
 
 ## Mapping of Controller Action to VTK event
 
@@ -61,8 +85,23 @@ The association of VTK event paths to VTK events hardcoded in each VTK modules i
 * For OpenVR, refer to [vtkOpenVRInteractorStyle::SetupActions()][vtkOpenVRInteractorStyle-url]
 * For OpenXR, refer to [vtkOpenXRInteractorStyle::SetupActions()][vtkOpenXRInteractorStyle-url]
 
-[vtkOpenVRInteractorStyle-url]: https://github.com/Slicer/VTK/blob/slicer-v9.2.20230607-1ff325c54-2/Rendering/OpenXR/vtkOpenVRInteractorStyle.cxx
+[vtkOpenVRInteractorStyle-url]: https://github.com/Slicer/VTK/blob/slicer-v9.2.20230607-1ff325c54-2/Rendering/OpenVR/vtkOpenVRInteractorStyle.cxx
 [vtkOpenXRInteractorStyle-url]: https://github.com/Slicer/VTK/blob/slicer-v9.2.20230607-1ff325c54-2/Rendering/OpenXR/vtkOpenXRInteractorStyle.cxx
+
+### Action Identifier Differences Between Backends
+
+OpenVR and OpenXR use different formats for action identifiers when calling `vtkVRRenderWindowInteractor::AddAction()`:
+
+| Backend | Format | Example |
+| --- | --- | --- |
+| OpenVR | Full action path | `/actions/vtk/in/TriggerAction` |
+| OpenXR | Action name only (lowercase) | `triggeraction` |
+
+The `vtkSlicerVirtualRealityLogic::SetGestureButton*()` helpers detect the active backend at runtime using `vtkOpenXRRenderWindowInteractor` class name and apply the correct identifier automatically. Additionally, OpenXR grip/squeeze button bindings are inconsistent across controllers (the right grip is typically bound to `positionprop`, while the left grip may be bound to `complexgestureaction` or not bound at all), so both identifiers are registered when using OpenXR.
+
+The default button configuration (set in `qMRMLVirtualRealityViewPrivate::createRenderWindow()`) is:
+- Trigger button: grab objects and world
+- Grip button: complex gesture (translate/rotate/scale scene)
 
 ### Complex Gesture Support
 

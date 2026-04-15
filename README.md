@@ -2,7 +2,7 @@
 
 Extension for 3D Slicer enabling interaction with the 3D scene through virtual reality (VR) or augmented reality (AR).
 
-The extension works with all OpenVR-compatible and OpenXR-compatible virtual reality headsets, such as [HTC Vive](#setup-htc-vive), all [Windows Mixed Reality headsets](#setup-windows-mixed-reality) (by Acer, Lenovo, HP, etc.) and with [Meta Quest](#setup-meta-quest) or [Oculus Rift](#setup-oculus-rift). The extension also supports the [HoloLens 2](#setup-hololens-2) augmented reality headset.
+The extension works with all OpenXR-compatible virtual reality and augmented reality headsets. The recommended headset is the **[Meta Quest 3](#setup-meta-quest)**, which works wirelessly via Air Link or with a USB cable. Other supported headsets include [HTC Vive](#setup-htc-vive), and [HoloLens 2](#setup-hololens-2). The legacy OpenVR backend is also available as a fallback for headsets that do not support OpenXR.
 
 ![SlicerVirtualReality Logo](SlicerVirtualReality.png)
 
@@ -28,25 +28,42 @@ Continuous improvements are made to the feature set. Feedback and ideas for impr
 
 ## Setup
 
-The extension supports virtual reality (VR) through both OpenXR and OpenVR backends. Augmented reality (AR) support is available by selecting the OpenXR backend and enabling remoting.
+The extension uses **OpenXR** as its primary backend, supporting both virtual reality (VR) and augmented reality (AR, via OpenXR Remoting). The legacy OpenVR backend is retained as a fallback.
 
 **Platform support:** Currently, the extension only functions on Windows computers. Linux support is experimental and untested due to the lack of official OpenXR runtimes and [limited SteamVR support on Linux](https://github.com/ValveSoftware/SteamVR-for-Linux/blob/master/README.md). The extension is available on macOS but lacks backend support due to Apple's lack of OpenXR support for the Vision Pro.
 
-|         | OpenXR             |  OpenVR            |
-| ------- | ------------------ | ------------------ |
-| Windows | :white_check_mark: | :white_check_mark: |
-| Linux   | :x:                | :x:                |
-| macOS   | :x:                | :x:                |
+|         | OpenXR (recommended) | OpenVR (legacy)    |
+| ------- | -------------------- | ------------------ |
+| Windows | :white_check_mark:   | :white_check_mark: |
+| Linux   | :x:                  | :x:                |
+| macOS   | :x:                  | :x:                |
 
-If you wish to use Virtual Reality extension on Linux or macOS and you have virtual or augmented reality capable hardware working well on your computer through either an OpenXR runtime or an OpenVR runtime (e.g Steam VR) then add a comment in the issue tracker ([macOS](https://github.com/KitwareMedical/SlicerVirtualReality/issues/3) / [Linux](https://github.com/KitwareMedical/SlicerVirtualReality/issues/57)).
+If you wish to use Virtual Reality extension on Linux or macOS and you have virtual or augmented reality capable hardware working well on your computer through an OpenXR runtime then add a comment in the issue tracker ([macOS](https://github.com/KitwareMedical/SlicerVirtualReality/issues/3) / [Linux](https://github.com/KitwareMedical/SlicerVirtualReality/issues/57)).
 
 **Configuring graphics:** On systems with both integrated display card and high-performance GPU (typically this is the case on laptops with NVidia GPUs), configure the graphics card application settings to use high-performance GPU for `SlicerApp-real.exe` (it is not necessary to use high-performance GPU for the launcher, `Slicer.exe`).
 
-**Generic tracker support:** Currently, generic trackers are only supported using the OpenVR backend. See issue [#171](https://github.com/KitwareMedical/SlicerVirtualReality/issues/171).
+<a name="setup-meta-quest" ></a>
+
+### Meta Quest 3 headset (recommended)
+
+- Install [Meta Horizon Link app][OculusSetup-link] and set up your headset.
+- In Meta Horizon Link, click on `Settings`, then in `General` section at `OpenXR Runtime` click `Set Meta Horizon Link as...` button. If this step is skipped then Slicer will not be able to connect to the headset (it will log the error: "Error [GENERAL |  | OpenXR-Loader] : RuntimeManifestFile::FindManifestFiles - failed to find active runtime file in registry")
+- Install Slicer and the SlicerVirtualReality extension.
+- To view content of the selected 3D view in your headset, click on the "Show scene in virtual reality" button <img src="https://github.com/KitwareMedical/SlicerVirtualReality/raw/master/VirtualReality/Resources/Icons/VirtualRealityHeadset.png" width="24"> on the Slicer toolbar.
+
+OpenXR is used by default. If OpenXR does not work, the legacy OpenVR backend can be used instead:
+- Install [Steam][Steam-link], [SteamVR][SteamVR-link] and start the SteamVR home application in your headset.
+- In Slicer, click on the wrench icon :wrench: in the toolbar, then select the OpenVR backend and enable rendering.
+
+[OculusSetup-link]: https://www.meta.com/help/quest/articles/headsets-and-accessories/oculus-rift-s/install-app-for-link/
+
+_Supported headsets: **Quest 3** (recommended), Quest Pro, Quest 2, Quest_
+
+_Supported XR modality: Virtual Reality (Augmented Reality via camera pass-through is coming soon)_
 
 <a name="setup-htc-vive" ></a>
 
-### How to set up my HTC Vive headset
+### HTC Vive headset
 
 - Install [VIVESetup][VIVESetup-link] and set up your headset.
 - Install Slicer and the SlicerVirtualReality extension.
@@ -54,7 +71,7 @@ If you wish to use Virtual Reality extension on Linux or macOS and you have virt
 
 [VIVESetup-link]: https://www.vive.com/us/setup/pc-vr/
 
-By default, the OpenXR backend is selected. To use the OpenVR backend:
+OpenXR is used by default. If OpenXR does not work, the legacy OpenVR backend can be used instead:
 - Start the SteamVR home application in your headset.
 - In Slicer, click on the wrench icon :wrench: in the toolbar, then select the OpenVR backend and enable rendering.
 
@@ -62,51 +79,24 @@ _Supported headsets: Pro 2, Pro, Vive_
 
 _Supported XR modality: Virtual Reality_
 
-<a name="setup-windows-mixed-reality" ></a>
-
-### How to set up my Windows Mixed Reality headset
-
-- Set up [Windows Mixed Reality](https://learn.microsoft.com/en-us/windows/mixed-reality/enthusiast-guide/set-up-windows-mixed-reality).
-- Install Slicer and the SlicerVirtualReality extension.
-- To view content of the selected 3D view in your headset, click on the "Show scene in virtual reality" button <img src="https://github.com/KitwareMedical/SlicerVirtualReality/raw/master/VirtualReality/Resources/Icons/VirtualRealityHeadset.png" width="24"> on the Slicer toolbar.
-
-By default, the OpenXR backend is used. To use the OpenVR backend:
- - Install [Steam][Steam-link] and [SteamVR][SteamVR-link].
- - Set up [Windows Mixed Reality for SteamVR](https://docs.microsoft.com/en-us/windows/mixed-reality/enthusiast-guide/using-steamvr-with-windows-mixed-reality) (you should be able to see SteamVR home application running in your headset).
- - In Slicer, click on the wrench icon :wrench: in the toolbar, then select the OpenVR backend and enable rendering.
-
-_See [here](https://en.wikipedia.org/wiki/Windows_Mixed_Reality#List_of_Windows_Mixed_Reality_headsets) for list of supported headsets._
-_Supported XR modality: Virtual Reality_
-
 <a name="setup-hololens-2" ></a>
 
-### How to set up my Hololens 2 headset
+### HoloLens 2 headset
 
-- Set up [Windows Mixed Reality](https://learn.microsoft.com/en-us/windows/mixed-reality/enthusiast-guide/set-up-windows-mixed-reality)
-- Install Slicer and the SlicerVirtualReality extension.
-- On the Hololens, install and start the [Holographic Remoting Player](https://learn.microsoft.com/en-us/windows/mixed-reality/develop/native/holographic-remoting-player).
-- To view content of the selected 3D view in your headset, click on the wrench icon :wrench: in the toolbar, then select the OpenXR backend, enable remoting, enter the IP displayed in the remoting player running in the Hololens, and enable rendering.
+HoloLens 2 is supported via [OpenXR Holographic Remoting](https://learn.microsoft.com/en-us/windows/mixed-reality/develop/native/holographic-remoting-overview), which streams the rendered scene wirelessly from the PC to the headset.
+
+- On the HoloLens 2, install and start the [Holographic Remoting Player](https://learn.microsoft.com/en-us/windows/mixed-reality/develop/native/holographic-remoting-player) from the Microsoft Store. Note the IP address shown on the HoloLens display.
+- Install Slicer and the SlicerVirtualReality extension on the PC.
+- In Slicer, click on the wrench icon :wrench: in the toolbar, then:
+  1. Select the **OpenXR** backend.
+  2. Enable **Remoting** and enter the IP address shown on the HoloLens.
+  3. Enable rendering.
+
+> [!NOTE]
+> - The PC and HoloLens 2 must be on the same network.
+> - Rendering is performed on the PC and streamed to the headset, so a high-performance GPU on the PC is important.
 
 _Supported XR modality: Augmented Reality_
-
-<a name="setup-meta-quest" ></a>
-
-### How to set up my Meta Quest headset
-
-- Install [Meta Horizon Link app][OculusSetup-link] and set up your headset.
-- In Meta Horizon Link, click on `Settings`, then in `General` section at `OpenXR Runtime` click `Set Meta Horizon Link as...` button. If this step is skipped then Slicer will not be able to connect to the headset (it will log the error: "Error [GENERAL |  | OpenXR-Loader] : RuntimeManifestFile::FindManifestFiles - failed to find active runtime file in registry")
-- Install Slicer and the SlicerVirtualReality extension.
-- To view content of the selected 3D view in your headset, click on the "Show scene in virtual reality" button <img src="https://github.com/KitwareMedical/SlicerVirtualReality/raw/master/VirtualReality/Resources/Icons/VirtualRealityHeadset.png" width="24"> on the Slicer toolbar.
-
-By default, the OpenXR backend is used. To use the OpenVR backend:
-- Install [Steam][Steam-link], [SteamVR][SteamVR-link] and start the SteamVR home application in your headset
-- In Slicer, click on the wrench icon :wrench: in the toolbar, then select the OpenVR backend and enable rendering.
-
-[OculusSetup-link]: https://www.meta.com/help/quest/articles/headsets-and-accessories/oculus-rift-s/install-app-for-link/
-
-_Supported headsets: Quest 3, Quest Pro, Quest 2, Quest_
-
-_Supported XR modality: Virtual Reality_
 
 <a name="setup-oculus-rift" ></a>
 
@@ -118,7 +108,7 @@ _Supported XR modality: Virtual Reality_
   - Start Oculus app (put on the headset for a moment and it will be started)
   - Click on the "Show scene in virtual reality" button <img src="https://github.com/KitwareMedical/SlicerVirtualReality/raw/master/VirtualReality/Resources/Icons/VirtualRealityHeadset.png" width="24"> on the Slicer toolbar.
 
-By default, the OpenXR backend is used. To use the OpenVR backend:
+OpenXR is used by default. If OpenXR does not work, the legacy OpenVR backend can be used instead:
 - Install [Steam][Steam-link], [SteamVR][SteamVR-link] and start the SteamVR home application in your headset.
 - In Slicer, click on the wrench icon :wrench: in the toolbar, then select the OpenVR backend and enable rendering.
 
@@ -141,7 +131,7 @@ Move around in space. Equivalent to physically walking around.
 
 Controls:
 - Touchpad forward: fly forward
-- Touchpad backwad: fly backward
+- Touchpad backward: fly backward
 
 > [!NOTE]
 > - Flying direction is specified by the orientation of the controller.
@@ -168,7 +158,7 @@ Translate/rotate a selected object.
 Controls: press grip button when a controller is inside a selectable object
 - Move controllers closer together/farther apart: scale size of the entire rendered scene
 - Translate controllers in parallel up/down/left/right/forward/backward: translate all objects
-- Move controller
+- Move controller to rotate the grabbed object
 
 > [!NOTE]
 > - When you grab and move object, a parent transform is automatically created for it (if it has not been under a transform already) and that transform is modified.
@@ -205,7 +195,7 @@ Go to _Virtual Reality_ module and check the desired checkbox to update linear t
 >
 > * The magnification factor in advanced settings affects these transforms.
 >
-> * Generic trackers are only supported using the OpenVR backend.
+> * Generic trackers are only supported using the legacy OpenVR backend. See issue [#171](https://github.com/KitwareMedical/SlicerVirtualReality/issues/171).
 
 ## Frequently asked questions
 
@@ -250,15 +240,17 @@ Some scenes are too complex to render fluently by mid-range graphics cards. If t
 
 ### How to record virtual reality videos?
 
-Enable screen mirroring in SteamVR and use the free of [OBS Studio](https://obsproject.com/) software to capture VR headset content, application window, webcam, etc.
+Use [OBS Studio](https://obsproject.com/) (free) to capture the VR headset view, application window, webcam, etc.:
+- **OpenXR (recommended):** Most headset companion apps (Meta Horizon Link for Quest 3, SteamVR) provide a screen-mirror or casting window that OBS can capture directly. On Meta Quest 3, the Quest app on your phone can also cast directly to a TV or browser.
+- **OpenVR (SteamVR):** Enable screen mirroring in SteamVR and capture the mirror window with OBS.
 
-Note that [OBS Studio](https://obsproject.com/) may crash if NVidia hardware-based compression is used. If this happens, choose CPU-based video compression option for recording.
+Note that [OBS Studio](https://obsproject.com/) may crash if NVidia hardware-based compression is used. If this happens, choose the CPU-based video compression option for recording.
 
 ### How to ask questions, report problems, or suggest new features?
 
-Visit [Slicer forum](https://discourse.slicer.org) and search for similar discussions. If you do not find related topics then createa a new one. Add _virtual-reality_ tag to make sure people who monitor virtual reality related questions get a notification about your question.
+Visit [Slicer forum](https://discourse.slicer.org) and search for similar discussions. If you do not find related topics then create a new one. Add _virtual-reality_ tag to make sure people who monitor virtual reality related questions get a notification about your question.
 
-If you are certain that you have found a software bug and no similar issue has been reported in the [issue tracker](https://github.com/KitwareMedical/SlicerVirtualReality/issues)) then please submit a new issue.
+If you are certain that you have found a software bug and no similar issue has been reported in the [issue tracker](https://github.com/KitwareMedical/SlicerVirtualReality/issues) then please submit a new issue.
 
 Please do not use "VR" acronym (you can spell out "virtual reality" instead), because "VR" may mean "volume rendering" just as well as "virtual reality" - you can even do volume rendering in virtual reality in Slicer - and so it becomes confusing very quickly.
 
@@ -271,7 +263,7 @@ Information for developers is available in the [Developer Guide](DeveloperGuide.
 Contributors include:
 - Kitware: Jean-Christophe Fillion-Robin, Jean-Baptiste Vimort, Lucas Gandel, Sankhesh Jhaveri
 - PerkLab (Queen's University): Csaba Pinter, Andras Lasso
-- VASST Lab (Robarts Research Insitute): Adam Rankin
+- VASST Lab (Robarts Research Institute): Adam Rankin
 
 ## How to cite
 
