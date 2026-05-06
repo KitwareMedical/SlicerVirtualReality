@@ -221,6 +221,36 @@ interactor.AddObserver("ViewerMovement3DEvent", onViewerMovement3DEvent, highPri
 # For example: we can map the trigger button to the menu event.
 
 slicer.modules.virtualreality.logic().AddAction(interactor, "triggeraction", vtk.vtkCommand.Menu3DEvent, False)
+```
+
+The default event mapping for Meta Quest (Oculus Touch) is incomplete and not very intuitive. It is often useful to make these changes/additions (map `A` button to a rarely used VTK event that can be customized; map trigger button to `triggeraction` for more intuitive naming, add mapping of grab button, by default to move a node):
+
+```
+        {
+          "inputs": {
+            "click": {
+              "output": "nextcamerapose"
+            }
+          },
+          "path": "/user/hand/right/input/a"
+        },
+        {
+          "inputs": {
+            "value": {
+              "output": "triggeraction"
+            }
+          },
+          "path": "/user/hand/right/input/trigger"
+        },
+        {
+          "inputs": {
+            "value": {
+              "output": "positionprop"
+            }
+          },
+          "path": "/user/hand/right/input/squeeze"
+        },
+```
 
 ## Related VTK modules
 
