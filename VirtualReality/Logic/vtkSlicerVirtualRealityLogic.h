@@ -176,6 +176,11 @@ public:
       const std::string& moduleShareDirectory, vtkMRMLVirtualRealityViewNode::XRBackendType xrBackend, bool installed);
   ///@}
 
+  /// Helper function to allow adding actions to the interactor without having to modify the action manifest.
+  /// This function is necessary because the vtkVRRenderWindowInteractor class is not Python-wrapped.
+  /// Example: AddAction(rwi, "/actions/vtk/in/TriggerAction", vtkCommand::Select3DEvent, false);
+  static void AddAction(vtkVRRenderWindowInteractor* rwi, const std::string& path, const vtkCommand::EventIds& eventId, bool isAnalog);
+
   /// Initialize the active Virtual Reality view node.
   ///
   /// Checks if there is already an active Virtual Reality view node.

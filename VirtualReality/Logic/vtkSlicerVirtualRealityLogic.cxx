@@ -670,6 +670,23 @@ void vtkSlicerVirtualRealityLogic::SetGestureButtonToNone(vtkVRRenderWindowInter
 }
 
 //-----------------------------------------------------------------------------
+/*static*/ void vtkSlicerVirtualRealityLogic::AddAction(vtkVRRenderWindowInteractor* rwi, const std::string& path, const vtkCommand::EventIds& eventId, bool isAnalog)
+{
+  if (!rwi)
+  {
+    vtkGenericWarningMacro("AddAction: Invalid render window interactor");
+    return;
+  }
+  vtkVRInteractorStyle* vrInteractorStyle = vtkVRInteractorStyle::SafeDownCast(rwi->GetInteractorStyle());
+  if (!vrInteractorStyle)
+  {
+    vtkWarningWithObjectMacro(rwi, "AddAction: Current interactor style is not a VR interactor style");
+    return;
+  }
+  rwi->AddAction(path, eventId, isAnalog);
+}
+
+//-----------------------------------------------------------------------------
 std::string vtkSlicerVirtualRealityLogic::ComputeActionManifestPath(vtkMRMLVirtualRealityViewNode::XRBackendType xrBackend)
 {
   std::string actionManifestPath =
