@@ -33,13 +33,13 @@ OpenXR Remoting is automatically disabled if `SlicerVirtualReality_HAS_OPENXR_SU
 
 ## Mapping of Controller Action to VTK event
 
-The mapping process consists of two main steps:
+The mapping process consists of several: action manifest json file maps controller-specific interaction path to VTK event path, then VTK render window interactor maps VTK event path to VTK event, which is processed by interactor style, which may be further customized by style delegates. For low-level custom processing of events, it is possible to intercept VTK events in the interactor.
 
-1. Parsing the `vtk_open<vr|xr>_actions.json` action manifest file to link controller-specific interaction paths with generic event paths. This file references controller-specific binding files, usually named `vtk_open<vr|xr>_binding_<vendor_name>.json`, where each controller interaction path is associated with a VTK-specific event path.
+### 1. Mapping from interaction path to VTK event path
 
-2. Assigning a VTK event path to either a VTK event or a `std::function`. This association of a VTK event path involving a single controller with a VTK event is carried out in `vtkOpen<VR|XR>InteractorStyle::SetupActions()`.
+Mapping from interaction path to VTK event path is specified in the action manifest file. Parsing the `vtk_open<vr|xr>_actions.json` action manifest file to link controller-specific interaction paths (e.g., `/user/hand/right/input/b`) with generic event paths (e.g., `showmenu`). This file references controller-specific binding files, usually named `vtk_open<vr|xr>_binding_<vendor_name>.json`, where each controller interaction path is associated with a VTK event path.
 
-### Action Manifest File
+#### Action Manifest File
 
 The controller interaction paths are specific to each backend:
 
@@ -54,7 +54,7 @@ As of [Slicer@c7fe8657c](https://github.com/Slicer/Slicer/commit/c7fe8657c6a4bc0
 | - HP Motion Controller          | [url][vtk_openvr_binding_hpmotioncontroller_url] | [url][vtk_openxr_binding_hp_mixed_reality_url]           |
 | - HTC Vive Controller           | [url][vtk_openvr_binding_vive_controller_url]    | [url][vtk_openxr_binding_htc_vive_controller_url]        |
 | - Microsoft Hand Interaction    |                                                  | [url][vtk_openxr_binding_microsoft_hand_interaction_url] |
-| - Oculus Touch                  | [url][vtk_openvr_binding_oculus_touch_url]       | [url][vtk_openxr_binding_oculus_touch_url]               |
+| - Oculus Touch (Meta Quest)     | [url][vtk_openvr_binding_oculus_touch_url]       | [url][vtk_openxr_binding_oculus_touch_url]               |
 | - Valve Knuckles                | [url][vtk_openvr_binding_knuckles_url]           | [url][vtk_openxr_binding_knuckles_url]                   |
 | - Khronos Simple Controller[^1] |                                                  | [url][vtk_openxr_binding_khr_simple_url]                 |
 
@@ -78,9 +78,9 @@ These files serve as essential references for mapping controller actions to VTK 
 [vtk_openxr_binding_knuckles_url]: https://github.com/Slicer/VTK/blob/slicer-v9.2.20230607-1ff325c54-2/Rendering/OpenXR/vtk_openxr_binding_knuckles.json
 [vtk_openxr_binding_khr_simple_url]: https://github.com/Slicer/VTK/blob/slicer-v9.2.20230607-1ff325c54-2/Rendering/OpenXR/vtk_openxr_binding_khr_simple_controller.json
 
-### Mapping of VTK event path
+### 2. Mapping from VTK event path to VTK event
 
-The association of VTK event paths to VTK events hardcoded in each VTK modules is as follow:
+Assigning a VTK event path (e.g., `showmenu`) to either a VTK event (e.g., `vtk.vtkCommand.Menu3DEvent`) or a `std::function` for a single controller is carried out in `vtkOpen<VR|XR>InteractorStyle::SetupActions()`.
 
 * For OpenVR, refer to [vtkOpenVRInteractorStyle::SetupActions()][vtkOpenVRInteractorStyle-url]
 * For OpenXR, refer to [vtkOpenXRInteractorStyle::SetupActions()][vtkOpenXRInteractorStyle-url]
@@ -88,7 +88,7 @@ The association of VTK event paths to VTK events hardcoded in each VTK modules i
 [vtkOpenVRInteractorStyle-url]: https://github.com/Slicer/VTK/blob/slicer-v9.2.20230607-1ff325c54-2/Rendering/OpenVR/vtkOpenVRInteractorStyle.cxx
 [vtkOpenXRInteractorStyle-url]: https://github.com/Slicer/VTK/blob/slicer-v9.2.20230607-1ff325c54-2/Rendering/OpenXR/vtkOpenXRInteractorStyle.cxx
 
-### Action Identifier Differences Between Backends
+#### Action Identifier Differences Between Backends
 
 OpenVR and OpenXR use different formats for action identifiers when calling `vtkVRRenderWindowInteractor::AddAction()`:
 
@@ -103,7 +103,7 @@ The default button configuration (set in `qMRMLVirtualRealityViewPrivate::create
 - Trigger button: grab objects and world
 - Grip button: complex gesture (translate/rotate/scale scene)
 
-### Complex Gesture Support
+#### Complex Gesture Support
 
 Recognition of complex gesture events commences when the two controller buttons mapped to the ComplexGesture action are pressed.
 
@@ -117,9 +117,13 @@ Limitations:
 
 * To workaround an OpenVR specific [limitation](https://gitlab.kitware.com/vtk/vtk/-/merge_requests/10778), each button expected to be involved in the complex gesture needs to be respectively associated with `/actions/vtk/in/ComplexGestureAction` and `/actions/vtk/in/ComplexGestureAction_Event2`.
 
+### Low-level interception of events
+
+For implementing completely custom behavior, mapping from VTK event path to VTK event can be customized (by using `slicer.modules.virtualreality.logic().AddAction()`) and the VTK event can be intercepted in the render window interactor by adding a high-priority observer.
+
 ## Useful Python Snippets
 
-Activate virtual reality view:
+### Activate virtual reality view
 
 ```python
 
@@ -157,7 +161,7 @@ assert vrCamera() is not None
 
 ```
 
-Set virtual reality view background color to black:
+### Set virtual reality view background color to black:
 
 ```python
 
@@ -168,7 +172,7 @@ vrView.SetBackgroundColor2(color)
 
 ```
 
-Set whether a node can be selected/grabbed/moved:
+### Set whether a node can be selected/grabbed/moved:
 
 ```python
 
@@ -176,6 +180,47 @@ nodeLocked.SetSelectable(0)
 nodeMovable.SetSelectable(1)
 
 ```
+
+### Low-level event handling
+
+```python
+# Get the render window interactor
+vrViewWidget = slicer.modules.virtualreality.viewWidget()
+interactor = vrViewWidget.interactor()
+
+# Set the gesture button to none to allow custom event mapping
+# (otherwise the squeeze button would be unavailable for custom mapping by default)
+slicer.modules.virtualreality.logic().SetGestureButtonToNone(interactor)
+
+# Use high priority observers to ensure we get to process the event before the interactor style (and we can prevent
+# any further processing of the event)
+highPriority = 100.0
+
+# By default, right-hand trigger button is mapped to `triggeraction`, which then calls `Select3DEvent`.
+# Here we take over the trigger button:
+
+@vtk.calldata_type(vtk.VTK_OBJECT)
+def onSelect3DEvent(caller, event, calldata):
+    print(f"Select3DEvent received: {event}")
+    print(f"WorldPosition: {calldata.GetWorldPosition()}")    
+    # Prevent further processing
+    caller.GetCommand(select3DObserverTag).AbortFlagOn()
+
+select3DObserverTag = interactor.AddObserver("Select3DEvent", onSelect3DEvent, highPriority)
+
+# Take over the right-hand joystick:
+
+@vtk.calldata_type(vtk.VTK_OBJECT)
+def onViewerMovement3DEvent(caller, event, calldata):
+    print(f"ViewerMovement3DEvent received: {event}")
+    print(f"TrackPadPosition: {calldata.GetTrackPadPosition()}")
+
+interactor.AddObserver("ViewerMovement3DEvent", onViewerMovement3DEvent, highPriority)
+
+# In recent software versions, it is also possible to modify the VTK event path to VTK event mapping.
+# For example: we can map the trigger button to the menu event.
+
+slicer.modules.virtualreality.logic().AddAction(interactor, "triggeraction", vtk.vtkCommand.Menu3DEvent, False)
 
 ## Related VTK modules
 
