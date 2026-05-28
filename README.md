@@ -1,5 +1,9 @@
 # SlicerVirtualReality
 
+> [!NOTE]
+> It is recommended to use a recent Slicer Preview Release, OpenXR interface, and Meta Quest 3 headset.
+> Other configurations may work, but not regularly tested.
+
 Extension for 3D Slicer enabling interaction with the 3D scene through virtual reality (VR) or augmented reality (AR).
 
 The extension works with all OpenXR-compatible virtual reality and augmented reality headsets. The recommended headset is the **[Meta Quest 3](#setup-meta-quest)**, which works wirelessly via Air Link or with a USB cable. Other supported headsets include [HTC Vive](#setup-htc-vive), and [HoloLens 2](#setup-hololens-2). The legacy OpenVR backend is also available as a fallback for headsets that do not support OpenXR.
@@ -102,61 +106,44 @@ _Supported XR modality: Augmented Reality_
 
 ## How to use controllers
 
+| Action | Meta Quest | HTC Vive |
+| --- | --- | --- |
+| Fly forward | Right thumbstick forward | Touchpad forward |
+| Fly backward | Right thumbstick backward | Touchpad backward |
+| Interact | A button | Trigger |
+| Select interaction mode | B button | Menu button |
+
+![Meta Quest 3 Controller](ControllerMetaQuest3.jpg)
+
 ![HTC Vive Controller](ControllerHtcVive.jpg)
 
 ### Fly
 
 Move around in space. Equivalent to physically walking around.
-
-Controls:
-- Touchpad forward: fly forward
-- Touchpad backward: fly backward
+Orient the controller in the intended direction of motion and use `Fly forward` or `Fly backward` action.
 
 > [!NOTE]
 > - Flying direction is specified by the orientation of the controller.
 > - Speed is proportional to distance of the fingertip from the touchpad center.
 > - Maximum speed is configurable in Virtual Reality module.
 
-### Transform entire scene
-
-Translate/rotate/scale the entire rendered scene.
-
-Controls: while keeping grip button depressed on both controllers
-- Move controllers closer together/farther apart: scale size of the entire scene
-- Translate controllers in parallel up/down/left/right/forward/backward: translate the entire scene
-- Pivot controllers around: rotate the entire scene
-
-> [!NOTE]
-> - Object positions in the scene are not modified.
-> - Controllers must be outside of all selectable objects when grip buttons are pressed.
-
 ### Transform objects
 
 Translate/rotate a selected object.
 
-Controls: press grip button when a controller is inside a selectable object
-- Move controllers closer together/farther apart: scale size of the entire rendered scene
-- Translate controllers in parallel up/down/left/right/forward/backward: translate all objects
-- Move controller to rotate the grabbed object
+- Make sure interaction mode is set to `Grab` (this is the default).
+- Activate `Interact` action (e.g., hold down the `A button`) when a controller is inside a selectable object.
+- Move controller to translate/rotate the object.
+- Deactivate `Interact` action (e.g., release the `A button`)
 
 > [!NOTE]
 > - When you grab and move object, a parent transform is automatically created for it (if it has not been under a transform already) and that transform is modified.
 > - To move a group of objects together, assign the same parent transform to them. You can do that in _Data_ module's _Transform hierarchy_ tab by drag-and-dropping objects under the same transform (or by double-clicking in the _Applied Transform_ column in  _Data_ module's _Transform hierarchy_ tab and selecting a transform; or by selecting a transform in _Transforms_ module and applying it to all the nodes that must move together).
-> - Either left or right controller can be used to grab an object. Each controller can be used to grab an object and move independently.
 > - By default all objects are selectable. An object can be made non-selectable (thus non-movable) in Data module / Subject hierarchy tab, right-clicking on the node and unchecking "Toggle Selectable".
-> - Moving of segmentation nodes is slow. If you want to move segmentations using controllers then export them to model nodes (in _Data_ module, right-click on the segmentation node and choose _Export visible segments to models_) and transform the model nodes.
 
 ## How to use hand interaction
 
 See [Action poses for hand interactions](https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#ext_hand_interaction-the-four-action-poses)
-
-### Fly
-
-_Not yet available._
-
-### Transform entire scene
-
-_Not yet available._
 
 ### Transform objects
 
@@ -220,7 +207,7 @@ Some scenes are too complex to render fluently by mid-range graphics cards. If t
 ### How to record virtual reality videos?
 
 Use [OBS Studio](https://obsproject.com/) (free) to capture the VR headset view, application window, webcam, etc.:
-- **OpenXR (recommended):** Most headset companion apps (Meta Horizon Link for Quest 3, SteamVR) provide a screen-mirror or casting window that OBS can capture directly. On Meta Quest 3, the Quest app on your phone can also cast directly to a TV or browser.
+- **OpenXR (recommended):** Most headset companion apps (Meta Horizon Link for Quest 3, SteamVR) provide a screen-mirror or casting window that OBS can capture directly. On Meta Quest 3, the mirror application can be found at `C:\Program Files\Oculus\Support\oculus-diagnostics\OculusMirror.exe` or similar location. The Quest app on your phone can also cast directly to a TV or browser.
 - **OpenVR (SteamVR):** Enable screen mirroring in SteamVR and capture the mirror window with OBS.
 
 Note that [OBS Studio](https://obsproject.com/) may crash if NVidia hardware-based compression is used. If this happens, choose the CPU-based video compression option for recording.
