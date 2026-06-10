@@ -37,9 +37,8 @@ class Q_SLICER_QTMODULES_VIRTUALREALITY_EXPORT
 {
   Q_OBJECT;
   QVTK_OBJECT;
-#ifdef Slicer_HAVE_QT5
+
   Q_PLUGIN_METADATA(IID "org.slicer.modules.loadable.qSlicerLoadableModule/1.0");
-#endif
   Q_INTERFACES(qSlicerLoadableModule);
 
   /// Visibility of the Virtual Reality toolbar
