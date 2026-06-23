@@ -24,8 +24,10 @@
 // MRML includes
 #include <vtkMRMLLinearTransformNode.h>
 #include <vtkMRMLModelDisplayNode.h>
+#include <vtkMRMLScalarVolumeNode.h>
 #include <vtkMRMLScene.h>
 #include <vtkMRMLSegmentationDisplayNode.h>
+#include <vtkMRMLVectorVolumeNode.h>
 
 // Slicer includes
 #include <vtkSlicerVolumeRenderingLogic.h>
@@ -805,4 +807,40 @@ std::string vtkSlicerVirtualRealityLogic::ComputeActionManifestPath(
   }
 
   return actionManifestPath;
+}
+
+//----------------------------------------------------------------------------
+vtkMRMLVectorVolumeNode* vtkSlicerVirtualRealityLogic::GetOrCreateVRSceneColorVolumeNode()
+{
+  vtkMRMLScene* scene = this->GetMRMLScene();
+  if (!scene)
+  {
+    return nullptr;
+  }
+  vtkMRMLVectorVolumeNode* node = vtkMRMLVectorVolumeNode::SafeDownCast(
+    scene->GetFirstNodeByName("VR Scene (Left Eye)"));
+  if (!node)
+  {
+    node = vtkMRMLVectorVolumeNode::SafeDownCast(
+      scene->AddNewNodeByClass("vtkMRMLVectorVolumeNode", "VR Scene (Left Eye)"));
+  }
+  return node;
+}
+
+//----------------------------------------------------------------------------
+vtkMRMLScalarVolumeNode* vtkSlicerVirtualRealityLogic::GetOrCreatePassthroughDepthVolumeNode()
+{
+  vtkMRMLScene* scene = this->GetMRMLScene();
+  if (!scene)
+  {
+    return nullptr;
+  }
+  vtkMRMLScalarVolumeNode* node = vtkMRMLScalarVolumeNode::SafeDownCast(
+    scene->GetFirstNodeByName("Passthrough Depth"));
+  if (!node)
+  {
+    node = vtkMRMLScalarVolumeNode::SafeDownCast(
+      scene->AddNewNodeByClass("vtkMRMLScalarVolumeNode", "Passthrough Depth"));
+  }
+  return node;
 }

@@ -61,6 +61,12 @@ class vtkLightCollection;
 class vtkObject;
 class vtkTimerLog;
 
+// VTK OpenGL loader (provides raw OpenGL 4.x function pointers)
+#include <vtk_glad.h>
+
+// STD includes
+#include <vector>
+
 // CTK includes
 #include <ctkVTKObject.h>
 
@@ -70,11 +76,11 @@ class vtkTimerLog;
 #include <QTimer>
 
 //-----------------------------------------------------------------------------
-class qMRMLVirtualRealityViewPrivate: public QObject
+class qMRMLVirtualRealityViewPrivate : public QObject
 {
   Q_OBJECT
-  QVTK_OBJECT
-  Q_DECLARE_PUBLIC(qMRMLVirtualRealityView);
+    QVTK_OBJECT
+    Q_DECLARE_PUBLIC(qMRMLVirtualRealityView);
 protected:
   qMRMLVirtualRealityView* const q_ptr;
 public:
@@ -92,10 +98,15 @@ public:
   vtkMRMLVirtualRealityViewNode::XRBackendType currentXRBackend() const;
   bool currentXRBackendRemotingEnabled() const;
   std::string currentXRBackendRemotingIPAddress() const;
+  bool currentXRBackendPassthroughEnabled() const;
 
 public slots:
   void updateWidgetFromMRML();
   void doOpenVirtualReality();
+  /// Called at the end of each eye's renderer pass.
+  /// Captures color and/or depth data into CPU staging buffers while
+  /// the rendering FBO is still valid (before swapchain release).
+  void onRendererEndEvent();
 
 protected:
   void updateWidgetFromMRMLNoModify();
@@ -103,8 +114,13 @@ protected:
   void updateTransformNodeWithHMDPose();
   void updateTransformNodesWithTrackerPoses();
 
-  void updateTransformNodeFromDevice(vtkMRMLTransformNode* node, vtkEventDataDevice device, uint32_t index=0);
-  void updateTransformNodeAttributesFromDevice(vtkMRMLTransformNode* node, vtkEventDataDevice device, uint32_t index=0);
+  void updateTransformNodeFromDevice(vtkMRMLTransformNode* node, vtkEventDataDevice device, uint32_t index = 0);
+  void updateTransformNodeAttributesFromDevice(vtkMRMLTransformNode* node, vtkEventDataDevice device, uint32_t index = 0);
+
+  /// Capture VR scene color and/or passthrough depth data into MRML volume nodes.
+  /// Called each render tick when VRSceneColorVolumeEnabled or
+  /// PassthroughDepthVolumeEnabled is set on the view node.
+  void updatePassthroughVolumeNodes();
 
   void createRenderWindow(vtkMRMLVirtualRealityViewNode::XRBackendType xrBackend);
   void destroyRenderWindow();
@@ -133,8 +149,26 @@ protected:
 
   QString ActionManifestPath;
 
-  bool IsUpdatingWidgetFromMRML{false};
-  int InitializationAttempts{0};
+  bool IsUpdatingWidgetFromMRML{ false };
+  int InitializationAttempts{ 0 };
+
+  // Staging buffers for passthrough volume data captured during rendering.
+  // Filled in onRendererEndEvent() (FBO valid), consumed in updatePassthroughVolumeNodes().
+  bool ColorStagingHasData{ false };
+  std::vector<unsigned char> ColorStaging; // RGB, VTK_UNSIGNED_CHAR
+  int ColorStagingWidth{ 0 };
+  int ColorStagingHeight{ 0 };
+
+  bool DepthStagingHasData{ false };
+  std::vector<float> DepthStaging; // depth in mm, VTK_FLOAT
+  int DepthStagingWidth{ 0 };
+  int DepthStagingHeight{ 0 };
+
+  // In the private class header:
+  GLuint DepthBlitTexture{ 0 };
+  GLuint DepthBlitFBO{ 0 };
+  GLint  DepthBlitWidth{ 0 };
+  GLint  DepthBlitHeight{ 0 };
 
   QTimer VirtualRealityLoopTimer;
 };

@@ -95,6 +95,11 @@ void qSlicerVirtualRealityModuleWidget::setup()
   connect(d->XRBackendComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setVirtualRealityXRBackend(int)));
   connect(d->RemotingEnabledCheckBox, SIGNAL(toggled(bool)), this, SLOT(setRemotingEnabled(bool)));
   connect(d->PlayerIPAddressLineEdit, SIGNAL(editingFinished()), this, SLOT(onPlayerIPAddressLineEditEditingFinished()));
+  connect(d->PassthroughEnabledCheckBox, SIGNAL(toggled(bool)), this, SLOT(setPassthroughEnabled(bool)));
+  connect(d->VRSceneColorVolumeCheckBox, SIGNAL(toggled(bool)), this, SLOT(setVRSceneColorVolumeEnabled(bool)));
+  connect(d->PassthroughDepthVolumeCheckBox, SIGNAL(toggled(bool)), this, SLOT(setPassthroughDepthVolumeEnabled(bool)));
+  connect(d->OccludedOpacitySlider, SIGNAL(valueChanged(double)), this, SLOT(onOccludedOpacityChanged(double)));
+  connect(d->EnvDepthDebugCheckBox, SIGNAL(toggled(bool)), this, SLOT(setEnvDepthDebugVisualization(bool)));
 
   connect(d->ConnectCheckBox, SIGNAL(toggled(bool)), this, SLOT(setVirtualRealityConnected(bool)));
   connect(d->RenderingEnabledCheckBox, SIGNAL(toggled(bool)), this, SLOT(setVirtualRealityActive(bool)));
@@ -122,6 +127,17 @@ void qSlicerVirtualRealityModuleWidget::setup()
 
   // If virtual reality logic is modified it indicates that the view node may have changed
   qvtkConnect(logic(), vtkCommand::ModifiedEvent, this, SLOT(updateWidgetFromMRML()));
+
+  // TODO: Currently the depth opacity is not functional with the latest version of the Meta headset.
+  // Hide the widget until it can be fixed.
+  d->OccludedOpacityLabel->setHidden(true);
+  d->OccludedOpacitySlider->setHidden(true);
+  d->PassthroughDepthVolumeLabel->setHidden(true);
+  d->PassthroughDepthVolumeCheckBox->setHidden(true);
+  d->EnvDepthDebugLabel->setHidden(true);
+  d->EnvDepthDebugCheckBox->setHidden(true);
+  d->VRSceneColorVolumeLabel->setHidden(true);
+  d->VRSceneColorVolumeCheckBox->setHidden(true);
 }
 
 //--------------------------------------------------------------------------
@@ -241,6 +257,43 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
         && vrViewNode->GetRemoting());
   d->PlayerIPAddressLineEdit->setReadOnly(vrLogic->GetVirtualRealityConnected());
   d->PlayerIPAddressLineEdit->blockSignals(wasBlocked);
+
+  // Passthrough
+  wasBlocked = d->PassthroughEnabledCheckBox->blockSignals(true);
+  d->PassthroughEnabledCheckBox->setChecked(vrViewNode != nullptr ? vrViewNode->GetPassthrough() : false);
+  d->PassthroughEnabledCheckBox->setEnabled(
+        (vrViewNode != nullptr)
+        && vrViewNode->GetXRBackend() == vtkMRMLVirtualRealityViewNode::OpenXR
+        && !vrLogic->GetVirtualRealityConnected());
+  d->PassthroughEnabledCheckBox->blockSignals(wasBlocked);
+
+  // Environment-depth occlusion
+  wasBlocked = d->OccludedOpacitySlider->blockSignals(true);
+  d->OccludedOpacitySlider->setValue(vrViewNode != nullptr ? vrViewNode->GetOccludedOpacity() : 0.0);
+  d->OccludedOpacitySlider->setEnabled(vrViewNode != nullptr
+        && vrViewNode->GetXRBackend() == vtkMRMLVirtualRealityViewNode::OpenXR);
+  d->OccludedOpacitySlider->blockSignals(wasBlocked);
+
+  wasBlocked = d->EnvDepthDebugCheckBox->blockSignals(true);
+  d->EnvDepthDebugCheckBox->setChecked(vrViewNode != nullptr ? vrViewNode->GetEnvDepthDebugVisualization() : false);
+  d->EnvDepthDebugCheckBox->setEnabled(vrViewNode != nullptr
+        && vrViewNode->GetXRBackend() == vtkMRMLVirtualRealityViewNode::OpenXR);
+  d->EnvDepthDebugCheckBox->blockSignals(wasBlocked);
+
+  // VR scene color volume capture
+  wasBlocked = d->VRSceneColorVolumeCheckBox->blockSignals(true);
+  d->VRSceneColorVolumeCheckBox->setChecked(
+    vrViewNode != nullptr ? vrViewNode->GetVRSceneColorVolumeEnabled() : false);
+  d->VRSceneColorVolumeCheckBox->setEnabled(vrViewNode != nullptr && vrLogic->GetVirtualRealityActive());
+  d->VRSceneColorVolumeCheckBox->blockSignals(wasBlocked);
+
+  wasBlocked = d->PassthroughDepthVolumeCheckBox->blockSignals(true);
+  d->PassthroughDepthVolumeCheckBox->setChecked(
+    vrViewNode != nullptr ? vrViewNode->GetPassthroughDepthVolumeEnabled() : false);
+  d->PassthroughDepthVolumeCheckBox->setEnabled(vrViewNode != nullptr
+        && vrViewNode->GetXRBackend() == vtkMRMLVirtualRealityViewNode::OpenXR
+        && vrLogic->GetVirtualRealityActive());
+  d->PassthroughDepthVolumeCheckBox->blockSignals(wasBlocked);
 }
 
 
@@ -475,6 +528,61 @@ void qSlicerVirtualRealityModuleWidget::setRemotingEnabled(bool enabled)
   if (vrViewNode)
   {
     vrViewNode->SetRemoting(enabled);
+  }
+}
+
+//----------------------------------------------------------------------------
+void qSlicerVirtualRealityModuleWidget::setPassthroughEnabled(bool enabled)
+{
+  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
+  if (vrViewNode)
+  {
+    vrViewNode->SetPassthrough(enabled);
+  }
+}
+
+//----------------------------------------------------------------------------
+void qSlicerVirtualRealityModuleWidget::setVRSceneColorVolumeEnabled(bool enabled)
+{
+  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
+  if (vrViewNode)
+  {
+    vrViewNode->SetVRSceneColorVolumeEnabled(enabled);
+  }
+}
+
+//----------------------------------------------------------------------------
+void qSlicerVirtualRealityModuleWidget::setPassthroughDepthVolumeEnabled(bool enabled)
+{
+  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
+  if (vrViewNode)
+  {
+    vrViewNode->SetPassthroughDepthVolumeEnabled(enabled);
+  }
+}
+
+//----------------------------------------------------------------------------
+void qSlicerVirtualRealityModuleWidget::onOccludedOpacityChanged(double value)
+{
+  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
+  if (vrViewNode)
+  {
+    vrViewNode->SetOccludedOpacity(value);
+  }
+}
+
+//----------------------------------------------------------------------------
+void qSlicerVirtualRealityModuleWidget::setEnvDepthDebugVisualization(bool enabled)
+{
+  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
+  vtkMRMLVirtualRealityViewNode* vrViewNode = vrLogic->GetVirtualRealityViewNode();
+  if (vrViewNode)
+  {
+    vrViewNode->SetEnvDepthDebugVisualization(enabled);
   }
 }
 
