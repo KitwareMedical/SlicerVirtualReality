@@ -254,7 +254,7 @@ bool vtkVirtualRealityViewInteractorObserver::DelegateInteractionEventDataToDisp
   else if (vrViewInteractor && vrViewInteractor->GetCurrentGesture() == vtkCommand::NoEvent)
     {
     // Report an error message only if the interactor is not processing a complex gesture.
-    vtkErrorMacro("DelegateInteractionEventDataToDisplayableManagers: Unrecognized device");
+    vtkErrorMacro("DelegateInteractionEventDataToDisplayableManagers: Unrecognized device " << int(ed->GetDevice()));
     }
   ed->SetInteractionContextName(interactionContextName);
 

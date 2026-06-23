@@ -255,6 +255,73 @@ public:
   vtkGetMacro(PlayerIPAddress, std::string);
   ///@}
 
+  ///@{
+  /// Enable camera passthrough (mixed reality / AR mode) for OpenXR.
+  ///
+  /// When enabled, the real-world view seen through the headset cameras is
+  /// blended with the rendered 3D scene using
+  /// XR_ENVIRONMENT_BLEND_MODE_ALPHA_BLEND.  The scene background is rendered
+  /// fully transparent so the camera feed shows through.
+  ///
+  /// This option only has an effect when the XR backend is OpenXR and the
+  /// runtime supports XR_ENVIRONMENT_BLEND_MODE_ALPHA_BLEND (e.g. Meta Quest 3
+  /// via Quest Link / Air Link).
+  ///
+  /// Changing this setting requires reconnecting to the headset.
+  vtkGetMacro(Passthrough, bool);
+  vtkSetMacro(Passthrough, bool);
+  vtkBooleanMacro(Passthrough, bool);
+  ///@}
+
+  ///@{
+  /// Opacity applied to virtual geometry that is occluded by real-world
+  /// surfaces when XR_META_environment_depth occlusion is active.
+  ///
+  ///  0.0 (default) – fully occluded (hard depth pre-pass).
+  ///  0.0 < x < 1.0 – partial occlusion (post-pass alpha blend).
+  ///  1.0            – no depth composition (bypass entirely).
+  ///
+  /// Has no effect when env-depth is unavailable or inactive.
+  vtkGetMacro(OccludedOpacity, double);
+  vtkSetClampMacro(OccludedOpacity, double, 0.0, 1.0);
+  ///@}
+
+  ///@{
+  /// Show a false-colour overlay of the real-world depth texture for debugging.
+  /// Red = near (0 m), blue = far (~5 m).
+  /// Has no effect when XR_META_environment_depth is unavailable or inactive.
+  vtkGetMacro(EnvDepthDebugVisualization, bool);
+  vtkSetMacro(EnvDepthDebugVisualization, bool);
+  vtkBooleanMacro(EnvDepthDebugVisualization, bool);
+  ///@}
+
+  ///@{
+  /// If enabled, the rendered left-eye VR scene is captured each render tick
+  /// and written to a vtkMRMLVectorVolumeNode named "VR Scene (Left Eye)"
+  /// (RGB, unsigned char).
+  ///
+  /// The captured image is the rendered VR scene for the left eye as submitted
+  /// to the display. This is not the raw headset camera feed; it is the
+  /// composited output of the VR renderer (geometry, overlays, etc.).
+  /// When XR_ENVIRONMENT_BLEND_MODE_ALPHA_BLEND (passthrough) is active,
+  /// transparent areas will include the real-world camera feed composited by
+  /// the runtime, but the primary content is the rendered scene.
+  vtkGetMacro(VRSceneColorVolumeEnabled, bool);
+  vtkSetMacro(VRSceneColorVolumeEnabled, bool);
+  vtkBooleanMacro(VRSceneColorVolumeEnabled, bool);
+  ///@}
+
+  ///@{
+  /// If enabled, the real-world environment depth is captured each render tick
+  /// (via XR_META_environment_depth) and written to a vtkMRMLScalarVolumeNode
+  /// named "Passthrough Depth".  Scalar values are in millimetres (float).
+  ///
+  /// Has no effect if XR_META_environment_depth is unavailable or inactive.
+  vtkGetMacro(PassthroughDepthVolumeEnabled, bool);
+  vtkSetMacro(PassthroughDepthVolumeEnabled, bool);
+  vtkBooleanMacro(PassthroughDepthVolumeEnabled, bool);
+  ///@}
+
   /// Return true if an error has occurred.
   /// "Connected" member requests connection but this method can tell if the
   /// hardware connection has been actually successfully established.
@@ -289,6 +356,17 @@ protected:
   // OpenXRRemoting
   bool Remoting{false};
   std::string PlayerIPAddress;
+
+  // Passthrough (OpenXR alpha blend mode)
+  bool Passthrough{false};
+
+  // Environment-depth occlusion (XR_META_environment_depth)
+  double OccludedOpacity{1.0};
+  bool EnvDepthDebugVisualization{false};
+
+  // VR scene / passthrough volume capture
+  bool VRSceneColorVolumeEnabled{false};
+  bool PassthroughDepthVolumeEnabled{false};
 
   vtkMRMLVirtualRealityViewNode();
   ~vtkMRMLVirtualRealityViewNode() override;

@@ -89,6 +89,11 @@ void vtkMRMLVirtualRealityViewNode::WriteXML(ostream& of, int nIndent)
   // OpenXRRemoting
   vtkMRMLWriteXMLBooleanMacro(remoting, Remoting);
   vtkMRMLWriteXMLStdStringMacro(playerIPAddress, PlayerIPAddress);
+  vtkMRMLWriteXMLBooleanMacro(passthrough, Passthrough);
+  vtkMRMLWriteXMLFloatMacro(occludedOpacity, OccludedOpacity);
+  vtkMRMLWriteXMLBooleanMacro(envDepthDebugVisualization, EnvDepthDebugVisualization);
+  vtkMRMLWriteXMLBooleanMacro(vrSceneColorVolumeEnabled, VRSceneColorVolumeEnabled);
+  vtkMRMLWriteXMLBooleanMacro(passthroughDepthVolumeEnabled, PassthroughDepthVolumeEnabled);
   vtkMRMLWriteXMLEndMacro();
 }
 
@@ -114,6 +119,11 @@ void vtkMRMLVirtualRealityViewNode::ReadXMLAttributes(const char** atts)
   // OpenXRRemoting
   vtkMRMLReadXMLBooleanMacro(remoting, Remoting);
   vtkMRMLReadXMLStdStringMacro(playerIPAddress, PlayerIPAddress);
+  vtkMRMLReadXMLBooleanMacro(passthrough, Passthrough);
+  vtkMRMLReadXMLFloatMacro(occludedOpacity, OccludedOpacity);
+  vtkMRMLReadXMLBooleanMacro(envDepthDebugVisualization, EnvDepthDebugVisualization);
+  vtkMRMLReadXMLBooleanMacro(vrSceneColorVolumeEnabled, VRSceneColorVolumeEnabled);
+  vtkMRMLReadXMLBooleanMacro(passthroughDepthVolumeEnabled, PassthroughDepthVolumeEnabled);
   vtkMRMLReadXMLEndMacro();
 
   this->EndModify(disabledModify);
@@ -143,6 +153,11 @@ void vtkMRMLVirtualRealityViewNode::Copy(vtkMRMLNode* anode)
   // OpenXRRemoting
   vtkMRMLCopyBooleanMacro(Remoting);
   vtkMRMLCopyStringMacro(PlayerIPAddress);
+  vtkMRMLCopyBooleanMacro(Passthrough);
+  vtkMRMLCopyFloatMacro(OccludedOpacity);
+  vtkMRMLCopyBooleanMacro(EnvDepthDebugVisualization);
+  vtkMRMLCopyBooleanMacro(VRSceneColorVolumeEnabled);
+  vtkMRMLCopyBooleanMacro(PassthroughDepthVolumeEnabled);
   vtkMRMLCopyEndMacro();
 
   this->EndModify(disabledModify);
@@ -168,6 +183,11 @@ void vtkMRMLVirtualRealityViewNode::PrintSelf(ostream& os, vtkIndent indent)
   // OpenXRRemoting
   vtkMRMLPrintBooleanMacro(Remoting);
   vtkMRMLPrintStdStringMacro(PlayerIPAddress);
+  vtkMRMLPrintBooleanMacro(Passthrough);
+  vtkMRMLPrintFloatMacro(OccludedOpacity);
+  vtkMRMLPrintBooleanMacro(EnvDepthDebugVisualization);
+  vtkMRMLPrintBooleanMacro(VRSceneColorVolumeEnabled);
+  vtkMRMLPrintBooleanMacro(PassthroughDepthVolumeEnabled);
   vtkMRMLPrintEndMacro();
 }
 

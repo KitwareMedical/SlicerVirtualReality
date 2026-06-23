@@ -33,6 +33,8 @@
 // Slicer includes
 #include <vtkSlicerModuleLogic.h>
 class vtkSlicerVolumeRenderingLogic;
+class vtkMRMLScalarVolumeNode;
+class vtkMRMLVectorVolumeNode;
 
 // VTK/Rendering/VR includes
 class vtkVRRenderWindowInteractor;
@@ -106,6 +108,14 @@ public:
 
   /// Set volume rendering logic
   void SetVolumeRenderingLogic(vtkSlicerVolumeRenderingLogic* volumeRenderingLogic);
+
+  /// Get the VR scene color (left-eye rendered frame) volume node, creating it if it does not exist.
+  /// Returns nullptr if no MRML scene is set.
+  vtkMRMLVectorVolumeNode* GetOrCreateVRSceneColorVolumeNode();
+
+  /// Get the passthrough depth volume node, creating it if it does not exist.
+  /// Returns nullptr if no MRML scene is set.
+  vtkMRMLScalarVolumeNode* GetOrCreatePassthroughDepthVolumeNode();
 
   /// Determines whether rendering should occur as quick view motion.
   ///
