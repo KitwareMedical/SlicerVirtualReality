@@ -30,6 +30,7 @@
 
 // VTK includes
 #include <vtkObject.h>
+#include <vtkCommand.h>
 #include <vtkEventData.h>
 #include <vtkSmartPointer.h>
 #include <vtkWeakPointer.h>
@@ -45,6 +46,76 @@ class VTK_SLICER_VIRTUALREALITY_MODULE_MRMLDISPLAYABLEMANAGER_EXPORT vtkVirtualR
 public:
   static vtkVirtualRealityViewOpenXRInteractorStyle *New();
   vtkTypeMacro(vtkVirtualRealityViewOpenXRInteractorStyle,vtkOpenXRInteractorStyle);
+
+  /// Generic, per-physical-control event IDs. One event ID per literal action
+  /// output name declared in Resources/Bindings/vtk_openxr_actions.json and
+  /// vtk_openxr_binding_oculus_touch_controller.json.
+  ///
+  /// Most of these are dispatched directly by AddAction() in SetupActions()
+  /// below and are independently observable by any code. A handful
+  /// (RightButton1ClickEvent, RightButton2ClickEvent, LeftMenuClickEvent,
+  /// RightThumbstickEvent, RightThumbstickTouchEvent) are instead bound by
+  /// default directly to a legacy VTK 3D event (Select3DEvent, Menu3DEvent,
+  /// ...) to preserve existing end-user behavior; their enum values remain
+  /// available so the corresponding action can be rebound back to "raw" mode.
+  ///
+  /// To customize which VTK event a given action invokes (e.g. remap a button
+  /// to a different event, or move movement from the right to the left
+  /// thumbstick), call vtkSlicerVirtualRealityLogic::AddAction() from Python
+  /// with the action's name (e.g. "right_button1_click") and the desired
+  /// vtkCommand event (or one of these GenericActionEvents values to make an
+  /// action raw again); see the "Low-level interception of events" section of
+  /// DeveloperGuide.md.
+  ///
+  /// \warning LeftGripValueEvent, RightGripValueEvent, LeftTriggerValueEvent and
+  /// RightTriggerValueEvent correspond to OpenXR "float" actions. As of this
+  /// writing, vtkOpenXRRenderWindowInteractor::HandleAction() does not implement
+  /// the XR_ACTION_TYPE_FLOAT_INPUT case, so these four events are registered
+  /// and bound correctly but will never actually be invoked until VTK adds
+  /// float-action dispatch support.
+  enum GenericActionEvents
+  {
+    LeftGripPoseEvent = vtkCommand::UserEvent + 1000,
+    RightGripPoseEvent,
+    LeftAimPoseEvent,
+    RightAimPoseEvent,
+
+    LeftGripValueEvent,
+    RightGripValueEvent,
+    LeftTriggerValueEvent,
+    RightTriggerValueEvent,
+    LeftTriggerTouchEvent,
+    RightTriggerTouchEvent,
+
+    LeftThumbstickEvent,
+    RightThumbstickEvent,
+    LeftThumbstickClickEvent,
+    RightThumbstickClickEvent,
+    LeftThumbstickTouchEvent,
+    RightThumbstickTouchEvent,
+
+    LeftThumbrestTouchEvent,
+    RightThumbrestTouchEvent,
+
+    LeftButton1ClickEvent,
+    LeftButton1TouchEvent,
+    LeftButton2ClickEvent,
+    LeftButton2TouchEvent,
+    LeftMenuClickEvent,
+
+    RightButton1ClickEvent,
+    RightButton1TouchEvent,
+    RightButton2ClickEvent,
+    RightButton2TouchEvent,
+    RightSystemClickEvent,
+  };
+
+  /// Register the 28 generic per-control Oculus Touch actions with the interactor.
+  /// Overrides vtkOpenXRInteractorStyle::SetupActions(), which otherwise registers
+  /// the legacy curated action set (elevation, movement, nextcamerapose,
+  /// positionprop, showmenu, startelevation, startmovement, triggeraction) that
+  /// is no longer declared in this module's own action manifest.
+  void SetupActions(vtkRenderWindowInteractor* iren) override;
 
   ///@{
   /// Set/get delegate

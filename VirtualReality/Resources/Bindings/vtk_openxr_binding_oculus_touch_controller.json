@@ -1,0 +1,200 @@
+{
+  "interaction_profile": "/interaction_profiles/oculus/touch_controller",
+
+  "bindings": {
+    "vtk-actions": {
+      "sources": [
+        {
+          "inputs": {
+            "pose": {
+              "output": "left_grip_pose"
+            }
+          },
+          "path": "/user/hand/left/input/grip"
+        },
+        {
+          "inputs": {
+            "pose": {
+              "output": "right_grip_pose"
+            }
+          },
+          "path": "/user/hand/right/input/grip"
+        },
+        {
+          "inputs": {
+            "pose": {
+              "output": "handpose"
+            }
+          },
+          "path": "/user/hand/left/input/aim"
+        },
+        {
+          "inputs": {
+            "pose": {
+              "output": "left_aim_pose"
+            }
+          },
+          "path": "/user/hand/left/input/aim"
+        },
+        {
+          "inputs": {
+            "pose": {
+              "output": "handpose"
+            }
+          },
+          "path": "/user/hand/right/input/aim"
+        },
+        {
+          "inputs": {
+            "pose": {
+              "output": "right_aim_pose"
+            }
+          },
+          "path": "/user/hand/right/input/aim"
+        },
+        {
+          "inputs": {
+            "value": {
+              "output": "left_grip_value"
+            }
+          },
+          "path": "/user/hand/left/input/squeeze"
+        },
+        {
+          "inputs": {
+            "value": {
+              "output": "right_grip_value"
+            }
+          },
+          "path": "/user/hand/right/input/squeeze"
+        },
+        {
+          "inputs": {
+            "value": {
+              "output": "left_trigger_value"
+            },
+            "touch": {
+              "output": "left_trigger_touch"
+            }
+          },
+          "path": "/user/hand/left/input/trigger"
+        },
+        {
+          "inputs": {
+            "value": {
+              "output": "right_trigger_value"
+            },
+            "touch": {
+              "output": "right_trigger_touch"
+            }
+          },
+          "path": "/user/hand/right/input/trigger"
+        },
+        {
+          "inputs": {
+            "position": {
+              "output": "left_thumbstick"
+            },
+            "click": {
+              "output": "left_thumbstick_click"
+            },
+            "touch": {
+              "output": "left_thumbstick_touch"
+            }
+          },
+          "path": "/user/hand/left/input/thumbstick"
+        },
+        {
+          "inputs": {
+            "position": {
+              "output": "right_thumbstick"
+            },
+            "click": {
+              "output": "right_thumbstick_click"
+            },
+            "touch": {
+              "output": "right_thumbstick_touch"
+            }
+          },
+          "path": "/user/hand/right/input/thumbstick"
+        },
+        {
+          "inputs": {
+            "touch": {
+              "output": "left_thumbrest_touch"
+            }
+          },
+          "path": "/user/hand/left/input/thumbrest"
+        },
+        {
+          "inputs": {
+            "touch": {
+              "output": "right_thumbrest_touch"
+            }
+          },
+          "path": "/user/hand/right/input/thumbrest"
+        },
+        {
+          "inputs": {
+            "click": {
+              "output": "left_button1_click"
+            },
+            "touch": {
+              "output": "left_button1_touch"
+            }
+          },
+          "path": "/user/hand/left/input/x"
+        },
+        {
+          "inputs": {
+            "click": {
+              "output": "left_button2_click"
+            },
+            "touch": {
+              "output": "left_button2_touch"
+            }
+          },
+          "path": "/user/hand/left/input/y"
+        },
+        {
+          "inputs": {
+            "click": {
+              "output": "left_menu_click"
+            }
+          },
+          "path": "/user/hand/left/input/menu"
+        },
+        {
+          "inputs": {
+            "click": {
+              "output": "right_button1_click"
+            },
+            "touch": {
+              "output": "right_button1_touch"
+            }
+          },
+          "path": "/user/hand/right/input/a"
+        },
+        {
+          "inputs": {
+            "click": {
+              "output": "right_button2_click"
+            },
+            "touch": {
+              "output": "right_button2_touch"
+            }
+          },
+          "path": "/user/hand/right/input/b"
+        },
+        {
+          "inputs": {
+            "click": {
+              "output": "right_system_click"
+            }
+          },
+          "path": "/user/hand/right/input/system"
+        }
+      ]
+    }
+  }
+}

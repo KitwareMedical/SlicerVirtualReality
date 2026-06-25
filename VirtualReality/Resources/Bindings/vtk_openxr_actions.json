@@ -1,0 +1,95 @@
+{
+  "actions": [
+    { "name": "handpose", "type": "pose" },
+    { "name": "handposegrip", "type": "pose" },
+    { "name": "haptic", "type": "vibration" },
+    { "name": "complexgestureaction", "type": "boolean" },
+
+    { "name": "left_grip_pose", "type": "pose" },
+    { "name": "right_grip_pose", "type": "pose" },
+    { "name": "left_aim_pose", "type": "pose" },
+    { "name": "right_aim_pose", "type": "pose" },
+
+    { "name": "left_grip_value", "type": "float" },
+    { "name": "right_grip_value", "type": "float" },
+    { "name": "left_trigger_value", "type": "float" },
+    { "name": "right_trigger_value", "type": "float" },
+    { "name": "left_trigger_touch", "type": "boolean" },
+    { "name": "right_trigger_touch", "type": "boolean" },
+
+    { "name": "left_thumbstick", "type": "vector2" },
+    { "name": "right_thumbstick", "type": "vector2" },
+    { "name": "left_thumbstick_click", "type": "boolean" },
+    { "name": "right_thumbstick_click", "type": "boolean" },
+    { "name": "left_thumbstick_touch", "type": "boolean" },
+    { "name": "right_thumbstick_touch", "type": "boolean" },
+
+    { "name": "left_thumbrest_touch", "type": "boolean" },
+    { "name": "right_thumbrest_touch", "type": "boolean" },
+
+    { "name": "left_button1_click", "type": "boolean" },
+    { "name": "left_button1_touch", "type": "boolean" },
+    { "name": "left_button2_click", "type": "boolean" },
+    { "name": "left_button2_touch", "type": "boolean" },
+    { "name": "left_menu_click", "type": "boolean" },
+
+    { "name": "right_button1_click", "type": "boolean" },
+    { "name": "right_button1_touch", "type": "boolean" },
+    { "name": "right_button2_click", "type": "boolean" },
+    { "name": "right_button2_touch", "type": "boolean" },
+    { "name": "right_system_click", "type": "boolean" }
+  ],
+  "default_bindings": [
+    {
+      "binding_url": "vtk_openxr_binding_oculus_touch_controller.json",
+      "controller_type": "oculus_touch"
+    }
+  ],
+  "action_sets": [
+    { "name": "vtk-actions", "localizedName": "VTK actions" }
+  ],
+  "localization": [
+    {
+      "handpose": "Hand Pose",
+      "handposegrip": "Hand Pose Grip",
+      "haptic": "Haptic Vibration",
+      "complexgestureaction": "Complex Gesture Action",
+
+      "left_grip_pose": "Left Grip Pose",
+      "right_grip_pose": "Right Grip Pose",
+      "left_aim_pose": "Left Aim Pose",
+      "right_aim_pose": "Right Aim Pose",
+
+      "left_grip_value": "Left Grip Value",
+      "right_grip_value": "Right Grip Value",
+      "left_trigger_value": "Left Trigger Value",
+      "right_trigger_value": "Right Trigger Value",
+      "left_trigger_touch": "Left Trigger Touch",
+      "right_trigger_touch": "Right Trigger Touch",
+
+      "left_thumbstick": "Left Thumbstick",
+      "right_thumbstick": "Right Thumbstick",
+      "left_thumbstick_click": "Left Thumbstick Click",
+      "right_thumbstick_click": "Right Thumbstick Click",
+      "left_thumbstick_touch": "Left Thumbstick Touch",
+      "right_thumbstick_touch": "Right Thumbstick Touch",
+
+      "left_thumbrest_touch": "Left Thumbrest Touch",
+      "right_thumbrest_touch": "Right Thumbrest Touch",
+
+      "left_button1_click": "Left Button 1 Click",
+      "left_button1_touch": "Left Button 1 Touch",
+      "left_button2_click": "Left Button 2 Click",
+      "left_button2_touch": "Left Button 2 Touch",
+      "left_menu_click": "Left Menu Click",
+
+      "right_button1_click": "Right Button 1 Click",
+      "right_button1_touch": "Right Button 1 Touch",
+      "right_button2_click": "Right Button 2 Click",
+      "right_button2_touch": "Right Button 2 Touch",
+      "right_system_click": "Right System Click",
+
+      "language_tag": "en_US"
+    }
+  ]
+}

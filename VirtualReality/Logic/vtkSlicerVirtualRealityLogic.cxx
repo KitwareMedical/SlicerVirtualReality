@@ -762,13 +762,20 @@ std::string vtkSlicerVirtualRealityLogic::ComputeActionManifestPath(
     // First, we retrieve <module-share-dir>
 
     // ... then we change the directory to <extension-name>/<thirdparty-lib-dir>/<actions-subdir>/
+    //
+    // Note: the OpenXR case is different. The VirtualReality module owns its OpenXR action
+    // manifest and binding file(s) (see VirtualReality/Logic/CMakeLists.txt), deployed directly
+    // under this module's own share directory ("xr_actions" subdirectory) instead of reaching
+    // into vtkRenderingOpenXR's own "xr_actions" install location. Since Slicer's install tree
+    // preserves the same share/Slicer-X.Y/qt-loadable-modules/<module-name> layout as the build
+    // tree, the same relative path applies in both the installed and build-tree branches below.
     switch (xrBackend)
     {
       case vtkMRMLVirtualRealityViewNode::OpenVR:
         actionManifestPath = moduleShareDirectory + "/../../../../" Slicer_THIRDPARTY_LIB_DIR "/vr_actions/";
         break;
       case vtkMRMLVirtualRealityViewNode::OpenXR:
-        actionManifestPath = moduleShareDirectory + "/../../../../" Slicer_THIRDPARTY_LIB_DIR "/xr_actions/";
+        actionManifestPath = moduleShareDirectory + "/xr_actions/";
         break;
       default:
         vtkErrorWithObjectMacro(nullptr, << "ComputeActionManifestPath: No install tree action manifest path set for"
@@ -791,13 +798,17 @@ std::string vtkSlicerVirtualRealityLogic::ComputeActionManifestPath(
     // First, we retrieve <module-share-dir>
 
     // ... then we change the directory to <vtk-module-name>-build/<vtk-module-name>/
+    //
+    // Note: the OpenXR case is different, see comment in the "installed" branch above -- the
+    // module's own "xr_actions" resources are deployed under <module-share-dir> in the build
+    // tree too, so no separate vtkRenderingOpenXR-build lookup is needed.
     switch (xrBackend)
     {
       case vtkMRMLVirtualRealityViewNode::OpenVR:
         actionManifestPath = moduleShareDirectory + "/../../../../../vtkRenderingOpenVR-build/vtkRenderingOpenVR/";
         break;
       case vtkMRMLVirtualRealityViewNode::OpenXR:
-        actionManifestPath = moduleShareDirectory + "/../../../../../vtkRenderingOpenXR-build/vtkRenderingOpenXR/";
+        actionManifestPath = moduleShareDirectory + "/xr_actions/";
         break;
       default:
         vtkErrorWithObjectMacro(nullptr, <<"ComputeActionManifestPath: No build tree action manifest path set for"
