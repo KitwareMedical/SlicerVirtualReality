@@ -25,6 +25,7 @@
 // MRML includes
 class vtkMRMLDisplayableNode;
 class vtkMRMLScene;
+class vtkMRMLTransformNode;
 
 // MRMLDM includes
 #include <vtkMRMLDisplayableManagerGroup.h>
@@ -113,6 +114,12 @@ protected:
   bool GrabEnabled{true};
   vtkWeakPointer<vtkMRMLDisplayableNode> PickedNode[vtkEventDataNumberOfDevices];
   vtkWeakPointer<vtkMRMLDisplayableManagerGroup> DisplayableManagers;
+
+  // VR interaction transform node being driven by each device's grab, and the controller/object
+  // poses recorded at the start of that grab (see StartPositionProp()/PositionProp()).
+  vtkWeakPointer<vtkMRMLTransformNode> InteractionTransformNode[vtkEventDataNumberOfDevices];
+  vtkNew<vtkMatrix4x4> StartingControllerPoseToWorldMatrix[vtkEventDataNumberOfDevices];
+  vtkNew<vtkMatrix4x4> StartingObjectToWorldMatrix[vtkEventDataNumberOfDevices];
 
 private:
   vtkVirtualRealityViewInteractorStyleDelegate() = default;

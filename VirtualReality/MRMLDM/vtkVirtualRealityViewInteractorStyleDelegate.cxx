@@ -42,9 +42,7 @@
 #include <vtkInteractorStyle.h>
 #include <vtkMatrix4x4.h>
 #include <vtkObjectFactory.h>
-#include <vtkQuaternion.h>
 #include <vtkRenderer.h>
-#include <vtkRenderWindowInteractor3D.h>
 #include <vtkTransform.h>
 
 //----------------------------------------------------------------------------
@@ -260,7 +258,8 @@ void vtkVirtualRealityViewInteractorStyleDelegate::PositionProp(
   }
   int deviceIndex = static_cast<int>(edd->GetDevice());
   vtkMRMLDisplayableNode* pickedNode = this->PickedNode[deviceIndex];
-  if (pickedNode == nullptr || !pickedNode->GetSelectable())
+  vtkMRMLTransformNode* vrTransformNode = this->InteractionTransformNode[deviceIndex];
+  if (pickedNode == nullptr || !pickedNode->GetSelectable() || vrTransformNode == nullptr)
   {
     return;
   }
@@ -269,92 +268,41 @@ void vtkVirtualRealityViewInteractorStyleDelegate::PositionProp(
     return;
   }
 
-  // Get positions and orientations
-  vtkRenderWindowInteractor3D* rwi = vtkRenderWindowInteractor3D::SafeDownCast(istyle->GetInteractor());
+  // Compute the object's new world pose directly from the controller's current pose and the
+  // controller/object poses recorded at the start of the grab (see StartPositionProp()):
+  //   newObjectToWorld = (currentControllerToWorld * startingControllerToWorld^-1) * startingObjectToWorld
+  // Deriving the pose from the grab's starting pose every frame (rather than accumulating a
+  // per-frame delta onto the previous frame's result) avoids compounding per-frame tracking
+  // noise: any small spurious rotation in a single frame's controller pose would otherwise get
+  // baked into the accumulated transform permanently, and, amplified by the lever arm between
+  // the controller and the grabbed point, show up as the object slowly drifting away.
   double worldPos[3] = {0.0};
   edd->GetWorldPosition(worldPos);
-  double* lastWorldPos = rwi->GetLastWorldEventPosition(rwi->GetPointerIndex());
-  double* worldOrientation = rwi->GetWorldEventOrientation(rwi->GetPointerIndex());
-  double* lastWorldOrientation = rwi->GetLastWorldEventOrientation(rwi->GetPointerIndex());
+  double worldOrientation[4] = {0.0};
+  edd->GetWorldOrientation(worldOrientation);
 
-  // Calculate transform
-  vtkNew<vtkTransform> interactionTransform;
-  interactionTransform->PreMultiply();
+  vtkNew<vtkMatrix4x4> currentControllerToWorldMatrix;
+  vtkMatrix4x4::PoseToMatrix(worldPos, worldOrientation, currentControllerToWorldMatrix);
 
-  double translation[3] = {0.0};
-  for (int i = 0; i < 3; i++)
-  {
-    translation[i] = worldPos[i] - lastWorldPos[i];
-  }
-  vtkQuaternion<double> q1;
-  q1.SetRotationAngleAndAxis(vtkMath::RadiansFromDegrees(
-    lastWorldOrientation[0]), lastWorldOrientation[1], lastWorldOrientation[2], lastWorldOrientation[3]);
-  vtkQuaternion<double> q2;
-  q2.SetRotationAngleAndAxis(vtkMath::RadiansFromDegrees(
-    worldOrientation[0]), worldOrientation[1], worldOrientation[2], worldOrientation[3]);
-  q1.Conjugate();
-  q2 = q2*q1;
-  double axis[4] = {0.0};
-  axis[0] = vtkMath::DegreesFromRadians(q2.GetRotationAngleAndAxis(axis+1));
-  interactionTransform->Translate(worldPos[0], worldPos[1], worldPos[2]);
-  interactionTransform->RotateWXYZ(axis[0], axis[1], axis[2], axis[3]);
-  interactionTransform->Translate(-worldPos[0], -worldPos[1], -worldPos[2]);
-  interactionTransform->Translate(translation[0], translation[1], translation[2]);
+  vtkNew<vtkMatrix4x4> startingControllerToWorldMatrixInverse;
+  vtkMatrix4x4::Invert(
+    this->StartingControllerPoseToWorldMatrix[deviceIndex], startingControllerToWorldMatrixInverse);
 
-  // Make sure that the topmost parent transform is the VR interaction transform
-  vtkMRMLTransformNode* topTransformNode = pickedNode->GetParentTransformNode();
-  while (topTransformNode && topTransformNode->GetParentTransformNode())
-  {
-    topTransformNode = topTransformNode->GetParentTransformNode();
-  }
-  vtkMRMLTransformNode* vrTransformNode = nullptr;
-  if (!topTransformNode)
-  {
-    // Create interaction transform if no transform found
-    vtkNew<vtkMRMLLinearTransformNode> newTransformNode;
-    std::string vrTransformNodeName(pickedNode->GetName());
-    vrTransformNodeName.append("_VR_Interaction_Transform");
-    newTransformNode->SetName(vrTransformNodeName.c_str());
-    newTransformNode->SetAttribute(
-      vtkMRMLVirtualRealityViewNode::GetVirtualRealityInteractionTransformAttributeName(), "1");
-    pickedNode->GetScene()->AddNode(newTransformNode);
-    pickedNode->SetAndObserveTransformNodeID(newTransformNode->GetID());
-    vrTransformNode = newTransformNode.GetPointer();
-  }
-  else
-  {
-    // Make top transform the VR interaction transform
-    if (!topTransformNode->GetAttribute(
-      vtkMRMLVirtualRealityViewNode::GetVirtualRealityInteractionTransformAttributeName()) )
-    {
-      vtkInfoMacro("PositionProp: Transform " << topTransformNode->GetName() <<
-        " is now used as VR interaction transform for node " << pickedNode->GetName());
-      topTransformNode->SetAttribute(
-        vtkMRMLVirtualRealityViewNode::GetVirtualRealityInteractionTransformAttributeName(), "1");
-    }
-    // VR interaction transform found (i.e. the top transform has the VR interaction transform attribute)
-    vrTransformNode = topTransformNode;
-  }
+  vtkNew<vtkMatrix4x4> controllerDeltaMatrix;
+  vtkMatrix4x4::Multiply4x4(
+    currentControllerToWorldMatrix, startingControllerToWorldMatrixInverse, controllerDeltaMatrix);
 
-  // Apply interaction transform
-  vtkTransform* lastVrInteractionTransform = vtkTransform::SafeDownCast(vrTransformNode->GetTransformToParent());
-  if (vrTransformNode->GetTransformToParent() && !lastVrInteractionTransform)
-  {
-    //TODO: Remove constraint
-    vtkErrorMacro("PositionProp failed: Node " << pickedNode->GetName() << " contains non-linear transform");
-    return;
-  }
-  // Use the interaction transform with the flattened matrix to prevent concatenation
-  // of potentially thousands of transforms
-  if (lastVrInteractionTransform)
-  {
-    interactionTransform->Concatenate(lastVrInteractionTransform->GetMatrix());
-    lastVrInteractionTransform->DeepCopy(interactionTransform);
-  }
-  else
-  {
-    vrTransformNode->SetAndObserveTransformToParent(interactionTransform);
-  }
+  vtkNew<vtkMatrix4x4> newObjectToWorldMatrix;
+  vtkMatrix4x4::Multiply4x4(
+    controllerDeltaMatrix, this->StartingObjectToWorldMatrix[deviceIndex], newObjectToWorldMatrix);
+
+  // Use SetMatrixTransformToParent() rather than fetching/SetMatrix()-ing the underlying
+  // vtkTransform directly: it reuses the flattened matrix transform (avoiding concatenation
+  // of potentially thousands of transforms) the same way, but also creates that transform on
+  // the first call and -- unlike vtkTransform::SetMatrix()/Concatenate(), which only updates
+  // internal state and GetMTime() without invoking Modified() -- guarantees the node's
+  // TransformModifiedEvent actually fires so the renderer and GUI observe the change.
+  vrTransformNode->SetMatrixTransformToParent(newObjectToWorldMatrix);
 
   if (istyle->GetAutoAdjustCameraClippingRange())
   {
@@ -390,11 +338,13 @@ void vtkVirtualRealityViewInteractorStyleDelegate::StartPositionProp(vtkEventDat
   }
 
   vtkEventDataDevice device = edata->GetDevice();
+  int deviceIndex = static_cast<int>(device);
 
   double pos[3] = {0.0};
   edata->GetWorldPosition(pos);
 
   // Get MRML node to move
+  vtkMRMLDisplayableNode* pickedNode = nullptr;
   for (int i=0; i<this->DisplayableManagers->GetDisplayableManagerCount(); ++i)
   {
     vtkMRMLAbstractThreeDViewDisplayableManager* currentDisplayableManager =
@@ -411,10 +361,77 @@ void vtkVirtualRealityViewInteractorStyleDelegate::StartPositionProp(vtkEventDat
       continue;
     }
     //TODO: Only the first selectable picked node in the last displayable manager will be picked
-    vtkMRMLDisplayableNode* pickedNode = displayNode->GetDisplayableNode();
-    if (pickedNode != nullptr && pickedNode->GetSelectable() && this->GrabEnabled)
+    vtkMRMLDisplayableNode* currentPickedNode = displayNode->GetDisplayableNode();
+    if (currentPickedNode != nullptr && currentPickedNode->GetSelectable() && this->GrabEnabled)
     {
-      this->PickedNode[static_cast<int>(device)] = pickedNode;
+      pickedNode = currentPickedNode;
+    }
+  }
+
+  if (pickedNode != nullptr)
+  {
+    // Make sure that the topmost parent transform is the VR interaction transform
+    vtkMRMLTransformNode* topTransformNode = pickedNode->GetParentTransformNode();
+    while (topTransformNode && topTransformNode->GetParentTransformNode())
+    {
+      topTransformNode = topTransformNode->GetParentTransformNode();
+    }
+    vtkMRMLTransformNode* vrTransformNode = nullptr;
+    if (!topTransformNode)
+    {
+      // Create interaction transform if no transform found
+      vtkNew<vtkMRMLLinearTransformNode> newTransformNode;
+      std::string vrTransformNodeName(pickedNode->GetName());
+      vrTransformNodeName.append("_VR_Interaction_Transform");
+      newTransformNode->SetName(vrTransformNodeName.c_str());
+      newTransformNode->SetAttribute(
+        vtkMRMLVirtualRealityViewNode::GetVirtualRealityInteractionTransformAttributeName(), "1");
+      pickedNode->GetScene()->AddNode(newTransformNode);
+      pickedNode->SetAndObserveTransformNodeID(newTransformNode->GetID());
+      vrTransformNode = newTransformNode.GetPointer();
+    }
+    else
+    {
+      // Make top transform the VR interaction transform
+      if (!topTransformNode->GetAttribute(
+        vtkMRMLVirtualRealityViewNode::GetVirtualRealityInteractionTransformAttributeName()) )
+      {
+        vtkInfoMacro("StartPositionProp: Transform " << topTransformNode->GetName() <<
+          " is now used as VR interaction transform for node " << pickedNode->GetName());
+        topTransformNode->SetAttribute(
+          vtkMRMLVirtualRealityViewNode::GetVirtualRealityInteractionTransformAttributeName(), "1");
+      }
+      // VR interaction transform found (i.e. the top transform has the VR interaction transform attribute)
+      vrTransformNode = topTransformNode;
+    }
+
+    vtkAbstractTransform* transformToParent = vrTransformNode->GetTransformToParent();
+    vtkTransform* linearTransformToParent = vtkTransform::SafeDownCast(transformToParent);
+    if (transformToParent && !linearTransformToParent)
+    {
+      //TODO: Remove constraint
+      vtkErrorMacro("StartPositionProp failed: Node " << pickedNode->GetName() << " contains non-linear transform");
+    }
+    else
+    {
+      // Snapshot the controller and object poses now, so that PositionProp() can derive the
+      // object pose for any later frame directly from the controller's current pose, instead
+      // of accumulating a per-frame delta (see PositionProp() for why that matters).
+      this->PickedNode[deviceIndex] = pickedNode;
+      this->InteractionTransformNode[deviceIndex] = vrTransformNode;
+
+      if (linearTransformToParent)
+      {
+        this->StartingObjectToWorldMatrix[deviceIndex]->DeepCopy(linearTransformToParent->GetMatrix());
+      }
+      else
+      {
+        this->StartingObjectToWorldMatrix[deviceIndex]->Identity();
+      }
+
+      double ori[4] = {0.0};
+      edata->GetWorldOrientation(ori);
+      vtkMatrix4x4::PoseToMatrix(pos, ori, this->StartingControllerPoseToWorldMatrix[deviceIndex]);
     }
   }
 
@@ -442,7 +459,9 @@ void vtkVirtualRealityViewInteractorStyleDelegate::EndPositionProp(vtkEventDataD
 
   vtkEventDataDevice device = edata->GetDevice();
   istyle->SetInteractionState(device, VTKIS_NONE);
-  this->PickedNode[static_cast<int>(device)] = nullptr;
+  int deviceIndex = static_cast<int>(device);
+  this->PickedNode[deviceIndex] = nullptr;
+  this->InteractionTransformNode[deviceIndex] = nullptr;
 }
 
 //----------------------------------------------------------------------------
