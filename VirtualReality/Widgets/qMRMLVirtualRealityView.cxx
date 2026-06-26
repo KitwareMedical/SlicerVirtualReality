@@ -297,6 +297,11 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow(vtkMRMLVirtualRealityVie
           // depth occlusion is not active (OccludedOpacity == 1.0).
           xrRenderWindow->SetCaptureEnvironmentDepth(
             this->MRMLVirtualRealityViewNode->GetPassthroughDepthVolumeEnabled());
+
+          // OpenXR has no API for rendering controller models, so vtkRenderingOpenXR falls back
+          // to a profile-to-asset JSON lookup table; point it at this module's own copy instead
+          // of relying on one being manually dropped next to the VTK build/install tree.
+          xrRenderWindow->SetModelsManifestDirectory(this->VirtualRealityLogic->ComputeControllerModelsPath());
         }
       }
     }

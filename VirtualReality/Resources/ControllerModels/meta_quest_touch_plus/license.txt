@@ -1,0 +1,12 @@
+Model Information:
+* title:	Meta Quest Touch Plus Controllers (left.glb, right.glb)
+* source:	https://github.com/immersive-web/webxr-input-profiles/tree/main/packages/assets/profiles/meta-quest-touch-plus
+* author:	W3C Immersive Web Community Group (webxr-input-profiles project)
+
+Model License:
+* license type:	MIT (see packages/assets/LICENSE.md in the source repository)
+* note:	Some assets portray registered trademarks of device manufacturers to
+  accurately depict the corresponding physical device. This does not grant
+  permission to use these trademarks in derivative works (e.g. alternate
+  controller skins) or for endorsement/promotion without prior written
+  permission from the trademark holders.

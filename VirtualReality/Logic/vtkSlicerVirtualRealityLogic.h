@@ -187,6 +187,17 @@ public:
       const std::string& moduleShareDirectory, vtkMRMLVirtualRealityViewNode::XRBackendType xrBackend, bool installed);
   ///@}
 
+  ///@{
+  /// Utility function for computing the directory containing this module's own copy of the
+  /// OpenXR controller render-model manifest (openxr_controllermodels.json) and the glTF assets
+  /// it references. OpenXR provides no API for rendering controller models, so vtkRenderingOpenXR
+  /// falls back to this profile-to-asset JSON lookup table (see VirtualReality/Logic/CMakeLists.txt
+  /// for how it is deployed under this module's own share directory).
+  ///
+  /// \sa vtkOpenXRRenderWindow::SetModelsManifestDirectory()
+  std::string ComputeControllerModelsPath();
+  ///@}
+
   /// Helper function to invoke an event with event data on the interactor from Python.
   /// This is necessary because vtkObject::InvokeEvent(unsigned long, void*) takes its call data
   /// as a void*, which Python cannot pass a wrapped vtkObject as; routing the call data through

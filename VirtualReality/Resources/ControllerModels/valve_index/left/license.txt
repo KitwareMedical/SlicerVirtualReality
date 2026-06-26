@@ -1,0 +1,11 @@
+Model Information:
+* title:	Valve Index Controller Left
+* source:	https://sketchfab.com/3d-models/valve-index-controller-left-24cc19b6c68d4cdba24e8424a1321658
+* author:	F53 (https://sketchfab.com/F53)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Valve Index Controller Left" (https://sketchfab.com/3d-models/valve-index-controller-left-24cc19b6c68d4cdba24e8424a1321658) by F53 (https://sketchfab.com/F53) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

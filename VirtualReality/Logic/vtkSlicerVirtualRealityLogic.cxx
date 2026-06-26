@@ -816,6 +816,26 @@ std::string vtkSlicerVirtualRealityLogic::ComputeActionManifestPath(
   return actionManifestPath;
 }
 
+//-----------------------------------------------------------------------------
+std::string vtkSlicerVirtualRealityLogic::ComputeControllerModelsPath()
+{
+  // Both build tree and install tree preserve the same
+  // share/Slicer-X.Y/qt-loadable-modules/<module-name> layout (see comment in
+  // ComputeActionManifestPath above), and this module's "xr_controller_models" resources are
+  // deployed directly under <module-share-dir> in both cases (see VirtualReality/Logic/CMakeLists.txt),
+  // so no separate install-tree/build-tree branching is needed here.
+  std::string controllerModelsPath = this->GetModuleShareDirectory() + "/xr_controller_models/";
+  std::string controllerModelsCollapsedPath = vtksys::SystemTools::CollapseFullPath(controllerModelsPath);
+
+  if (!vtksys::SystemTools::FileExists(controllerModelsCollapsedPath + "/openxr_controllermodels.json"))
+  {
+    vtkErrorMacro(<< "ComputeControllerModelsPath: Controller models manifest not found: "
+                  << controllerModelsCollapsedPath << "/openxr_controllermodels.json");
+  }
+
+  return controllerModelsCollapsedPath + "/";
+}
+
 //----------------------------------------------------------------------------
 vtkMRMLVectorVolumeNode* vtkSlicerVirtualRealityLogic::GetOrCreateVRSceneColorVolumeNode()
 {

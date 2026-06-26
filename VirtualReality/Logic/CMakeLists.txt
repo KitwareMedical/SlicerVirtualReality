@@ -48,3 +48,24 @@ if(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
       COMPONENT Runtime)
   endforeach()
 endif()
+
+#-----------------------------------------------------------------------------
+# Deploy the OpenXR controller render-model manifest and glTF assets owned by this module, so
+# that vtkSlicerVirtualRealityLogic::ComputeControllerModelsPath() can locate them under this
+# module's own share directory. This is a workaround for OpenXR providing no API for rendering
+# controller models (see vtkOpenXRRenderWindow::SetModelsManifestDirectory()).
+if(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
+  set(openxr_controller_models_dir ${CMAKE_CURRENT_SOURCE_DIR}/../Resources/ControllerModels)
+  file(GLOB_RECURSE openxr_controller_model_files RELATIVE ${openxr_controller_models_dir} ${openxr_controller_models_dir}/*)
+  foreach(openxr_controller_model_file ${openxr_controller_model_files})
+    configure_file(
+      ${openxr_controller_models_dir}/${openxr_controller_model_file}
+      ${CMAKE_BINARY_DIR}/${Slicer_QTLOADABLEMODULES_SHARE_DIR}/${MODULE_NAME}/xr_controller_models/${openxr_controller_model_file}
+      COPYONLY)
+    get_filename_component(openxr_controller_model_file_dir ${openxr_controller_model_file} DIRECTORY)
+    install(
+      FILES ${CMAKE_BINARY_DIR}/${Slicer_QTLOADABLEMODULES_SHARE_DIR}/${MODULE_NAME}/xr_controller_models/${openxr_controller_model_file}
+      DESTINATION ${Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR}/${MODULE_NAME}/xr_controller_models/${openxr_controller_model_file_dir}
+      COMPONENT Runtime)
+  endforeach()
+endif()

@@ -1,0 +1,24 @@
+[
+  {
+    "interaction_profile": "/interaction_profiles/htc/vive_controller",
+    "asset_paths": {
+      "left_controller": "htc_vive/scene.gltf",
+      "right_controller": "htc_vive/scene.gltf"
+    }
+  },
+  {
+    "interaction_profile": "/interaction_profiles/valve/index_controller",
+    "asset_paths": {
+      "left_controller": "valve_index/left/scene.gltf",
+      "right_controller": "valve_index/right/scene.gltf"
+    }
+  },
+  {
+    "interaction_profile": "/interaction_profiles/oculus/touch_controller",
+    "asset_paths": {
+      "left_controller": "meta_quest_touch_plus/left.glb",
+      "right_controller": "meta_quest_touch_plus/right.glb"
+    }
+  }
+]
+
