@@ -508,7 +508,13 @@ void qSlicerVirtualRealityModule::enableVirtualReality(bool enable)
 {
   Q_D(qSlicerVirtualRealityModule);
   QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
-  d->logic()->SetVirtualRealityActive(enable);
+  d->logic()->SetVirtualRealityConnected(enable);
+  if (enable && !d->logic()->GetVirtualRealityActive())
+  {
+    // Connecting to the hardware does not make sense without rendering enabled,
+    // so enable it now if it was not already enabled.
+    d->logic()->SetVirtualRealityActive(true);
+  }
   QApplication::restoreOverrideCursor();
 }
 
