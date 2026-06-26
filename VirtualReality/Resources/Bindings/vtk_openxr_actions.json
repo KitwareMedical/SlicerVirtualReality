@@ -12,6 +12,8 @@
 
     { "name": "left_grip_value", "type": "float" },
     { "name": "right_grip_value", "type": "float" },
+    { "name": "left_grip_click", "type": "boolean" },
+    { "name": "right_grip_click", "type": "boolean" },
     { "name": "left_trigger_value", "type": "float" },
     { "name": "right_trigger_value", "type": "float" },
     { "name": "left_trigger_touch", "type": "boolean" },
@@ -62,6 +64,8 @@
 
       "left_grip_value": "Left Grip Value",
       "right_grip_value": "Right Grip Value",
+      "left_grip_click": "Left Grip Click",
+      "right_grip_click": "Right Grip Click",
       "left_trigger_value": "Left Trigger Value",
       "right_trigger_value": "Right Trigger Value",
       "left_trigger_touch": "Left Trigger Touch",

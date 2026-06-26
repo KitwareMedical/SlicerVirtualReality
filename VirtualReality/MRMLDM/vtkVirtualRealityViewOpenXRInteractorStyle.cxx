@@ -63,6 +63,8 @@ void vtkVirtualRealityViewOpenXRInteractorStyle::SetupActions(vtkRenderWindowInt
 
   oiren->AddAction("left_grip_value", static_cast<vtkCommand::EventIds>(LeftGripValueEvent));
   oiren->AddAction("right_grip_value", static_cast<vtkCommand::EventIds>(RightGripValueEvent));
+  oiren->AddAction("left_grip_click", static_cast<vtkCommand::EventIds>(LeftGripClickEvent)); // also translated into PositionProp3DEvent
+  oiren->AddAction("right_grip_click", static_cast<vtkCommand::EventIds>(RightGripClickEvent)); // also translated into PositionProp3DEvent
   oiren->AddAction("left_trigger_value", static_cast<vtkCommand::EventIds>(LeftTriggerValueEvent));
   oiren->AddAction("right_trigger_value", static_cast<vtkCommand::EventIds>(RightTriggerValueEvent));
   oiren->AddAction("left_trigger_touch", static_cast<vtkCommand::EventIds>(LeftTriggerTouchEvent));
@@ -82,11 +84,11 @@ void vtkVirtualRealityViewOpenXRInteractorStyle::SetupActions(vtkRenderWindowInt
   oiren->AddAction("left_button1_touch", static_cast<vtkCommand::EventIds>(LeftButton1TouchEvent));
   oiren->AddAction("left_button2_click", static_cast<vtkCommand::EventIds>(LeftButton2ClickEvent));
   oiren->AddAction("left_button2_touch", static_cast<vtkCommand::EventIds>(LeftButton2TouchEvent));
-  oiren->AddAction("left_menu_click", static_cast<vtkCommand::EventIds>(LeftMenuClickEvent)); // also translated into NextPose3DEvent
+  oiren->AddAction("left_menu_click", static_cast<vtkCommand::EventIds>(LeftMenuClickEvent));
 
-  oiren->AddAction("right_button1_click", static_cast<vtkCommand::EventIds>(RightButton1ClickEvent)); // also translated into Select3DEvent
+  oiren->AddAction("right_button1_click", static_cast<vtkCommand::EventIds>(RightButton1ClickEvent));
   oiren->AddAction("right_button1_touch", static_cast<vtkCommand::EventIds>(RightButton1TouchEvent));
-  oiren->AddAction("right_button2_click", static_cast<vtkCommand::EventIds>(RightButton2ClickEvent)); // also translated into Menu3DEvent
+  oiren->AddAction("right_button2_click", static_cast<vtkCommand::EventIds>(RightButton2ClickEvent));
   oiren->AddAction("right_button2_touch", static_cast<vtkCommand::EventIds>(RightButton2TouchEvent));
   oiren->AddAction("right_system_click", static_cast<vtkCommand::EventIds>(RightSystemClickEvent));
 
@@ -109,24 +111,58 @@ void vtkVirtualRealityViewOpenXRInteractorStyle::ProcessControllerEvents(
 
   // Invoke on the interactor (not directly on this style object): both this style's own
   // dispatch (vtkInteractorStyle::ProcessEvents, registered as an observer on the interactor,
-  // which calls OnSelect3D/OnMenu3D/OnNextPose3D/OnViewerMovement3D) and any other code
-  // observing these legacy events on the interactor (e.g. vtkVirtualRealityViewInteractorObserver)
-  // only react to events invoked on the interactor.
+  // which calls OnViewerMovement3D/OnPositionProp3D) and any other code observing these
+  // legacy events on the interactor (e.g. vtkVirtualRealityViewInteractorObserver) only react
+  // to events invoked on the interactor. RightButton1ClickEvent/RightButton2ClickEvent/
+  // LeftMenuClickEvent are intentionally not translated into Select3DEvent/Menu3DEvent/
+  // NextPose3DEvent here; see the ControllerEvents doc comment above.
   vtkRenderWindowInteractor* interactor = self->GetInteractor();
   switch (event)
   {
-  case RightButton1ClickEvent:
-    interactor->InvokeEvent(vtkCommand::Select3DEvent, callData);
-    break;
-  case RightButton2ClickEvent:
-    interactor->InvokeEvent(vtkCommand::Menu3DEvent, callData);
-    break;
-  case LeftMenuClickEvent:
-    interactor->InvokeEvent(vtkCommand::NextPose3DEvent, callData);
-    break;
   case RightThumbstickEvent:
   case RightThumbstickTouchEvent:
     interactor->InvokeEvent(vtkCommand::ViewerMovement3DEvent, callData);
+    break;
+  case LeftGripClickEvent:
+  case RightGripClickEvent:
+    interactor->InvokeEvent(vtkCommand::PositionProp3DEvent, callData);
+    break;
+  default:
+    break;
+  }
+}
+
+//----------------------------------------------------------------------------
+void vtkVirtualRealityViewOpenXRInteractorStyle::OnPositionProp3D(vtkEventData* edata)
+{
+  // Mirrors vtkVRInteractorStyle::OnSelect3D(), which is the only generic 3D event that VTK
+  // wires into the StartAction()/EndAction() grab/move state machine. PositionProp3DEvent is
+  // not handled by VTK itself, so this override is what allows it (and therefore
+  // LeftGripClickEvent/RightGripClickEvent, translated into it by ProcessControllerEvents())
+  // to also drive VTKIS_POSITION_PROP. Unlike OnSelect3D(), the state is hardcoded rather than
+  // looked up via GetMappedAction(): that lookup only matters for VTK's built-in 3D menu
+  // (vtkVRInteractorStyle::MenuCallback), which this module deliberately does not use (see
+  // ControllerEvents doc comment), so PositionProp3DEvent is never remapped to anything other
+  // than VTKIS_POSITION_PROP.
+  vtkEventDataDevice3D* bd = edata->GetAsEventDataDevice3D();
+  if (!bd)
+  {
+    return;
+  }
+
+  int x = this->Interactor->GetEventPosition()[0];
+  int y = this->Interactor->GetEventPosition()[1];
+  this->FindPokedRenderer(x, y);
+
+  switch (bd->GetAction())
+  {
+  case vtkEventDataAction::Press:
+  case vtkEventDataAction::Touch:
+    this->StartAction(VTKIS_POSITION_PROP, bd);
+    break;
+  case vtkEventDataAction::Release:
+  case vtkEventDataAction::Untouch:
+    this->EndAction(VTKIS_POSITION_PROP, bd);
     break;
   default:
     break;
