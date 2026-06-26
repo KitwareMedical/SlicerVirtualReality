@@ -31,6 +31,15 @@
 vtkStandardNewMacro(vtkVirtualRealityViewOpenXRInteractorStyle);
 
 //----------------------------------------------------------------------------
+vtkVirtualRealityViewOpenXRInteractorStyle::vtkVirtualRealityViewOpenXRInteractorStyle()
+{
+  this->ControllerEventCallbackCommand = vtkSmartPointer<vtkCallbackCommand>::New();
+  this->ControllerEventCallbackCommand->SetClientData(this);
+  this->ControllerEventCallbackCommand->SetCallback(
+    vtkVirtualRealityViewOpenXRInteractorStyle::ProcessControllerEvents);
+}
+
+//----------------------------------------------------------------------------
 void vtkVirtualRealityViewOpenXRInteractorStyle::SetupActions(vtkRenderWindowInteractor* iren)
 {
   // Intentionally does not call Superclass::SetupActions(): the base class
@@ -43,6 +52,10 @@ void vtkVirtualRealityViewOpenXRInteractorStyle::SetupActions(vtkRenderWindowInt
     return;
   }
 
+  // Action -> event ID bindings, in the same order as the ControllerEvents enum (see the
+  // header for details). Bindings annotated "also translated" are additionally converted by
+  // ProcessControllerEvents() into the noted legacy VTK 3D event, to preserve existing
+  // end-user behavior.
   oiren->AddAction("left_grip_pose", static_cast<vtkCommand::EventIds>(LeftGripPoseEvent));
   oiren->AddAction("right_grip_pose", static_cast<vtkCommand::EventIds>(RightGripPoseEvent));
   oiren->AddAction("left_aim_pose", static_cast<vtkCommand::EventIds>(LeftAimPoseEvent));
@@ -56,9 +69,11 @@ void vtkVirtualRealityViewOpenXRInteractorStyle::SetupActions(vtkRenderWindowInt
   oiren->AddAction("right_trigger_touch", static_cast<vtkCommand::EventIds>(RightTriggerTouchEvent));
 
   oiren->AddAction("left_thumbstick", static_cast<vtkCommand::EventIds>(LeftThumbstickEvent));
+  oiren->AddAction("right_thumbstick", static_cast<vtkCommand::EventIds>(RightThumbstickEvent)); // also translated into ViewerMovement3DEvent
   oiren->AddAction("left_thumbstick_click", static_cast<vtkCommand::EventIds>(LeftThumbstickClickEvent));
   oiren->AddAction("right_thumbstick_click", static_cast<vtkCommand::EventIds>(RightThumbstickClickEvent));
   oiren->AddAction("left_thumbstick_touch", static_cast<vtkCommand::EventIds>(LeftThumbstickTouchEvent));
+  oiren->AddAction("right_thumbstick_touch", static_cast<vtkCommand::EventIds>(RightThumbstickTouchEvent)); // also translated into ViewerMovement3DEvent
 
   oiren->AddAction("left_thumbrest_touch", static_cast<vtkCommand::EventIds>(LeftThumbrestTouchEvent));
   oiren->AddAction("right_thumbrest_touch", static_cast<vtkCommand::EventIds>(RightThumbrestTouchEvent));
@@ -67,20 +82,53 @@ void vtkVirtualRealityViewOpenXRInteractorStyle::SetupActions(vtkRenderWindowInt
   oiren->AddAction("left_button1_touch", static_cast<vtkCommand::EventIds>(LeftButton1TouchEvent));
   oiren->AddAction("left_button2_click", static_cast<vtkCommand::EventIds>(LeftButton2ClickEvent));
   oiren->AddAction("left_button2_touch", static_cast<vtkCommand::EventIds>(LeftButton2TouchEvent));
+  oiren->AddAction("left_menu_click", static_cast<vtkCommand::EventIds>(LeftMenuClickEvent)); // also translated into NextPose3DEvent
 
+  oiren->AddAction("right_button1_click", static_cast<vtkCommand::EventIds>(RightButton1ClickEvent)); // also translated into Select3DEvent
   oiren->AddAction("right_button1_touch", static_cast<vtkCommand::EventIds>(RightButton1TouchEvent));
+  oiren->AddAction("right_button2_click", static_cast<vtkCommand::EventIds>(RightButton2ClickEvent)); // also translated into Menu3DEvent
   oiren->AddAction("right_button2_touch", static_cast<vtkCommand::EventIds>(RightButton2TouchEvent));
   oiren->AddAction("right_system_click", static_cast<vtkCommand::EventIds>(RightSystemClickEvent));
 
-  // The following 5 actions are bound directly to legacy VTK 3D events,
-  // preserving current end-user behavior exactly (matches VTK's stock Oculus
-  // Touch binding: right A button -> select, right B button -> menu, left
-  // menu button -> next camera pose, right thumbstick -> movement). Customize
-  // via vtkSlicerVirtualRealityLogic::AddAction() from Python, e.g. to rebind
-  // movement to the left thumbstick instead (see DeveloperGuide.md).
-  oiren->AddAction("right_button1_click", vtkCommand::Select3DEvent);
-  oiren->AddAction("right_button2_click", vtkCommand::Menu3DEvent);
-  oiren->AddAction("left_menu_click", vtkCommand::NextPose3DEvent);
-  oiren->AddAction("right_thumbstick", vtkCommand::ViewerMovement3DEvent);
-  oiren->AddAction("right_thumbstick_touch", vtkCommand::ViewerMovement3DEvent);
+  // Observe all the ControllerEvents so that ProcessControllerEvents() can translate
+  // the curated subset of them annotated above into the legacy VTK 3D events they replace.
+  for (int controllerEvent = vtkVirtualRealityViewOpenXRInteractorStyle::FIRST_CONTROLLER_EVENT;
+       controllerEvent < vtkVirtualRealityViewOpenXRInteractorStyle::LAST_CONTROLLER_EVENT; ++controllerEvent)
+  {
+    oiren->AddObserver(
+      static_cast<unsigned long>(controllerEvent), this->ControllerEventCallbackCommand, this->Priority);
+  }
+}
+
+//----------------------------------------------------------------------------
+void vtkVirtualRealityViewOpenXRInteractorStyle::ProcessControllerEvents(
+  vtkObject* vtkNotUsed(object), unsigned long event, void* clientData, void* callData)
+{
+  vtkVirtualRealityViewOpenXRInteractorStyle* self =
+    static_cast<vtkVirtualRealityViewOpenXRInteractorStyle*>(clientData);
+
+  // Invoke on the interactor (not directly on this style object): both this style's own
+  // dispatch (vtkInteractorStyle::ProcessEvents, registered as an observer on the interactor,
+  // which calls OnSelect3D/OnMenu3D/OnNextPose3D/OnViewerMovement3D) and any other code
+  // observing these legacy events on the interactor (e.g. vtkVirtualRealityViewInteractorObserver)
+  // only react to events invoked on the interactor.
+  vtkRenderWindowInteractor* interactor = self->GetInteractor();
+  switch (event)
+  {
+  case RightButton1ClickEvent:
+    interactor->InvokeEvent(vtkCommand::Select3DEvent, callData);
+    break;
+  case RightButton2ClickEvent:
+    interactor->InvokeEvent(vtkCommand::Menu3DEvent, callData);
+    break;
+  case LeftMenuClickEvent:
+    interactor->InvokeEvent(vtkCommand::NextPose3DEvent, callData);
+    break;
+  case RightThumbstickEvent:
+  case RightThumbstickTouchEvent:
+    interactor->InvokeEvent(vtkCommand::ViewerMovement3DEvent, callData);
+    break;
+  default:
+    break;
+  }
 }
