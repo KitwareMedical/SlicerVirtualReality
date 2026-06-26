@@ -164,6 +164,14 @@
         {
           "inputs": {
             "click": {
+              "output": "complexgestureaction"
+            }
+          },
+          "path": "/user/hand/left/input/x"
+        },
+        {
+          "inputs": {
+            "click": {
               "output": "left_button2_click"
             },
             "touch": {
@@ -187,6 +195,14 @@
             },
             "touch": {
               "output": "right_button1_touch"
+            }
+          },
+          "path": "/user/hand/right/input/a"
+        },
+        {
+          "inputs": {
+            "click": {
+              "output": "complexgestureaction"
             }
           },
           "path": "/user/hand/right/input/a"
