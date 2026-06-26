@@ -53,9 +53,7 @@ void vtkVirtualRealityViewOpenXRInteractorStyle::SetupActions(vtkRenderWindowInt
   }
 
   // Action -> event ID bindings, in the same order as the ControllerEvents enum (see the
-  // header for details). Bindings annotated "also translated" are additionally converted by
-  // ProcessControllerEvents() into the noted default VTK 3D event, to preserve existing
-  // end-user behavior.
+  // header for details).
   oiren->AddAction("left_grip_pose", static_cast<vtkCommand::EventIds>(LeftGripPoseEvent));
   oiren->AddAction("right_grip_pose", static_cast<vtkCommand::EventIds>(RightGripPoseEvent));
   oiren->AddAction("left_aim_pose", static_cast<vtkCommand::EventIds>(LeftAimPoseEvent));
@@ -63,8 +61,8 @@ void vtkVirtualRealityViewOpenXRInteractorStyle::SetupActions(vtkRenderWindowInt
 
   oiren->AddAction("left_grip_value", static_cast<vtkCommand::EventIds>(LeftGripValueEvent));
   oiren->AddAction("right_grip_value", static_cast<vtkCommand::EventIds>(RightGripValueEvent));
-  oiren->AddAction("left_grip_click", static_cast<vtkCommand::EventIds>(LeftGripClickEvent)); // also translated into PositionProp3DEvent
-  oiren->AddAction("right_grip_click", static_cast<vtkCommand::EventIds>(RightGripClickEvent)); // also translated into PositionProp3DEvent
+  oiren->AddAction("left_grip_click", static_cast<vtkCommand::EventIds>(LeftGripClickEvent));
+  oiren->AddAction("right_grip_click", static_cast<vtkCommand::EventIds>(RightGripClickEvent));
   oiren->AddAction("left_trigger_value", static_cast<vtkCommand::EventIds>(LeftTriggerValueEvent));
   oiren->AddAction("right_trigger_value", static_cast<vtkCommand::EventIds>(RightTriggerValueEvent));
   oiren->AddAction("left_trigger_click", static_cast<vtkCommand::EventIds>(LeftTriggerClickEvent));
@@ -73,11 +71,11 @@ void vtkVirtualRealityViewOpenXRInteractorStyle::SetupActions(vtkRenderWindowInt
   oiren->AddAction("right_trigger_touch", static_cast<vtkCommand::EventIds>(RightTriggerTouchEvent));
 
   oiren->AddAction("left_thumbstick", static_cast<vtkCommand::EventIds>(LeftThumbstickEvent));
-  oiren->AddAction("right_thumbstick", static_cast<vtkCommand::EventIds>(RightThumbstickEvent)); // also translated into ViewerMovement3DEvent
+  oiren->AddAction("right_thumbstick", static_cast<vtkCommand::EventIds>(RightThumbstickEvent));
   oiren->AddAction("left_thumbstick_click", static_cast<vtkCommand::EventIds>(LeftThumbstickClickEvent));
   oiren->AddAction("right_thumbstick_click", static_cast<vtkCommand::EventIds>(RightThumbstickClickEvent));
   oiren->AddAction("left_thumbstick_touch", static_cast<vtkCommand::EventIds>(LeftThumbstickTouchEvent));
-  oiren->AddAction("right_thumbstick_touch", static_cast<vtkCommand::EventIds>(RightThumbstickTouchEvent)); // also translated into ViewerMovement3DEvent
+  oiren->AddAction("right_thumbstick_touch", static_cast<vtkCommand::EventIds>(RightThumbstickTouchEvent));
 
   oiren->AddAction("left_thumbrest_touch", static_cast<vtkCommand::EventIds>(LeftThumbrestTouchEvent));
   oiren->AddAction("right_thumbrest_touch", static_cast<vtkCommand::EventIds>(RightThumbrestTouchEvent));
@@ -94,14 +92,17 @@ void vtkVirtualRealityViewOpenXRInteractorStyle::SetupActions(vtkRenderWindowInt
   oiren->AddAction("right_button2_touch", static_cast<vtkCommand::EventIds>(RightButton2TouchEvent));
   oiren->AddAction("right_system_click", static_cast<vtkCommand::EventIds>(RightSystemClickEvent));
 
-  // Observe all the ControllerEvents so that ProcessControllerEvents() can translate
-  // the curated subset of them annotated above into the default VTK 3D events they replace.
-  for (int controllerEvent = vtkVirtualRealityViewOpenXRInteractorStyle::FIRST_CONTROLLER_EVENT;
-       controllerEvent < vtkVirtualRealityViewOpenXRInteractorStyle::LAST_CONTROLLER_EVENT; ++controllerEvent)
-  {
-    oiren->AddObserver(
-      static_cast<unsigned long>(controllerEvent), this->ControllerEventCallbackCommand, this->Priority);
-  }
+  // Observe exactly the ControllerEvents that ProcessControllerEvents() translates into a
+  // default VTK 3D event (annotated "also translated" above) -- keep this list in sync with
+  // that function's switch.
+  oiren->AddObserver(
+    static_cast<unsigned long>(RightThumbstickEvent), this->ControllerEventCallbackCommand, this->Priority);
+  oiren->AddObserver(
+    static_cast<unsigned long>(RightThumbstickTouchEvent), this->ControllerEventCallbackCommand, this->Priority);
+  oiren->AddObserver(
+    static_cast<unsigned long>(LeftGripClickEvent), this->ControllerEventCallbackCommand, this->Priority);
+  oiren->AddObserver(
+    static_cast<unsigned long>(RightGripClickEvent), this->ControllerEventCallbackCommand, this->Priority);
 }
 
 //----------------------------------------------------------------------------

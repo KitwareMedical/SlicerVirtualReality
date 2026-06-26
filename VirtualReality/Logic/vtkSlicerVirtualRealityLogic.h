@@ -40,6 +40,7 @@ class vtkMRMLVectorVolumeNode;
 class vtkVRRenderWindowInteractor;
 
 // VTK includes
+class vtkEventData;
 class vtkMatrix4x4;
 
 // STD includes
@@ -186,10 +187,12 @@ public:
       const std::string& moduleShareDirectory, vtkMRMLVirtualRealityViewNode::XRBackendType xrBackend, bool installed);
   ///@}
 
-  /// Helper function to allow adding actions to the interactor without having to modify the action manifest.
-  /// This function is necessary because the vtkVRRenderWindowInteractor class is not Python-wrapped.
-  /// Example: AddAction(rwi, "/actions/vtk/in/TriggerAction", vtkCommand::Select3DEvent, false);
-  static void AddAction(vtkVRRenderWindowInteractor* rwi, const std::string& path, const vtkCommand::EventIds& eventId, bool isAnalog);
+  /// Helper function to invoke an event with event data on the interactor from Python.
+  /// This is necessary because vtkObject::InvokeEvent(unsigned long, void*) takes its call data
+  /// as a void*, which Python cannot pass a wrapped vtkObject as; routing the call data through
+  /// this method instead (whose call data parameter is a proper vtkEventData*) avoids that.
+  /// Example: InvokeEvent(rwi, vtkCommand::ViewerMovement3DEvent, calldata)
+  static void InvokeEvent(vtkVRRenderWindowInteractor* rwi, const vtkCommand::EventIds& eventId, vtkEventData* edata);
 
   /// Initialize the active Virtual Reality view node.
   ///

@@ -86,8 +86,9 @@ public:
   ///   as LeftGripClickEvent/RightGripClickEvent do via PositionProp3DEvent
   ///   below), but is redundant now that grip-click covers that, so the
   ///   right A button is left raw.
-  /// Any of these can still be wired up explicitly via
-  /// vtkSlicerVirtualRealityLogic::AddAction() if wanted.
+  /// Any of these can still be wired up explicitly from Python, by observing the
+  /// corresponding ControllerEvents value and forwarding it to the desired vtkCommand
+  /// event via vtkSlicerVirtualRealityLogic::InvokeEvent().
   ///
   /// LeftGripClickEvent and RightGripClickEvent are translated into
   /// PositionProp3DEvent, which OnPositionProp3D() below drives into
@@ -98,12 +99,11 @@ public:
   /// vtkVirtualRealityViewInteractorStyleDelegate, via this style's
   /// StartPositionProp()/EndPositionProp()/PositionProp() overrides below.
   ///
-  /// To customize which VTK event a given action invokes (e.g. remap a button
-  /// to a different event, or move movement from the right to the left
-  /// thumbstick), call vtkSlicerVirtualRealityLogic::AddAction() from Python
-  /// with the action's name (e.g. "right_button1_click") and the desired
-  /// vtkCommand event; see the "Low-level interception of events" section of
-  /// DeveloperGuide.md.
+  /// To customize which VTK event a given control drives (e.g. move movement from the
+  /// right to the left thumbstick), observe the corresponding ControllerEvents value from
+  /// Python and forward it to the desired vtkCommand event via
+  /// vtkSlicerVirtualRealityLogic::InvokeEvent(); see the "Low-level interception of
+  /// events" section of DeveloperGuide.md.
   ///
   /// \warning LeftGripValueEvent, RightGripValueEvent, LeftTriggerValueEvent and
   /// RightTriggerValueEvent correspond to OpenXR "float" actions. As of this
@@ -216,7 +216,7 @@ protected:
   vtkVirtualRealityViewOpenXRInteractorStyle();
   ~vtkVirtualRealityViewOpenXRInteractorStyle() override = default;
 
-  /// Callback invoked for every ControllerEvents enum value observed on the interactor; see SetupActions().
+  /// Callback invoked for the ControllerEvents registered as observers in SetupActions().
   static void ProcessControllerEvents(
     vtkObject* object, unsigned long event, void* clientData, void* callData);
 
