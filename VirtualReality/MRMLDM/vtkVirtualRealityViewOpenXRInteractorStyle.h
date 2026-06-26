@@ -56,7 +56,7 @@ public:
   /// below and are independently observable by any code that observes the
   /// interactor. A curated subset (RightThumbstickEvent,
   /// RightThumbstickTouchEvent, LeftGripClickEvent, RightGripClickEvent) is
-  /// additionally translated by ProcessControllerEvents() into a legacy VTK
+  /// additionally translated by ProcessControllerEvents() into a default VTK
   /// 3D event (ViewerMovement3DEvent, PositionProp3DEvent) invoked on the
   /// interactor, to preserve/add the corresponding end-user behavior.
   ///
@@ -72,7 +72,7 @@ public:
   /// immediate, deflection-independent start-on-touch / stop-on-release
   /// signal.
   ///
-  /// Several other events are deliberately NOT translated into a legacy VTK
+  /// Several other events are deliberately NOT translated into a default VTK
   /// 3D event, despite VTK's stock Oculus Touch binding doing so:
   /// - RightButton2ClickEvent -> Menu3DEvent would show VTK's built-in 3D
   ///   menu (vtkVRInteractorStyle::OnMenu3D()/vtkVRMenuWidget), which has no
@@ -125,6 +125,8 @@ public:
     RightGripClickEvent,
     LeftTriggerValueEvent,
     RightTriggerValueEvent,
+    LeftTriggerClickEvent,
+    RightTriggerClickEvent,
     LeftTriggerTouchEvent,
     RightTriggerTouchEvent,
 
@@ -153,7 +155,7 @@ public:
     LAST_CONTROLLER_EVENT
   };
 
-  /// Register the 30 generic per-control Oculus Touch actions with the interactor.
+  /// Register the 32 generic per-control Oculus Touch actions with the interactor.
   /// Overrides vtkOpenXRInteractorStyle::SetupActions(), which otherwise registers
   /// the legacy curated action set (elevation, movement, nextcamerapose,
   /// positionprop, showmenu, startelevation, startmovement, triggeraction) that

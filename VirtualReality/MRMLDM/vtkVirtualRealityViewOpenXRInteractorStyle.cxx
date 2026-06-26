@@ -54,7 +54,7 @@ void vtkVirtualRealityViewOpenXRInteractorStyle::SetupActions(vtkRenderWindowInt
 
   // Action -> event ID bindings, in the same order as the ControllerEvents enum (see the
   // header for details). Bindings annotated "also translated" are additionally converted by
-  // ProcessControllerEvents() into the noted legacy VTK 3D event, to preserve existing
+  // ProcessControllerEvents() into the noted default VTK 3D event, to preserve existing
   // end-user behavior.
   oiren->AddAction("left_grip_pose", static_cast<vtkCommand::EventIds>(LeftGripPoseEvent));
   oiren->AddAction("right_grip_pose", static_cast<vtkCommand::EventIds>(RightGripPoseEvent));
@@ -67,6 +67,8 @@ void vtkVirtualRealityViewOpenXRInteractorStyle::SetupActions(vtkRenderWindowInt
   oiren->AddAction("right_grip_click", static_cast<vtkCommand::EventIds>(RightGripClickEvent)); // also translated into PositionProp3DEvent
   oiren->AddAction("left_trigger_value", static_cast<vtkCommand::EventIds>(LeftTriggerValueEvent));
   oiren->AddAction("right_trigger_value", static_cast<vtkCommand::EventIds>(RightTriggerValueEvent));
+  oiren->AddAction("left_trigger_click", static_cast<vtkCommand::EventIds>(LeftTriggerClickEvent));
+  oiren->AddAction("right_trigger_click", static_cast<vtkCommand::EventIds>(RightTriggerClickEvent));
   oiren->AddAction("left_trigger_touch", static_cast<vtkCommand::EventIds>(LeftTriggerTouchEvent));
   oiren->AddAction("right_trigger_touch", static_cast<vtkCommand::EventIds>(RightTriggerTouchEvent));
 
@@ -93,7 +95,7 @@ void vtkVirtualRealityViewOpenXRInteractorStyle::SetupActions(vtkRenderWindowInt
   oiren->AddAction("right_system_click", static_cast<vtkCommand::EventIds>(RightSystemClickEvent));
 
   // Observe all the ControllerEvents so that ProcessControllerEvents() can translate
-  // the curated subset of them annotated above into the legacy VTK 3D events they replace.
+  // the curated subset of them annotated above into the default VTK 3D events they replace.
   for (int controllerEvent = vtkVirtualRealityViewOpenXRInteractorStyle::FIRST_CONTROLLER_EVENT;
        controllerEvent < vtkVirtualRealityViewOpenXRInteractorStyle::LAST_CONTROLLER_EVENT; ++controllerEvent)
   {
@@ -112,8 +114,8 @@ void vtkVirtualRealityViewOpenXRInteractorStyle::ProcessControllerEvents(
   // Invoke on the interactor (not directly on this style object): both this style's own
   // dispatch (vtkInteractorStyle::ProcessEvents, registered as an observer on the interactor,
   // which calls OnViewerMovement3D/OnPositionProp3D) and any other code observing these
-  // legacy events on the interactor (e.g. vtkVirtualRealityViewInteractorObserver) only react
-  // to events invoked on the interactor. RightButton1ClickEvent/RightButton2ClickEvent/
+  // default VTK 3D events on the interactor (e.g. vtkVirtualRealityViewInteractorObserver) only
+  // react to events invoked on the interactor. RightButton1ClickEvent/RightButton2ClickEvent/
   // LeftMenuClickEvent are intentionally not translated into Select3DEvent/Menu3DEvent/
   // NextPose3DEvent here; see the ControllerEvents doc comment above.
   vtkRenderWindowInteractor* interactor = self->GetInteractor();

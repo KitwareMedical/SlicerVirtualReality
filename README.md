@@ -23,8 +23,8 @@ Key features:
 - Visualize any 4D datasets using various rendering techniques (including volume rendering) provided by the Sequences extension.
 - Align the headset's view to match the viewpoint of the selected 3D view in Slicer.
 - Fly around using the touchpad of the right controller: direction is specified by orientation of the controller; speed is determined by the position of the finger on the touchpad (touch at the top to fly forward, touch at the bottom to fly backward).
-- Grab and reposition objects using the controller's grab button.
-- Translate, rotate, and scale the entire scene by pressing grab buttons on both controllers simultaneously.
+- Grab and reposition objects using either controller's grab button.
+- Translate, rotate, and scale the entire scene using a two-handed gesture (see [How to use controllers](#controllers) for the exact buttons, which vary by headset).
 - Advanced volume rendering performance tuning available in the Virtual Reality module to balance image quality and refresh rate.
 - Make controller positions available as transforms in the Slicer scene. These transforms can be used in custom modules to reslice volumes (using Volume Reslice Driver module in SlicerIGT extension) or transform any nodes in the scene.
 
@@ -110,8 +110,11 @@ _Supported XR modality: Augmented Reality_
 | --- | --- | --- |
 | Fly forward | Right thumbstick forward | Touchpad forward |
 | Fly backward | Right thumbstick backward | Touchpad backward |
-| Interact | A button | Trigger |
-| Select interaction mode | B button | Menu button |
+| Grab/move object | Grip button (either controller) | Trigger |
+| Transform/scale entire scene | X button (left) + A button (right), pressed together | Grip button (both controllers), pressed together |
+| Select interaction mode | _Not available_[^1] | Menu button |
+
+[^1]: On Meta Quest, grabbing/moving objects is always available via either grip button, so there is no separate "interaction mode" to select. The B button is not mapped to anything by default.
 
 ![Meta Quest 3 Controller](ControllerMetaQuest3.jpg)
 
@@ -131,10 +134,8 @@ Orient the controller in the intended direction of motion and use `Fly forward` 
 
 Translate/rotate a selected object.
 
-- Make sure interaction mode is set to `Grab` (this is the default).
-- Activate `Interact` action (e.g., hold down the `A button`) when a controller is inside a selectable object.
-- Move controller to translate/rotate the object.
-- Deactivate `Interact` action (e.g., release the `A button`)
+- On Meta Quest: hold down either controller's `Grip` button when the controller is inside a selectable object, move the controller to translate/rotate the object, then release the `Grip` button. No interaction mode needs to be selected first.
+- On HTC Vive: make sure interaction mode is set to `Grab` (this is the default), then hold down the `Trigger` when the controller is inside a selectable object, move the controller to translate/rotate the object, then release the `Trigger`.
 
 > [!NOTE]
 > - When you grab and move object, a parent transform is automatically created for it (if it has not been under a transform already) and that transform is modified.

@@ -2,6 +2,8 @@
 
 This Slicer extension is in active development. The API may change from version to version without notice.
 
+> **OpenVR is deprecated.** The legacy OpenVR backend (`SlicerVirtualReality_HAS_OPENVR_SUPPORT`) is still present in the codebase, but is no longer actively maintained, and will eventually be removed. This guide only documents the OpenXR backend.
+
 ## Build instructions
 
 - Build the extension against the newly built Slicer using the SuperBuild system.
@@ -9,11 +11,10 @@ This Slicer extension is in active development. The API may change from version 
 
 ### CMake build options
 
-The top-level `CMakeLists.txt` exposes three backend options:
+The top-level `CMakeLists.txt` exposes:
 
 | CMake option | Default (Windows) | Default (macOS) | Description |
 | --- | --- | --- | --- |
-| `SlicerVirtualReality_HAS_OPENVR_SUPPORT` | `ON` | `OFF` | Build the OpenVR XR backend |
 | `SlicerVirtualReality_HAS_OPENXR_SUPPORT` | `ON` | `OFF` | Build the OpenXR XR backend |
 | `SlicerVirtualReality_HAS_OPENXRREMOTING_SUPPORT` | `ON` | `OFF` | Build OpenXR Remoting support (HoloLens 2) |
 
@@ -26,100 +27,50 @@ OpenXR Remoting is automatically disabled if `SlicerVirtualReality_HAS_OPENXR_SU
 | `vtkMRMLVirtualRealityViewNode` | `VirtualReality/MRML/` | MRML node holding all VR view settings (backend, magnification, controller transforms, etc.) |
 | `vtkSlicerVirtualRealityLogic` | `VirtualReality/Logic/` | Main logic class: activates/deactivates VR, manages the active view node, and sets up button bindings |
 | `qMRMLVirtualRealityView` | `VirtualReality/Widgets/` | Qt widget that owns the VTK render window and interactor for the VR view |
+| `vtkVirtualRealityViewOpenXRInteractorStyle` | `VirtualReality/MRMLDM/` | OpenXR interactor style: registers one event per physical controller action (`ControllerEvents`) and translates a curated subset into default VTK 3D events |
 | `vtkVirtualRealityViewInteractorObserver` | `VirtualReality/MRMLDM/` | Bridges VTK VR interactor events to Slicer displayable managers |
-| `vtkVirtualRealityViewInteractorStyleDelegate` | `VirtualReality/MRMLDM/` | Shared delegate implementing scene/object grab and gesture logic for both OpenVR and OpenXR styles |
+| `vtkVirtualRealityViewInteractorStyleDelegate` | `VirtualReality/MRMLDM/` | Delegate implementing scene/object grab and gesture logic |
 | `vtkVirtualRealityComplexGestureRecognizer` | `VirtualReality/MRMLDM/` | Slicer-specific two-controller gesture recognition (translate/rotate/scale) |
 | `vtkMRMLVirtualRealityViewDisplayableManagerFactory` | `VirtualReality/MRMLDM/` | Singleton factory that registers displayable managers for the VR view |
 
 ## Mapping of Controller Action to VTK event
 
-The mapping process consists of several: action manifest json file maps controller-specific interaction path to VTK event path, then VTK render window interactor maps VTK event path to VTK event, which is processed by interactor style, which may be further customized by style delegates. For low-level custom processing of events, it is possible to intercept VTK events in the interactor.
+The mapping process consists of several steps: the action manifest JSON file maps a controller-specific interaction path to a named action, the render window interactor maps that action to a VTK event, which is processed by the interactor style and may be further customized by style delegates. For low-level custom processing, it is also possible to intercept VTK events directly on the interactor.
 
-### 1. Mapping from interaction path to VTK event path
+### 1. Mapping from interaction path to action name
 
-Mapping from interaction path to VTK event path is specified in the action manifest file. Parsing the `vtk_open<vr|xr>_actions.json` action manifest file to link controller-specific interaction paths (e.g., `/user/hand/right/input/b`) with generic event paths (e.g., `showmenu`). This file references controller-specific binding files, usually named `vtk_open<vr|xr>_binding_<vendor_name>.json`, where each controller interaction path is associated with a VTK event path.
+This module ships its own OpenXR action manifest, instead of using vtkRenderingOpenXR's stock one:
 
-#### Action Manifest File
+- [`VirtualReality/Resources/Bindings/vtk_openxr_actions.json`][vtk_openxr_actions_json_url] declares one action per physical control on the Oculus Touch (Meta Quest) controller — grip pose, grip squeeze/click, trigger, thumbstick, all buttons, etc.
+- [`VirtualReality/Resources/Bindings/vtk_openxr_binding_oculus_touch_controller.json`][vtk_openxr_binding_oculus_touch_url] binds each of those actions to its physical [OpenXR interaction profile path](https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#semantic-path-interaction-profiles) (e.g. `/user/hand/right/input/squeeze`).
 
-The controller interaction paths are specific to each backend:
+Both files are deployed under this module's own share directory (see `vtkSlicerVirtualRealityLogic::ComputeActionManifestPath()`), not vtkRenderingOpenXR's. Refer to the [Reserved Paths](https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#semantic-path-reserved) and [Interaction Profile Paths](https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#semantic-path-interaction-profiles) sections of the OpenXR spec for background on the path format.
 
-* For OpenVR: Refer to the [List of common controller types](https://github.com/ValveSoftware/openvr/wiki/List-of-common-controller-types) and the [SteamVR Input Guide](https://github.com/OpenVR-Advanced-Settings/OpenVR-AdvancedSettings/blob/master/docs/SteamVRInputGuide.md).
-* For OpenXR: Refer to the [Reserved Paths](https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#semantic-path-reserved) and the [Interaction Profile Paths](https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#semantic-path-interaction-profiles).
+[vtk_openxr_actions_json_url]: https://github.com/KitwareMedical/SlicerVirtualReality/blob/master/VirtualReality/Resources/Bindings/vtk_openxr_actions.json
+[vtk_openxr_binding_oculus_touch_url]: https://github.com/KitwareMedical/SlicerVirtualReality/blob/master/VirtualReality/Resources/Bindings/vtk_openxr_binding_oculus_touch_controller.json
 
-As of [Slicer@c7fe8657c](https://github.com/Slicer/Slicer/commit/c7fe8657c6a4bc0666685349b3222ff3c1b4fa02), the provided `vtk_open<vr|xr>_actions.json` and `vtk_open<vr|xr>_binding_<vendor_name>.json` files in the `vtkRenderingOpenVR` and `vtkRenderingOpenXR` VTK modules are as follow:
+### 2. Mapping from action name to VTK event
 
-|                                 | OpenVR                                           | OpenXR                                                   |
-| ------------------------------- | ------------------------------------------------ | -------------------------------------------------------- |
-| Action manifest                 | [url][vtk_openvr_actions_json_url]               | [url][vtk_openxr_actions_json_url]                       |
-| - HP Motion Controller          | [url][vtk_openvr_binding_hpmotioncontroller_url] | [url][vtk_openxr_binding_hp_mixed_reality_url]           |
-| - HTC Vive Controller           | [url][vtk_openvr_binding_vive_controller_url]    | [url][vtk_openxr_binding_htc_vive_controller_url]        |
-| - Microsoft Hand Interaction    |                                                  | [url][vtk_openxr_binding_microsoft_hand_interaction_url] |
-| - Oculus Touch (Meta Quest)     | [url][vtk_openvr_binding_oculus_touch_url]       | [url][vtk_openxr_binding_oculus_touch_url]               |
-| - Valve Knuckles                | [url][vtk_openvr_binding_knuckles_url]           | [url][vtk_openxr_binding_knuckles_url]                   |
-| - Khronos Simple Controller[^1] |                                                  | [url][vtk_openxr_binding_khr_simple_url]                 |
+Every action declared in the manifest is registered with a dedicated event ID in `vtkVirtualRealityViewOpenXRInteractorStyle::ControllerEvents`, via [`vtkVirtualRealityViewOpenXRInteractorStyle::SetupActions()`][vtkVirtualRealityViewOpenXRInteractorStyle-cxx-url]. This means **every** physical control is independently observable on the interactor (e.g. `RightGripClickEvent`), regardless of whether it is also translated into a default VTK 3D event.
 
-[^1]: https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#_khronos_simple_controller_profile
+A curated subset is additionally translated, by `ProcessControllerEvents()`, into a default VTK 3D event (`ViewerMovement3DEvent`, `PositionProp3DEvent`, ...) to preserve/add the corresponding end-user behavior — e.g. the right thumbstick drives `ViewerMovement3DEvent` (fly/dolly movement), and either grip's click/squeeze drives `PositionProp3DEvent` (grab/move props). See the `ControllerEvents` doc comment in [`vtkVirtualRealityViewOpenXRInteractorStyle.h`][vtkVirtualRealityViewOpenXRInteractorStyle-h-url] for the authoritative, up-to-date list — including which events are deliberately *not* translated (and why, e.g. VTK's built-in 3D menu has no reliable way to dismiss it) — since this set evolves as the module changes and is not duplicated here to avoid drift.
 
-These files serve as essential references for mapping controller actions to VTK events.
+[vtkVirtualRealityViewOpenXRInteractorStyle-h-url]: https://github.com/KitwareMedical/SlicerVirtualReality/blob/master/VirtualReality/MRMLDM/vtkVirtualRealityViewOpenXRInteractorStyle.h
+[vtkVirtualRealityViewOpenXRInteractorStyle-cxx-url]: https://github.com/KitwareMedical/SlicerVirtualReality/blob/master/VirtualReality/MRMLDM/vtkVirtualRealityViewOpenXRInteractorStyle.cxx
 
-<!-- vtkRenderingOpenVR -->
-[vtk_openvr_actions_json_url]: https://github.com/Slicer/VTK/blob/slicer-v9.2.20230607-1ff325c54-2/Rendering/OpenVR/vtk_openvr_actions.json
-[vtk_openvr_binding_hpmotioncontroller_url]: https://github.com/Slicer/VTK/blob/slicer-v9.2.20230607-1ff325c54-2/Rendering/OpenVR/vtk_openvr_binding_hpmotioncontroller.json
-[vtk_openvr_binding_vive_controller_url]: https://github.com/Slicer/VTK/blob/slicer-v9.2.20230607-1ff325c54-2/Rendering/OpenVR/vtk_openvr_binding_vive_controller.json
-[vtk_openvr_binding_knuckles_url]: https://github.com/Slicer/VTK/blob/slicer-v9.2.20230607-1ff325c54-2/Rendering/OpenVR/vtk_openvr_binding_knuckles.json
-[vtk_openvr_binding_oculus_touch_url]: https://github.com/Slicer/VTK/blob/slicer-v9.2.20230607-1ff325c54-2/Rendering/OpenVR/vtk_openvr_binding_oculus_touch.json
-
-<!-- vtkRenderingOpenXR -->
-[vtk_openxr_actions_json_url]: https://github.com/Slicer/VTK/blob/slicer-v9.2.20230607-1ff325c54-2/Rendering/OpenXR/vtk_openxr_actions.json
-[vtk_openxr_binding_hp_mixed_reality_url]: https://github.com/Slicer/VTK/blob/slicer-v9.2.20230607-1ff325c54-2/Rendering/OpenXR/vtk_openxr_binding_hp_mixed_reality.json
-[vtk_openxr_binding_htc_vive_controller_url]: https://github.com/Slicer/VTK/blob/slicer-v9.2.20230607-1ff325c54-2/Rendering/OpenXR/vtk_openxr_binding_htc_vive_controller.json
-[vtk_openxr_binding_microsoft_hand_interaction_url]: https://github.com/Slicer/VTK/blob/slicer-v9.2.20230607-1ff325c54-2/Rendering/OpenXR/vtk_openxr_binding_microsoft_hand_interaction.json
-[vtk_openxr_binding_oculus_touch_url]: https://github.com/Slicer/VTK/blob/slicer-v9.2.20230607-1ff325c54-2/Rendering/OpenXR/vtk_openxr_binding_oculus_touch_controller.json
-[vtk_openxr_binding_knuckles_url]: https://github.com/Slicer/VTK/blob/slicer-v9.2.20230607-1ff325c54-2/Rendering/OpenXR/vtk_openxr_binding_knuckles.json
-[vtk_openxr_binding_khr_simple_url]: https://github.com/Slicer/VTK/blob/slicer-v9.2.20230607-1ff325c54-2/Rendering/OpenXR/vtk_openxr_binding_khr_simple_controller.json
-
-### 2. Mapping from VTK event path to VTK event
-
-Assigning a VTK event path (e.g., `showmenu`) to either a VTK event (e.g., `vtk.vtkCommand.Menu3DEvent`) or a `std::function` for a single controller is carried out in `vtkOpen<VR|XR>InteractorStyle::SetupActions()`.
-
-* For OpenVR, refer to [vtkOpenVRInteractorStyle::SetupActions()][vtkOpenVRInteractorStyle-url]
-* For OpenXR, refer to [vtkOpenXRInteractorStyle::SetupActions()][vtkOpenXRInteractorStyle-url]
-
-[vtkOpenVRInteractorStyle-url]: https://github.com/Slicer/VTK/blob/slicer-v9.2.20230607-1ff325c54-2/Rendering/OpenVR/vtkOpenVRInteractorStyle.cxx
-[vtkOpenXRInteractorStyle-url]: https://github.com/Slicer/VTK/blob/slicer-v9.2.20230607-1ff325c54-2/Rendering/OpenXR/vtkOpenXRInteractorStyle.cxx
-
-#### Action Identifier Differences Between Backends
-
-OpenVR and OpenXR use different formats for action identifiers when calling `vtkVRRenderWindowInteractor::AddAction()`:
-
-| Backend | Format | Example |
-| --- | --- | --- |
-| OpenVR | Full action path | `/actions/vtk/in/TriggerAction` |
-| OpenXR | Action name only (lowercase) | `triggeraction` |
-
-The `vtkSlicerVirtualRealityLogic::SetGestureButton*()` helpers detect the active backend at runtime using `vtkOpenXRRenderWindowInteractor` class name and apply the correct identifier automatically. Additionally, OpenXR grip/squeeze button bindings are inconsistent across controllers (the right grip is typically bound to `positionprop`, while the left grip may be bound to `complexgestureaction` or not bound at all), so both identifiers are registered when using OpenXR.
-
-The default button configuration (set in `qMRMLVirtualRealityViewPrivate::createRenderWindow()`) is:
-- Trigger button: grab objects and world
-- Grip button: complex gesture (translate/rotate/scale scene)
+To remap an action to a different event from Python, use `slicer.modules.virtualreality.logic().AddAction()` — see the "Low-level event handling" snippet below.
 
 #### Complex Gesture Support
 
-Recognition of complex gesture events commences when the two controller buttons mapped to the ComplexGesture action are pressed.
-
-The SlicerVirtualReality implements its own heuristic by specializing the `HandleComplexGestureEvents()` and `RecognizeComplexGesture()` in the [vtkVirtualRealityComplexGestureRecognizer][vtkVirtualRealityComplexGestureRecognizer-url]  class.
+Recognition of complex gesture events commences when the two controller buttons mapped to the `complexgestureaction` action are pressed simultaneously, handled by VTK's `vtkVRRenderWindowInteractor::HandleComplexGestureEvents()`. The SlicerVirtualReality implements its own heuristic on top of that by specializing `HandleComplexGestureEvents()` and `RecognizeComplexGesture()` in [`vtkVirtualRealityComplexGestureRecognizer`][vtkVirtualRealityComplexGestureRecognizer-url].
 
 [vtkVirtualRealityComplexGestureRecognizer-url]: https://github.com/KitwareMedical/SlicerVirtualReality/blob/master/VirtualReality/MRMLDM/vtkVirtualRealityComplexGestureRecognizer.cxx
 
-Limitations:
-
-* The selected controller buttons are exclusively mapped to the ComplexGesture action and cannot be associated with a regular action.
-
-* To workaround an OpenVR specific [limitation](https://gitlab.kitware.com/vtk/vtk/-/merge_requests/10778), each button expected to be involved in the complex gesture needs to be respectively associated with `/actions/vtk/in/ComplexGestureAction` and `/actions/vtk/in/ComplexGestureAction_Event2`.
+For OpenXR, `complexgestureaction` is bound to the left X button and the right A button in `vtk_openxr_binding_oculus_touch_controller.json` (in addition to those buttons' own `left_button1_click`/`right_button1_click` actions, which OpenXR allows binding to the same physical control), so pressing X and A simultaneously starts a complex gesture.
 
 ### Low-level interception of events
 
-For implementing completely custom behavior, mapping from VTK event path to VTK event can be customized (by using `slicer.modules.virtualreality.logic().AddAction()`) and the VTK event can be intercepted in the render window interactor by adding a high-priority observer.
+For implementing completely custom behavior, the action → event mapping can be customized from Python (via `slicer.modules.virtualreality.logic().AddAction()`), and any VTK event — including the raw, per-control `ControllerEvents` that are always independently observable — can be intercepted on the render window interactor by adding a high-priority observer.
 
 ## Useful Python Snippets
 
@@ -184,76 +135,47 @@ nodeMovable.SetSelectable(1)
 ### Low-level event handling
 
 ```python
-# Get the render window interactor
+# Get the render window interactor and its (OpenXR) interactor style
+import vtkSlicerVirtualRealityModuleMRMLDisplayableManagerPython as vtkSlicerVirtualRealityModuleMRMLDisplayableManager
 vrViewWidget = slicer.modules.virtualreality.viewWidget()
 interactor = vrViewWidget.interactor()
-
-# Set the gesture button to none to allow custom event mapping
-# (otherwise the squeeze button would be unavailable for custom mapping by default)
-slicer.modules.virtualreality.logic().SetGestureButtonToNone(interactor)
+interactorStyle = interactor.GetInteractorStyle()
 
 # Use high priority observers to ensure we get to process the event before the interactor style (and we can prevent
 # any further processing of the event)
 highPriority = 100.0
 
-# By default, right-hand trigger button is mapped to `triggeraction`, which then calls `Select3DEvent`.
-# Here we take over the trigger button:
+# Every physical control fires its own raw ControllerEvents value independently, whether or not it is also
+# translated into a default VTK 3D event. Observe the right grip's click/squeeze directly, with no remapping needed:
 
 @vtk.calldata_type(vtk.VTK_OBJECT)
-def onSelect3DEvent(caller, event, calldata):
-    print(f"Select3DEvent received: {event}")
-    print(f"WorldPosition: {calldata.GetWorldPosition()}")    
-    # Prevent further processing
-    caller.GetCommand(select3DObserverTag).AbortFlagOn()
+def onRightGripClickEvent(caller, event, calldata):
+    print(f"RightTriggerClickEvent received, action={calldata.GetAction()}")
 
-select3DObserverTag = interactor.AddObserver("Select3DEvent", onSelect3DEvent, highPriority)
+interactor.AddObserver(vtkSlicerVirtualRealityModuleMRMLDisplayableManager.vtkVirtualRealityViewOpenXRInteractorStyle.RightTriggerClickEvent, onRightGripClickEvent, highPriority)
 
-# Take over the right-hand joystick:
+# A curated subset of controller events is also translated into default VTK 3D events by
+# vtkVirtualRealityViewOpenXRInteractorStyle::ProcessControllerEvents() (see its header for the up-to-date list).
+# For example, both grips' click/squeeze are translated into PositionProp3DEvent (grab/move props).
+# Here we take over that event:
 
 @vtk.calldata_type(vtk.VTK_OBJECT)
-def onViewerMovement3DEvent(caller, event, calldata):
-    print(f"ViewerMovement3DEvent received: {event}")
-    print(f"TrackPadPosition: {calldata.GetTrackPadPosition()}")
+def onPositionProp3DEvent(caller, event, calldata):
+    print(f"PositionProp3DEvent received: {event}")
+    print(f"WorldPosition: {calldata.GetWorldPosition()}")
+    # Prevent further processing (e.g. to override the default grab/move behavior)
+    caller.GetCommand(positionPropObserverTag).AbortFlagOn()
 
-interactor.AddObserver("ViewerMovement3DEvent", onViewerMovement3DEvent, highPriority)
+positionPropObserverTag = interactor.AddObserver("PositionProp3DEvent", onPositionProp3DEvent, highPriority)
 
-# In recent software versions, it is also possible to modify the VTK event path to VTK event mapping.
-# For example: we can map the trigger button to the menu event.
+# It is also possible to remap an action to a different event entirely. For example, the right A button
+# (independently observable as RightButton1ClickEvent, but not translated into anything by default) can be
+# rebound to also grab/move props, in addition to both grips:
 
-slicer.modules.virtualreality.logic().AddAction(interactor, "triggeraction", vtk.vtkCommand.Menu3DEvent, False)
-```
-
-The default event mapping for Meta Quest (Oculus Touch) is incomplete and not very intuitive. It is often useful to make these changes/additions (map `A` button to a rarely used VTK event that can be customized; map trigger button to `triggeraction` for more intuitive naming, add mapping of grab button, by default to move a node):
-
-```
-        {
-          "inputs": {
-            "click": {
-              "output": "nextcamerapose"
-            }
-          },
-          "path": "/user/hand/right/input/a"
-        },
-        {
-          "inputs": {
-            "value": {
-              "output": "triggeraction"
-            }
-          },
-          "path": "/user/hand/right/input/trigger"
-        },
-        {
-          "inputs": {
-            "value": {
-              "output": "positionprop"
-            }
-          },
-          "path": "/user/hand/right/input/squeeze"
-        },
+slicer.modules.virtualreality.logic().AddAction(interactor, "right_button1_click", vtk.vtkCommand.PositionProp3DEvent, False)
 ```
 
 ## Related VTK modules
 
 * [VTK::RenderingOpenXR](https://docs.vtk.org/en/latest/modules/vtk-modules/Rendering/OpenXR/README.html)
 * [VTK::RenderingOpenXRRemoting](https://docs.vtk.org/en/latest/modules/vtk-modules/Rendering/OpenXRRemoting/README.html)
-* [VTK::RenderingOpenVR](https://docs.vtk.org/en/latest/modules/vtk-modules/Rendering/OpenVR/README.html)

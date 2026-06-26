@@ -108,6 +108,22 @@
         },
         {
           "inputs": {
+            "value": {
+              "output": "left_trigger_click"
+            }
+          },
+          "path": "/user/hand/left/input/trigger"
+        },
+        {
+          "inputs": {
+            "value": {
+              "output": "right_trigger_click"
+            }
+          },
+          "path": "/user/hand/right/input/trigger"
+        },
+        {
+          "inputs": {
             "position": {
               "output": "left_thumbstick"
             },
