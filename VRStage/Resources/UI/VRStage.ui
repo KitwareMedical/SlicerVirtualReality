@@ -1,0 +1,717 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>VRStage</class>
+ <widget class="qMRMLWidget" name="VRStage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>420</width>
+    <height>640</height>
+   </rect>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="ctkCollapsibleButton" name="controlsCollapsibleButton">
+     <property name="text">
+      <string>Stage</string>
+     </property>
+     <layout class="QVBoxLayout" name="controlsLayout">
+      <item>
+       <layout class="QHBoxLayout" name="buttonsLayout">
+        <item>
+         <widget class="QPushButton" name="enterButton">
+          <property name="toolTip">
+           <string>Activate VR and enter the grounded room/turntable viewer.</string>
+          </property>
+          <property name="text">
+           <string>Enter VR Stage</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="exitButton">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>Leave viewer mode and restore normal VR navigation.</string>
+          </property>
+          <property name="text">
+           <string>Exit</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QLabel" name="statusLabel">
+        <property name="text">
+         <string>Not active</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="ctkCollapsibleButton" name="settingsCollapsibleButton">
+     <property name="text">
+      <string>Behavior</string>
+     </property>
+     <layout class="QFormLayout" name="settingsLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="rotationSpeedLabel">
+        <property name="text">
+         <string>Rotation speed (deg/s):</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QDoubleSpinBox" name="rotationSpeedSpinBox">
+        <property name="toolTip">
+         <string>Turntable angular speed at full left-thumbstick deflection.</string>
+        </property>
+        <property name="SlicerParameterName" stdset="0">
+         <string>rotationSpeedDegPerSec</string>
+        </property>
+        <property name="minimum">
+         <double>1.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>360.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>45.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="magnificationStepLabel">
+        <property name="text">
+         <string>Scale step factor:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QDoubleSpinBox" name="magnificationStepSpinBox">
+        <property name="toolTip">
+         <string>Multiplicative factor applied to world scale on each +/- button press.</string>
+        </property>
+        <property name="SlicerParameterName" stdset="0">
+         <string>magnificationStep</string>
+        </property>
+        <property name="minimum">
+         <double>1.010000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>4.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.050000000000000</double>
+        </property>
+        <property name="value">
+         <double>1.250000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="defaultScaleLabel">
+        <property name="text">
+         <string>Default scale:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QDoubleSpinBox" name="defaultScaleSpinBox">
+        <property name="toolTip">
+         <string>Real-world magnification (1.0 = normal VR size) used to frame the data on each reset, when Fit data to table is off.</string>
+        </property>
+        <property name="SlicerParameterName" stdset="0">
+         <string>defaultScale</string>
+        </property>
+        <property name="decimals">
+         <number>2</number>
+        </property>
+        <property name="minimum">
+         <double>0.010000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>100.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>1.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" colspan="2">
+       <widget class="QCheckBox" name="fitToTableCheckBox">
+        <property name="toolTip">
+         <string>Auto-scale the data to span the table on each framing. Off by default so scene views keep a consistent real-world scale.</string>
+        </property>
+        <property name="text">
+         <string>Fit data to table</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+        <property name="SlicerParameterName" stdset="0">
+         <string>fitToTable</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0" colspan="2">
+       <widget class="QCheckBox" name="passthroughCheckBox">
+        <property name="toolTip">
+         <string>Enable camera passthrough (mixed reality mode). Requires an OpenXR headset with passthrough support.</string>
+        </property>
+        <property name="text">
+         <string>Passthrough</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+        <property name="SlicerParameterName" stdset="0">
+         <string>passthrough</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0" colspan="2">
+       <widget class="QCheckBox" name="overheadLightCheckBox">
+        <property name="toolTip">
+         <string>Light the table from an overhead fixture near the ceiling, with softer fill lights derived from it, instead of the VR view's default lighting. See Display &gt; Colors for the light's color.</string>
+        </property>
+        <property name="text">
+         <string>Overhead light</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+        <property name="SlicerParameterName" stdset="0">
+         <string>overheadLight</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="ctkCollapsibleButton" name="displayCollapsibleButton">
+     <property name="text">
+      <string>Display</string>
+     </property>
+     <property name="collapsed">
+      <bool>true</bool>
+     </property>
+     <layout class="QVBoxLayout" name="displayLayout">
+      <item>
+       <widget class="QGroupBox" name="colorsGroupBox">
+        <property name="title">
+         <string>Colors</string>
+        </property>
+        <property name="toolTip">
+         <string>All colors update live while the stage is active (most are baked into textures, so the room is rebuilt in place - a brief hitch is normal).</string>
+        </property>
+        <layout class="QFormLayout" name="colorsLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="accentColorLabel">
+           <property name="text">
+            <string>Accent color:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="ctkColorPickerButton" name="accentColorPickerButton">
+           <property name="toolTip">
+            <string>Glowing trim, table screen ring, signage borders, orientation labels. Updates live.</string>
+           </property>
+           <property name="SlicerParameterName" stdset="0">
+            <string>display.accentColor</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="accentColorDimLabel">
+           <property name="text">
+            <string>Accent color (dim):</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="ctkColorPickerButton" name="accentColorDimPickerButton">
+           <property name="toolTip">
+            <string>Muted accent used for the column glow band, collar seam ring and table screen circuit pattern.</string>
+           </property>
+           <property name="SlicerParameterName" stdset="0">
+            <string>display.accentColorDim</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="floorColorLabel">
+           <property name="text">
+            <string>Floor color:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="ctkColorPickerButton" name="floorColorPickerButton">
+           <property name="SlicerParameterName" stdset="0">
+            <string>display.floorColor</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="wallColorLabel">
+           <property name="text">
+            <string>Wall color:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="ctkColorPickerButton" name="wallColorPickerButton">
+           <property name="SlicerParameterName" stdset="0">
+            <string>display.wallColor</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="columnColorLabel">
+           <property name="text">
+            <string>Column color:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="ctkColorPickerButton" name="columnColorPickerButton">
+           <property name="SlicerParameterName" stdset="0">
+            <string>display.columnColor</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0">
+          <widget class="QLabel" name="tableColorLabel">
+           <property name="text">
+            <string>Table cap color:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="1">
+          <widget class="ctkColorPickerButton" name="tableColorPickerButton">
+           <property name="SlicerParameterName" stdset="0">
+            <string>display.tableColor</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0">
+          <widget class="QLabel" name="rimBandColorLabel">
+           <property name="text">
+            <string>Table collar color:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="1">
+          <widget class="ctkColorPickerButton" name="rimBandColorPickerButton">
+           <property name="SlicerParameterName" stdset="0">
+            <string>display.rimBandColor</string>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="0">
+          <widget class="QLabel" name="tableScreenBackgroundColorLabel">
+           <property name="text">
+            <string>Table/signage screen background:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="1">
+          <widget class="ctkColorPickerButton" name="tableScreenBackgroundColorPickerButton">
+           <property name="toolTip">
+            <string>Shared dark background used by the table's holo screen, the info screen and the back-wall signage panel.</string>
+           </property>
+           <property name="SlicerParameterName" stdset="0">
+            <string>display.tableScreenBackgroundColor</string>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="0">
+          <widget class="QLabel" name="overheadLightColorLabel">
+           <property name="text">
+            <string>Overhead light color:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="1">
+          <widget class="ctkColorPickerButton" name="overheadLightColorPickerButton">
+           <property name="toolTip">
+            <string>Color of the overhead light rig (see Behavior &gt; Overhead light for the on/off switch). Updates live.</string>
+           </property>
+           <property name="SlicerParameterName" stdset="0">
+            <string>display.overheadLightColor</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="visibilityGroupBox">
+        <property name="title">
+         <string>Visibility</string>
+        </property>
+        <layout class="QVBoxLayout" name="visibilityLayout">
+         <item>
+          <widget class="QCheckBox" name="showRoomCheckBox">
+           <property name="toolTip">
+            <string>Draw the room walls and ceiling light panels around the turntable.</string>
+           </property>
+           <property name="text">
+            <string>Show room walls</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+           <property name="SlicerParameterName" stdset="0">
+            <string>display.showWalls</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="showBackWallSignageCheckBox">
+           <property name="toolTip">
+            <string>Show the control-scheme help text on the back wall (independent of the room walls above).</string>
+           </property>
+           <property name="text">
+            <string>Show help signage</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+           <property name="SlicerParameterName" stdset="0">
+            <string>display.showBackWallSignage</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="showAtlasWallCheckBox">
+           <property name="toolTip">
+            <string>Show the left-wall atlas launcher tiles (Abdominal/Brain/Knee) - aim and press to download and load one.</string>
+           </property>
+           <property name="text">
+            <string>Show atlas wall</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+           <property name="SlicerParameterName" stdset="0">
+            <string>display.showAtlasWall</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="showSceneViewWallCheckBox">
+           <property name="toolTip">
+            <string>Show the right-wall scene-view launcher tiles - aim and press to switch to that scene view.</string>
+           </property>
+           <property name="text">
+            <string>Show scene view wall</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+           <property name="SlicerParameterName" stdset="0">
+            <string>display.showSceneViewWall</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="showTableScreenCheckBox">
+           <property name="toolTip">
+            <string>Show the holo readout inset in the tabletop.</string>
+           </property>
+           <property name="text">
+            <string>Show table screen</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+           <property name="SlicerParameterName" stdset="0">
+            <string>display.showTableScreen</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="showInfoScreenCheckBox">
+           <property name="toolTip">
+            <string>Show the scale/scene-view monitor mounted on the table's collar.</string>
+           </property>
+           <property name="text">
+            <string>Show info screen</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+           <property name="SlicerParameterName" stdset="0">
+            <string>display.showInfoScreen</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="showOrientationLabelsCheckBox">
+           <property name="toolTip">
+            <string>Show the R/L/A/P/S/I orientation labels around the data.</string>
+           </property>
+           <property name="text">
+            <string>Show orientation labels</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+           <property name="SlicerParameterName" stdset="0">
+            <string>display.showOrientationLabels</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="enableReformatToolCheckBox">
+           <property name="toolTip">
+            <string>Enable the grabbable arbitrary reformat plane tool. Applies live: disabling removes the plane and its screen immediately.</string>
+           </property>
+           <property name="text">
+            <string>Enable reformat plane tool</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+           <property name="SlicerParameterName" stdset="0">
+            <string>display.enableReformatTool</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="enableMeasurementToolCheckBox">
+           <property name="toolTip">
+            <string>Enable the point-to-point measurement tool. Applies live: disabling removes the aiming reticle and cancels any unfinished measurement (completed ones stay in the scene).</string>
+           </property>
+           <property name="text">
+            <string>Enable measurement tool</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+           <property name="SlicerParameterName" stdset="0">
+            <string>display.enableMeasurementTool</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="ctkCollapsibleButton" name="controlBindingsCollapsibleButton">
+     <property name="text">
+      <string>Controls</string>
+     </property>
+     <property name="collapsed">
+      <bool>true</bool>
+     </property>
+     <layout class="QFormLayout" name="controlBindingsLayout">
+      <item row="0" column="0" colspan="2">
+       <widget class="QLabel" name="controlBindingsHintLabel">
+        <property name="text">
+         <string>Which button triggers each action. Takes effect immediately, including while the stage is active.</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="scaleUpLabel">
+        <property name="text">
+         <string>Scale up:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="scaleUpComboBox">
+        <property name="SlicerParameterName" stdset="0">
+         <string>controls.scaleUp</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="scaleDownLabel">
+        <property name="text">
+         <string>Scale down:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QComboBox" name="scaleDownComboBox">
+        <property name="SlicerParameterName" stdset="0">
+         <string>controls.scaleDown</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="nextSceneViewLabel">
+        <property name="text">
+         <string>Next scene view:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QComboBox" name="nextSceneViewComboBox">
+        <property name="SlicerParameterName" stdset="0">
+         <string>controls.nextSceneView</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="prevSceneViewLabel">
+        <property name="text">
+         <string>Previous scene view:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QComboBox" name="prevSceneViewComboBox">
+        <property name="SlicerParameterName" stdset="0">
+         <string>controls.prevSceneView</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="resetFramingLabel">
+        <property name="text">
+         <string>Reset framing:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QComboBox" name="resetFramingComboBox">
+        <property name="SlicerParameterName" stdset="0">
+         <string>controls.resetFraming</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="toggleReformatVisibleLabel">
+        <property name="text">
+         <string>Show/hide reformat plane:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QComboBox" name="toggleReformatVisibleComboBox">
+        <property name="SlicerParameterName" stdset="0">
+         <string>controls.toggleReformatVisible</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="toggleAutoSpinLabel">
+        <property name="text">
+         <string>Toggle auto-spin:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QComboBox" name="toggleAutoSpinComboBox">
+        <property name="SlicerParameterName" stdset="0">
+         <string>controls.toggleAutoSpin</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="placeMeasurementPointLabel">
+        <property name="text">
+         <string>Place measurement point:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="1">
+       <widget class="QComboBox" name="placeMeasurementPointComboBox">
+        <property name="SlicerParameterName" stdset="0">
+         <string>controls.placeMeasurementPoint</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="0">
+       <widget class="QLabel" name="undoMeasurementLabel">
+        <property name="text">
+         <string>Undo measurement:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="1">
+       <widget class="QComboBox" name="undoMeasurementComboBox">
+        <property name="SlicerParameterName" stdset="0">
+         <string>controls.undoMeasurement</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ctkCollapsibleButton</class>
+   <extends>QWidget</extends>
+   <header>ctkCollapsibleButton.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>qMRMLWidget</class>
+   <extends>QWidget</extends>
+   <header>qMRMLWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ctkColorPickerButton</class>
+   <extends>QPushButton</extends>
+   <header>ctkColorPickerButton.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>VRStage</sender>
+   <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
+   <receiver>settingsCollapsibleButton</receiver>
+   <slot>setMRMLScene(vtkMRMLScene*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>180</x>
+     <y>10</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>180</x>
+     <y>160</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
