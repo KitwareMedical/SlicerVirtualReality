@@ -27,7 +27,7 @@ class vtkVRRenderWindowInteractor;
 
 // VTK includes
 #include <vtkObject.h>
-#include <vtkSmartPointer.h>
+#include <vtkWeakPointer.h>
 class vtkEventData;
 class vtkEventDataDevice3D;
 
@@ -42,6 +42,9 @@ public:
 
   ///@{
   /// Interactor to recognize the complex gestures from.
+  /// The interactor owns this recognizer, so only a weak reference is kept:
+  /// a strong reference would create a cycle that prevents the interactor
+  /// (and the renderer, camera, props, pickers it retains) from being deleted.
   void SetInteractor(vtkVRRenderWindowInteractor* interactor);
   vtkVRRenderWindowInteractor* GetInteractor() const;
   ///}@
@@ -53,7 +56,7 @@ public:
   ///@}
 
 protected:
-  vtkSmartPointer<vtkVRRenderWindowInteractor> Interactor;
+  vtkWeakPointer<vtkVRRenderWindowInteractor> Interactor;
 
 private:
   vtkVirtualRealityComplexGestureRecognizer() = default;

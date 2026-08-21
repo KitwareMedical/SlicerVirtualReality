@@ -35,7 +35,12 @@ vtkStandardNewMacro(vtkVirtualRealityComplexGestureRecognizer);
 //----------------------------------------------------------------------------
 void vtkVirtualRealityComplexGestureRecognizer::SetInteractor(vtkVRRenderWindowInteractor* interactor)
 {
-  vtkSetSmartPointerBodyMacro(Interactor, vtkVRRenderWindowInteractor, interactor);
+  if (this->Interactor == interactor)
+  {
+    return;
+  }
+  this->Interactor = interactor;
+  this->Modified();
 }
 
 //----------------------------------------------------------------------------
