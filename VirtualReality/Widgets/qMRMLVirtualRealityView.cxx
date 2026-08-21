@@ -1297,6 +1297,11 @@ vtkVirtualRealityViewInteractorObserver* qMRMLVirtualRealityView::interactorObse
 void qMRMLVirtualRealityView::addDisplayableManager(const QString& displayableManagerName)
 {
   Q_D(qMRMLVirtualRealityView);
+  if (!d->DisplayableManagerGroup)
+  {
+    qWarning() << Q_FUNC_INFO << " failed: VR view is not connected";
+    return;
+  }
   vtkSmartPointer<vtkMRMLAbstractDisplayableManager> displayableManager;
   displayableManager.TakeReference(
     vtkMRMLDisplayableManagerGroup::InstantiateDisplayableManager(
@@ -1352,6 +1357,10 @@ void qMRMLVirtualRealityView::getDisplayableManagers(vtkCollection* displayableM
 void qMRMLVirtualRealityView::setGrabObjectsEnabled(bool enable)
 {
   Q_D(qMRMLVirtualRealityView);
+  if (!d->InteractorStyleDelegate)
+  {
+    return;
+  }
   d->InteractorStyleDelegate->SetGrabEnabled(enable);
 }
 
@@ -1359,6 +1368,10 @@ void qMRMLVirtualRealityView::setGrabObjectsEnabled(bool enable)
 bool qMRMLVirtualRealityView::isGrabObjectsEnabled()
 {
   Q_D(qMRMLVirtualRealityView);
+  if (!d->InteractorStyleDelegate)
+  {
+    return false;
+  }
   return d->InteractorStyleDelegate->GetGrabEnabled();
 }
 
@@ -1372,6 +1385,11 @@ void qMRMLVirtualRealityView::setDolly3DEnabled(bool enable)
   // - `vtk_openvr_binding_*.json` files define the "button to action" mapping
   // - `vtkOpenVRInteractorStyle()` contructor defines the "action to eventId" mapping
 
+  if (!d->InteractorStyle)
+  {
+    // VR is not connected (interactor style is only created while connected)
+    return;
+  }
   if (enable)
   {
     d->InteractorStyle->MapInputToAction(vtkCommand::ViewerMovement3DEvent, VTKIS_DOLLY);
@@ -1386,7 +1404,10 @@ void qMRMLVirtualRealityView::setDolly3DEnabled(bool enable)
 bool qMRMLVirtualRealityView::isDolly3DEnabled()
 {
   Q_D(qMRMLVirtualRealityView);
-
+  if (!d->InteractorStyle)
+  {
+    return false;
+  }
   return d->InteractorStyle->GetMappedAction(vtkCommand::ViewerMovement3DEvent) == VTKIS_DOLLY;
 }
 
@@ -1394,6 +1415,10 @@ bool qMRMLVirtualRealityView::isDolly3DEnabled()
 void qMRMLVirtualRealityView::setGestureButtonToTrigger()
 {
   Q_D(qMRMLVirtualRealityView);
+  if (!d->Interactor)
+  {
+    return;
+  }
   vtkSlicerVirtualRealityLogic::SetGestureButtonToTrigger(d->Interactor);
 }
 
@@ -1401,6 +1426,10 @@ void qMRMLVirtualRealityView::setGestureButtonToTrigger()
 void qMRMLVirtualRealityView::setGestureButtonToGrip()
 {
   Q_D(qMRMLVirtualRealityView);
+  if (!d->Interactor)
+  {
+    return;
+  }
   vtkSlicerVirtualRealityLogic::SetGestureButtonToGrip(d->Interactor);
 }
 
@@ -1408,6 +1437,10 @@ void qMRMLVirtualRealityView::setGestureButtonToGrip()
 void qMRMLVirtualRealityView::setGestureButtonToTriggerAndGrip()
 {
   Q_D(qMRMLVirtualRealityView);
+  if (!d->Interactor)
+  {
+    return;
+  }
   vtkSlicerVirtualRealityLogic::SetGestureButtonToTriggerAndGrip(d->Interactor);
 }
 
@@ -1415,6 +1448,10 @@ void qMRMLVirtualRealityView::setGestureButtonToTriggerAndGrip()
 void qMRMLVirtualRealityView::setGestureButtonToNone()
 {
   Q_D(qMRMLVirtualRealityView);
+  if (!d->Interactor)
+  {
+    return;
+  }
   vtkSlicerVirtualRealityLogic::SetGestureButtonToNone(d->Interactor);
 }
 
@@ -1422,6 +1459,10 @@ void qMRMLVirtualRealityView::setGestureButtonToNone()
 QString qMRMLVirtualRealityView::actionManifestPath() const
 {
   Q_D(const qMRMLVirtualRealityView);
+  if (!d->Interactor)
+  {
+    return QString();
+  }
   return QString::fromStdString(d->Interactor->GetActionManifestDirectory());
 }
 
