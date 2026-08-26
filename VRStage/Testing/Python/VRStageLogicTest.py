@@ -139,14 +139,14 @@ print("frontFacingYawRad: OK")
 
 # Fit-to-table: with base scale factor sf0 (identity M0 -> sf0 = 1), the fit relScale makes the
 # data diagonal span the table diameter. A cube with diagonal D -> fitRelScale = 2*R_table/D.
-logic._basePhysicalToWorld = vtk.vtkMatrix4x4()  # identity, sf0 = 1
-logic._dataBounds = [-50.0, 50.0, -50.0, 50.0, -50.0, 50.0]  # 100 cube, diagonal = 100*sqrt(3)
+logic.framing.basePhysicalToWorld = vtk.vtkMatrix4x4()  # identity, sf0 = 1
+logic.framing.dataBounds = [-50.0, 50.0, -50.0, 50.0, -50.0, 50.0]  # 100 cube, diagonal = 100*sqrt(3)
 diag = (3 ** 0.5) * 100.0
 expectedFit = (2.0 * VRStage.TABLE_RADIUS_M) / diag
-assert abs(logic._computeFitRelScale() - expectedFit) < 1e-9, logic._computeFitRelScale()
-logic._dataBounds = [0.0, -1.0, 0.0, -1.0, 0.0, -1.0]  # empty -> fit 1.0
-assert logic._computeFitRelScale() == 1.0
-logic._basePhysicalToWorld = None
+assert abs(logic.framing.computeFitRelScale() - expectedFit) < 1e-9, logic.framing.computeFitRelScale()
+logic.framing.dataBounds = [0.0, -1.0, 0.0, -1.0, 0.0, -1.0]  # empty -> fit 1.0
+assert logic.framing.computeFitRelScale() == 1.0
+logic.framing.basePhysicalToWorld = None
 print("computeFitRelScale: OK")
 
 # Auto-spin toggles.
@@ -161,11 +161,12 @@ print("toggleAutoSpin: OK")
 #
 # VRStageDisplayOptions (parameter node field "display") exposes colors/visibility so other
 # modules can reuse the room/table chrome while customizing it - see VRStage.py's docstring.
-# Defaults must match the module's original palette, and _buildChrome (which only needs a
+# Defaults must match the module's original palette, and _buildStage (which only needs a
 # renderer, not a live VR widget/headset) must honor the visibility flags.
 
 displayLogic = VRStage.VRStageLogic()
 defaultDisplay = displayLogic.getParameterNode().display
+assert defaultDisplay.showFloor is True
 assert defaultDisplay.showWalls is True
 assert defaultDisplay.showBackWallSignage is True
 assert defaultDisplay.showTableScreen is True
@@ -182,34 +183,43 @@ assert defaultDisplay.accentColor.name() == expectedAccent.name(), \
     (defaultDisplay.accentColor.name(), expectedAccent.name())
 print("VRStageDisplayOptions defaults: OK")
 
-# _buildChrome only needs a bare renderer (no live VR widget) - same synthetic-renderer approach
+# _buildStage only needs a bare renderer (no live VR widget) - same synthetic-renderer approach
 # as the Pick3DRay test further below - to exercise the visibility-gating logic headlessly.
 disabledLogic = VRStage.VRStageLogic()
 disabledDisplay = disabledLogic.getParameterNode().display
 disabledDisplay.showOrientationLabels = False
 disabledDisplay.showTableScreen = False
 disabledDisplay.showInfoScreen = False
-disabledLogic._buildChrome(vtk.vtkRenderer())
-assert disabledLogic._orientationLabelActors == {}, "orientation labels should be skipped when disabled"
-assert disabledLogic._tableScreenActor is None, "table screen actor should be skipped when disabled"
-assert disabledLogic._monitorAssembly is None, "info screen should be skipped when disabled"
+disabledLogic._buildStage(vtk.vtkRenderer())
+assert disabledLogic.orientationLabels.actors == {}, "orientation labels should be skipped when disabled"
+assert disabledLogic.roomChrome.tableScreenActor is None, "table screen actor should be skipped when disabled"
+assert disabledLogic.roomChrome.monitorAssembly is None, "info screen should be skipped when disabled"
 # Reset so this doesn't leak into anything else sharing the scene's parameter node.
 disabledDisplay.showOrientationLabels = True
 disabledDisplay.showTableScreen = True
 disabledDisplay.showInfoScreen = True
 
 enabledLogic = VRStage.VRStageLogic()
-enabledLogic._buildChrome(vtk.vtkRenderer())  # defaults: everything on
-assert len(enabledLogic._orientationLabelActors) == 6
-assert enabledLogic._tableScreenActor is not None
-assert enabledLogic._monitorAssembly is not None
+enabledLogic._buildStage(vtk.vtkRenderer())  # defaults: everything on
+assert len(enabledLogic.orientationLabels.actors) == 6
+assert enabledLogic.roomChrome.tableScreenActor is not None
+assert enabledLogic.roomChrome.monitorAssembly is not None
+
+# showFloor gates exactly the three floor props (base disc, grid overlay, accent ring).
+noFloorLogic = VRStage.VRStageLogic()
+noFloorDisplay = noFloorLogic.getParameterNode().display
+noFloorDisplay.showFloor = False
+noFloorLogic._buildStage(vtk.vtkRenderer())
+assert len(noFloorLogic.roomChrome.props) == len(enabledLogic.roomChrome.props) - 3, \
+    (len(noFloorLogic.roomChrome.props), len(enabledLogic.roomChrome.props))
+noFloorDisplay.showFloor = True
 print("VRStageDisplayOptions visibility gating: OK")
 
 # ---------------------------------------------------------------- live option application
 #
 # applyOptions diffs an _optionsSnapshot of the rebuild-requiring options against the one the live
 # state was built from, and _rebuildChrome rebuilds the room in place (carrying the turntable angle
-# and scene-view wall page across) - see VRStage.py's applyOptions/_rebuildChrome. Both are
+# and scene-view wall page across) - see VRStageLogic.applyOptions/_rebuildChrome. Both are
 # exercisable headlessly: the snapshot is pure, and _rebuildChrome takes an explicit renderer.
 
 liveLogic = VRStage.VRStageLogic()
@@ -242,29 +252,29 @@ assert liveLogic._appliedOptions is None
 # _rebuildChrome in place: fewer props after hiding the info screen, no leaked props on the
 # renderer, and the turntable angle / wall page survive the rebuild.
 liveRenderer = vtk.vtkRenderer()
-liveLogic._buildChrome(liveRenderer)
-assert liveLogic._monitorAssembly is not None
+liveLogic._buildStage(liveRenderer)
+assert liveLogic.roomChrome.monitorAssembly is not None
 propCountBefore = liveRenderer.GetViewProps().GetNumberOfItems()
-assert propCountBefore == len(liveLogic._chromeProps) + len(liveLogic._orientationLabelActors)
-liveLogic._turntableAngleRad = 0.7
+assert propCountBefore == len(liveLogic.roomChrome.props) + len(liveLogic.orientationLabels.actors)
+liveLogic.framing.turntableAngleRad = 0.7
 liveLogic.isActive = True
 liveLogic._appliedOptions = VRStage.VRStageLogic._optionsSnapshot(liveParams)
-# Stub the VR renderer accessor so _rebuildChrome/_teardownChrome use the synthetic renderer.
+# Stub the VR renderer accessor so _rebuildChrome/_teardownStage use the synthetic renderer.
 liveLogic._vrRenderer = lambda: liveRenderer
 liveParams.display.showInfoScreen = False
 liveLogic._rebuildChrome(liveRenderer)
-assert liveLogic._monitorAssembly is None, "rebuild must honor the new visibility flag"
-assert abs(liveLogic._turntableAngleRad - 0.7) < 1e-12, "turntable angle must survive a rebuild"
+assert liveLogic.roomChrome.monitorAssembly is None, "rebuild must honor the new visibility flag"
+assert abs(liveLogic.framing.turntableAngleRad - 0.7) < 1e-12, "turntable angle must survive a rebuild"
 propCountAfter = liveRenderer.GetViewProps().GetNumberOfItems()
-assert propCountAfter == len(liveLogic._chromeProps) + len(liveLogic._orientationLabelActors), \
+assert propCountAfter == len(liveLogic.roomChrome.props) + len(liveLogic.orientationLabels.actors), \
     "rebuild leaked props on the renderer"
 assert propCountAfter < propCountBefore
 # Inactive -> no-op, even with an explicit renderer.
 liveLogic.isActive = False
 liveParams.display.showInfoScreen = True
 liveLogic._rebuildChrome(liveRenderer)
-assert liveLogic._monitorAssembly is None, "_rebuildChrome must be a no-op while inactive"
-liveLogic._teardownChrome()
+assert liveLogic.roomChrome.monitorAssembly is None, "_rebuildChrome must be a no-op while inactive"
+liveLogic._teardownStage()
 assert liveRenderer.GetViewProps().GetNumberOfItems() == 0
 print("_rebuildChrome: OK")
 
@@ -354,10 +364,10 @@ print("control-scheme signage text generation: OK")
 
 # ---------------------------------------------------------------- wall tile galleries
 #
-# Left-wall atlas launcher + right-wall scene-view launcher tiles - see VRStage.py's "wall tile
-# galleries" section. Grid/geometry math is pure; _buildSceneViewWallTiles/_buildAtlasWallTiles
-# only need a parameter node + slicer.modules.sceneviews.logic(), not a live VR widget/headset -
-# same "no headset needed" property as the _buildChrome visibility-gating tests above.
+# Left-wall atlas launcher + right-wall scene-view launcher tiles - see WallTileGallery in
+# VRStageLib/WallTiles.py. Grid/geometry math is pure; _buildSceneViewWallTiles/
+# _buildAtlasWallTiles only need the display options + slicer.modules.sceneviews.logic(), not a
+# live VR widget/headset - same "no headset needed" property as the _buildStage tests above.
 
 # _gridTileOffsets: row-major, centered, stable ordering, and a short last row is itself
 # centered rather than left-aligned.
@@ -405,10 +415,11 @@ print("ATLAS_SPECS: OK")
 
 # _buildAtlasWallTiles: exactly 3 pickable panel actors (+ 3 labels), all registered for picking.
 atlasWallLogic = VRStage.VRStageLogic()
-atlasWallActors = atlasWallLogic._buildAtlasWallTiles()
+atlasWallDisplay = atlasWallLogic.getParameterNode().display
+atlasWallActors = atlasWallLogic.wallTiles._buildAtlasWallTiles(atlasWallDisplay)
 assert len(atlasWallActors) == 6, len(atlasWallActors)  # 3 panels + 3 labels
-assert len(atlasWallLogic._wallTileByActor) == 3
-for panelActor in atlasWallLogic._wallTileByActor:
+assert len(atlasWallLogic.wallTiles.tileByActor) == 3
+for panelActor in atlasWallLogic.wallTiles.tileByActor:
     assert panelActor.GetPickable(), "atlas tiles must stay pickable"
 print("buildAtlasWallTiles: OK")
 
@@ -417,9 +428,10 @@ print("buildAtlasWallTiles: OK")
 # instead of leaving the wall blank.
 assert slicer.modules.sceneviews.logic().GetNumberOfSceneViews() == 0
 emptyWallLogic = VRStage.VRStageLogic()
-emptyWallActors = emptyWallLogic._buildSceneViewWallTiles()
+emptyWallDisplay = emptyWallLogic.getParameterNode().display
+emptyWallActors = emptyWallLogic.wallTiles._buildSceneViewWallTiles(emptyWallDisplay)
 assert len(emptyWallActors) == 2, len(emptyWallActors)  # 1 placeholder panel + 1 label
-assert len(emptyWallLogic._wallTileByActor) == 0, "the placeholder must not be registered as pickable"
+assert len(emptyWallLogic.wallTiles.tileByActor) == 0, "the placeholder must not be registered as pickable"
 assert emptyWallActors[0].GetPickable() == 0, "the placeholder panel must not be pickable"
 print("buildSceneViewWallTiles (zero views): OK")
 
@@ -477,7 +489,7 @@ class _PressCalldata:
 
 dispatchLogic = VRStage.VRStageLogic()
 dispatchCalls = []
-dispatchLogic._hoveredWallTile = VRStage._WallTile(vtk.vtkActor(), lambda: dispatchCalls.append(1))
+dispatchLogic.wallTiles.hoveredTile = VRStage._WallTile(vtk.vtkActor(), lambda: dispatchCalls.append(1))
 dispatchLogic.measurementTool.pendingLineNode = None
 lineNodeCountBefore = len(slicer.util.getNodesByClass("vtkMRMLMarkupsLineNode"))
 
@@ -531,7 +543,8 @@ logic.reformatTool.sliceNode = reformatSliceNode
 logic.reformatTool.monitorActor = None
 logic.reformatTool.updateFromPlane()
 
-expectedMatrix = reformatTransformNode.GetMatrixTransformToParent()
+expectedMatrix = vtk.vtkMatrix4x4()
+reformatTransformNode.GetMatrixTransformToParent(expectedMatrix)
 sliceToRAS = reformatSliceNode.GetSliceToRAS()
 for r in range(4):
     for c in range(4):
@@ -553,31 +566,32 @@ svLogic = slicer.modules.sceneviews.logic()
 svLogic.CreateSceneView("VRStageTestView1")
 svLogic.CreateSceneView("VRStageTestView2")
 assert logic.sceneViewCount() >= 2, logic.sceneViewCount()
-startIndex = logic._sceneViewIndex
+startIndex = logic.sceneViews.currentIndex
 logic.cycleSceneView(+1)
-assert logic._sceneViewIndex != startIndex or logic.sceneViewCount() == 1
+assert logic.sceneViews.currentIndex != startIndex or logic.sceneViewCount() == 1
 logic.cycleSceneView(-1)
 print("cycleSceneView: OK")
 
 # _restoreSceneViewAtIndex is the shared tail cycleSceneView and the scene-view wall tiles both
-# use - jumping to an explicit, valid index restores it and updates _sceneViewIndex; an
-# out-of-range index is a no-op (never raises, never corrupts _sceneViewIndex).
+# use - jumping to an explicit, valid index restores it and updates sceneViews.currentIndex; an
+# out-of-range index is a no-op (never raises, never corrupts sceneViews.currentIndex).
 restoreLogic = VRStage.VRStageLogic()
 restoreLogic._restoreSceneViewAtIndex(1)
-assert restoreLogic._sceneViewIndex == 1
+assert restoreLogic.sceneViews.currentIndex == 1
 restoreLogic._restoreSceneViewAtIndex(999)  # out of range -> ignored
-assert restoreLogic._sceneViewIndex == 1
+assert restoreLogic.sceneViews.currentIndex == 1
 restoreLogic._activateSceneViewTile(0)  # same tail, reached the way a wall-tile press would
-assert restoreLogic._sceneViewIndex == 0
+assert restoreLogic.sceneViews.currentIndex == 0
 print("restoreSceneViewAtIndex: OK")
 
 # _buildSceneViewWallTiles with a handful of real scene views: one pickable tile per view, each
 # registered for picking, none of them the zero-view placeholder path.
 fewWallLogic = VRStage.VRStageLogic()
-fewWallActors = fewWallLogic._buildSceneViewWallTiles()
-assert len(fewWallLogic._wallTileByActor) == logic.sceneViewCount()
+fewWallDisplay = fewWallLogic.getParameterNode().display
+fewWallActors = fewWallLogic.wallTiles._buildSceneViewWallTiles(fewWallDisplay)
+assert len(fewWallLogic.wallTiles.tileByActor) == logic.sceneViewCount()
 assert len(fewWallActors) == 2 * logic.sceneViewCount()  # panel + label per tile
-for panelActor in fewWallLogic._wallTileByActor:
+for panelActor in fewWallLogic.wallTiles.tileByActor:
     assert panelActor.GetPickable(), "scene view tiles must stay pickable"
 print("buildSceneViewWallTiles (few views): OK")
 
@@ -603,12 +617,13 @@ def _navTileTexts(actors, contentTileCount):
 
 # Page 0 (default): full page of content, Prev disabled, Next enabled.
 page0Logic = VRStage.VRStageLogic()
-page0Actors = page0Logic._buildSceneViewWallTiles()
-assert page0Logic._sceneViewWallPage == 0
+page0Display = page0Logic.getParameterNode().display
+page0Actors = page0Logic.wallTiles._buildSceneViewWallTiles(page0Display)
+assert page0Logic.wallTiles.sceneViewPage == 0
 content0 = min(totalViews, VRStage.SCENE_VIEW_WALL_PAGE_SIZE)
 assert len(page0Actors) == 2 * content0 + 2 * 3, len(page0Actors)  # content + 3 nav tiles
 # Registered/pickable: every content tile, plus only whichever of Prev/Next is enabled.
-assert len(page0Logic._wallTileByActor) == content0 + 1, len(page0Logic._wallTileByActor)
+assert len(page0Logic.wallTiles.tileByActor) == content0 + 1, len(page0Logic.wallTiles.tileByActor)
 prevPanel0, _prevLabel0, pagePanel0, pageLabel0, nextPanel0, _nextLabel0 = _navTileTexts(page0Actors, content0)
 assert not prevPanel0.GetPickable(), "Prev must be disabled on the first page"
 assert nextPanel0.GetPickable(), "Next must be enabled when a later page exists"
@@ -618,12 +633,13 @@ print("buildSceneViewWallTiles (page 1 of 2): OK")
 
 # Page 1 (last, short): remaining content, Prev enabled, Next disabled.
 page1Logic = VRStage.VRStageLogic()
-page1Logic._sceneViewWallPage = 1
-page1Actors = page1Logic._buildSceneViewWallTiles()
+page1Display = page1Logic.getParameterNode().display
+page1Logic.wallTiles.sceneViewPage = 1
+page1Actors = page1Logic.wallTiles._buildSceneViewWallTiles(page1Display)
 content1 = totalViews - VRStage.SCENE_VIEW_WALL_PAGE_SIZE
 assert content1 == 2, content1
 assert len(page1Actors) == 2 * content1 + 2 * 3, len(page1Actors)
-assert len(page1Logic._wallTileByActor) == content1 + 1, len(page1Logic._wallTileByActor)
+assert len(page1Logic.wallTiles.tileByActor) == content1 + 1, len(page1Logic.wallTiles.tileByActor)
 prevPanel1, _prevLabel1, pagePanel1, pageLabel1, nextPanel1, _nextLabel1 = _navTileTexts(page1Actors, content1)
 assert prevPanel1.GetPickable(), "Prev must be enabled once off the first page"
 assert not nextPanel1.GetPickable(), "Next must be disabled on the last page"
@@ -631,14 +647,17 @@ assert pageLabel1.GetInput() == "Page 2 / 2", pageLabel1.GetInput()
 print("buildSceneViewWallTiles (page 2 of 2): OK")
 
 # _activateSceneViewWallPage updates the tracked page even with no live VR renderer to rebuild
-# into (_rebuildSceneViewWall is a documented no-op outside VR) - this is what a Next/Prev tile
-# press ultimately calls.
+# into (rebuildSceneViewWall is a documented no-op without a renderer) - this is what a
+# Next/Prev tile press ultimately calls.
 pageActivateLogic = VRStage.VRStageLogic()
-pageActivateLogic._buildSceneViewWallTiles()
-assert pageActivateLogic._sceneViewWallPage == 0
+pageActivateDisplay = pageActivateLogic.getParameterNode().display
+pageActivateLogic.wallTiles._buildSceneViewWallTiles(pageActivateDisplay)
+assert pageActivateLogic.wallTiles.sceneViewPage == 0
 pageActivateLogic._activateSceneViewWallPage(1)
-assert pageActivateLogic._sceneViewWallPage == 1
-pageActivateLogic._rebuildSceneViewWall()  # no renderer -> must not raise
+assert pageActivateLogic.wallTiles.sceneViewPage == 1
+pageActivateLogic.wallTiles.rebuildSceneViewWall(  # no renderer -> must not raise
+    None, pageActivateDisplay,
+    pageActivateLogic.roomChrome.anchorMatrix, pageActivateLogic.roomChrome.props)
 print("scene view wall pagination: OK")
 
 # ---------------------------------------------------------------- measurement tool

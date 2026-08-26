@@ -188,7 +188,8 @@ class ReformatTool:
         if self.transformNode is None or self.sliceNode is None:
             return
 
-        matrix = self.transformNode.GetMatrixTransformToParent()
+        matrix = vtk.vtkMatrix4x4()
+        self.transformNode.GetMatrixTransformToParent(matrix)
 
         sliceToRAS = self.sliceNode.GetSliceToRAS()
         sliceToRAS.DeepCopy(matrix)

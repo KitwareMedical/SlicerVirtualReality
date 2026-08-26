@@ -188,14 +188,23 @@ class VRStageWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
     # ---- module reload (SlicerHeart pattern, ported to importlib for Python 3.12+)
 
+    # Dependency order: each module must come after every module it imports from, so that
+    # re-executing it binds the freshly reloaded classes/functions (a missing entry keeps the
+    # stale module cached in sys.modules even after Logic reloads).
     _VRSTAGELIB_SUBMODULES = [
         "Constants",
         "ParameterNode",
         "BakedText",
         "Props",
         "FramingMath",
+        "SceneViews",
+        "OrientationLabels",
         "MeasurementTool",
         "ReformatTool",
+        "StageLighting",
+        "RoomChrome",
+        "StageFraming",
+        "WallTiles",
         "Logic",
     ]
 
