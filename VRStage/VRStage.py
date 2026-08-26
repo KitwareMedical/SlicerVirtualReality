@@ -117,6 +117,7 @@ class VRStageWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
         self.ui.enterButton.clicked.connect(self.onEnterButton)
         self.ui.exitButton.clicked.connect(self.onExitButton)
+        self.ui.resetInteractionTransformsButton.clicked.connect(self.onResetInteractionTransformsButton)
 
         self.initializeParameterNode()
         self.updateGUIFromLogic()
@@ -172,6 +173,9 @@ class VRStageWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     def onExitButton(self) -> None:
         self.logic.exitViewerMode()
         self.updateGUIFromLogic()
+
+    def onResetInteractionTransformsButton(self) -> None:
+        self.logic.resetInteractionTransforms()
 
     def updateGUIFromLogic(self) -> None:
         active = bool(self.logic and self.logic.isActive)

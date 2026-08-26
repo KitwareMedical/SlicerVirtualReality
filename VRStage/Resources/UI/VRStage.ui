@@ -45,6 +45,16 @@
        </layout>
       </item>
       <item>
+       <widget class="QPushButton" name="resetInteractionTransformsButton">
+        <property name="toolTip">
+         <string>Move all objects that have been repositioned by grabbing in virtual reality back to their original position, by resetting their interaction transforms to identity.</string>
+        </property>
+        <property name="text">
+         <string>Reset interaction transforms</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="statusLabel">
         <property name="text">
          <string>Not active</string>

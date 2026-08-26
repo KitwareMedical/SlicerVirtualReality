@@ -568,6 +568,30 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
     def resetMagnification(self) -> None:
         self._resetFraming()
 
+    @staticmethod
+    def resetInteractionTransforms() -> None:
+        """Reset all VR interaction transforms to identity.
+
+        Iterates all transform nodes in the scene marked with the
+        VirtualReality.InteractionTransform attribute and sets linear ones back
+        to identity, returning grabbed objects to their original position.
+        Non-linear transforms carrying the attribute are skipped.
+        """
+        scene = slicer.mrmlScene
+        identityMatrix = vtk.vtkMatrix4x4()
+        nodes = scene.GetNodesByClass("vtkMRMLTransformNode")
+        nodes.UnRegister(None)
+        for i in range(nodes.GetNumberOfItems()):
+            transformNode = nodes.GetItemAsObject(i)
+            if transformNode.GetAttribute("VirtualReality.InteractionTransform") is None:
+                continue
+            if not transformNode.IsLinear():
+                logging.warning(
+                    f"resetInteractionTransforms: Skipping non-linear transform node"
+                    f" '{transformNode.GetName()}'")
+                continue
+            transformNode.SetMatrixTransformToParent(identityMatrix)
+
     # ------------------------------------------------------------------ arbitrary reformat slice
 
     def _setupReformatSlice(self, renderer) -> None:
