@@ -84,17 +84,20 @@ class RoomChrome:
         accentColorDim = _rgbF(display.accentColorDim)
         overheadLightColor = _rgbF(display.overheadLightColor)
 
-        floor = Props.discActor(
-            center=(0.0, FLOOR_THICKNESS_M / 2.0, 0.0),
-            radius=FLOOR_RADIUS_M, height=FLOOR_THICKNESS_M, color=floorColor)
-        floorGrid = Props.texturedDiscActor(
-            center=(0.0, FLOOR_THICKNESS_M + 0.001, 0.0),
-            radius=FLOOR_RADIUS_M, texture=Props.arrayToTexture(Props.floorPanelTexture(floorColor)),
-            ambient=0.55, diffuse=0.35)
-        floorRing = Props.glowRingActor(
-            center=(tableCenterXZ[0], FLOOR_THICKNESS_M + 0.002, tableCenterXZ[1]),
-            innerRadius=FLOOR_RING_INNER_M, outerRadius=FLOOR_RING_OUTER_M,
-            color=accentColor)
+        floorProps = []
+        if display.showFloor:
+            floor = Props.discActor(
+                center=(0.0, FLOOR_THICKNESS_M / 2.0, 0.0),
+                radius=FLOOR_RADIUS_M, height=FLOOR_THICKNESS_M, color=floorColor)
+            floorGrid = Props.texturedDiscActor(
+                center=(0.0, FLOOR_THICKNESS_M + 0.001, 0.0),
+                radius=FLOOR_RADIUS_M, texture=Props.arrayToTexture(Props.floorPanelTexture(floorColor)),
+                ambient=0.55, diffuse=0.35)
+            floorRing = Props.glowRingActor(
+                center=(tableCenterXZ[0], FLOOR_THICKNESS_M + 0.002, tableCenterXZ[1]),
+                innerRadius=FLOOR_RING_INNER_M, outerRadius=FLOOR_RING_OUTER_M,
+                color=accentColor)
+            floorProps = [floor, floorGrid, floorRing]
 
         column = Props.discActor(
             center=(0.0, TABLE_HEIGHT_M - TABLE_HEIGHT_MAX_M / 2.0, TABLE_FORWARD_M),
@@ -155,7 +158,7 @@ class RoomChrome:
             tableTopRing, tableWellFloor, collarSeamRing,
         ]
         tableProps.extend(tableScreenProps)
-        roomProps = [floor, floorGrid, floorRing]
+        roomProps = floorProps
 
         if display.showWalls:
             roomProps.append(Props.roomActor(

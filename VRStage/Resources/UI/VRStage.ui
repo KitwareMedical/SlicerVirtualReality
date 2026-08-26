@@ -374,6 +374,22 @@
         </property>
         <layout class="QVBoxLayout" name="visibilityLayout">
          <item>
+          <widget class="QCheckBox" name="showFloorCheckBox">
+           <property name="toolTip">
+            <string>Draw the floor (base disc, grid panels, and the accent ring around the table).</string>
+           </property>
+           <property name="text">
+            <string>Show floor</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+           <property name="SlicerParameterName" stdset="0">
+            <string>display.showFloor</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QCheckBox" name="showRoomCheckBox">
            <property name="toolTip">
             <string>Draw the room walls and ceiling light panels around the turntable.</string>

@@ -273,7 +273,7 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
     _DISPLAY_FIELDS = (
         "accentColor", "accentColorDim", "floorColor", "wallColor", "columnColor",
         "tableColor", "rimBandColor", "tableScreenBackgroundColor", "overheadLightColor",
-        "showWalls", "showBackWallSignage", "showTableScreen", "showInfoScreen",
+        "showFloor", "showWalls", "showBackWallSignage", "showTableScreen", "showInfoScreen",
         "showOrientationLabels", "showAtlasWall", "showSceneViewWall",
         "enableReformatTool", "enableMeasurementTool",
     )
@@ -310,7 +310,7 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
     CHROME_OPTION_FIELDS = (
         "accentColor", "accentColorDim", "floorColor", "wallColor", "columnColor", "tableColor",
         "rimBandColor", "tableScreenBackgroundColor", "overheadLightColor",
-        "showWalls", "showBackWallSignage", "showTableScreen", "showInfoScreen",
+        "showFloor", "showWalls", "showBackWallSignage", "showTableScreen", "showInfoScreen",
         "showOrientationLabels", "showAtlasWall", "showSceneViewWall",
     )
     TOOL_OPTION_FIELDS = ("enableReformatTool", "enableMeasurementTool")

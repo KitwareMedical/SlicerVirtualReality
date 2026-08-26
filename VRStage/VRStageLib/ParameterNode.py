@@ -48,7 +48,8 @@ class VRStageDisplayOptions:
     tableScreenBackgroundColor: Annotated[qt.QColor, Default(qt.QColor.fromRgbF(*TABLE_SCREEN_BG_COLOR))]
     overheadLightColor: Annotated[qt.QColor, Default(qt.QColor.fromRgbF(*OVERHEAD_LIGHT_COLOR))]
 
-    showWalls: bool = True              # room walls + ceiling light panel (floor/table are always drawn)
+    showFloor: bool = True              # floor disc, floor grid, and the accent ring around the table
+    showWalls: bool = True              # room walls + ceiling light panel (table is always drawn)
     showBackWallSignage: bool = True    # the control-scheme help text (independent of showWalls)
     showTableScreen: bool = True        # the holo readout inset in the tabletop
     showInfoScreen: bool = True         # the scale/scene-view monitor mounted on the table's collar
