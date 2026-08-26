@@ -158,9 +158,9 @@ HELP_PANEL_CENTER_Y_M = ROOM_CENTER_Y_M + 0.35
 HELP_PANEL_WIDTH_M = 2.4
 HELP_TITLE_HEIGHT_M = 0.14
 HELP_BODY_HEIGHT_M = 0.085
-HELP_BODY_LINE_COUNT = 1 + len(CONTROL_ACTION_ORDER) + 3  # rotate line + one per action + grip
-                                                           # line + roll line + table-height line
-                                                           # - worst
+HELP_BODY_LINE_COUNT = 1 + len(CONTROL_ACTION_ORDER) + 4  # rotate line + one per action + walk
+                                                           # line + grip line + roll line +
+                                                           # table-height line - worst
                                                            # case (every action bound); an
                                                            # Unbound one produces no line, see
                                                            # _controlSchemeBodyText
@@ -321,6 +321,15 @@ THUMBSTICK_DEADZONE = 0.25
 INPUT_TIMER_INTERVAL_MS = 33  # ~30 Hz continuous-input update (turntable)
 AUTO_SPIN_DEG_PER_SEC = 30.0    # hands-free presentation rotation speed
 
+# Right-stick locomotion: the user walks around the room (head-relative move/strafe) while the
+# room, table and data stay put - implemented as a horizontal physical->room offset composed
+# into the PhysicalToWorldMatrix (see StageLocomotion/LocomotionMath). All in physical meters,
+# so walk speed is real-world speed regardless of data magnification.
+LOCOMOTION_SPEED_M_PER_S = 1.0    # walk speed at full stick deflection
+# The headset itself (stick offset + wherever the user has physically walked in their playspace)
+# is what's clamped to the room footprint, so the head can never pass through a wall.
+LOCOMOTION_WALL_MARGIN_M = 0.3    # minimum headset distance from any wall (X/Z clamp)
+
 SLICE_NODE_IDS = ["vtkMRMLSliceNodeRed", "vtkMRMLSliceNodeGreen", "vtkMRMLSliceNodeYellow"]
 
 # Left/right wall launcher tiles: the left wall holds a fixed set of "load this atlas" tiles
@@ -479,6 +488,7 @@ __all__ = [
     # Magnification / input
     "MIN_MAGNIFICATION", "MAX_MAGNIFICATION", "DEFAULT_MAGNIFICATION", "UNIT_MAGNIFICATION_SCALE",
     "THUMBSTICK_DEADZONE", "INPUT_TIMER_INTERVAL_MS", "AUTO_SPIN_DEG_PER_SEC",
+    "LOCOMOTION_SPEED_M_PER_S", "LOCOMOTION_WALL_MARGIN_M",
     "SLICE_NODE_IDS",
     # Wall tiles
     "WALL_TILE_WIDTH_M", "WALL_TILE_HEIGHT_M", "WALL_TILE_GUTTER_M", "WALL_TILE_LABEL_HEIGHT_M",

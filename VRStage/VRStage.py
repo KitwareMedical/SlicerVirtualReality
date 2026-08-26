@@ -17,6 +17,8 @@ from VRStageLib.BakedText import (            # noqa: F401
     BakedTextMixin, BakedTextActor, BakedFollowerTextActor)
 from VRStageLib import Props                  # noqa: F401
 from VRStageLib import FramingMath             # noqa: F401
+from VRStageLib import LocomotionMath          # noqa: F401
+from VRStageLib.StageLocomotion import StageLocomotion  # noqa: F401
 from VRStageLib.MeasurementTool import MeasurementTool  # noqa: F401
 from VRStageLib.ReformatTool import ReformatTool  # noqa: F401
 from VRStageLib.Logic import VRStageLogic  # noqa: F401
@@ -41,7 +43,8 @@ class VRStage(ScriptedLoadableModule):
         self.parent.helpText = _("""
 A grounded, presentation-oriented virtual reality viewer. Instead of flying through empty space,
 the user stands in a fixed room with a turntable in front of them. Scene data appears on the
-turntable and is rotated with the left thumbstick; world scale and scene-view navigation are
+turntable and is rotated with the left thumbstick; the right thumbstick walks the user around
+the room (which stays put, and cannot be left); world scale and scene-view navigation are
 driven by controller buttons. A grabbable arbitrary reformat plane lets the data be sliced from
 any angle, with a floating screen showing the reformatted image live.
 
@@ -53,6 +56,10 @@ Controller bindings (Oculus Touch, defaults shown - nine of these are rebindable
 section below, or via `logic.getParameterNode().controls`):
 - Left thumbstick left/right: rotate the turntable (yaw); up/down: pitch. Left grip (hold):
   turns left/right into roll and up/down into table height - see below. (fixed)
+- Right thumbstick: walk around the room - up/down moves along the direction the headset is
+  facing, left/right strafes. The room, table and data stay put; the headset is kept inside the
+  walls (with a small margin), even in combination with physically walking around the playspace.
+  (fixed)
 - Either grip (hold): the reformat plane follows that controller's position/orientation for as
   long as the grip is held - release to leave it in place. A floating screen beside the plane
   shows the reformatted image live. Hidden until toggled on (see below). The left grip doubles
@@ -62,7 +69,8 @@ section below, or via `logic.getParameterNode().controls`):
 - A/X: unbound by default (aim at a right-wall tile and pull the right trigger to pick a scene
   view instead - see below - or rebind next/previous scene view onto A/X in the Controls section)
 - Left thumbstick click: recenter the data on the table (at the default scale, see the Behavior
-  section's "Default scale" - 1.0 = normal VR size, unless "Fit data to table" is on)
+  section's "Default scale" - 1.0 = normal VR size, unless "Fit data to table" is on) and return
+  the user to the center of the room
 - Left menu button: toggle hands-free auto-spin
 - Right trigger: aim the right controller at the anatomy (or the revealed reformat plane, for
   volume-only data) and pull to place a measurement point; pull again to complete the pair into
@@ -70,8 +78,9 @@ section below, or via `logic.getParameterNode().controls`):
   wall's atlas launcher or the right wall's scene-view launcher), activate that tile. Left
   trigger: undo the last point or measurement. (aiming with the right controller is fixed; which
   buttons place/undo is rebindable)
-- Two-controller A+X gesture: freely move/scale/rotate (the room follows) (fixed - independent of
-  any rebinding above, since it's a built-in SlicerVR gesture, not one of this module's actions)
+
+The built-in two-controller A+X free gesture (and the default right-stick fly) are disabled
+while the stage is active, and restored on exit.
 
 Other modules can reuse this room/table setup while customizing its colors and showing/hiding
 individual components (walls, signage, orientation labels, table screen, info screen, atlas wall,
@@ -197,6 +206,7 @@ class VRStageWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         "BakedText",
         "Props",
         "FramingMath",
+        "LocomotionMath",
         "SceneViews",
         "OrientationLabels",
         "MeasurementTool",
@@ -204,6 +214,7 @@ class VRStageWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         "StageLighting",
         "RoomChrome",
         "StageFraming",
+        "StageLocomotion",
         "WallTiles",
         "Logic",
     ]
@@ -278,6 +289,28 @@ class VRStageTest(ScriptedLoadableModuleTest):
             VRStageLogic.computeDefaultTableHeightM(baseM, 1.0, tallBounds), TABLE_HEIGHT_MIN_M)
         self.assertEqual(
             VRStageLogic.computeDefaultTableHeightM(baseM, 1.0, emptyBounds), TABLE_HEIGHT_M)
+
+        # Locomotion math is pure and clamped: full-stick forward walks at
+        # LOCOMOTION_SPEED_M_PER_S along the gaze, the wall margin blocks outward motion,
+        # and an already-outside head is never teleported (mirrors the headless test).
+        gazeBack = [0.0, 0.0, -1.0]
+        vx, vz = LocomotionMath.walkVelocity(
+            0.0, 1.0, gazeBack, THUMBSTICK_DEADZONE, LOCOMOTION_SPEED_M_PER_S)
+        self.assertAlmostEqual(vx, 0.0)
+        self.assertAlmostEqual(vz, -LOCOMOTION_SPEED_M_PER_S)
+        limitX = ROOM_SIZE_M[0] / 2.0 - LOCOMOTION_WALL_MARGIN_M
+        dx, dz = LocomotionMath.clampWalkDelta(
+            limitX - 0.05, 0.0, 0.2, 0.2, ROOM_SIZE_M, LOCOMOTION_WALL_MARGIN_M)
+        self.assertAlmostEqual(dx, 0.05)  # clamped at the wall
+        self.assertAlmostEqual(dz, 0.2)   # while sliding along it
+        dx, _dz = LocomotionMath.clampWalkDelta(
+            limitX + 0.5, 0.0, 0.2, 0.0, ROOM_SIZE_M, LOCOMOTION_WALL_MARGIN_M)
+        self.assertEqual(dx, 0.0)
+        walker = StageLocomotion()
+        self.assertTrue(walker.update(1.0, [0.0, 1.7, 0.0], gazeBack, 0.0, 1.0))
+        self.assertAlmostEqual(walker.offsetZM, -LOCOMOTION_SPEED_M_PER_S)
+        walker.reset()
+        self.assertTrue(walker.isIdentity())
 
         # Live option application: the snapshot applyOptions diffs against is deterministic and
         # tracks each rebuild-requiring field; applyOptions is a no-op while inactive.

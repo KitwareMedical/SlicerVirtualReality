@@ -10,6 +10,7 @@ set(MODULE_PYTHON_SCRIPTS
   VRStageLib/BakedText
   VRStageLib/Props
   VRStageLib/FramingMath
+  VRStageLib/LocomotionMath
   VRStageLib/MeasurementTool
   VRStageLib/ReformatTool
   VRStageLib/SceneViews
@@ -18,6 +19,7 @@ set(MODULE_PYTHON_SCRIPTS
   VRStageLib/WallTiles
   VRStageLib/RoomChrome
   VRStageLib/StageFraming
+  VRStageLib/StageLocomotion
   VRStageLib/Logic
   )
 

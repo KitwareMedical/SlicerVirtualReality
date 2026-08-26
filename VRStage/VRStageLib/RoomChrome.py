@@ -259,22 +259,25 @@ class RoomChrome:
         self.monitorAssembly = None
         self.signageBodyActor = None
 
-    def reanchor(self, physicalToWorldMatrix, tableHeightM) -> None:
-        """DeepCopy *physicalToWorldMatrix* into ``anchorMatrix`` and derive
+    def reanchor(self, roomToWorldMatrix, tableHeightM) -> None:
+        """DeepCopy *roomToWorldMatrix* into ``anchorMatrix`` and derive
         ``tableAnchorMatrix`` with the runtime table-height offset, then mark
         every chrome prop modified.
 
         This is the single framing↔chrome seam; it is called from Logic's
-        ``_setPhysicalToWorld`` on every matrix change.
+        ``_setRoomToWorld`` on every framing-matrix change.  The anchor is the
+        room->world matrix (NOT the raw window PhysicalToWorld, which additionally
+        contains the locomotion offset), so the room stays world-fixed while the
+        user walks through it.
         """
-        if physicalToWorldMatrix is None:
+        if roomToWorldMatrix is None:
             return
-        self.anchorMatrix.DeepCopy(physicalToWorldMatrix)
-        self.tableAnchorMatrix.DeepCopy(physicalToWorldMatrix)
+        self.anchorMatrix.DeepCopy(roomToWorldMatrix)
+        self.tableAnchorMatrix.DeepCopy(roomToWorldMatrix)
         delta = tableHeightM - TABLE_HEIGHT_M
         for row in range(3):
             self.tableAnchorMatrix.SetElement(row, 3,
-                physicalToWorldMatrix.GetElement(row, 3) + delta * physicalToWorldMatrix.GetElement(row, 1))
+                roomToWorldMatrix.GetElement(row, 3) + delta * roomToWorldMatrix.GetElement(row, 1))
         for prop in self.props:
             prop.Modified()
 

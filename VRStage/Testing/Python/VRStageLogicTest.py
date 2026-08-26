@@ -2,8 +2,9 @@ import qt
 import vtk
 import slicer
 import VRStage
-from VRStageLib import FramingMath, Props
+from VRStageLib import FramingMath, LocomotionMath, Props
 from VRStageLib.MeasurementTool import MeasurementTool
+from VRStageLib.StageLocomotion import StageLocomotion
 
 # Headless tests for VRStageLogic: everything that does not require a headset.
 #
@@ -156,6 +157,94 @@ assert logic._autoSpin is True
 logic.toggleAutoSpin()
 assert logic._autoSpin is False
 print("toggleAutoSpin: OK")
+
+# ---------------------------------------------------------------- locomotion
+#
+# Right-stick walking (LocomotionMath + StageLocomotion): the physical->room offset that
+# lets the user walk around a world-fixed room - the window matrix composes as
+# PhysicalToWorld = roomToWorld x L, so these invariants are what keep the room/table/data
+# put (and the user inside the walls) while only L changes.
+
+# horizontalUnit: flattens to [x, 0, z] and normalizes; a vertical or non-finite gaze has
+# no horizontal direction -> None (walking is skipped that tick).
+assert LocomotionMath.horizontalUnit([0.0, 5.0, -2.0]) == [0.0, 0.0, -1.0]
+hu = LocomotionMath.horizontalUnit([3.0, 1.0, 4.0])
+assert abs(hu[0] - 0.6) < 1e-9 and hu[1] == 0.0 and abs(hu[2] - 0.8) < 1e-9, hu
+assert LocomotionMath.horizontalUnit([0.0, 1.0, 0.0]) is None  # gaze straight up
+assert LocomotionMath.horizontalUnit([float("nan"), 0.0, 1.0]) is None
+print("horizontalUnit: OK")
+
+# walkVelocity: radial deadzone; full deflection = LOCOMOTION_SPEED_M_PER_S; stick +Y
+# walks along the gaze direction and stick +X strafes right (right = forward x up).
+deadzone = VRStage.THUMBSTICK_DEADZONE
+walkSpeed = VRStage.LOCOMOTION_SPEED_M_PER_S
+gazeBack = [0.0, 0.0, -1.0]  # authored forward (-Z), toward the back wall
+assert LocomotionMath.walkVelocity(0.0, deadzone, gazeBack, deadzone, walkSpeed) == (0.0, 0.0)
+assert LocomotionMath.walkVelocity(0.0, 1.0, None, deadzone, walkSpeed) == (0.0, 0.0)
+vx, vz = LocomotionMath.walkVelocity(0.0, 1.0, gazeBack, deadzone, walkSpeed)  # full forward
+assert abs(vx) < 1e-9 and abs(vz + walkSpeed) < 1e-9, (vx, vz)
+vx, vz = LocomotionMath.walkVelocity(1.0, 0.0, gazeBack, deadzone, walkSpeed)  # full strafe
+assert abs(vx - walkSpeed) < 1e-9 and abs(vz) < 1e-9, (vx, vz)  # facing -Z, right is +X
+vx, vz = LocomotionMath.walkVelocity(0.0, 1.0, [1.0, 0.0, 0.0], deadzone, walkSpeed)
+assert abs(vx - walkSpeed) < 1e-9 and abs(vz) < 1e-9, (vx, vz)  # direction tracks the gaze
+partial = 0.625  # between deadzone and full: speed ramps radially
+vx, vz = LocomotionMath.walkVelocity(0.0, partial, gazeBack, deadzone, walkSpeed)
+assert abs(vz + walkSpeed * (partial - deadzone) / (1.0 - deadzone)) < 1e-9, vz
+print("walkVelocity: OK")
+
+# clampWalkDelta: interior motion passes through; each axis clamps independently at its
+# wall margin (so the user slides along a wall instead of sticking); a head already
+# outside the margin (large physical playspace) is never teleported - outward motion is
+# blocked, inward motion still allowed.
+roomSize = VRStage.ROOM_SIZE_M
+wallMargin = VRStage.LOCOMOTION_WALL_MARGIN_M
+limitX = roomSize[0] / 2.0 - wallMargin
+dx, dz = LocomotionMath.clampWalkDelta(0.0, 0.0, 0.1, -0.2, roomSize, wallMargin)
+assert abs(dx - 0.1) < 1e-12 and abs(dz + 0.2) < 1e-12, (dx, dz)
+dx, dz = LocomotionMath.clampWalkDelta(limitX - 0.05, 0.0, 0.2, 0.2, roomSize, wallMargin)
+assert abs(dx - 0.05) < 1e-12, dx  # clamped at the +X wall...
+assert abs(dz - 0.2) < 1e-12, dz   # ...while still sliding along it in Z
+outsideX = limitX + 0.5
+dx, _dz = LocomotionMath.clampWalkDelta(outsideX, 0.0, 0.2, 0.0, roomSize, wallMargin)
+assert dx == 0.0, dx               # can't stick-move further out
+dx, _dz = LocomotionMath.clampWalkDelta(outsideX, 0.0, -0.2, 0.0, roomSize, wallMargin)
+assert abs(dx + 0.2) < 1e-12, dx   # can always come back in - and never a teleport
+print("clampWalkDelta: OK")
+
+# StageLocomotion: a scripted 1 s full-stick walk covers exactly LOCOMOTION_SPEED_M_PER_S
+# meters; walking into a wall stops at the margin; reset restores identity.
+walker = StageLocomotion()
+assert walker.isIdentity()
+walkTicks = 30
+walkDt = 1.0 / walkTicks
+for _ in range(walkTicks):
+    assert walker.update(walkDt, walker.roomFromPhysicalPoint([0.0, 1.7, 0.0]), gazeBack, 0.0, 1.0)
+assert abs(walker.offsetZM + VRStage.LOCOMOTION_SPEED_M_PER_S) < 1e-9, walker.offsetZM
+assert abs(walker.offsetXM) < 1e-9, walker.offsetXM
+for _ in range(1000):  # keep walking forward: the wall margin must stop the offset
+    walker.update(walkDt, walker.roomFromPhysicalPoint([0.0, 1.7, 0.0]), gazeBack, 0.0, 1.0)
+limitZ = roomSize[2] / 2.0 - wallMargin
+assert abs(walker.offsetZM + limitZ) < 1e-6, walker.offsetZM
+walker.reset()
+assert walker.isIdentity()
+
+# Composition invariants: L x L^-1 == identity, and (since L is a rigid horizontal
+# translation) composing it into a scaled roomToWorld leaves the scale - and therefore
+# the magnification readout - untouched.
+walker.offsetXM, walker.offsetZM = 1.25, -0.75
+composed = vtk.vtkMatrix4x4()
+vtk.vtkMatrix4x4.Multiply4x4(walker.matrix(), walker.inverseMatrix(), composed)
+identityMatrix = vtk.vtkMatrix4x4()
+for r in range(4):
+    for c in range(4):
+        assert abs(composed.GetElement(r, c) - identityMatrix.GetElement(r, c)) < 1e-12
+scaledRoomToWorld = vtk.vtkMatrix4x4()
+for i in range(3):
+    scaledRoomToWorld.SetElement(i, i, VRStage.UNIT_MAGNIFICATION_SCALE)
+windowMatrix = vtk.vtkMatrix4x4()
+vtk.vtkMatrix4x4.Multiply4x4(scaledRoomToWorld, walker.matrix(), windowMatrix)
+assert abs(FramingMath.linearScale(windowMatrix) - FramingMath.linearScale(scaledRoomToWorld)) < 1e-9
+print("StageLocomotion: OK")
 
 # ---------------------------------------------------------------- display options
 #
@@ -320,7 +409,7 @@ assert set(VRStage.CONTROL_BINDING_LABELS) == set(VRStage.CONTROL_BINDING_EVENT_
 print("CONTROL_BINDING_EVENT_NAMES: OK" + (" (verified against real interactor style)" if _style else " (interactor style module unavailable, name-shape only)"))
 
 # The generated signage text: one line per BOUND action (with its currently-bound button
-# substituted), plus the three fixed lines (rotate, grip, roll, table-height) - an Unbound
+# substituted), plus the five fixed lines (rotate, walk, grip, roll, table-height) - an Unbound
 # action produces no line (see _controlSchemeBodyText), so HELP_BODY_LINE_COUNT (which assumes
 # every action is bound) is only an upper bound, not an exact match, once
 # nextSceneView/prevSceneView are left Unbound.
@@ -328,6 +417,7 @@ bodyText = Props.controlSchemeBodyText(defaultControls)
 bodyLines = bodyText.split("\n")
 assert len(bodyLines) == VRStage.HELP_BODY_LINE_COUNT - 2, (len(bodyLines), VRStage.HELP_BODY_LINE_COUNT)
 assert bodyLines[0] == "L-stick: rotate/pitch turntable"
+assert bodyLines[1] == "R-stick: walk around the room"
 assert bodyLines[-1] == "Left grip (hold) + L-stick U/D: table height"
 assert "B: scale up" in bodyLines
 assert "Right Trigger: place measurement point" in bodyLines

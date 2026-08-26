@@ -1,8 +1,16 @@
 """Stage framing transform model for VR Stage.
 
-``StageFraming`` computes physical-to-world matrices; ``VRStageLogic`` applies them.
-All mutating controls take "current matrix in, new matrix out" so the collaborator is
-free of render-window/renderer/fan-out knowledge and every control is headless-testable.
+``StageFraming`` computes framing matrices; ``VRStageLogic`` applies them via
+``_setRoomToWorld``.  All mutating controls take "current matrix in, new matrix out" so
+the collaborator is free of render-window/renderer/fan-out knowledge and every control
+is headless-testable.
+
+Since right-stick locomotion was added, the matrices here are room->world: "room"
+coordinates are the authored physical frame of Constants.py, and the window's actual
+PhysicalToWorldMatrix additionally composes the physical->room locomotion offset
+(``PhysicalToWorld = roomToWorld x L``, see StageLocomotion).  Attribute names keep the
+original ``...PhysicalToWorld`` spelling because room coordinates ARE the authored
+physical coordinates - only the live walked-about offset distinguishes them.
 """
 
 import math

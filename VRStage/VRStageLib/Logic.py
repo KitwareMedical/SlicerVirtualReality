@@ -6,9 +6,16 @@ desktop 3D and 2D views therefore never move.  The math (computePhysicalToWorld 
 geometry helpers) is pure and covered by the headless test; the chrome/observer paths
 require an active VR view.
 
+The window's matrix is composed as ``PhysicalToWorld = roomToWorld x L``, where
+``roomToWorld`` is the framing matrix (StageFraming — "room" coordinates are the authored
+physical frame of Constants.py) and ``L`` is the right-stick locomotion offset
+(StageLocomotion, physical->room).  Framing controls act on roomToWorld; room chrome is
+anchored to roomToWorld; changing only L therefore walks the user through a world-fixed
+room while the room, table and data stay put.
+
 Behavioral clusters are delegated to collaborator classes in this package:
     RoomChrome, WallTileGallery, StageLighting, OrientationLabels,
-    StageFraming, SceneViewNavigator, MeasurementTool, ReformatTool.
+    StageFraming, StageLocomotion, SceneViewNavigator, MeasurementTool, ReformatTool.
 This file retains: lifecycle (enter/exit), options fan-out, the physical-to-world
 pipeline, thin public controls, the input timer, observer registration
 (VTKObservationMixin), and tool/wall-tile arbitration glue.
@@ -38,6 +45,8 @@ from .OrientationLabels import OrientationLabels
 from .WallTiles import WallTileGallery
 from .RoomChrome import RoomChrome
 from .StageFraming import StageFraming
+from .StageLocomotion import StageLocomotion
+from . import LocomotionMath
 
 
 class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
@@ -66,6 +75,7 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
         self.lighting = StageLighting()
         self.orientationLabels = OrientationLabels()
         self.framing = StageFraming()
+        self.locomotion = StageLocomotion()
         self.sceneViews = SceneViewNavigator()
         self.reformatTool = ReformatTool()
         self.measurementTool = MeasurementTool()
@@ -73,6 +83,8 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
         # Continuous inputs.
         self._leftStickX = 0.0
         self._leftStickY = 0.0
+        self._rightStickX = 0.0
+        self._rightStickY = 0.0
         self._autoSpin = False
         self._inputTimer = qt.QTimer()
         self._inputTimer.setInterval(INPUT_TIMER_INTERVAL_MS)
@@ -157,6 +169,8 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
             pass
 
         slicer.app.processEvents()
+        # L = identity before capturing, so the captured window matrix IS roomToWorld.
+        self.locomotion.reset()
         capturedPhysicalToWorld = vtk.vtkMatrix4x4()
         widget.renderWindow().GetPhysicalToWorldMatrix(capturedPhysicalToWorld)
         self.framing.captureBase(capturedPhysicalToWorld)
@@ -165,6 +179,8 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
         self._autoSpin = False
         self._leftStickX = 0.0
         self._leftStickY = 0.0
+        self._rightStickX = 0.0
+        self._rightStickY = 0.0
         self.reformatTool.gripHeldSide = None
         self.reformatTool.visible = False
         self.framing.tableHeightM = TABLE_HEIGHT_M
@@ -177,7 +193,7 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
         parameterNode = params
         matrix = self.framing.resetFramingMatrix(parameterNode.fitToTable, parameterNode.defaultScale)
         if matrix is not None:
-            self._setPhysicalToWorld(matrix)
+            self._setRoomToWorld(matrix)
             self.roomChrome.setTurntableAngle(self.framing.turntableAngleRad)
             self._updateScaleReadout()
 
@@ -206,6 +222,9 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
         self._inputTimer.stop()
         self._leftStickX = 0.0
         self._leftStickY = 0.0
+        self._rightStickX = 0.0
+        self._rightStickY = 0.0
+        self.locomotion.reset()
 
         self._removeObservers()
 
@@ -386,7 +405,7 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
         self._teardownStage()
         self.wallTiles.sceneViewPage = sceneViewWallPage
         self._buildStage(renderer)
-        self.roomChrome.reanchor(self._currentPhysicalToWorld(), self.framing.tableHeightM)
+        self.roomChrome.reanchor(self._currentRoomToWorld(), self.framing.tableHeightM)
         self.wallTiles.markActorsModified()
         self._physicalScale(update=True)
         self.roomChrome.setTurntableAngle(self.framing.turntableAngleRad)
@@ -407,6 +426,7 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
         return FramingMath.computeDefaultTableHeightM(baseMatrix, relScale, dataBounds)
 
     def _currentPhysicalToWorld(self):
+        """The raw window matrix (roomToWorld x L)."""
         renderWindow = self._renderWindow()
         if renderWindow is None:
             return None
@@ -414,26 +434,48 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
         renderWindow.GetPhysicalToWorldMatrix(matrix)
         return matrix
 
-    def _setPhysicalToWorld(self, matrix) -> None:
+    def _currentRoomToWorld(self):
+        """The framing matrix R = PhysicalToWorld x L^-1, recomputed on demand (never
+        cached) so external PhysicalToWorld writers stay consistent with locomotion."""
+        current = self._currentPhysicalToWorld()
+        if current is None or self.locomotion.isIdentity():
+            return current
+        room = vtk.vtkMatrix4x4()
+        vtk.vtkMatrix4x4.Multiply4x4(current, self.locomotion.inverseMatrix(), room)
+        return room
+
+    def _setWindowPhysicalToWorld(self, matrix) -> bool:
+        """Set the raw window matrix (finiteness-gated). Returns False when rejected.
+
+        The camera clipping range is reset after every change (not only scale changes):
+        locomotion translates the camera relative to the world geometry, which can
+        invalidate the range just as a scale change can.
+        """
         renderWindow = self._renderWindow()
         if renderWindow is None:
-            return
+            return False
         if not all(math.isfinite(matrix.GetElement(r, c)) for r in range(4) for c in range(4)):
             logging.warning("VRStage: ignoring non-finite PhysicalToWorld matrix")
-            return
-        previousScale = FramingMath.matrixScale(self._currentPhysicalToWorld())
+            return False
         try:
             renderWindow.SetPhysicalToWorldMatrix(matrix)
         except Exception:  # noqa: BLE001
             logging.warning("VRStage: unable to set PhysicalToWorldMatrix")
-        self.roomChrome.reanchor(matrix, self.framing.tableHeightM)
+        renderer = self._vrRenderer()
+        if renderer is not None:
+            renderer.ResetCameraClippingRange()
+        return True
+
+    def _setRoomToWorld(self, roomMatrix) -> None:
+        """Apply a new framing matrix: compose with the locomotion offset into the
+        window, then re-glue the room chrome to the room->world matrix."""
+        window = vtk.vtkMatrix4x4()
+        vtk.vtkMatrix4x4.Multiply4x4(roomMatrix, self.locomotion.matrix(), window)
+        if not self._setWindowPhysicalToWorld(window):
+            return
+        self.roomChrome.reanchor(roomMatrix, self.framing.tableHeightM)
         self.wallTiles.markActorsModified()
         self._physicalScale(update=True)
-        newScale = FramingMath.matrixScale(matrix)
-        if previousScale is None or abs(newScale - previousScale) > 1e-9 * max(newScale, 1e-12):
-            renderer = self._vrRenderer()
-            if renderer is not None:
-                renderer.ResetCameraClippingRange()
 
     def _physicalScale(self, update=False) -> float:
         """Read the VR physical scale; optionally update orientation labels."""
@@ -444,34 +486,40 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
         return physicalScale
 
     def _incrementalWorldTransform(self, worldMatrix) -> None:
-        current = self._currentPhysicalToWorld()
+        current = self._currentRoomToWorld()
         if current is None:
             return
         inverse = vtk.vtkMatrix4x4()
         vtk.vtkMatrix4x4.Invert(worldMatrix, inverse)
         newMatrix = vtk.vtkMatrix4x4()
         vtk.vtkMatrix4x4.Multiply4x4(inverse, current, newMatrix)
-        self._setPhysicalToWorld(newMatrix)
+        self._setRoomToWorld(newMatrix)
 
     def _onPhysicalToWorldModified(self, caller=None, event=None) -> None:
-        self.roomChrome.reanchor(self._currentPhysicalToWorld(), self.framing.tableHeightM)
+        # Re-glue chrome to the room->world matrix (NOT the raw window matrix): this
+        # signal also fires for external writers (e.g. the VirtualReality module's
+        # desktop magnification control), which move room+data together relative to the
+        # user - the walked-to offset must be preserved through that.
+        self.roomChrome.reanchor(self._currentRoomToWorld(), self.framing.tableHeightM)
         self.wallTiles.markActorsModified()
         self._updateScaleReadout()
         self._physicalScale(update=True)
 
     def _resetFraming(self) -> None:
+        # Recentering the user is part of the reset: cheap recovery after walking away.
+        self.locomotion.reset()
         parameterNode = self.getParameterNode()
         matrix = self.framing.resetFramingMatrix(parameterNode.fitToTable, parameterNode.defaultScale)
         self.orientationLabels.updatePositions(self.framing.dataBounds, self.framing.dataCenter)
         if matrix is not None:
-            self._setPhysicalToWorld(matrix)
+            self._setRoomToWorld(matrix)
             self.roomChrome.setTurntableAngle(self.framing.turntableAngleRad)
             self._updateScaleReadout()
 
     # ------------------------------------------------------------------ readout helpers
 
     def _updateScaleReadout(self) -> None:
-        self.framing.magnification = self.framing.currentMagnification(self._currentPhysicalToWorld())
+        self.framing.magnification = self.framing.currentMagnification(self._currentRoomToWorld())
         self.roomChrome.showScale(self.framing.magnification)
 
     def _updateSceneViewReadout(self) -> None:
@@ -485,34 +533,103 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
     # ------------------------------------------------------------------ turntable / input
 
     def rotateTurntable(self, deltaRad) -> None:
-        current = self._currentPhysicalToWorld()
+        current = self._currentRoomToWorld()
         w = self.framing.turntableMatrix(current, deltaRad)
         if w is not None:
             self._incrementalWorldTransform(w)
             self.roomChrome.setTurntableAngle(self.framing.turntableAngleRad)
 
     def pitchTable(self, deltaRad) -> None:
-        current = self._currentPhysicalToWorld()
+        current = self._currentRoomToWorld()
         renderer = self._vrRenderer()
         w = self.framing.pitchMatrix(current, deltaRad, renderer)
         if w is not None:
             self._incrementalWorldTransform(w)
 
     def rollTable(self, deltaRad) -> None:
-        current = self._currentPhysicalToWorld()
+        current = self._currentRoomToWorld()
         renderer = self._vrRenderer()
         w = self.framing.rollMatrix(current, deltaRad, renderer)
         if w is not None:
             self._incrementalWorldTransform(w)
 
     def moveTableVertical(self, deltaM) -> None:
-        current = self._currentPhysicalToWorld()
+        current = self._currentRoomToWorld()
         w = self.framing.tableVerticalMatrix(current, deltaM)
         if w is not None:
             self._incrementalWorldTransform(w)
 
     def toggleAutoSpin(self) -> None:
         self._autoSpin = not self._autoSpin
+
+    # ------------------------------------------------------------------ locomotion
+
+    def _headPoseRoom(self):
+        """(headRoom, forwardRoom): the headset position and horizontal gaze unit vector
+        in room coordinates, or (None, None) when no finite head pose is available.
+
+        Primary source is the HMD's device-to-physical matrix (the same API
+        qMRMLVirtualRealityView uses to drive the HMD transform node), converted
+        physical->room by the locomotion offset.  Fallback is the active camera (which
+        tracks the HMD), mapped world->room by the inverse room->world matrix.
+        """
+        try:
+            renderWindow = self._renderWindow()
+            if renderWindow is not None:
+                handle = renderWindow.GetDeviceHandleForDevice(
+                    vtk.vtkEventDataDevice.HeadMountedDisplay)
+                matrix = renderWindow.GetDeviceToPhysicalMatrixForDeviceHandle(handle)
+                if matrix is not None:
+                    position = [matrix.GetElement(i, 3) for i in range(3)]
+                    forward = [-matrix.GetElement(i, 2) for i in range(3)]  # device -Z
+                    if all(math.isfinite(c) for c in position + forward):
+                        forwardRoom = LocomotionMath.horizontalUnit(
+                            self.locomotion.roomFromPhysicalDirection(forward))
+                        return self.locomotion.roomFromPhysicalPoint(position), forwardRoom
+        except Exception:  # noqa: BLE001
+            pass
+        try:
+            renderer = self._vrRenderer()
+            roomToWorld = self._currentRoomToWorld()
+            if renderer is None or roomToWorld is None:
+                return None, None
+            camera = renderer.GetActiveCamera()
+            if camera is None:
+                return None, None
+            worldToRoom = vtk.vtkMatrix4x4()
+            vtk.vtkMatrix4x4.Invert(roomToWorld, worldToRoom)
+            position = list(worldToRoom.MultiplyPoint(list(camera.GetPosition()) + [1.0]))[:3]
+            forward = list(worldToRoom.MultiplyPoint(
+                list(camera.GetDirectionOfProjection()) + [0.0]))[:3]
+            if not all(math.isfinite(c) for c in position + forward):
+                return None, None
+            return position, LocomotionMath.horizontalUnit(forward)
+        except Exception:  # noqa: BLE001
+            return None, None
+
+    def _updateLocomotion(self, dt) -> None:
+        """Advance the right-stick walk one input tick.
+
+        Only the locomotion offset changes and the window matrix is recomposed;
+        roomToWorld is untouched, so the chrome is deliberately NOT reanchored - the
+        room, table and data stay world-fixed while the user moves through them.
+        """
+        if not self.isActive:
+            return
+        if math.hypot(self._rightStickX, self._rightStickY) <= THUMBSTICK_DEADZONE:
+            return
+        roomToWorld = self._currentRoomToWorld()  # before mutating the offset
+        if roomToWorld is None:
+            return
+        headRoom, forwardRoom = self._headPoseRoom()
+        if headRoom is None:
+            return
+        if not self.locomotion.update(dt, headRoom, forwardRoom,
+                                      self._rightStickX, self._rightStickY):
+            return
+        window = vtk.vtkMatrix4x4()
+        vtk.vtkMatrix4x4.Multiply4x4(roomToWorld, self.locomotion.matrix(), window)
+        self._setWindowPhysicalToWorld(window)
 
     def _onInputTimer(self) -> None:
         dt = INPUT_TIMER_INTERVAL_MS / 1000.0
@@ -538,12 +655,14 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
         elif self._autoSpin:
             self.rotateTurntable(vtk.vtkMath.RadiansFromDegrees(AUTO_SPIN_DEG_PER_SEC) * dt)
 
+        self._updateLocomotion(dt)
+
         self.measurementTool.decayFlash(dt)
 
     # ------------------------------------------------------------------ magnification
 
     def getMagnification(self) -> float:
-        return self.framing.currentMagnification(self._currentPhysicalToWorld())
+        return self.framing.currentMagnification(self._currentRoomToWorld())
 
     @staticmethod
     def steppedMagnification(current, direction, stepFactor):
@@ -551,7 +670,7 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
         return FramingMath.steppedMagnification(current, direction, stepFactor)
 
     def setMagnification(self, value) -> None:
-        current = self._currentPhysicalToWorld()
+        current = self._currentRoomToWorld()
         if current is None:
             self.framing.magnification = value
             return
@@ -562,7 +681,7 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
 
     def stepMagnification(self, direction) -> None:
         stepFactor = self.getParameterNode().magnificationStep
-        currentMag = self.framing.currentMagnification(self._currentPhysicalToWorld())
+        currentMag = self.framing.currentMagnification(self._currentRoomToWorld())
         self.setMagnification(self.steppedMagnification(currentMag, direction, stepFactor))
 
     def resetMagnification(self) -> None:
@@ -854,6 +973,13 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
 
     @vtk.calldata_type(vtk.VTK_OBJECT)
     def _onRightThumbstick(self, caller, event, calldata):
+        try:
+            pos = calldata.GetTrackPadPosition()
+            self._rightStickX = float(pos[0])
+            self._rightStickY = float(pos[1])
+        except Exception:  # noqa: BLE001
+            self._rightStickX = 0.0
+            self._rightStickY = 0.0
         self._abort(self._rightStickPosTag)
 
     @vtk.calldata_type(vtk.VTK_OBJECT)

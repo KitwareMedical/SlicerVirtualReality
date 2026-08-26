@@ -376,6 +376,7 @@ def controlSchemeBodyText(controls):
     """The back-wall signage's control-scheme text, generated from the current button
     bindings rather than hardcoded."""
     lines = ["L-stick: rotate/pitch turntable"]
+    lines.append("R-stick: walk around the room")
     for fieldName, description in CONTROL_ACTION_ORDER:
         binding = getattr(controls, fieldName)
         if binding == CONTROL_BINDING_UNBOUND:
