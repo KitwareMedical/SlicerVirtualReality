@@ -688,6 +688,30 @@
     </widget>
    </item>
    <item>
+    <layout class="QHBoxLayout" name="defaultsButtonsLayout">
+     <item>
+      <widget class="QPushButton" name="saveDefaultsButton">
+       <property name="toolTip">
+        <string>Save all current options (Behavior, Display, Controls) to the application settings as the default, so they persist between sessions and are applied automatically on startup.</string>
+       </property>
+       <property name="text">
+        <string>Save as default</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="restoreDefaultsButton">
+       <property name="toolTip">
+        <string>Discard the saved defaults and reset all options (Behavior, Display, Controls) back to the module's original values.</string>
+       </property>
+       <property name="text">
+        <string>Restore defaults</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>

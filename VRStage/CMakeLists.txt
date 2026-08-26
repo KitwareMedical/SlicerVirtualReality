@@ -7,6 +7,7 @@ set(MODULE_PYTHON_SCRIPTS
   VRStageLib/__init__
   VRStageLib/Constants
   VRStageLib/ParameterNode
+  VRStageLib/UserDefaults
   VRStageLib/BakedText
   VRStageLib/Props
   VRStageLib/FramingMath

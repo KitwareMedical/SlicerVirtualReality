@@ -13,6 +13,7 @@ from VRStageLib.Constants import *            # noqa: F401,F403
 from VRStageLib.Constants import _rgbF, _WallTile  # noqa: F401
 from VRStageLib.ParameterNode import (        # noqa: F401
     VRStageDisplayOptions, VRStageControlBindings, VRStageParameterNode)
+from VRStageLib import UserDefaults           # noqa: F401
 from VRStageLib.BakedText import (            # noqa: F401
     BakedTextMixin, BakedTextActor, BakedFollowerTextActor)
 from VRStageLib import Props                  # noqa: F401
@@ -87,6 +88,11 @@ individual components (walls, signage, orientation labels, table screen, info sc
 scene view wall), disabling the reformat/measurement tools, or rebinding which button triggers
 which action - see VRStageDisplayOptions (`logic.getParameterNode().display`) and
 VRStageControlBindings (`logic.getParameterNode().controls`).
+
+"Save as default" stores all current options (Behavior, Display, Controls) in the application
+settings so they persist between sessions and are applied automatically on startup - like the
+Markups module's "Save as default". "Restore defaults" discards them and returns every option
+to its original value.
 """)
         self.parent.helpText += self.getDefaultModuleDocumentationLink()
         self.parent.acknowledgementText = _("""
@@ -127,6 +133,8 @@ class VRStageWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.enterButton.clicked.connect(self.onEnterButton)
         self.ui.exitButton.clicked.connect(self.onExitButton)
         self.ui.resetInteractionTransformsButton.clicked.connect(self.onResetInteractionTransformsButton)
+        self.ui.saveDefaultsButton.clicked.connect(self.onSaveDefaultsButton)
+        self.ui.restoreDefaultsButton.clicked.connect(self.onRestoreDefaultsButton)
 
         self.initializeParameterNode()
         self.updateGUIFromLogic()
@@ -186,6 +194,14 @@ class VRStageWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     def onResetInteractionTransformsButton(self) -> None:
         self.logic.resetInteractionTransforms()
 
+    def onSaveDefaultsButton(self) -> None:
+        self.logic.saveOptionsAsDefault()
+        slicer.util.showStatusMessage(_("VR Stage options saved as default."), 3000)
+
+    def onRestoreDefaultsButton(self) -> None:
+        self.logic.restoreDefaultOptions()
+        slicer.util.showStatusMessage(_("VR Stage options restored to defaults."), 3000)
+
     def updateGUIFromLogic(self) -> None:
         active = bool(self.logic and self.logic.isActive)
         self.ui.enterButton.enabled = not active
@@ -203,6 +219,7 @@ class VRStageWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     _VRSTAGELIB_SUBMODULES = [
         "Constants",
         "ParameterNode",
+        "UserDefaults",
         "BakedText",
         "Props",
         "FramingMath",
@@ -323,5 +340,26 @@ class VRStageTest(ScriptedLoadableModuleTest):
         self.assertEqual(snapshot, VRStageLogic._optionsSnapshot(params))
         logic.applyOptions()
         self.assertIsNone(logic._appliedOptions)
+
+        # User defaults ("Save as default"): a save/apply round trip through a throwaway
+        # settings file restores the saved values on a brand-new parameter node - exactly once,
+        # so a marked (e.g. scene-loaded) node is never clobbered.
+        import os
+        import tempfile
+        testSettings = qt.QSettings(
+            os.path.join(tempfile.mkdtemp(), "VRStageUserDefaults.ini"), qt.QSettings.IniFormat)
+        savedParams = VRStageParameterNode(
+            slicer.mrmlScene.AddNewNodeByClass("vtkMRMLScriptedModuleNode"))
+        savedParams.rotationSpeedDegPerSec = 90.0
+        savedParams.display.showFloor = False
+        UserDefaults.saveUserDefaults(savedParams, testSettings)
+        freshParams = VRStageParameterNode(
+            slicer.mrmlScene.AddNewNodeByClass("vtkMRMLScriptedModuleNode"))
+        self.assertTrue(UserDefaults.applyUserDefaultsOnce(freshParams, testSettings))
+        self.assertEqual(freshParams.rotationSpeedDegPerSec, 90.0)
+        self.assertFalse(freshParams.display.showFloor)
+        freshParams.rotationSpeedDegPerSec = 33.0
+        self.assertFalse(UserDefaults.applyUserDefaultsOnce(freshParams, testSettings))
+        self.assertEqual(freshParams.rotationSpeedDegPerSec, 33.0)
 
         self.delayDisplay("Test passed")

@@ -35,6 +35,7 @@ from slicer.util import VTKObservationMixin
 from .Constants import *  # noqa: F403
 from .Constants import _rgbF, _WallTile
 from .ParameterNode import VRStageParameterNode
+from . import UserDefaults
 from . import Props
 from . import FramingMath
 from .MeasurementTool import MeasurementTool
@@ -102,7 +103,22 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
         parameterNode = super().getParameterNode()
         if not self._parameterNode or self._parameterNode.parameterNode != parameterNode:
             self._parameterNode = VRStageParameterNode(parameterNode)
+            # A brand-new parameter node starts from the user's saved defaults (if any);
+            # a node loaded from a saved scene keeps that scene's values - see UserDefaults.
+            UserDefaults.applyUserDefaultsOnce(self._parameterNode)
         return self._parameterNode
+
+    def saveOptionsAsDefault(self) -> None:
+        """Persist all current options (behavior, display, controls) to the application
+        settings as the user defaults, applied automatically in future sessions - the
+        VRStage equivalent of Markups' "Save as default"."""
+        UserDefaults.saveUserDefaults(self.getParameterNode())
+
+    def restoreDefaultOptions(self) -> None:
+        """Discard the saved user defaults and reset all current options back to the
+        module's factory values (applies live if the stage is active)."""
+        UserDefaults.clearUserDefaults()
+        UserDefaults.resetToFactoryDefaults(self.getParameterNode())
 
     # ------------------------------------------------------------------ VR access
 

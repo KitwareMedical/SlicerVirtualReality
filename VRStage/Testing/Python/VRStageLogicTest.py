@@ -1,8 +1,11 @@
+import os
+import tempfile
+
 import qt
 import vtk
 import slicer
 import VRStage
-from VRStageLib import FramingMath, LocomotionMath, Props
+from VRStageLib import FramingMath, LocomotionMath, Props, UserDefaults
 from VRStageLib.MeasurementTool import MeasurementTool
 from VRStageLib.StageLocomotion import StageLocomotion
 
@@ -366,6 +369,106 @@ assert liveLogic.roomChrome.monitorAssembly is None, "_rebuildChrome must be a n
 liveLogic._teardownStage()
 assert liveRenderer.GetViewProps().GetNumberOfItems() == 0
 print("_rebuildChrome: OK")
+
+# ---------------------------------------------------------------- user defaults
+#
+# "Save as default" (VRStageLib/UserDefaults.py): the current parameter values are written to
+# QSettings and re-applied to every freshly created parameter node, so options persist between
+# sessions - like Markups' "Save as default". Fully headless: all functions take an injectable
+# QSettings, so a throwaway INI file stands in for the user's real application settings, and
+# standalone (non-singleton) scripted module nodes stand in for the module's parameter node.
+
+udSettingsPath = os.path.join(tempfile.mkdtemp(), "VRStageUserDefaults.ini")
+udSettings = qt.QSettings(udSettingsPath, qt.QSettings.IniFormat)
+
+# flattenedParameterNames enumerates every leaf across the nested packs - and must agree with
+# the field tuples Logic.py uses for its own scene-clear snapshot, so a parameter added to the
+# parameter node without updating those tuples is caught here.
+udNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLScriptedModuleNode")
+udParams = VRStage.VRStageParameterNode(udNode)
+udNames = UserDefaults.flattenedParameterNames(udParams)
+assert "rotationSpeedDegPerSec" in udNames
+assert "display.accentColor" in udNames
+assert "controls.scaleUp" in udNames
+expectedLeafCount = (len(VRStage.VRStageLogic._PARAM_FIELDS)
+                     + len(VRStage.VRStageLogic._DISPLAY_FIELDS)
+                     + len(VRStage.VRStageLogic._CONTROL_FIELDS))
+assert len(udNames) == expectedLeafCount, (len(udNames), expectedLeafCount)
+print("flattenedParameterNames: OK")
+
+# serialize/deserialize round-trips per leaf type; unparsable text raises (so applyUserDefaults
+# can skip it) instead of silently producing a wrong value.
+assert UserDefaults.serializeValue(True) == "true"
+assert UserDefaults.deserializeValue("true", False) is True
+assert UserDefaults.deserializeValue("1", False) is True
+assert UserDefaults.deserializeValue("false", True) is False
+assert abs(UserDefaults.deserializeValue("2.5", 0.0) - 2.5) < 1e-12
+assert UserDefaults.deserializeValue("Left Menu", "") == "Left Menu"
+udColor = qt.QColor(10, 20, 30)
+assert UserDefaults.deserializeValue(UserDefaults.serializeValue(udColor), qt.QColor()).name() == "#0a141e"
+for badText, template in (("banana", False), ("banana", 0.0), ("#notacolor", qt.QColor())):
+    try:
+        UserDefaults.deserializeValue(badText, template)
+        raise AssertionError(f"deserializeValue({badText!r}) should have raised")
+    except ValueError:
+        pass
+print("serialize/deserializeValue: OK")
+
+# Save -> apply round trip: a brand-new parameter node picks up the saved values (and only
+# once - applyUserDefaultsOnce marks the node, so later re-wraps never clobber session edits).
+udParams.rotationSpeedDegPerSec = 90.0
+udParams.fitToTable = True
+udParams.display.wallColor = qt.QColor(10, 20, 30)
+udParams.display.showFloor = False
+udParams.controls.scaleUp = "Left Menu"
+UserDefaults.saveUserDefaults(udParams, udSettings)
+assert UserDefaults.hasUserDefaults(udSettings)
+
+udFreshNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLScriptedModuleNode")
+udFreshParams = VRStage.VRStageParameterNode(udFreshNode)
+assert UserDefaults.applyUserDefaultsOnce(udFreshParams, udSettings) is True
+assert udFreshParams.rotationSpeedDegPerSec == 90.0
+assert udFreshParams.fitToTable is True
+assert udFreshParams.display.wallColor.name() == "#0a141e"
+assert udFreshParams.display.showFloor is False
+assert udFreshParams.controls.scaleUp == "Left Menu"
+assert udFreshNode.GetAttribute(UserDefaults.USER_DEFAULTS_APPLIED_ATTRIBUTE)
+udFreshParams.rotationSpeedDegPerSec = 33.0
+assert UserDefaults.applyUserDefaultsOnce(udFreshParams, udSettings) is False, \
+    "a marked node must never be re-defaulted"
+assert udFreshParams.rotationSpeedDegPerSec == 33.0
+print("saveUserDefaults/applyUserDefaultsOnce round trip: OK")
+
+# Robustness: a stored value that no longer parses (edited INI, older version) or no longer
+# validates (renamed binding label, out-of-range number) is skipped with a warning while every
+# other saved value still applies; a stale key for a since-removed parameter is simply ignored.
+udSettings.setValue(f"{UserDefaults.SETTINGS_PREFIX}/controls.scaleUp", "Not A Button")
+udSettings.setValue(f"{UserDefaults.SETTINGS_PREFIX}/rotationSpeedDegPerSec", "banana")
+udSettings.setValue(f"{UserDefaults.SETTINGS_PREFIX}/magnificationStep", "999.0")
+udSettings.setValue(f"{UserDefaults.SETTINGS_PREFIX}/no.such.parameter", "1")
+udStaleNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLScriptedModuleNode")
+udStaleParams = VRStage.VRStageParameterNode(udStaleNode)
+UserDefaults.applyUserDefaults(udStaleParams, udSettings)  # must not raise
+assert udStaleParams.controls.scaleUp == "B", "an invalid Choice value must keep the factory default"
+assert udStaleParams.rotationSpeedDegPerSec == 180.0, "an unparsable number must keep the factory default"
+assert udStaleParams.magnificationStep == 1.25, "an out-of-range number must keep the factory default"
+assert udStaleParams.display.wallColor.name() == "#0a141e", "valid saved values must still apply"
+print("applyUserDefaults robustness: OK")
+
+# resetToFactoryDefaults + clearUserDefaults: the full "Restore defaults" path.
+UserDefaults.resetToFactoryDefaults(udFreshParams)
+assert udFreshParams.rotationSpeedDegPerSec == 180.0
+assert udFreshParams.fitToTable is False
+assert udFreshParams.display.showFloor is True
+assert udFreshParams.display.wallColor.name() == qt.QColor.fromRgbF(*VRStage.WALL_BASE_COLOR).name()
+assert udFreshParams.controls.scaleUp == "B"
+UserDefaults.clearUserDefaults(udSettings)
+assert not UserDefaults.hasUserDefaults(udSettings)
+print("resetToFactoryDefaults/clearUserDefaults: OK")
+
+slicer.mrmlScene.RemoveNode(udNode)
+slicer.mrmlScene.RemoveNode(udFreshNode)
+slicer.mrmlScene.RemoveNode(udStaleNode)
 
 # ---------------------------------------------------------------- control bindings
 #
