@@ -318,7 +318,8 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
     )
     _CONTROL_FIELDS = (
         "scaleUp", "scaleDown", "nextSceneView", "prevSceneView", "resetFraming",
-        "toggleReformatVisible", "toggleAutoSpin", "placeMeasurementPoint", "undoMeasurement",
+        "recenterUser", "toggleReformatVisible", "toggleAutoSpin", "placeMeasurementPoint",
+        "undoMeasurement",
     )
 
     def _snapshotUserSettings(self):
@@ -534,8 +535,6 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
         self._physicalScale(update=True)
 
     def _resetFraming(self) -> None:
-        # Recentering the user is part of the reset: cheap recovery after walking away.
-        self.locomotion.reset()
         parameterNode = self.getParameterNode()
         matrix = self.framing.resetFramingMatrix(parameterNode.fitToTable, parameterNode.defaultScale)
         self.orientationLabels.updatePositions(self.framing.dataBounds, self.framing.dataCenter)
@@ -658,6 +657,20 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
         window = vtk.vtkMatrix4x4()
         vtk.vtkMatrix4x4.Multiply4x4(roomToWorld, self.locomotion.matrix(), window)
         self._setWindowPhysicalToWorld(window)
+
+    def recenterUser(self) -> None:
+        """Return the user to the room origin by clearing the walked-to locomotion offset.
+
+        Like a locomotion tick, only the offset changes and the window matrix is
+        recomposed - roomToWorld is untouched, so the room, table and data stay
+        world-fixed and the chrome needs no reanchor.
+        """
+        if self.locomotion.isIdentity():
+            return
+        roomToWorld = self._currentRoomToWorld()  # before clearing the offset
+        self.locomotion.reset()
+        if roomToWorld is not None:
+            self._setWindowPhysicalToWorld(roomToWorld)
 
     def _onInputTimer(self) -> None:
         dt = INPUT_TIMER_INTERVAL_MS / 1000.0
@@ -969,6 +982,7 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
         addAction("nextSceneView", self._onNextSceneView)
         addAction("prevSceneView", self._onPrevSceneView)
         addAction("resetFraming", self._onResetScale)
+        addAction("recenterUser", self._onRecenterUser)
         addAction("toggleReformatVisible", self._onToggleReformatVisible)
         addAction("toggleAutoSpin", self._onToggleAutoSpin)
         self.addObserver(interactor, style.LeftGripClickEvent, self._onLeftGripClick, priority=highPriority)
@@ -1053,6 +1067,11 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
     def _onResetScale(self, caller, event, calldata):
         if self._isPress(calldata):
             self.resetMagnification()
+
+    @vtk.calldata_type(vtk.VTK_OBJECT)
+    def _onRecenterUser(self, caller, event, calldata):
+        if self._isPress(calldata):
+            self.recenterUser()
 
     @vtk.calldata_type(vtk.VTK_OBJECT)
     def _onNextSceneView(self, caller, event, calldata):

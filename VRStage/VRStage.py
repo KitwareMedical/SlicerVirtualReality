@@ -53,7 +53,7 @@ The viewer does not modify the user's loaded data: turntable placement, scale an
 applied only to the VR view (via its PhysicalToWorldMatrix), so the desktop 3D and slice views
 are left untouched. The Red/Green/Yellow slice planes are not shown.
 
-Controller bindings (Oculus Touch, defaults shown - nine of these are rebindable in the Controls
+Controller bindings (Oculus Touch, defaults shown - ten of these are rebindable in the Controls
 section below, or via `logic.getParameterNode().controls`):
 - Left thumbstick left/right: rotate the turntable (yaw); up/down: pitch. Left grip (hold):
   turns left/right into roll and up/down into table height - see below. (fixed)
@@ -63,15 +63,16 @@ section below, or via `logic.getParameterNode().controls`):
   (fixed)
 - Either grip (hold): the reformat plane follows that controller's position/orientation for as
   long as the grip is held - release to leave it in place. A floating screen beside the plane
-  shows the reformatted image live. Hidden until toggled on (see below). The left grip doubles
+  shows the reformatted image live. Hidden until toggled on - the show/hide toggle is unbound by
+  default, bind it to a free button in the Controls section. The left grip doubles
   as the roll/table-height modifier above, so holding it does both at once. (fixed)
-- Right thumbstick click: show/hide the reformat plane and its floating screen
+- Right thumbstick click: return to the center of the room (undoes any right-stick walking; the
+  room, table and data stay put)
 - B button: increase scale, Y button: decrease scale
 - A/X: unbound by default (aim at a right-wall tile and pull the right trigger to pick a scene
   view instead - see below - or rebind next/previous scene view onto A/X in the Controls section)
 - Left thumbstick click: recenter the data on the table (at the default scale, see the Behavior
-  section's "Default scale" - 1.0 = normal VR size, unless "Fit data to table" is on) and return
-  the user to the center of the room
+  section's "Default scale" - 1.0 = normal VR size, unless "Fit data to table" is on)
 - Left menu button: toggle hands-free auto-spin
 - Right trigger: aim the right controller at the anatomy (or the revealed reformat plane, for
   volume-only data) and pull to place a measurement point; pull again to complete the pair into

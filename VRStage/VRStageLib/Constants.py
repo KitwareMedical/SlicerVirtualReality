@@ -117,12 +117,12 @@ CONTROL_BINDING_EVENT_NAMES = {
 CONTROL_BINDING_UNBOUND = "Unbound"
 CONTROL_BINDING_LABELS = [CONTROL_BINDING_UNBOUND] + list(CONTROL_BINDING_EVENT_NAMES.keys())
 
-# The module's nine button-triggered actions, in the order they're listed in the Controls UI
+# The module's ten button-triggered actions, in the order they're listed in the Controls UI
 # section and generated into the back-wall signage's control-scheme text, paired with a short
 # human-readable description used only for that signage text (not shown in the Controls UI,
-# where the action itself is the row label - see VRStageControlBindings). Defaults (set on the
-# parameterPack fields below) reproduce the module's original fixed bindings exactly, so behavior
-# is unchanged until a user actually rebinds something in the Controls UI. HELP_BODY_LINE_COUNT
+# where the action itself is the row label - see VRStageControlBindings). Defaults are set on the
+# parameterPack fields in ParameterNode.py - see VRStageControlBindings' docstring for the
+# rationale behind the non-obvious ones. HELP_BODY_LINE_COUNT
 # below is derived from this list's length (+2 for the fixed rotate/grip lines) rather than
 # hand-counted, so the back-wall signage panel auto-resizes if an action is ever added/removed.
 CONTROL_ACTION_ORDER = [
@@ -131,6 +131,7 @@ CONTROL_ACTION_ORDER = [
     ("nextSceneView", "next scene view"),
     ("prevSceneView", "previous scene view"),
     ("resetFraming", "reset framing"),
+    ("recenterUser", "recenter in room"),
     ("toggleReformatVisible", "show/hide reformat plane"),
     ("placeMeasurementPoint", "place measurement point"),
     ("undoMeasurement", "undo point/measurement"),

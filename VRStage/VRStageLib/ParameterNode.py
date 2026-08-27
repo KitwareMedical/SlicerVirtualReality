@@ -66,7 +66,7 @@ class VRStageDisplayOptions:
 
 @parameterPack
 class VRStageControlBindings:
-    """Which controller button triggers each of this module's nine button-triggered actions -
+    """Which controller button triggers each of this module's ten button-triggered actions -
     see CONTROL_BINDING_EVENT_NAMES for the available buttons and CONTROL_ACTION_ORDER for the
     action list/descriptions. Exposed so a user (or another module) can rebind the default
     layout, e.g. to avoid a clash with a button that module's own tooling also wants to use.
@@ -75,7 +75,7 @@ class VRStageControlBindings:
     VRStageLogic._refreshControlBindings) as well as on the next enterViewerMode() call.
 
     Nothing prevents two actions from being assigned to the same button: both fire on press,
-    which is rarely useful but not prevented, since validating uniqueness across nine
+    which is rarely useful but not prevented, since validating uniqueness across ten
     independent combo boxes was judged not worth the added UI complexity.
 
     placeMeasurementPoint/undoMeasurement default to the triggers rather than A/X: both are
@@ -91,6 +91,11 @@ class VRStageControlBindings:
     that the right-wall scene-view tiles cover scene selection (aim + pick a specific view,
     rather than blindly cycling next/prev). A user who still wants the old cycling behavior can
     rebind either onto any free button in the Controls UI.
+
+    recenterUser (return to the room origin, undoing right-stick walking) takes Right Stick
+    Click: clicking the stick you walk with is the natural "stop and snap back" gesture.
+    That displaced toggleReformatVisible to Unbound - the reformat plane is a secondary tool,
+    and anyone using it can rebind the toggle onto any free button (e.g. A/X).
     """
 
     scaleUp: Annotated[str, Choice(CONTROL_BINDING_LABELS)] = "B"
@@ -98,7 +103,8 @@ class VRStageControlBindings:
     nextSceneView: Annotated[str, Choice(CONTROL_BINDING_LABELS)] = CONTROL_BINDING_UNBOUND
     prevSceneView: Annotated[str, Choice(CONTROL_BINDING_LABELS)] = CONTROL_BINDING_UNBOUND
     resetFraming: Annotated[str, Choice(CONTROL_BINDING_LABELS)] = "Left Stick Click"
-    toggleReformatVisible: Annotated[str, Choice(CONTROL_BINDING_LABELS)] = "Right Stick Click"
+    recenterUser: Annotated[str, Choice(CONTROL_BINDING_LABELS)] = "Right Stick Click"
+    toggleReformatVisible: Annotated[str, Choice(CONTROL_BINDING_LABELS)] = CONTROL_BINDING_UNBOUND
     toggleAutoSpin: Annotated[str, Choice(CONTROL_BINDING_LABELS)] = "Left Menu"
     placeMeasurementPoint: Annotated[str, Choice(CONTROL_BINDING_LABELS)] = "Right Trigger"
     undoMeasurement: Annotated[str, Choice(CONTROL_BINDING_LABELS)] = "Left Trigger"

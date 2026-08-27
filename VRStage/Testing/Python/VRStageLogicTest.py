@@ -477,9 +477,9 @@ slicer.mrmlScene.RemoveNode(udStaleNode)
 # ---------------------------------------------------------------- control bindings
 #
 # VRStageControlBindings (parameter node field "controls") lets a button be reassigned to any
-# of the module's nine button-triggered actions - see CONTROL_BINDING_EVENT_NAMES/
-# CONTROL_ACTION_ORDER in VRStage.py. Defaults must reproduce the module's original fixed
-# bindings exactly (so behavior is unchanged out of the box), every default button label must
+# of the module's ten button-triggered actions - see CONTROL_BINDING_EVENT_NAMES/
+# CONTROL_ACTION_ORDER in VRStage.py. Defaults must reproduce the module's documented default
+# bindings exactly, every default button label must
 # resolve to a real event on the actual interactor style class (catches a typo'd event name that
 # would otherwise only surface as a crash deep in _installObservers with a live VR headset), and
 # the generated back-wall signage text must have exactly HELP_BODY_LINE_COUNT lines with the
@@ -492,7 +492,8 @@ assert defaultControls.scaleDown == "Y"
 assert defaultControls.nextSceneView == VRStage.CONTROL_BINDING_UNBOUND
 assert defaultControls.prevSceneView == VRStage.CONTROL_BINDING_UNBOUND
 assert defaultControls.resetFraming == "Left Stick Click"
-assert defaultControls.toggleReformatVisible == "Right Stick Click"
+assert defaultControls.recenterUser == "Right Stick Click"
+assert defaultControls.toggleReformatVisible == VRStage.CONTROL_BINDING_UNBOUND
 assert defaultControls.toggleAutoSpin == "Left Menu"
 assert defaultControls.placeMeasurementPoint == "Right Trigger"
 assert defaultControls.undoMeasurement == "Left Trigger"
@@ -519,33 +520,38 @@ print("CONTROL_BINDING_EVENT_NAMES: OK" + (" (verified against real interactor s
 # substituted), plus the five fixed lines (rotate, walk, grip, roll, table-height) - an Unbound
 # action produces no line (see _controlSchemeBodyText), so HELP_BODY_LINE_COUNT (which assumes
 # every action is bound) is only an upper bound, not an exact match, once
-# nextSceneView/prevSceneView are left Unbound.
+# nextSceneView/prevSceneView/toggleReformatVisible are left Unbound.
 bodyText = Props.controlSchemeBodyText(defaultControls)
 bodyLines = bodyText.split("\n")
-assert len(bodyLines) == VRStage.HELP_BODY_LINE_COUNT - 2, (len(bodyLines), VRStage.HELP_BODY_LINE_COUNT)
+assert len(bodyLines) == VRStage.HELP_BODY_LINE_COUNT - 3, (len(bodyLines), VRStage.HELP_BODY_LINE_COUNT)
 assert bodyLines[0] == "L-stick: rotate/pitch turntable"
 assert bodyLines[1] == "R-stick: walk around the room"
 assert bodyLines[-1] == "Left grip (hold) + L-stick U/D: table height"
 assert "B: scale up" in bodyLines
+assert "Right Stick Click: recenter in room" in bodyLines
 assert "Right Trigger: place measurement point" in bodyLines
 assert "Either grip (hold): move reformat plane" in bodyLines
 assert "Left grip (hold) + L-stick L/R: roll" in bodyLines
 assert not any("next scene view" in line for line in bodyLines), "unbound actions must not get a signage line"
 assert not any("previous scene view" in line for line in bodyLines)
+assert not any("reformat plane" in line and "grip" not in line for line in bodyLines)
 
 # Binding every action (the worst case HELP_BODY_LINE_COUNT is actually sized for) produces
-# exactly HELP_BODY_LINE_COUNT lines, with real lines for the two previously-unbound actions.
+# exactly HELP_BODY_LINE_COUNT lines, with real lines for the three previously-unbound actions.
 fullyBoundLogic = VRStage.VRStageLogic()
 fullyBoundControls = fullyBoundLogic.getParameterNode().controls
 fullyBoundControls.nextSceneView = "A"
 fullyBoundControls.prevSceneView = "X"
+fullyBoundControls.toggleReformatVisible = "Left Menu"
 fullyBoundText = Props.controlSchemeBodyText(fullyBoundControls)
 fullyBoundLines = fullyBoundText.split("\n")
 assert len(fullyBoundLines) == VRStage.HELP_BODY_LINE_COUNT, (len(fullyBoundLines), VRStage.HELP_BODY_LINE_COUNT)
 assert "A: next scene view" in fullyBoundLines
 assert "X: previous scene view" in fullyBoundLines
+assert "Left Menu: show/hide reformat plane" in fullyBoundLines
 fullyBoundControls.nextSceneView = VRStage.CONTROL_BINDING_UNBOUND  # reset - shared parameter node
 fullyBoundControls.prevSceneView = VRStage.CONTROL_BINDING_UNBOUND
+fullyBoundControls.toggleReformatVisible = VRStage.CONTROL_BINDING_UNBOUND
 print("control-scheme signage line budget: OK")
 
 # Rebinding is reflected immediately in the generated text (this is what makes the in-VR sign
