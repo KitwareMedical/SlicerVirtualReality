@@ -332,9 +332,11 @@ LOCOMOTION_WALL_MARGIN_M = 0.3    # minimum headset distance from any wall (X/Z 
 
 SLICE_NODE_IDS = ["vtkMRMLSliceNodeRed", "vtkMRMLSliceNodeGreen", "vtkMRMLSliceNodeYellow"]
 
-# Left/right wall launcher tiles: the left wall holds a fixed set of "load this atlas" tiles
-# (ATLAS_SPECS, one press downloads+loads that atlas scene - see _buildAtlasWallTiles), the right
-# wall holds one tile per Scene View in the current scene, built fresh at chrome-build time
+# Left/right wall launcher tiles: the left ("library") wall holds scene launcher tiles - either
+# the fixed set of "load this atlas" tiles (ATLAS_SPECS, one press downloads+loads that atlas
+# scene - see _buildAtlasWallTiles) or one tile per *.mrb file in a user-chosen directory
+# (libraryWallSource/mrbLibraryDirectory - see _buildLibraryWallTiles) - the right wall holds one
+# tile per Scene View in the current scene, built fresh at chrome-build time
 # (_buildSceneViewWallTiles). Both walls share the same tile-panel geometry (_wallTilePanelActor/
 # _wallTileLabelActor/_gridTileOffsets/_wallTileWorldPosition) and the same aim-ray-pick +
 # button-press activation machinery (_wallTilePicker/_wallTileByActor/_hoveredWallTile) - see the
@@ -357,11 +359,14 @@ ATLAS_WALL_CENTER_Y_M = ROOM_CENTER_Y_M
 ATLAS_WALL_CENTER_Z_M = TABLE_FORWARD_M
 
 SCENE_VIEW_WALL_COLUMNS = 3
+LIBRARY_WALL_SOURCE_ATLASES = "Atlases"
+LIBRARY_WALL_SOURCE_DIRECTORY = "MRB directory"
+LIBRARY_WALL_SOURCES = [LIBRARY_WALL_SOURCE_ATLASES, LIBRARY_WALL_SOURCE_DIRECTORY]
 SCENE_VIEW_WALL_MAX_ROWS = 3
 SCENE_VIEW_WALL_PAGE_SIZE = SCENE_VIEW_WALL_COLUMNS * SCENE_VIEW_WALL_MAX_ROWS  # tiles per page
 SCENE_VIEW_WALL_CENTER_Z_M = TABLE_FORWARD_M
 # Prev/page-indicator/Next row below the content grid, shown only when there's more than one page
-# (see _buildSceneViewWallNavTiles). Sized from SCENE_VIEW_WALL_MAX_ROWS (the full page height),
+# (see _buildWallNavTiles). Sized from SCENE_VIEW_WALL_MAX_ROWS (the full page height),
 # not the current page's actual row count, so the nav row sits at the same place on every page -
 # including a short last page - rather than jumping up to hug a partially-filled grid.
 SCENE_VIEW_WALL_CONTENT_HEIGHT_M = (
@@ -376,6 +381,15 @@ SCENE_VIEW_WALL_NAV_ROW_DV_M = (
 SCENE_VIEW_WALL_FLOOR_CLEARANCE_M = 0.15
 SCENE_VIEW_WALL_CENTER_Y_M = (FLOOR_THICKNESS_M + SCENE_VIEW_WALL_FLOOR_CLEARANCE_M
                               + WALL_TILE_HEIGHT_M / 2.0 - SCENE_VIEW_WALL_NAV_ROW_DV_M)
+
+# The left wall's "MRB directory" library source paginates exactly like the scene-view wall
+# (same page grid, nav row and floor-anchored center), just mirrored onto the left wall. The
+# "Atlases" source keeps its own centered single-row layout (ATLAS_WALL_* above).
+LIBRARY_WALL_COLUMNS = SCENE_VIEW_WALL_COLUMNS
+LIBRARY_WALL_PAGE_SIZE = SCENE_VIEW_WALL_PAGE_SIZE
+LIBRARY_WALL_CENTER_Y_M = SCENE_VIEW_WALL_CENTER_Y_M
+LIBRARY_WALL_CENTER_Z_M = TABLE_FORWARD_M
+LIBRARY_WALL_NAV_ROW_DV_M = SCENE_VIEW_WALL_NAV_ROW_DV_M
 
 # The three atlases from Slicer's own AtlasTests self-test module (Applications/SlicerApp/
 # Testing/Python/AtlasTests.py in Slicer core - not part of this extension) - same fixed
@@ -500,6 +514,9 @@ __all__ = [
     "SCENE_VIEW_WALL_CENTER_Z_M", "SCENE_VIEW_WALL_CONTENT_HEIGHT_M",
     "SCENE_VIEW_WALL_NAV_GAP_M", "SCENE_VIEW_WALL_NAV_ROW_DV_M",
     "SCENE_VIEW_WALL_FLOOR_CLEARANCE_M", "SCENE_VIEW_WALL_CENTER_Y_M",
+    "LIBRARY_WALL_SOURCE_ATLASES", "LIBRARY_WALL_SOURCE_DIRECTORY", "LIBRARY_WALL_SOURCES",
+    "LIBRARY_WALL_COLUMNS", "LIBRARY_WALL_PAGE_SIZE", "LIBRARY_WALL_CENTER_Y_M",
+    "LIBRARY_WALL_CENTER_Z_M", "LIBRARY_WALL_NAV_ROW_DV_M",
     "ATLAS_SPECS", "ATLAS_ICON_COLORS",
     # Reformat
     "REFORMAT_SLICE_LAYOUT_NAME", "REFORMAT_PLANE_NODE_NAME",

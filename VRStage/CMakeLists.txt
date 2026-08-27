@@ -12,6 +12,7 @@ set(MODULE_PYTHON_SCRIPTS
   VRStageLib/Props
   VRStageLib/FramingMath
   VRStageLib/LocomotionMath
+  VRStageLib/MrbLibrary
   VRStageLib/MeasurementTool
   VRStageLib/ReformatTool
   VRStageLib/SceneViews

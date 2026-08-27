@@ -189,7 +189,44 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="0" colspan="2">
+      <item row="5" column="0">
+       <widget class="QLabel" name="libraryWallSourceLabel">
+        <property name="text">
+         <string>Left wall shows:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QComboBox" name="libraryWallSourceComboBox">
+        <property name="toolTip">
+         <string>What the left wall's launcher tiles offer: the built-in atlases, or one tile per MRB file found in the directory below (thumbnailed from each file's embedded scene screenshot). Updates live.</string>
+        </property>
+        <property name="SlicerParameterName" stdset="0">
+         <string>libraryWallSource</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="mrbLibraryDirectoryLabel">
+        <property name="text">
+         <string>MRB directory:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="ctkPathLineEdit" name="mrbLibraryDirectoryPathLineEdit">
+        <property name="toolTip">
+         <string>Directory scanned for *.mrb scene bundles when "Left wall shows" is set to MRB directory.</string>
+        </property>
+        <property name="filters">
+         <set>ctkPathLineEdit::Dirs</set>
+        </property>
+        <property name="SlicerParameterName" stdset="0">
+         <string>mrbLibraryDirectory</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0" colspan="2">
        <widget class="QCheckBox" name="overheadLightCheckBox">
         <property name="toolTip">
          <string>Light the table from an overhead fixture near the ceiling, with softer fill lights derived from it, instead of the VR view's default lighting. See Display &gt; Colors for the light's color.</string>
@@ -422,18 +459,18 @@
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="showAtlasWallCheckBox">
+          <widget class="QCheckBox" name="showLibraryWallCheckBox">
            <property name="toolTip">
-            <string>Show the left-wall atlas launcher tiles (Abdominal/Brain/Knee) - aim and press to download and load one.</string>
+            <string>Show the left-wall scene launcher tiles (atlases or an MRB directory - see Behavior &gt; Left wall shows) - aim and press to load one.</string>
            </property>
            <property name="text">
-            <string>Show atlas wall</string>
+            <string>Show library wall</string>
            </property>
            <property name="checked">
             <bool>true</bool>
            </property>
            <property name="SlicerParameterName" stdset="0">
-            <string>display.showAtlasWall</string>
+            <string>display.showLibraryWall</string>
            </property>
           </widget>
          </item>
@@ -732,6 +769,11 @@
    <extends>QWidget</extends>
    <header>ctkCollapsibleButton.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ctkPathLineEdit</class>
+   <extends>QWidget</extends>
+   <header>ctkPathLineEdit.h</header>
   </customwidget>
   <customwidget>
    <class>qMRMLWidget</class>

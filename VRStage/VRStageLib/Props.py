@@ -252,6 +252,23 @@ def textureFromImageFile(path):
     return texture
 
 
+def textureFromPngBytes(data):
+    """In-memory PNG bytes (e.g. read out of an MRB zip) -> vtkTexture, or None if the bytes
+    do not decode. The decoded image is detached from the reader so the byte buffer (which
+    vtkPNGReader only borrows) does not need to outlive this call."""
+    reader = vtk.vtkPNGReader()
+    reader.SetMemoryBuffer(data)
+    reader.SetMemoryBufferLength(len(data))
+    reader.Update()
+    image = reader.GetOutput()
+    if image is None or image.GetDimensions()[0] <= 1:
+        return None
+    texture = vtk.vtkTexture()
+    texture.SetInputData(image)
+    texture.InterpolateOn()
+    return texture
+
+
 def wallPanelTexture(bgColor, size=256):
     """Subtle bright panel-line grid for the room walls."""
     bg = np.array(bgColor) * 255.0

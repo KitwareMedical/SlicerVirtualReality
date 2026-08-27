@@ -1,5 +1,6 @@
 """VRStageDisplayOptions, VRStageControlBindings, and VRStageParameterNode."""
 
+import pathlib
 from typing import Annotated
 
 import qt
@@ -54,7 +55,8 @@ class VRStageDisplayOptions:
     showTableScreen: bool = True        # the holo readout inset in the tabletop
     showInfoScreen: bool = True         # the scale/scene-view monitor mounted on the table's collar
     showOrientationLabels: bool = True  # R/L/A/P/S/I billboards
-    showAtlasWall: bool = True          # left-wall atlas-launcher tiles (see ATLAS_SPECS)
+    showLibraryWall: bool = True        # left-wall scene-launcher tiles - atlases or a
+                                         # directory of MRB files, per libraryWallSource
     showSceneViewWall: bool = True      # right-wall scene-view-launcher tiles (built from the
                                          # scene's current Scene Views at enter time)
 
@@ -78,7 +80,7 @@ class VRStageControlBindings:
 
     placeMeasurementPoint/undoMeasurement default to the triggers rather than A/X: both are
     "picking" actions - aim and pull to place a markup point on the anatomy, or to activate
-    whichever wall tile (atlas launcher or scene-view launcher) the aim ray is currently over -
+    whichever wall tile (library launcher or scene-view launcher) the aim ray is currently over -
     and a trigger pull is the natural gesture for that, on either controller. Rebinding
     placeMeasurementPoint/undoMeasurement onto A/X (no longer the default) engages the debounce
     in _isButton1PressSuppressed, which exists specifically to avoid a spurious place/undo when
@@ -114,6 +116,12 @@ class VRStageParameterNode:
     fitToTable - if true, auto-scale each framing so the data spans the table. Off by default:
         with it on, different scene views (with different data extents) land at very different
         scales; off, every framing uses defaultScale (1.0 = normal VR size, by default).
+    libraryWallSource - what the left ("library") wall's launcher tiles offer: the fixed atlas
+        set (LIBRARY_WALL_SOURCE_ATLASES) or one tile per *.mrb scene bundle found in
+        mrbLibraryDirectory (LIBRARY_WALL_SOURCE_DIRECTORY), thumbnailed from each bundle's
+        embedded scene screenshot. Applies live (the wall rebuilds in place).
+    mrbLibraryDirectory - the directory scanned for *.mrb files when libraryWallSource is
+        LIBRARY_WALL_SOURCE_DIRECTORY. An empty path shows a "no MRB files" placeholder tile.
     overheadLight - if true, the table is lit by a light rig anchored above it (with softer
         fill lights derived from it) instead of the VR view's default lighting.
     display - colors and component show/hide options - see VRStageDisplayOptions.
@@ -126,5 +134,7 @@ class VRStageParameterNode:
     fitToTable: bool = False
     overheadLight: bool = True
     passthrough: bool = False
+    libraryWallSource: Annotated[str, Choice(LIBRARY_WALL_SOURCES)] = LIBRARY_WALL_SOURCE_ATLASES
+    mrbLibraryDirectory: pathlib.Path = pathlib.Path()
     display: VRStageDisplayOptions = VRStageDisplayOptions()
     controls: VRStageControlBindings = VRStageControlBindings()

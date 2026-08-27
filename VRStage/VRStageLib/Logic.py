@@ -38,6 +38,7 @@ from .ParameterNode import VRStageParameterNode
 from . import UserDefaults
 from . import Props
 from . import FramingMath
+from . import MrbLibrary
 from .MeasurementTool import MeasurementTool
 from .ReformatTool import ReformatTool
 from .SceneViews import sceneViewsLogic, SceneViewNavigator
@@ -276,11 +277,13 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
         self.roomChrome.build(renderer, params)
 
         self.wallTiles.build(
-            renderer, display,
+            renderer, params,
             self.roomChrome.anchorMatrix, self.roomChrome.props,
             onActivateAtlas=self._activateAtlasTile,
+            onActivateMrb=self._activateMrbTile,
             onRestoreSceneView=self._activateSceneViewTile,
-            onPageRequested=self._activateSceneViewWallPage)
+            onPageRequested=self._activateSceneViewWallPage,
+            onLibraryPageRequested=self._activateLibraryWallPage)
 
         accentColor = _rgbF(display.accentColor)
         if display.showOrientationLabels:
@@ -304,12 +307,13 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
     _PARAM_FIELDS = (
         "rotationSpeedDegPerSec", "magnificationStep", "defaultScale",
         "fitToTable", "overheadLight", "passthrough",
+        "libraryWallSource", "mrbLibraryDirectory",
     )
     _DISPLAY_FIELDS = (
         "accentColor", "accentColorDim", "floorColor", "wallColor", "columnColor",
         "tableColor", "rimBandColor", "tableScreenBackgroundColor", "overheadLightColor",
         "showFloor", "showWalls", "showBackWallSignage", "showTableScreen", "showInfoScreen",
-        "showOrientationLabels", "showAtlasWall", "showSceneViewWall",
+        "showOrientationLabels", "showLibraryWall", "showSceneViewWall",
         "enableReformatTool", "enableMeasurementTool",
     )
     _CONTROL_FIELDS = (
@@ -346,8 +350,11 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
         "accentColor", "accentColorDim", "floorColor", "wallColor", "columnColor", "tableColor",
         "rimBandColor", "tableScreenBackgroundColor", "overheadLightColor",
         "showFloor", "showWalls", "showBackWallSignage", "showTableScreen", "showInfoScreen",
-        "showOrientationLabels", "showAtlasWall", "showSceneViewWall",
+        "showOrientationLabels", "showLibraryWall", "showSceneViewWall",
     )
+    # Top-level (non-display) parameters that are baked into the room chrome at build time -
+    # they select/locate the left wall's library tiles, so changing one rebuilds the chrome.
+    CHROME_PARAM_FIELDS = ("libraryWallSource", "mrbLibraryDirectory")
     TOOL_OPTION_FIELDS = ("enableReformatTool", "enableMeasurementTool")
     FRAMING_OPTION_FIELDS = ("fitToTable", "defaultScale")
 
@@ -360,6 +367,8 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
         for fieldName in cls.CHROME_OPTION_FIELDS + cls.TOOL_OPTION_FIELDS:
             value = getattr(display, fieldName)
             snapshot["display." + fieldName] = value.name() if isinstance(value, qt.QColor) else value
+        for fieldName in cls.CHROME_PARAM_FIELDS:
+            snapshot[fieldName] = str(getattr(params, fieldName))
         for fieldName in cls.FRAMING_OPTION_FIELDS:
             snapshot[fieldName] = getattr(params, fieldName)
         return snapshot
@@ -382,7 +391,8 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
         if not changed:
             return
 
-        if any("display." + f in changed for f in self.CHROME_OPTION_FIELDS):
+        if (any("display." + f in changed for f in self.CHROME_OPTION_FIELDS)
+                or any(f in changed for f in self.CHROME_PARAM_FIELDS)):
             self._scheduleChromeRebuild()
 
         renderer = self._vrRenderer()
@@ -418,8 +428,10 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
         if renderer is None:
             return
         sceneViewWallPage = self.wallTiles.sceneViewPage
+        libraryWallPage = self.wallTiles.libraryPage
         self._teardownStage()
         self.wallTiles.sceneViewPage = sceneViewWallPage
+        self.wallTiles.libraryPage = libraryWallPage
         self._buildStage(renderer)
         self.roomChrome.reanchor(self._currentRoomToWorld(), self.framing.tableHeightM)
         self.wallTiles.markActorsModified()
@@ -838,30 +850,55 @@ class VRStageLogic(ScriptedLoadableModuleLogic, VTKObservationMixin):
             self.wallTiles.rebuildSceneViewWall(
                 renderer, display, self.roomChrome.anchorMatrix, self.roomChrome.props)
 
-    def _activateAtlasTile(self, atlasSpec) -> None:
-        """Download and load an atlas, keeping the VR experience across the swap."""
+    def _swapSceneKeepingStage(self, loadScene, sceneName, failureMessage) -> None:
+        """Run *loadScene* (a zero-arg callable that replaces the MRML scene), keeping the VR
+        experience across the swap: user-facing options survive the scene clear, and the stage
+        is re-entered if it was active. VR itself stays active throughout, so the OpenXR
+        session is not torn down."""
         wasActive = self.isActive
         savedSettings = self._snapshotUserSettings()
         if wasActive:
             self.exitViewerMode()
         try:
-            import SampleData
-            filenames = SampleData.downloadFromURL(
-                fileNames=atlasSpec["fileNames"], uris=atlasSpec["uris"],
-                checksums=atlasSpec["checksums"], loadFiles=False)
-            slicer.util.loadScene(filenames[0], properties={"clear": True})
+            loadScene()
         except Exception:  # noqa: BLE001
-            logging.exception("Failed to load atlas %s", atlasSpec.get("name"))
-            slicer.util.errorDisplay(
-                _("Failed to load {name}. Check your network connection and try again.")
-                .format(name=atlasSpec["name"]))
+            logging.exception("Failed to load %s", sceneName)
+            slicer.util.errorDisplay(failureMessage)
         finally:
             self._restoreUserSettings(savedSettings)
             if wasActive:
                 try:
                     self.enterViewerMode()
                 except Exception:  # noqa: BLE001
-                    logging.exception("Failed to re-enter VR Stage after atlas activation")
+                    logging.exception("Failed to re-enter VR Stage after loading %s", sceneName)
+
+    def _activateAtlasTile(self, atlasSpec) -> None:
+        """Download and load an atlas, keeping the VR experience across the swap."""
+        def loadAtlas():
+            import SampleData
+            filenames = SampleData.downloadFromURL(
+                fileNames=atlasSpec["fileNames"], uris=atlasSpec["uris"],
+                checksums=atlasSpec["checksums"], loadFiles=False)
+            slicer.util.loadScene(filenames[0], properties={"clear": True})
+        self._swapSceneKeepingStage(
+            loadAtlas, atlasSpec["name"],
+            _("Failed to load {name}. Check your network connection and try again.")
+            .format(name=atlasSpec["name"]))
+
+    def _activateMrbTile(self, mrbPath) -> None:
+        """Load an MRB scene bundle from the library wall, keeping the VR experience."""
+        self._swapSceneKeepingStage(
+            lambda: slicer.util.loadScene(str(mrbPath), properties={"clear": True}),
+            str(mrbPath),
+            _("Failed to load {name}.").format(name=MrbLibrary.mrbDisplayName(mrbPath)))
+
+    def _activateLibraryWallPage(self, page) -> None:
+        self.wallTiles.libraryPage = page
+        renderer = self._vrRenderer()
+        if renderer is not None:
+            self.wallTiles.rebuildLibraryWall(
+                renderer, self.getParameterNode(),
+                self.roomChrome.anchorMatrix, self.roomChrome.props)
 
     # ------------------------------------------------------------------ lighting option
 

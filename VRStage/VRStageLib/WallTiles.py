@@ -1,9 +1,11 @@
 """Interactive wall-tile galleries for VR Stage.
 
-Two walls of one-press tiles: the left wall is a fixed set of "load this atlas" tiles
-(ATLAS_SPECS); the right wall shows one tile per scene view in the scene, paginated.
-Both share the same grid-layout math, textured-panel-plus-label construction, and
-aim-ray-pick + button-press activation machinery.
+Two walls of one-press tiles: the left ("library") wall launches whole scenes - either the
+fixed set of "load this atlas" tiles (ATLAS_SPECS) or one tile per *.mrb file in a
+user-chosen directory (libraryWallSource/mrbLibraryDirectory, thumbnailed from each bundle's
+embedded scene screenshot), paginated; the right wall shows one tile per scene view in the
+scene, paginated. Both share the same grid-layout math, textured-panel-plus-label
+construction, and aim-ray-pick + button-press activation machinery.
 
 Picking: tile panels are the one exception to "every VRStage chrome actor calls
 PickableOff()" (see the measurement tool's picking invariant) — so they get their own
@@ -26,6 +28,12 @@ from .Constants import (
     ATLAS_WALL_CENTER_Y_M,
     ATLAS_WALL_CENTER_Z_M,
     ATLAS_WALL_COLUMNS,
+    LIBRARY_WALL_CENTER_Y_M,
+    LIBRARY_WALL_CENTER_Z_M,
+    LIBRARY_WALL_COLUMNS,
+    LIBRARY_WALL_NAV_ROW_DV_M,
+    LIBRARY_WALL_PAGE_SIZE,
+    LIBRARY_WALL_SOURCE_DIRECTORY,
     SCENE_VIEW_WALL_CENTER_Y_M,
     SCENE_VIEW_WALL_CENTER_Z_M,
     SCENE_VIEW_WALL_COLUMNS,
@@ -41,6 +49,7 @@ from .Constants import (
 )
 from .MeasurementTool import MeasurementTool
 from .SceneViews import sceneViewsLogic
+from . import MrbLibrary
 from . import Props
 
 
@@ -56,29 +65,42 @@ class WallTileGallery:
         self.hoveredTile = None
         self.sceneViewPage = 0
         self.sceneViewActors = []
+        self.libraryPage = 0
+        self.libraryActors = []
         self._picker = None
+        self._thumbnailTextures = {}
         self._onActivateAtlas = None
+        self._onActivateMrb = None
         self._onRestoreSceneView = None
         self._onPageRequested = None
+        self._onLibraryPageRequested = None
 
-    def build(self, renderer, display, anchorMatrix, chromeProps,
-              onActivateAtlas, onRestoreSceneView, onPageRequested):
+    def build(self, renderer, params, anchorMatrix, chromeProps,
+              onActivateAtlas, onActivateMrb, onRestoreSceneView,
+              onPageRequested, onLibraryPageRequested):
         """Build both tile walls and add them to *renderer*.
 
         *chromeProps* is the shared list owned by RoomChrome; tile actors are appended
         to it so they participate in reanchor ``Modified()`` calls.  *anchorMatrix* is
         the room-space ``vtkMatrix4x4`` identity assigned as ``UserMatrix``.
 
-        *onActivateAtlas(atlasSpec)*, *onRestoreSceneView(index)*, and
-        *onPageRequested(page)* are callbacks into VRStageLogic.
+        *onActivateAtlas(atlasSpec)*, *onActivateMrb(path)*, *onRestoreSceneView(index)*,
+        *onPageRequested(page)* and *onLibraryPageRequested(page)* are callbacks into
+        VRStageLogic.
         """
         self._onActivateAtlas = onActivateAtlas
+        self._onActivateMrb = onActivateMrb
         self._onRestoreSceneView = onRestoreSceneView
         self._onPageRequested = onPageRequested
+        self._onLibraryPageRequested = onLibraryPageRequested
 
+        display = params.display
         roomProps = []
-        if display.showAtlasWall:
-            roomProps.extend(self._buildAtlasWallTiles(display))
+        if display.showLibraryWall:
+            self.libraryActors = self._buildLibraryWall(params)
+            roomProps.extend(self.libraryActors)
+        else:
+            self.libraryActors = []
         if display.showSceneViewWall:
             self.sceneViewActors = self._buildSceneViewWallTiles(display)
             roomProps.extend(self.sceneViewActors)
@@ -97,10 +119,91 @@ class WallTileGallery:
         self.hoveredTile = None
         self.sceneViewPage = 0
         self.sceneViewActors = []
+        self.libraryPage = 0
+        self.libraryActors = []
         self._picker = None
+        self._thumbnailTextures = {}
         self._onActivateAtlas = None
+        self._onActivateMrb = None
         self._onRestoreSceneView = None
         self._onPageRequested = None
+        self._onLibraryPageRequested = None
+
+    def _buildLibraryWall(self, params):
+        """The left wall's tiles for the current library source (atlases or MRB directory)."""
+        if params.libraryWallSource == LIBRARY_WALL_SOURCE_DIRECTORY:
+            return self._buildLibraryWallTiles(params)
+        return self._buildAtlasWallTiles(params.display)
+
+    def _buildLibraryWallTiles(self, params):
+        """One launcher tile per *.mrb file in params.mrbLibraryDirectory, paginated like the
+        scene-view wall (same page grid, nav row and floor-anchored center, mirrored left)."""
+        display = params.display
+        bgColor = _rgbF(display.wallColor)
+        borderColor = _rgbF(display.accentColor)
+        captionBg = _rgbF(display.tableScreenBackgroundColor)
+        mrbFiles = MrbLibrary.listMrbFiles(params.mrbLibraryDirectory)
+
+        if not mrbFiles:
+            self.libraryPage = 0
+            if MrbLibrary.isLibraryDirectorySet(params.mrbLibraryDirectory):
+                caption = _("No MRB files found")
+            else:
+                caption = _("No MRB directory selected")
+            texture = Props.arrayToTexture(Props.signagePanelTexture(bgColor, borderColor))
+            x, y, z = Props.wallTileWorldPosition(
+                "left", LIBRARY_WALL_CENTER_Y_M, LIBRARY_WALL_CENTER_Z_M, 0.0, 0.0)
+            panel = Props.wallTilePanelActor(
+                "left", x, y, z, WALL_TILE_WIDTH_M, WALL_TILE_HEIGHT_M, texture)
+            panel.PickableOff()
+            label = Props.wallTileLabelActor(
+                "left", y, z, WALL_TILE_HEIGHT_M, caption, captionBg, borderColor)
+            return [panel, label]
+
+        pageCount = math.ceil(len(mrbFiles) / LIBRARY_WALL_PAGE_SIZE)
+        self.libraryPage = max(0, min(self.libraryPage, pageCount - 1))
+        startIndex = self.libraryPage * LIBRARY_WALL_PAGE_SIZE
+        pageFiles = mrbFiles[startIndex:startIndex + LIBRARY_WALL_PAGE_SIZE]
+
+        actors = []
+        offsets = Props.gridTileOffsets(
+            len(pageFiles), LIBRARY_WALL_COLUMNS, WALL_TILE_WIDTH_M, WALL_TILE_HEIGHT_M,
+            WALL_TILE_GUTTER_M)
+        for mrbPath, (du, dv) in zip(pageFiles, offsets):
+            x, y, z = Props.wallTileWorldPosition(
+                "left", LIBRARY_WALL_CENTER_Y_M, LIBRARY_WALL_CENTER_Z_M, du, dv)
+            texture = self._mrbThumbnailTexture(mrbPath)
+            if texture is None:
+                texture = Props.arrayToTexture(Props.signagePanelTexture(bgColor, borderColor))
+            panel = Props.wallTilePanelActor(
+                "left", x, y, z, WALL_TILE_WIDTH_M, WALL_TILE_HEIGHT_M, texture)
+            label = Props.wallTileLabelActor(
+                "left", y, z, WALL_TILE_HEIGHT_M, MrbLibrary.mrbDisplayName(mrbPath),
+                captionBg, borderColor)
+            self.tileByActor[panel] = _WallTile(
+                panel, (lambda p=mrbPath: self._activateWallTile(
+                    lambda path=p: self._onActivateMrb(path))))
+            actors.extend([panel, label])
+
+        if pageCount > 1:
+            actors.extend(self._buildWallNavTiles(
+                display, "left", LIBRARY_WALL_CENTER_Y_M, LIBRARY_WALL_CENTER_Z_M,
+                LIBRARY_WALL_NAV_ROW_DV_M, LIBRARY_WALL_COLUMNS, pageCount,
+                self.libraryPage, lambda page: self._onLibraryPageRequested(page)))
+        return actors
+
+    def _mrbThumbnailTexture(self, mrbPath):
+        """The bundle's embedded scene screenshot as a texture, or None. Cached per
+        (path, mtime) so page flips don't re-read the zip archives."""
+        try:
+            key = (str(mrbPath), os.path.getmtime(mrbPath))
+        except OSError:
+            return None
+        if key not in self._thumbnailTextures:
+            data = MrbLibrary.mrbScreenshotBytes(mrbPath)
+            self._thumbnailTextures[key] = (
+                Props.textureFromPngBytes(data) if data is not None else None)
+        return self._thumbnailTextures[key]
 
     def _buildAtlasWallTiles(self, display):
         bgColor = _rgbF(display.wallColor)
@@ -181,34 +284,36 @@ class WallTileGallery:
             actors.extend([panel, label])
 
         if pageCount > 1:
-            actors.extend(self._buildSceneViewWallNavTiles(display, pageCount))
+            actors.extend(self._buildWallNavTiles(
+                display, "right", SCENE_VIEW_WALL_CENTER_Y_M, SCENE_VIEW_WALL_CENTER_Z_M,
+                SCENE_VIEW_WALL_NAV_ROW_DV_M, SCENE_VIEW_WALL_COLUMNS, pageCount,
+                self.sceneViewPage, lambda page: self._onPageRequested(page)))
         return actors
 
-    def _buildSceneViewWallNavTiles(self, display, pageCount):
+    def _buildWallNavTiles(self, display, side, centerYM, centerZM, navRowDvM, columns,
+                           pageCount, currentPage, onPageRequested):
+        """Prev / page-indicator / Next row below a paginated wall's content grid."""
         bgColor = _rgbF(display.wallColor)
         accentColor = _rgbF(display.accentColor)
         captionBg = _rgbF(display.tableScreenBackgroundColor)
         navOffsets = Props.gridTileOffsets(
-            3, SCENE_VIEW_WALL_COLUMNS, WALL_TILE_WIDTH_M, WALL_TILE_HEIGHT_M, WALL_TILE_GUTTER_M)
-        currentPage = self.sceneViewPage
+            3, columns, WALL_TILE_WIDTH_M, WALL_TILE_HEIGHT_M, WALL_TILE_GUTTER_M)
         navSpecs = [
             (currentPage > 0, _("< Prev Page"),
-             (lambda p=currentPage - 1: self._onPageRequested(p))),
+             (lambda p=currentPage - 1: onPageRequested(p))),
             (False, _("Page {current} / {total}").format(current=currentPage + 1, total=pageCount), None),
             (currentPage < pageCount - 1, _("Next Page >"),
-             (lambda p=currentPage + 1: self._onPageRequested(p))),
+             (lambda p=currentPage + 1: onPageRequested(p))),
         ]
         actors = []
         for (enabled, text, callback), (du, _dv) in zip(navSpecs, navOffsets):
-            x, y, z = Props.wallTileWorldPosition(
-                "right", SCENE_VIEW_WALL_CENTER_Y_M, SCENE_VIEW_WALL_CENTER_Z_M,
-                du, SCENE_VIEW_WALL_NAV_ROW_DV_M)
+            x, y, z = Props.wallTileWorldPosition(side, centerYM, centerZM, du, navRowDvM)
             borderColor = accentColor if enabled else bgColor
             texture = Props.arrayToTexture(Props.signagePanelTexture(bgColor, borderColor))
             panel = Props.wallTilePanelActor(
-                "right", x, y, z, WALL_TILE_WIDTH_M, WALL_TILE_HEIGHT_M, texture)
+                side, x, y, z, WALL_TILE_WIDTH_M, WALL_TILE_HEIGHT_M, texture)
             label = Props.wallTileLabelActor(
-                "right", y, z, WALL_TILE_HEIGHT_M, text, captionBg, borderColor)
+                side, y, z, WALL_TILE_HEIGHT_M, text, captionBg, borderColor)
             if enabled and callback is not None:
                 self.tileByActor[panel] = _WallTile(
                     panel, (lambda cb=callback: self._activateWallTile(cb)))
@@ -232,6 +337,23 @@ class WallTileGallery:
             actor.SetUserMatrix(anchorMatrix)
             renderer.AddViewProp(actor)
         chromeProps.extend(self.sceneViewActors)
+        self._rebuildPicker()
+
+    def rebuildLibraryWall(self, renderer, params, anchorMatrix, chromeProps) -> None:
+        """Tear down and rebuild just the left wall, in place."""
+        if renderer is None:
+            return
+        self.setHoveredTile(None)
+        for actor in self.libraryActors:
+            renderer.RemoveViewProp(actor)
+            if actor in chromeProps:
+                chromeProps.remove(actor)
+            self.tileByActor.pop(actor, None)
+        self.libraryActors = self._buildLibraryWall(params) if params.display.showLibraryWall else []
+        for actor in self.libraryActors:
+            actor.SetUserMatrix(anchorMatrix)
+            renderer.AddViewProp(actor)
+        chromeProps.extend(self.libraryActors)
         self._rebuildPicker()
 
     def _rebuildPicker(self) -> None:
@@ -263,8 +385,10 @@ class WallTileGallery:
         return tile
 
     def markActorsModified(self) -> None:
-        """Mark scene-view wall actors modified after a reanchor."""
+        """Mark rebuilt-in-place wall actors modified after a reanchor."""
         for actor in self.sceneViewActors:
+            actor.Modified()
+        for actor in self.libraryActors:
             actor.Modified()
 
     def _activateWallTile(self, callback) -> None:

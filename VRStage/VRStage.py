@@ -76,16 +76,21 @@ section below, or via `logic.getParameterNode().controls`):
 - Right trigger: aim the right controller at the anatomy (or the revealed reformat plane, for
   volume-only data) and pull to place a measurement point; pull again to complete the pair into
   a persisted distance measurement - OR, if the aim ray is over a wall tile instead (the left
-  wall's atlas launcher or the right wall's scene-view launcher), activate that tile. Left
+  wall's scene-library launcher or the right wall's scene-view launcher), activate that tile. Left
   trigger: undo the last point or measurement. (aiming with the right controller is fixed; which
   buttons place/undo is rebindable)
 
 The built-in two-controller A+X free gesture (and the default right-stick fly) are disabled
 while the stage is active, and restored on exit.
 
+The left ("library") wall offers one-press scene launchers: either the built-in atlas set, or -
+choose "MRB directory" under Behavior > "Left wall shows" and pick a folder - one tile per MRB
+file in that folder, thumbnailed from each file's embedded scene screenshot. Aim and pull the
+right trigger to load one; the current scene is replaced but the VR session stays on.
+
 Other modules can reuse this room/table setup while customizing its colors and showing/hiding
-individual components (walls, signage, orientation labels, table screen, info screen, atlas wall,
-scene view wall), disabling the reformat/measurement tools, or rebinding which button triggers
+individual components (walls, signage, orientation labels, table screen, info screen, library
+wall, scene view wall), disabling the reformat/measurement tools, or rebinding which button triggers
 which action - see VRStageDisplayOptions (`logic.getParameterNode().display`) and
 VRStageControlBindings (`logic.getParameterNode().controls`).
 
@@ -224,6 +229,7 @@ class VRStageWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         "Props",
         "FramingMath",
         "LocomotionMath",
+        "MrbLibrary",
         "SceneViews",
         "OrientationLabels",
         "MeasurementTool",
@@ -361,5 +367,21 @@ class VRStageTest(ScriptedLoadableModuleTest):
         freshParams.rotationSpeedDegPerSec = 33.0
         self.assertFalse(UserDefaults.applyUserDefaultsOnce(freshParams, testSettings))
         self.assertEqual(freshParams.rotationSpeedDegPerSec, 33.0)
+
+        # MRB library (left wall's "MRB directory" source): directory listing and the
+        # embedded-screenshot selection heuristic (mirrors the headless logic test).
+        import zipfile
+        from VRStageLib import MrbLibrary
+        mrbDir = tempfile.mkdtemp()
+        mrbPath = os.path.join(mrbDir, "Sample.mrb")
+        with zipfile.ZipFile(mrbPath, "w") as archive:
+            archive.writestr("S/S.mrml", "<MRML/>")
+            archive.writestr("S/S.png", b"root-png-bytes")
+            archive.writestr("S/Data/view.png", b"data-png-bytes")
+        self.assertEqual([p.name for p in MrbLibrary.listMrbFiles(mrbDir)], ["Sample.mrb"])
+        self.assertEqual(MrbLibrary.mrbDisplayName(mrbPath), "Sample")
+        self.assertEqual(MrbLibrary.mrbScreenshotBytes(mrbPath), b"root-png-bytes")
+        self.assertIsNone(MrbLibrary.mrbScreenshotBytes(os.path.join(mrbDir, "missing.mrb")))
+        self.assertEqual(MrbLibrary.listMrbFiles(""), [])
 
         self.delayDisplay("Test passed")

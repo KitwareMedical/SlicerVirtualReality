@@ -1,11 +1,13 @@
 import os
+import pathlib
 import tempfile
+import zipfile
 
 import qt
 import vtk
 import slicer
 import VRStage
-from VRStageLib import FramingMath, LocomotionMath, Props, UserDefaults
+from VRStageLib import FramingMath, LocomotionMath, MrbLibrary, Props, UserDefaults
 from VRStageLib.MeasurementTool import MeasurementTool
 from VRStageLib.StageLocomotion import StageLocomotion
 
@@ -406,6 +408,8 @@ assert abs(UserDefaults.deserializeValue("2.5", 0.0) - 2.5) < 1e-12
 assert UserDefaults.deserializeValue("Left Menu", "") == "Left Menu"
 udColor = qt.QColor(10, 20, 30)
 assert UserDefaults.deserializeValue(UserDefaults.serializeValue(udColor), qt.QColor()).name() == "#0a141e"
+udPath = pathlib.Path("C:/some/library dir")
+assert UserDefaults.deserializeValue(UserDefaults.serializeValue(udPath), pathlib.Path()) == udPath
 for badText, template in (("banana", False), ("banana", 0.0), ("#notacolor", qt.QColor())):
     try:
         UserDefaults.deserializeValue(badText, template)
@@ -616,6 +620,135 @@ for panelActor in atlasWallLogic.wallTiles.tileByActor:
     assert panelActor.GetPickable(), "atlas tiles must stay pickable"
 print("buildAtlasWallTiles: OK")
 
+# ---------------------------------------------------------------- MRB library (left wall's
+# "MRB directory" source) - see VRStageLib/MrbLibrary.py + _buildLibraryWallTiles.
+
+# _screenshotEntryName preference order: root PNG matching the .mrml stem > any root PNG >
+# first (sorted) Data PNG > None. Pure selection over the archive name list.
+assert MrbLibrary._screenshotEntryName(
+    ["X/", "X/X.mrml", "X/Other.png", "X/X.png", "X/Data/view.png"]) == "X/X.png"
+assert MrbLibrary._screenshotEntryName(["X/X.mrml", "X/Other.png", "X/Data/view.png"]) == "X/Other.png"
+assert MrbLibrary._screenshotEntryName(["X/X.mrml", "X/Data/b.png", "X/Data/a.png"]) == "X/Data/a.png"
+assert MrbLibrary._screenshotEntryName(["X/X.mrml", "X/Data/vol.nrrd"]) is None
+print("MrbLibrary._screenshotEntryName: OK")
+
+
+def _testPngBytes(color=(255, 0, 0)):
+    """A tiny valid PNG, via vtkPNGWriter's write-to-memory mode."""
+    image = vtk.vtkImageData()
+    image.SetDimensions(4, 4, 1)
+    image.AllocateScalars(vtk.VTK_UNSIGNED_CHAR, 3)
+    for yPix in range(4):
+        for xPix in range(4):
+            for comp in range(3):
+                image.SetScalarComponentFromDouble(xPix, yPix, 0, comp, color[comp])
+    pngWriter = vtk.vtkPNGWriter()
+    pngWriter.WriteToMemoryOn()
+    pngWriter.SetInputData(image)
+    pngWriter.Write()
+    resultArray = pngWriter.GetResult()
+    return bytes(bytearray(resultArray.GetValue(i) for i in range(resultArray.GetNumberOfTuples())))
+
+
+def _writeTestMrb(directory, name, entries):
+    mrbPath = os.path.join(directory, name)
+    with zipfile.ZipFile(mrbPath, "w") as archive:
+        for entryName, data in entries:
+            archive.writestr(entryName, data)
+    return mrbPath
+
+
+# listMrbFiles: top-level *.mrb only (case-insensitive extension and sort); unset/missing
+# directories yield an empty list instead of raising.
+mrbLibDir = tempfile.mkdtemp()
+mrbPngBytes = _testPngBytes()
+mrbWithRootPng = _writeTestMrb(mrbLibDir, "Beta.mrb", [("S/S.mrml", "<MRML/>"), ("S/S.png", mrbPngBytes)])
+mrbWithDataPng = _writeTestMrb(mrbLibDir, "alpha.MRB", [("S/S.mrml", "<MRML/>"), ("S/Data/view.png", mrbPngBytes)])
+mrbWithoutPng = _writeTestMrb(mrbLibDir, "gamma.mrb", [("S/S.mrml", "<MRML/>")])
+with open(os.path.join(mrbLibDir, "notascene.txt"), "w") as textFile:
+    textFile.write("not an mrb")
+
+assert MrbLibrary.listMrbFiles(pathlib.Path()) == []
+assert MrbLibrary.listMrbFiles("") == []
+assert MrbLibrary.listMrbFiles(os.path.join(mrbLibDir, "no-such-dir")) == []
+mrbFiles = MrbLibrary.listMrbFiles(mrbLibDir)
+assert [p.name for p in mrbFiles] == ["alpha.MRB", "Beta.mrb", "gamma.mrb"], mrbFiles
+assert MrbLibrary.mrbDisplayName(mrbWithRootPng) == "Beta"
+print("MrbLibrary.listMrbFiles: OK")
+
+# mrbScreenshotBytes: reads the preferred PNG out of the zip; no-PNG and corrupt archives
+# return None instead of raising.
+assert MrbLibrary.mrbScreenshotBytes(mrbWithRootPng) == mrbPngBytes
+assert MrbLibrary.mrbScreenshotBytes(mrbWithDataPng) == mrbPngBytes
+assert MrbLibrary.mrbScreenshotBytes(mrbWithoutPng) is None
+corruptMrbPath = os.path.join(mrbLibDir, "corrupt.mrb")
+with open(corruptMrbPath, "wb") as corruptFile:
+    corruptFile.write(b"this is not a zip archive")
+assert MrbLibrary.mrbScreenshotBytes(corruptMrbPath) is None
+os.remove(corruptMrbPath)  # keep the directory's tile count deterministic for the wall tests
+print("MrbLibrary.mrbScreenshotBytes: OK")
+
+# textureFromPngBytes decodes to a usable texture; garbage bytes yield None, the wall then
+# falls back to the procedural panel texture.
+mrbTexture = Props.textureFromPngBytes(mrbPngBytes)
+assert mrbTexture is not None
+assert mrbTexture.GetInput().GetDimensions()[0] == 4
+assert Props.textureFromPngBytes(b"not a png") is None
+print("textureFromPngBytes: OK")
+
+# _buildLibraryWallTiles: one pickable tile per MRB (panel + caption), thumbnail cache keyed by
+# (path, mtime); with no directory set, a single non-pickable placeholder. NOTE: the parameter
+# node is the module singleton, so restore it at the end.
+libraryLogic = VRStage.VRStageLogic()
+libraryParams = libraryLogic.getParameterNode()
+libraryParams.libraryWallSource = VRStage.LIBRARY_WALL_SOURCE_DIRECTORY
+
+libraryParams.mrbLibraryDirectory = pathlib.Path()
+placeholderActors = libraryLogic.wallTiles._buildLibraryWall(libraryParams)
+assert len(placeholderActors) == 2, len(placeholderActors)
+assert len(libraryLogic.wallTiles.tileByActor) == 0
+assert placeholderActors[0].GetPickable() == 0, "the placeholder panel must not be pickable"
+
+libraryParams.mrbLibraryDirectory = pathlib.Path(mrbLibDir)
+libraryWallActors = libraryLogic.wallTiles._buildLibraryWall(libraryParams)
+assert len(libraryWallActors) == 6, len(libraryWallActors)  # 3 MRBs -> 3 panels + 3 labels
+assert len(libraryLogic.wallTiles.tileByActor) == 3
+for panelActor in libraryLogic.wallTiles.tileByActor:
+    assert panelActor.GetPickable(), "library tiles must stay pickable"
+assert len(libraryLogic.wallTiles._thumbnailTextures) == 3  # cached (None cached too, for gamma)
+assert sum(1 for t in libraryLogic.wallTiles._thumbnailTextures.values() if t is not None) == 2
+
+# Pagination: page size + a prev/page/next nav row once there is more than one page; the
+# clamped page index survives a rebuild with fewer files.
+for extraIndex in range(VRStage.LIBRARY_WALL_PAGE_SIZE):
+    _writeTestMrb(mrbLibDir, f"zz_extra{extraIndex:02d}.mrb", [("S/S.mrml", "<MRML/>")])
+libraryLogic.wallTiles.tileByActor = {}
+libraryLogic.wallTiles.libraryPage = 1
+pagedActors = libraryLogic.wallTiles._buildLibraryWall(libraryParams)
+# 12 files -> page 1 holds the last 3 tiles, plus the 3-tile nav row (each tile = panel+label).
+assert len(pagedActors) == (3 + 3) * 2, len(pagedActors)
+assert libraryLogic.wallTiles.libraryPage == 1
+libraryLogic.wallTiles.libraryPage = 99
+libraryLogic.wallTiles.tileByActor = {}
+libraryLogic.wallTiles._buildLibraryWall(libraryParams)
+assert libraryLogic.wallTiles.libraryPage == 1, "page index must clamp to the last page"
+
+# The "Atlases" source is untouched by the directory settings.
+libraryParams.libraryWallSource = VRStage.LIBRARY_WALL_SOURCE_ATLASES
+libraryLogic.wallTiles.tileByActor = {}
+atlasModeActors = libraryLogic.wallTiles._buildLibraryWall(libraryParams)
+assert len(atlasModeActors) == 6, len(atlasModeActors)
+
+# _optionsSnapshot must track both new parameters so changing them rebuilds the chrome live.
+librarySnapshot = VRStage.VRStageLogic._optionsSnapshot(libraryParams)
+assert librarySnapshot["libraryWallSource"] == VRStage.LIBRARY_WALL_SOURCE_ATLASES
+assert librarySnapshot["mrbLibraryDirectory"] == str(pathlib.Path(mrbLibDir))
+libraryParams.mrbLibraryDirectory = pathlib.Path()
+assert VRStage.VRStageLogic._optionsSnapshot(libraryParams) != librarySnapshot
+libraryParams.libraryWallSource = VRStage.LIBRARY_WALL_SOURCE_ATLASES  # restore singleton state
+libraryLogic.wallTiles.teardown(None)
+print("buildLibraryWallTiles: OK")
+
 # _buildSceneViewWallTiles with zero scene views (nothing created yet at this point in the test
 # file - see the "scene views" section further below) builds one non-interactive placeholder tile
 # instead of leaving the wall blank.
@@ -802,7 +935,7 @@ assert pageCount == 2, pageCount
 
 def _navTileTexts(actors, contentTileCount):
     """The 3 nav tiles (Prev, Page indicator, Next) immediately follow the content tiles, panel
-    then label each - see _buildSceneViewWallNavTiles/_buildSceneViewWallTiles."""
+    then label each - see _buildWallNavTiles/_buildSceneViewWallTiles."""
     navStart = 2 * contentTileCount
     prevPanel, prevLabel, pagePanel, pageLabel, nextPanel, nextLabel = actors[navStart:navStart + 6]
     return prevPanel, prevLabel, pagePanel, pageLabel, nextPanel, nextLabel

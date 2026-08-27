@@ -21,6 +21,7 @@ INI file instead of the user's real application settings.
 """
 
 import logging
+import pathlib
 
 import qt
 
@@ -58,7 +59,7 @@ def serializeValue(value) -> str:
         return value.name(1)  # 1 = QColor.HexArgb ("#aarrggbb"), same form QColorSerializer uses
     if isinstance(value, bool):
         return "true" if value else "false"
-    if isinstance(value, (int, float, str)):
+    if isinstance(value, (int, float, str, pathlib.PurePath)):
         return str(value)
     raise ValueError(f"Unsupported user-default value type: {type(value).__name__}")
 
@@ -84,6 +85,8 @@ def deserializeValue(text: str, templateValue):
         return float(text)
     if isinstance(templateValue, str):
         return text
+    if isinstance(templateValue, pathlib.PurePath):
+        return type(templateValue)(text)
     raise ValueError(f"Unsupported user-default value type: {type(templateValue).__name__}")
 
 
