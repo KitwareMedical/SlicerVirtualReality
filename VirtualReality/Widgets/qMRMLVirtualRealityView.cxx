@@ -389,7 +389,13 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow(vtkMRMLVirtualRealityVie
 
   this->DisplayableManagerGroup = vtkSmartPointer<vtkMRMLDisplayableManagerGroup>::Take(
     factory->InstantiateDisplayableManagers(q->renderer()));
-  this->DisplayableManagerGroup->SetMRMLDisplayableNode(this->MRMLVirtualRealityViewNode);
+  // Note: The view node is intentionally NOT attached to the displayable manager group here.
+  // Attaching it makes the displayable managers observe the scene and query the render window
+  // (e.g. vtkMRMLCrosshairDisplayableManager3D calls vtkRenderWindow::GetScreenSize()), which
+  // crashes on an OpenXR render window that has not been successfully initialized
+  // (vtkOpenXRManager::GetRecommendedImageRectSize() dereferences render resources that only
+  // exist after Initialize() succeeds). The node is attached in updateWidgetFromMRMLNoModify()
+  // once RenderWindow->Initialize() has succeeded.
   this->InteractorStyleDelegate->SetDisplayableManagers(this->DisplayableManagerGroup);
   this->InteractorObserver->SetDisplayableManagers(this->DisplayableManagerGroup);
 
@@ -677,8 +683,11 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRMLNoModify()
     this->createRenderWindow(xrBackend);
   }
 
-  // Skip further updates if the XR backend is undefined or if the view node has an error
+  // Skip further updates if the XR backend is undefined, failed to initialize, or if the view node has an error.
+  // In particular, the displayable managers must not be attached to the view node (and therefore the scene)
+  // until the render window has been successfully initialized, see createRenderWindow().
   if (this->currentXRBackend() == vtkMRMLVirtualRealityViewNode::UndefinedXRBackend
+    || !this->RenderWindow->GetVRInitialized()
     || this->MRMLVirtualRealityViewNode->HasError())
   {
     return;
