@@ -453,6 +453,12 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow(vtkMRMLVirtualRealityVie
   {
     this->MRMLVirtualRealityViewNode->SetError("Connection failed");
     qWarning() << Q_FUNC_INFO << ": Failed to initialize " << xrBackendAsStr << " RenderWindow";
+#if defined(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
+    if (vtkOpenXRRenderWindow::SafeDownCast(this->RenderWindow))
+    {
+      this->releaseFailedOpenXRInstance();
+    }
+#endif
     return;
   }
 
@@ -512,6 +518,43 @@ void qMRMLVirtualRealityViewPrivate::createRenderWindow(vtkMRMLVirtualRealityVie
     qDebug() << " " << this->DisplayableManagerGroup->GetNthDisplayableManager(idx)->GetClassName();
   }
 
+}
+
+//---------------------------------------------------------------------------
+void qMRMLVirtualRealityViewPrivate::releaseFailedOpenXRInstance()
+{
+#if defined(SlicerVirtualReality_HAS_OPENXR_SUPPORT)
+  // When vtkOpenXRManager::Initialize() fails after xrCreateInstance() succeeded (for example
+  // xrGetSystem()/CheckGraphicsRequirements() fail because the headset is not connected or
+  // Quest Link is not enabled), the XrInstance it created is never destroyed:
+  // vtkOpenXRRenderWindow::Finalize() is a no-op unless initialization fully succeeded, and
+  // vtkOpenXRManager::Initialize() does not clean up after itself.
+  //
+  // The OpenXR loader only supports a single XrInstance per process (xrCreateInstance() returns
+  // XR_ERROR_LIMIT_REACHED while another instance is alive), so the leaked instance would make
+  // every subsequent connection attempt fail until Slicer is restarted, even after the headset
+  // becomes available. Destroy it here so that the next attempt starts from a clean state.
+  //
+  // vtkOpenXRManager never resets its XrInstance member, so after a previous successful session
+  // (already finalized) the handle may be stale. This is harmless: the loader rejects a handle
+  // that does not correspond to the currently active instance with XR_ERROR_HANDLE_INVALID, and
+  // if an instance is alive it is by construction one leaked by the manager (the only owner of
+  // OpenXR handles in this process), so destroying it is the desired outcome either way.
+  XrInstance xrInstance = vtkOpenXRManager::GetInstance().GetXrRuntimeInstance();
+  if (xrInstance == XR_NULL_HANDLE)
+  {
+    return;
+  }
+  XrResult result = xrDestroyInstance(xrInstance);
+  if (XR_SUCCEEDED(result))
+  {
+    qDebug() << Q_FUNC_INFO << ": Destroyed XrInstance left over from the failed initialization";
+  }
+  else if (result != XR_ERROR_HANDLE_INVALID)
+  {
+    qWarning() << Q_FUNC_INFO << ": xrDestroyInstance failed with XrResult" << static_cast<int>(result);
+  }
+#endif
 }
 
 //---------------------------------------------------------------------------
