@@ -61,6 +61,14 @@ public:
   /// Copy the node's attributes to this object
   void Copy(vtkMRMLNode* node) override;
 
+  /// Reset node attributes to the default values.
+  /// For this node, Visibility means "connected to the headset", so resetting to defaults must
+  /// never connect or disconnect the hardware: the current Visibility is preserved. A default
+  /// node of another class (e.g. the default 3D view node, which Slicer's ViewControllers module
+  /// applies to every vtkMRMLViewNode subclass at startup) is ignored entirely, so that the
+  /// node keeps the settings applied from the module's own default node (e.g. the XR backend).
+  void Reset(vtkMRMLNode* defaultNode = nullptr) override;
+
   /// Get node XML tag name (like Volume, Model)
   const char* GetNodeTagName() override;
 
