@@ -106,15 +106,17 @@ _Supported XR modality: Augmented Reality_
 
 ## How to use controllers
 
-| Action | Meta Quest | HTC Vive |
-| --- | --- | --- |
-| Fly forward | Right thumbstick forward | Touchpad forward |
-| Fly backward | Right thumbstick backward | Touchpad backward |
-| Grab/move object | Grip button (either controller) | Trigger |
-| Transform/scale entire scene | X button (left) + A button (right), pressed together | Grip button (both controllers), pressed together |
-| Select interaction mode | _Not available_[^1] | Menu button |
+| Action | Meta Quest | HTC Vive | Valve Index | HP Reverb G2 |
+| --- | --- | --- | --- | --- |
+| Fly forward | Right thumbstick forward | Right touchpad forward | Right thumbstick forward | Right thumbstick forward |
+| Fly backward | Right thumbstick backward | Right touchpad backward | Right thumbstick backward | Right thumbstick backward |
+| Grab/move object | Grip button (either controller) | Grip button (either controller) | Grip (either controller) | Grip button (either controller) |
+| Transform/scale entire scene | X button (left) + A button (right), pressed together | Trigger (both controllers), pressed together | A button (both controllers), pressed together | X button (left) + A button (right), pressed together |
 
-[^1]: On Meta Quest, grabbing/moving objects is always available via either grip button, so there is no separate "interaction mode" to select. The B button is not mapped to anything by default.
+Grabbing/moving objects is always available via either grip button, so there is no separate "interaction mode" to select. The remaining buttons (B, menu, ...) are not mapped to anything by default, but every control is available for customization, see the [developer guide](DeveloperGuide.md#controller-events). Headsets with other controllers work through the generic Khronos simple controller profile (select = grab, menu buttons pressed together = transform/scale the scene).
+
+> [!NOTE]
+> The legacy OpenVR backend keeps its own bindings: on HTC Vive with OpenVR, objects are grabbed with the trigger, the scene is transformed with both grip buttons, and the menu button selects the interaction mode.
 
 ![Meta Quest 3 Controller](ControllerMetaQuest3.jpg)
 
@@ -134,8 +136,8 @@ Orient the controller in the intended direction of motion and use `Fly forward` 
 
 Translate/rotate a selected object.
 
-- On Meta Quest: hold down either controller's `Grip` button when the controller is inside a selectable object, move the controller to translate/rotate the object, then release the `Grip` button. No interaction mode needs to be selected first.
-- On HTC Vive: make sure interaction mode is set to `Grab` (this is the default), then hold down the `Trigger` when the controller is inside a selectable object, move the controller to translate/rotate the object, then release the `Trigger`.
+- Hold down either controller's `Grip` button when the controller is inside a selectable object, move the controller to translate/rotate the object, then release the `Grip` button. No interaction mode needs to be selected first.
+- With the legacy OpenVR backend on HTC Vive: make sure interaction mode is set to `Grab` (this is the default), then hold down the `Trigger` when the controller is inside a selectable object, move the controller to translate/rotate the object, then release the `Trigger`.
 
 > [!NOTE]
 > - When you grab and move object, a parent transform is automatically created for it (if it has not been under a transform already) and that transform is modified.

@@ -41,9 +41,32 @@
     { "name": "right_button1_touch", "type": "boolean" },
     { "name": "right_button2_click", "type": "boolean" },
     { "name": "right_button2_touch", "type": "boolean" },
-    { "name": "right_system_click", "type": "boolean" }
+    { "name": "right_system_click", "type": "boolean" },
+
+    { "name": "left_system_click", "type": "boolean" },
+    { "name": "right_menu_click", "type": "boolean" }
   ],
   "default_bindings": [
+    {
+      "binding_url": "vtk_openxr_binding_khr_simple_controller.json",
+      "controller_type": "khr_simple"
+    },
+    {
+      "binding_url": "vtk_openxr_binding_htc_vive_controller.json",
+      "controller_type": "vive_controller"
+    },
+    {
+      "binding_url": "vtk_openxr_binding_hp_mixed_reality.json",
+      "controller_type": "mixed_reality"
+    },
+    {
+      "binding_url": "vtk_openxr_binding_knuckles.json",
+      "controller_type": "knuckles"
+    },
+    {
+      "binding_url": "vtk_openxr_binding_microsoft_hand_interaction.json",
+      "controller_type": "microsoft_hand_interaction"
+    },
     {
       "binding_url": "vtk_openxr_binding_oculus_touch_controller.json",
       "controller_type": "oculus_touch"
@@ -96,6 +119,9 @@
       "right_button2_click": "Right Button 2 Click",
       "right_button2_touch": "Right Button 2 Touch",
       "right_system_click": "Right System Click",
+
+      "left_system_click": "Left System Click",
+      "right_menu_click": "Right Menu Click",
 
       "language_tag": "en_US"
     }

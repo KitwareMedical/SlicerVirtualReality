@@ -49,8 +49,16 @@ public:
   vtkTypeMacro(vtkVirtualRealityViewOpenXRInteractorStyle,vtkOpenXRInteractorStyle);
 
   /// Generic, per-physical-control event IDs. One event ID per literal action
-  /// output name declared in Resources/Bindings/vtk_openxr_actions.json and
-  /// vtk_openxr_binding_oculus_touch_controller.json.
+  /// output name declared in Resources/Bindings/vtk_openxr_actions.json.
+  ///
+  /// The actions are named after the controls of the Oculus Touch (Meta Quest)
+  /// controller. The binding file of every other supported interaction profile
+  /// (Resources/Bindings/vtk_openxr_binding_*.json: HTC Vive, Valve Index, HP
+  /// Reverb G2, Khronos simple controller, Microsoft hand interaction) maps its
+  /// own controls onto the same actions, so that the default behavior and any
+  /// customization made in terms of these events apply to every headset. For
+  /// example, the HTC Vive trackpad drives the thumbstick events, and hand
+  /// tracking's pinch/grasp gestures drive the trigger/grip events.
   ///
   /// All of these are dispatched directly by AddAction() in SetupActions()
   /// below and are independently observable by any code that observes the
@@ -152,10 +160,17 @@ public:
     RightButton2TouchEvent,
     RightSystemClickEvent,
 
+    // Controls that do not exist on the Oculus Touch controller but are present
+    // on other controllers (e.g. HTC Vive and Valve Index have a system button
+    // on both hands; HTC Vive, HP Reverb G2 and the Khronos simple controller
+    // have a menu button on both hands).
+    LeftSystemClickEvent,
+    RightMenuClickEvent,
+
     LAST_CONTROLLER_EVENT
   };
 
-  /// Register the 32 generic per-control Oculus Touch actions with the interactor.
+  /// Register the generic per-control actions with the interactor.
   /// Overrides vtkOpenXRInteractorStyle::SetupActions(), which otherwise registers
   /// the legacy curated action set (elevation, movement, nextcamerapose,
   /// positionprop, showmenu, startelevation, startmovement, triggeraction) that

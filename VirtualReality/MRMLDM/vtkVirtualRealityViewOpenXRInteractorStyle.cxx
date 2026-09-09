@@ -92,6 +92,9 @@ void vtkVirtualRealityViewOpenXRInteractorStyle::SetupActions(vtkRenderWindowInt
   oiren->AddAction("right_button2_touch", static_cast<vtkCommand::EventIds>(RightButton2TouchEvent));
   oiren->AddAction("right_system_click", static_cast<vtkCommand::EventIds>(RightSystemClickEvent));
 
+  oiren->AddAction("left_system_click", static_cast<vtkCommand::EventIds>(LeftSystemClickEvent));
+  oiren->AddAction("right_menu_click", static_cast<vtkCommand::EventIds>(RightMenuClickEvent));
+
   // Observe exactly the ControllerEvents that ProcessControllerEvents() translates into a
   // default VTK 3D event (annotated "also translated" above) -- keep this list in sync with
   // that function's switch.

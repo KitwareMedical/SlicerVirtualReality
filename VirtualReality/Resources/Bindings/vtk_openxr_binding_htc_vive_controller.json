@@ -1,0 +1,201 @@
+{
+  "interaction_profile": "/interaction_profiles/htc/vive_controller",
+  "bindings": {
+    "vtk-actions": {
+      "sources": [
+        {
+          "inputs": {
+            "pose": {
+              "output": "left_grip_pose"
+            }
+          },
+          "path": "/user/hand/left/input/grip"
+        },
+        {
+          "inputs": {
+            "pose": {
+              "output": "handpose"
+            }
+          },
+          "path": "/user/hand/left/input/aim"
+        },
+        {
+          "inputs": {
+            "pose": {
+              "output": "left_aim_pose"
+            }
+          },
+          "path": "/user/hand/left/input/aim"
+        },
+        {
+          "inputs": {
+            "click": {
+              "output": "left_grip_click"
+            }
+          },
+          "path": "/user/hand/left/input/squeeze"
+        },
+        {
+          "inputs": {
+            "value": {
+              "output": "left_trigger_value"
+            }
+          },
+          "path": "/user/hand/left/input/trigger"
+        },
+        {
+          "inputs": {
+            "click": {
+              "output": "left_trigger_click"
+            }
+          },
+          "path": "/user/hand/left/input/trigger"
+        },
+        {
+          "inputs": {
+            "click": {
+              "output": "complexgestureaction"
+            }
+          },
+          "path": "/user/hand/left/input/trigger"
+        },
+        {
+          "inputs": {
+            "position": {
+              "output": "left_thumbstick"
+            }
+          },
+          "path": "/user/hand/left/input/trackpad"
+        },
+        {
+          "inputs": {
+            "click": {
+              "output": "left_thumbstick_click"
+            }
+          },
+          "path": "/user/hand/left/input/trackpad"
+        },
+        {
+          "inputs": {
+            "touch": {
+              "output": "left_thumbstick_touch"
+            }
+          },
+          "path": "/user/hand/left/input/trackpad"
+        },
+        {
+          "inputs": {
+            "click": {
+              "output": "left_menu_click"
+            }
+          },
+          "path": "/user/hand/left/input/menu"
+        },
+        {
+          "inputs": {
+            "click": {
+              "output": "left_system_click"
+            }
+          },
+          "path": "/user/hand/left/input/system"
+        },
+        {
+          "inputs": {
+            "pose": {
+              "output": "right_grip_pose"
+            }
+          },
+          "path": "/user/hand/right/input/grip"
+        },
+        {
+          "inputs": {
+            "pose": {
+              "output": "handpose"
+            }
+          },
+          "path": "/user/hand/right/input/aim"
+        },
+        {
+          "inputs": {
+            "pose": {
+              "output": "right_aim_pose"
+            }
+          },
+          "path": "/user/hand/right/input/aim"
+        },
+        {
+          "inputs": {
+            "click": {
+              "output": "right_grip_click"
+            }
+          },
+          "path": "/user/hand/right/input/squeeze"
+        },
+        {
+          "inputs": {
+            "value": {
+              "output": "right_trigger_value"
+            }
+          },
+          "path": "/user/hand/right/input/trigger"
+        },
+        {
+          "inputs": {
+            "click": {
+              "output": "right_trigger_click"
+            }
+          },
+          "path": "/user/hand/right/input/trigger"
+        },
+        {
+          "inputs": {
+            "click": {
+              "output": "complexgestureaction"
+            }
+          },
+          "path": "/user/hand/right/input/trigger"
+        },
+        {
+          "inputs": {
+            "position": {
+              "output": "right_thumbstick"
+            }
+          },
+          "path": "/user/hand/right/input/trackpad"
+        },
+        {
+          "inputs": {
+            "click": {
+              "output": "right_thumbstick_click"
+            }
+          },
+          "path": "/user/hand/right/input/trackpad"
+        },
+        {
+          "inputs": {
+            "touch": {
+              "output": "right_thumbstick_touch"
+            }
+          },
+          "path": "/user/hand/right/input/trackpad"
+        },
+        {
+          "inputs": {
+            "click": {
+              "output": "right_menu_click"
+            }
+          },
+          "path": "/user/hand/right/input/menu"
+        },
+        {
+          "inputs": {
+            "click": {
+              "output": "right_system_click"
+            }
+          },
+          "path": "/user/hand/right/input/system"
+        }
+      ]
+    }
+  }
+}
