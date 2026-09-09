@@ -102,7 +102,6 @@ void qSlicerVirtualRealityModuleWidget::setup()
   connect(d->EnvDepthDebugCheckBox, SIGNAL(toggled(bool)), this, SLOT(setEnvDepthDebugVisualization(bool)));
 
   connect(d->ConnectCheckBox, SIGNAL(toggled(bool)), this, SLOT(setVirtualRealityConnected(bool)));
-  connect(d->RenderingEnabledCheckBox, SIGNAL(toggled(bool)), this, SLOT(setVirtualRealityActive(bool)));
   connect(d->TwoSidedLightingCheckBox, SIGNAL(toggled(bool)), this, SLOT(setTwoSidedLighting(bool)));
   connect(d->BackLightsCheckBox, SIGNAL(toggled(bool)), this, SLOT(setBackLights(bool)));
   connect(d->ControllerModelsVisibleCheckBox, SIGNAL(toggled(bool)), this, SLOT(setControllerModelsVisible(bool)));
@@ -166,10 +165,6 @@ void qSlicerVirtualRealityModuleWidget::updateWidgetFromMRML()
     errorText = vrViewNode->GetError().c_str();
   }
   d->ConnectionStatusLabel->setText(errorText);
-
-  wasBlocked = d->RenderingEnabledCheckBox->blockSignals(true);
-  d->RenderingEnabledCheckBox->setChecked(vrViewNode != nullptr && vrViewNode->GetActive());
-  d->RenderingEnabledCheckBox->blockSignals(wasBlocked);
 
   wasBlocked = d->DesiredUpdateRateSlider->blockSignals(true);
   d->DesiredUpdateRateSlider->setValue(vrViewNode != nullptr ? vrViewNode->GetDesiredUpdateRate() : 0);
@@ -309,13 +304,13 @@ void qSlicerVirtualRealityModuleWidget::setVirtualRealityConnected(bool connect)
 {
   vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
   vrLogic->SetVirtualRealityConnected(connect);
-}
-
-//-----------------------------------------------------------------------------
-void qSlicerVirtualRealityModuleWidget::setVirtualRealityActive(bool activate)
-{
-  vtkSlicerVirtualRealityLogic* vrLogic = vtkSlicerVirtualRealityLogic::SafeDownCast(this->logic());
-  vrLogic->SetVirtualRealityActive(activate);
+  if (connect && !vrLogic->GetVirtualRealityActive())
+  {
+    // Connecting to the hardware does not make sense without rendering enabled,
+    // so enable it now if it was not already enabled (same as the toolbar button).
+    // Rendering can still be paused from code with SetVirtualRealityActive(false).
+    vrLogic->SetVirtualRealityActive(true);
+  }
 }
 
 //-----------------------------------------------------------------------------
