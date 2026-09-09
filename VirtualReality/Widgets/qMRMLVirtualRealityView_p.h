@@ -125,6 +125,11 @@ protected:
   void createRenderWindow(vtkMRMLVirtualRealityViewNode::XRBackendType xrBackend);
   void destroyRenderWindow();
 
+  /// Destroy the XrInstance left behind by a failed vtkOpenXRRenderWindow::Initialize(), so that
+  /// a later connection attempt is not rejected by the OpenXR loader (which only allows a single
+  /// XrInstance per process). No-op without OpenXR support.
+  void releaseFailedOpenXRInstance();
+
   vtkSlicerCamerasModuleLogic* CamerasLogic;
   vtkSmartPointer<vtkSlicerVirtualRealityLogic> VirtualRealityLogic;
 
