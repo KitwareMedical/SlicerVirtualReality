@@ -637,7 +637,10 @@ void qMRMLVirtualRealityViewPrivate::updateWidgetFromMRMLNoModify()
   {
     this->destroyRenderWindow();
     this->InitializationAttempts = 0;
-    this->MRMLVirtualRealityViewNode->ClearError();
+    if (this->MRMLVirtualRealityViewNode)
+    {
+      this->MRMLVirtualRealityViewNode->ClearError();
+    }
     return;
   }
 
