@@ -46,6 +46,19 @@ One event ID per physical control, always independently observable on the intera
 | `RightButton2ClickEvent` | `right_button2_click` | B button | |
 | `RightButton2TouchEvent` | `right_button2_touch` | B button touch | |
 | `RightSystemClickEvent` | `right_system_click` | System button | |
+| `LeftSystemClickEvent` | `left_system_click` | _(none)_ | Left system button on HTC Vive and Valve Index |
+| `RightMenuClickEvent` | `right_menu_click` | _(none)_ | Right menu button on HTC Vive, HP Reverb G2 and the Khronos simple controller |
+
+The actions (and therefore the events) are named after the Meta Quest controls, but every supported [OpenXR interaction profile](https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#semantic-path-interaction-profiles) is mapped onto the same set, so the default behavior and any customization made in terms of these events apply to every headset:
+
+| Interaction profile | Binding file | Notable mappings |
+| --- | --- | --- |
+| Meta Quest (Oculus Touch) | `vtk_openxr_binding_oculus_touch_controller.json` | One action per physical control, see the table above; `complexgestureaction` = X + A |
+| HTC Vive | `vtk_openxr_binding_htc_vive_controller.json` | Trackpad position/click/touch → thumbstick events; squeeze click → grip click; menu/system buttons on both hands; `complexgestureaction` = both triggers |
+| Valve Index | `vtk_openxr_binding_knuckles.json` | Squeeze value → grip value/click; A/B click+touch → button 1/2; system buttons on both hands; `complexgestureaction` = A + A |
+| HP Reverb G2 | `vtk_openxr_binding_hp_mixed_reality.json` | X/Y (left) and A/B (right) → button 1/2; trigger/squeeze value → trigger/grip value/click; menu buttons on both hands; `complexgestureaction` = X + A |
+| Khronos simple controller | `vtk_openxr_binding_khr_simple_controller.json` | Select → trigger click and grip click; menu → menu click; `complexgestureaction` = both menu buttons |
+| Microsoft hand interaction | `vtk_openxr_binding_microsoft_hand_interaction.json` | Pinch (select value) → trigger value/click; grasp (squeeze value) → grip value/click; `complexgestureaction` = pinch with both hands |
 
 ### Action events
 
@@ -227,10 +240,11 @@ The OpenXR action manifest maps device-specific controls (joysticks, buttons, et
 
 This module ships its own OpenXR action manifest, instead of using vtkRenderingOpenXR's stock one:
 
-- [`VirtualReality/Resources/Bindings/vtk_openxr_actions.json`][vtk_openxr_actions_json_url] declares one action per physical control on the Oculus Touch (Meta Quest) controller — grip pose, grip squeeze/click, trigger, thumbstick, all buttons, etc.
+- [`VirtualReality/Resources/Bindings/vtk_openxr_actions.json`][vtk_openxr_actions_json_url] declares one action per physical control on the Oculus Touch (Meta Quest) controller — grip pose, grip squeeze/click, trigger, thumbstick, all buttons, etc. — plus the few controls that only exist on other controllers (left system button, right menu button).
 - [`VirtualReality/Resources/Bindings/vtk_openxr_binding_oculus_touch_controller.json`][vtk_openxr_binding_oculus_touch_url] binds each of those actions to its physical [OpenXR interaction profile path](https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#semantic-path-interaction-profiles) (e.g. `/user/hand/right/input/squeeze`).
+- The other `vtk_openxr_binding_*.json` files in the same directory do the same for the HTC Vive, Valve Index, HP Reverb G2, Khronos simple controller and Microsoft hand interaction profiles (see the table in [Controller Events](#controller-events)). The OpenXR runtime picks the binding that matches the connected controller; suggesting bindings for a profile the runtime does not support is harmless.
 
-Both files are deployed under this module's own share directory (see `vtkSlicerVirtualRealityLogic::ComputeActionManifestPath()`), not vtkRenderingOpenXR's. Refer to the [Reserved Paths](https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#semantic-path-reserved) and [Interaction Profile Paths](https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#semantic-path-interaction-profiles) sections of the OpenXR spec for background on the path format.
+All these files are deployed under this module's own share directory (see `vtkSlicerVirtualRealityLogic::ComputeActionManifestPath()`), not vtkRenderingOpenXR's. vtkRenderingOpenXR's own manifest files (which describe VTK's legacy action set) are removed from the extension package, see the top-level `CMakeLists.txt`. Refer to the [Reserved Paths](https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#semantic-path-reserved) and [Interaction Profile Paths](https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#semantic-path-interaction-profiles) sections of the OpenXR spec for background on the path format.
 
 [vtk_openxr_actions_json_url]: https://github.com/KitwareMedical/SlicerVirtualReality/blob/master/VirtualReality/Resources/Bindings/vtk_openxr_actions.json
 [vtk_openxr_binding_oculus_touch_url]: https://github.com/KitwareMedical/SlicerVirtualReality/blob/master/VirtualReality/Resources/Bindings/vtk_openxr_binding_oculus_touch_controller.json
@@ -247,7 +261,7 @@ Recognition of complex gesture events commences when the two controller buttons 
 
 [vtkVirtualRealityComplexGestureRecognizer-url]: https://github.com/KitwareMedical/SlicerVirtualReality/blob/master/VirtualReality/MRMLDM/vtkVirtualRealityComplexGestureRecognizer.cxx
 
-For OpenXR, `complexgestureaction` is bound to the left X button and the right A button in `vtk_openxr_binding_oculus_touch_controller.json` (in addition to those buttons' own `left_button1_click`/`right_button1_click` actions, which OpenXR allows binding to the same physical control), so pressing X and A simultaneously starts a complex gesture.
+For OpenXR, `complexgestureaction` is bound to the left X button and the right A button in `vtk_openxr_binding_oculus_touch_controller.json` (in addition to those buttons' own `left_button1_click`/`right_button1_click` actions, which OpenXR allows binding to the same physical control), so pressing X and A simultaneously starts a complex gesture. The binding files of the other interaction profiles bind it to the closest equivalent (both triggers on HTC Vive, A + A on Valve Index, X + A on HP Reverb G2, both menu buttons on the Khronos simple controller, pinching with both hands with hand interaction).
 
 ### Low-level interception of events
 
